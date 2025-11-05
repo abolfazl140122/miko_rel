@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>همیار - در حال بارگذاری...</title>
     <style>
-        /* تنظیمات کلی صفحه */
+        /* ... کدهای CSS بدون تغییر باقی می‌مانند ... */
         body, html {
             margin: 0;
             padding: 0;
@@ -15,8 +15,6 @@
             overflow: hidden;
             direction: rtl;
         }
-
-        /* کانتینر اصلی لودینگ با پس‌زمینه گرادیانت */
         #loading-container {
             display: flex;
             flex-direction: column;
@@ -30,47 +28,31 @@
             color: white;
             text-align: center;
         }
-
-        /* انیمیشن حرکت پس‌زمینه */
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
-        /* استایل لوگو */
         #logo {
             width: 150px;
             height: auto;
             margin-bottom: 25px;
-            /* انیمیشن تنفس (پالس) برای لوگو */
             animation: pulse 2s infinite ease-in-out;
-            border-radius: 50%; /* اگر لوگو مربعی است، آن را دایره‌ای نمایش می‌دهد */
+            border-radius: 50%;
             box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
         }
-
         @keyframes pulse {
             0% { transform: scale(0.95); }
             70% { transform: scale(1); }
             100% { transform: scale(0.95); }
         }
-
-        /* استایل پیام وضعیت */
         #status-message {
             font-size: 1.2em;
             font-weight: 500;
             text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
         }
-        
-        /* استایل پیام‌های موفق و خطا */
-        #status-message.success {
-            color: #c8ffc8; /* سبز روشن */
-        }
-        #status-message.error {
-            color: #ffc8c8; /* قرمز روشن */
-        }
-
-        /* اسپینر (چرخنده لودینگ) */
+        #status-message.success { color: #c8ffc8; }
+        #status-message.error { color: #ffc8c8; }
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
@@ -80,42 +62,33 @@
             animation: spin 1s linear infinite;
             margin-top: 20px;
         }
-        
-        /* انیمیشن چرخش اسپینر */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
     </style>
 </head>
 <body>
 
     <div id="loading-container">
-        <!-- لوگوی شما -->
         <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/26f5a0b93e6e692276e10aa7de08d342d5402f66/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85.png" alt="لوگو اپلیکیشن همیار" id="logo">
-        
-        <!-- پیام وضعیت -->
         <p id="status-message">در حال آماده سازی...</p>
-        
-        <!-- اسپینر -->
         <div id="spinner" class="spinner"></div>
     </div>
 
     <script>
-        // آدرس فایل PHP واسط شما
-        const PROXY_URL = 'firebase_proxy.php';
-        // کلید امنیتی مشترک که در فایل PHP تعریف شده است
+        // ======================= تغییر اصلی اینجاست =======================
+        // آدرس کامل و مطلق فایل PHP واسط خود را وارد کنید
+        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        // ================================================================
+
         const SHARED_SECRET = 'miko1234';
 
-        // پیدا کردن عناصر HTML برای تغییر محتوا
         const statusMessageElement = document.getElementById('status-message');
         const spinnerElement = document.getElementById('spinner');
 
-        // تابع اصلی برای برقراری ارتباط با سرور
         async function connectToServer() {
             try {
-                // مرحله ۱: دریافت توکن دسترسی از سرور واسط
                 statusMessageElement.innerText = 'در حال دریافت مجوز دسترسی...';
                 const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, {
                     method: 'GET',
@@ -125,7 +98,8 @@
                 });
 
                 if (!tokenResponse.ok) {
-                    throw new Error(`خطا در دریافت توکن: ${tokenResponse.statusText}`);
+                    // جزئیات بیشتری از خطا را نمایش می‌دهیم
+                    throw new Error(`سرور پاسخی ناموفق داد (${tokenResponse.status})`);
                 }
 
                 const tokenData = await tokenResponse.json();
@@ -137,10 +111,8 @@
                 
                 console.log('توکن با موفقیت دریافت شد.');
 
-                // مرحله ۲: تست ارتباط با سرور اصلی (Firebase) از طریق واسط
                 statusMessageElement.innerText = 'در حال اتصال به سرور اصلی...';
                 
-                // یک درخواست GET ساده به یک مسیر مجاز (مثلا test) ارسال می‌کنیم
                 const testResponse = await fetch(`${PROXY_URL}?path=test`, {
                     method: 'GET',
                     headers: {
@@ -149,33 +121,25 @@
                 });
 
                 if (!testResponse.ok) {
-                    throw new Error(`خطا در ارتباط با سرور اصلی: ${testResponse.statusText}`);
+                    throw new Error(`خطا در ارتباط با سرور اصلی: (${testResponse.status})`);
                 }
                 
                 console.log('ارتباط با سرور اصلی موفقیت‌آمیز بود.');
 
-                // مرحله ۳: نمایش پیام موفقیت
-                spinnerElement.style.display = 'none'; // مخفی کردن اسپینر
+                spinnerElement.style.display = 'none';
                 statusMessageElement.innerText = 'اتصال با موفقیت برقرار شد!';
                 statusMessageElement.classList.add('success');
 
-                // در اینجا می‌توانید کاربر را به صفحه اصلی اپلیکیشن هدایت کنید
-                // setTimeout(() => {
-                //     window.location.href = '/dashboard.html';
-                // }, 1500);
-
-
             } catch (error) {
                 console.error('یک خطا رخ داد:', error);
-                spinnerElement.style.display = 'none'; // مخفی کردن اسپینر
+                spinnerElement.style.display = 'none';
+                // نمایش پیام خطای دقیق‌تر
                 statusMessageElement.innerText = `خطا در اتصال: ${error.message}`;
                 statusMessageElement.classList.add('error');
             }
         }
 
-        // اجرای تابع اتصال پس از بارگذاری کامل صفحه
         window.onload = connectToServer;
-
     </script>
 </body>
 </html>
