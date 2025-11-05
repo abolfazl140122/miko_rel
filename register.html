@@ -90,7 +90,7 @@
             color: var(--error-color);
             font-size: 0.85em;
             margin-top: 5px;
-            display: none; /* Hidden by default */
+            display: none;
         }
         
         .profile-pic-group {
@@ -156,16 +156,10 @@
             margin-top: 20px;
             padding: 12px;
             border-radius: 8px;
-            display: none; /* Hidden by default */
+            display: none;
         }
-        #form-status.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        #form-status.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
+        #form-status.success { background-color: #d4edda; color: #155724; }
+        #form-status.error { background-color: #f8d7da; color: #721c24; }
 
     </style>
 </head>
@@ -192,7 +186,7 @@
             </div>
             <div class="input-group">
                 <label for="username">نام کاربری (انگلیسی)</label>
-                <input type="text" id="username" placeholder="فقط حروف انگلیسی، اعداد و _" required pattern="^[a-zA-Z0-9_]{3,15}$">
+                <input type="text" id="username" placeholder="فقط حروف انگلیسی، اعداد و _" required>
                 <div class="error-message" id="username-error"></div>
             </div>
             <div class="input-group">
@@ -265,72 +259,90 @@
         };
         const profilePreview = document.getElementById('profile-preview');
 
-        inputs.profilePic.addEventListener('change', () => {
-            const file = inputs.profilePic.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => profilePreview.src = e.target.result;
-                reader.readAsDataURL(file);
-            }
-        });
-
-        for (const key in inputs) {
-            inputs[key].addEventListener('input', () => {
-                validateField(key);
+        // --- Event Listeners with Robust Handling ---
+        Object.values(inputs).forEach(input => {
+            // Use 'change' for checkbox, file, select and 'input' for others.
+            const eventType = ['checkbox', 'file', 'select-one'].includes(input.type) ? 'change' : 'input';
+            input.addEventListener(eventType, () => {
+                validateField(input.id);
                 checkFormValidity();
             });
-        }
+            // Also listen to 'blur' (when user clicks away) for good measure
+            input.addEventListener('blur', () => {
+                validateField(input.id);
+                checkFormValidity();
+            });
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (validateAllFields()) await submitForm();
         });
 
-        function showError(field, message) {
-            const errorElement = document.getElementById(`${field}-error`);
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
+        // --- Validation Logic ---
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            if(errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
         }
 
-        function hideError(field) {
-            document.getElementById(`${field}-error`).style.display = 'none';
+        function hideError(fieldId) {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            if(errorElement) errorElement.style.display = 'none';
         }
 
-        function validateField(field) {
-            const input = inputs[field];
+        function validateField(fieldId) {
+            const input = inputs[fieldId];
+            if (!input) return true; // If field doesn't exist in our list
+            
             let isValid = true;
-            if (input.required && !input.value.trim() && input.type !== 'checkbox') {
-                showError(field, 'این فیلد الزامی است.');
-                isValid = false;
-            } else { hideError(field); }
-            switch(field) {
+            hideError(fieldId); // Reset error message first
+
+            if (input.required) {
+                if (input.type === 'checkbox' && !input.checked) {
+                    showError(fieldId, 'شما باید با قوانین موافقت کنید.');
+                    isValid = false;
+                } else if (!input.value.trim()) {
+                    showError(fieldId, 'این فیلد الزامی است.');
+                    isValid = false;
+                }
+            }
+
+            if (!isValid) return false; // Stop further validation if already invalid
+
+            // Specific validations
+            switch(fieldId) {
                 case 'username':
                     if (!/^[a-zA-Z0-9_]{3,15}$/.test(input.value)) {
-                        showError(field, 'نام کاربری باید 3 تا 15 کاراکتر و شامل حروف انگلیسی، عدد یا _ باشد.');
+                        showError(fieldId, 'نام کاربری باید 3 تا 15 کاراکتر و شامل حروف انگلیسی، عدد یا _ باشد.');
                         isValid = false;
                     }
                     break;
                 case 'mobile':
                     if (!/^09\d{9}$/.test(input.value)) {
-                        showError(field, 'فرمت شماره موبایل صحیح نیست. (مثال: 09123456789)');
+                        showError(fieldId, 'فرمت شماره موبایل صحیح نیست. (مثال: 09123456789)');
                         isValid = false;
                     }
                     break;
                 case 'age':
-                    if (input.value < 18 || input.value > 99) {
-                        showError(field, 'سن شما باید بین 18 تا 99 سال باشد.');
+                    if (+input.value < 18 || +input.value > 99) {
+                        showError(fieldId, 'سن شما باید بین 18 تا 99 سال باشد.');
                         isValid = false;
                     }
                     break;
                 case 'password':
-                    if (input.value.length < 8) { showError(field, 'رمز عبور باید حداقل 8 کاراکتر باشد.'); isValid = false; }
-                    validateField('passwordConfirm');
+                    if (input.value.length < 8) {
+                        showError(fieldId, 'رمز عبور باید حداقل 8 کاراکتر باشد.');
+                        isValid = false;
+                    }
                     break;
                 case 'passwordConfirm':
-                    if (input.value !== inputs.password.value) { showError(field, 'رمزهای عبور با یکدیگر مطابقت ندارند.'); isValid = false; }
-                    break;
-                case 'terms':
-                     if (!input.checked) { showError(field, 'شما باید با قوانین و مقررات موافقت کنید.'); isValid = false; }
+                    if (input.value !== inputs.password.value) {
+                        showError(fieldId, 'رمزهای عبور با یکدیگر مطابقت ندارند.');
+                        isValid = false;
+                    }
                     break;
             }
             return isValid;
@@ -338,7 +350,11 @@
 
         function validateAllFields() {
             let isFormValid = true;
-            for (const key in inputs) { if (!validateField(key)) isFormValid = false; }
+            for (const key in inputs) {
+                if (!validateField(key)) {
+                    isFormValid = false;
+                }
+            }
             return isFormValid;
         }
         
@@ -346,6 +362,7 @@
             submitBtn.disabled = !validateAllFields();
         }
 
+        // --- Form Submission ---
         async function submitForm() {
             submitBtn.disabled = true;
             submitBtn.textContent = 'در حال ارسال...';
@@ -357,17 +374,14 @@
                 });
                 if (!tokenResponse.ok) throw new Error('خطا در دریافت توکن احراز هویت.');
                 const tokenData = await tokenResponse.json();
-                const clientToken = tokenData.token;
 
-                // --- CRITICAL CHANGE IS HERE ---
-                // We are now including the password in the data sent to Firebase.
                 const userData = {
                     displayName: inputs.displayName.value.trim(),
                     username: inputs.username.value.trim(),
                     mobile: inputs.mobile.value.trim(),
                     age: parseInt(inputs.age.value),
                     gender: inputs.gender.value,
-                    password: inputs.password.value, // The password is now being saved!
+                    password: inputs.password.value, // Password is correctly included now
                     bio: document.getElementById('bio').value.trim(),
                     interests: document.getElementById('interests').value.trim().split('،').map(i => i.trim()),
                     createdAt: new Date().toISOString()
@@ -377,31 +391,40 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${clientToken}`
+                        'Authorization': `Bearer ${tokenData.token}`
                     },
                     body: JSON.stringify(userData)
                 });
 
                 if (!registerResponse.ok) {
-                    const errorData = await registerResponse.json();
-                    throw new Error(errorData.error || 'خطا در ثبت اطلاعات در سرور.');
+                    throw new Error((await registerResponse.json()).error || 'خطا در ثبت اطلاعات.');
                 }
                 
                 formStatus.textContent = 'ثبت‌نام با موفقیت انجام شد! حالا می‌توانید وارد شوید.';
                 formStatus.className = 'success';
                 formStatus.style.display = 'block';
                 form.reset();
-                profilePreview.src = 'data:image/svg+xml;base64,...';
+                profilePreview.src = 'data:image/svg+xml;...';
                 
             } catch (error) {
                 formStatus.textContent = error.message;
                 formStatus.className = 'error';
                 formStatus.style.display = 'block';
             } finally {
-                submitBtn.disabled = false;
+                submitBtn.disabled = true; // Keep it disabled after submission
                 submitBtn.textContent = 'ثبت‌نام';
             }
         }
+        
+        // Listen for profile picture changes
+        inputs.profilePic.addEventListener('change', () => {
+            const file = inputs.profilePic.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => profilePreview.src = e.target.result;
+                reader.readAsDataURL(file);
+            }
+        });
     </script>
 </body>
 </html>
