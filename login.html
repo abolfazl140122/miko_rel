@@ -18,7 +18,7 @@
         .input-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #555; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; font-family: 'Vazirmatn', sans-serif; transition: border-color 0.3s, box-shadow 0.3s; }
         .input-group input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); }
-        .error-message { color: var(--error-color); font-size: 0.85em; margin-top: 5px; min-height: 1em; }
+        .error-message { color: var(--error-color); font-size: 0.85em; margin-top: 5px; min-height: 1em; display: none; }
         #submit-btn { width: 100%; padding: 14px; border: none; border-radius: 8px; background-color: var(--primary-color); color: white; font-size: 1.1em; font-weight: 700; cursor: pointer; transition: background-color 0.3s, opacity 0.3s; margin-top: 10px; }
         #submit-btn:hover { background-color: #0056b3; }
         #submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -42,11 +42,13 @@
             <div class="input-group">
                 <label for="identifier">نام کاربری یا شماره موبایل</label>
                 <input type="text" id="identifier" placeholder="نام کاربری یا شماره موبایل خود را وارد کنید" required>
+                <div class="error-message" id="identifier-error"></div>
             </div>
 
             <div class="input-group">
                 <label for="password">رمز عبور</label>
                 <input type="password" id="password" placeholder="رمز عبور خود را وارد کنید" required>
+                <div class="error-message" id="password-error"></div>
             </div>
             
             <button type="submit" id="submit-btn" disabled>ورود</button>
@@ -62,44 +64,79 @@
     </div>
 
     <script>
-        // --- CONFIG ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
 
-        // --- DOM Elements ---
+        const form = document.getElementById('login-form');
         const submitBtn = document.getElementById('submit-btn');
         const formStatus = document.getElementById('form-status');
         const identifierInput = document.getElementById('identifier');
         const passwordInput = document.getElementById('password');
 
+        // --- Validation Logic ---
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function hideError(fieldId) {
+            document.getElementById(`${fieldId}-error`).style.display = 'none';
+        }
+
+        function validateForm() {
+            let isIdentifierValid = true;
+            const identifierValue = identifierInput.value.trim();
+            if (identifierValue.length === 0) {
+                showError('identifier', 'این فیلد الزامی است.');
+                isIdentifierValid = false;
+            } else {
+                const isMobile = /^09\d{9}$/.test(identifierValue);
+                const isUsername = /^[a-zA-Z0-9_]{3,15}$/.test(identifierValue);
+                if (!isMobile && !isUsername) {
+                    showError('identifier', 'لطفا نام کاربری یا شماره موبایل معتبر وارد کنید.');
+                    isIdentifierValid = false;
+                } else {
+                    hideError('identifier');
+                }
+            }
+
+            let isPasswordValid = true;
+            if (passwordInput.value.trim().length === 0) {
+                showError('password', 'این فیلد الزامی است.');
+                isPasswordValid = false;
+            } else {
+                hideError('password');
+            }
+            
+            const isFormValid = isIdentifierValid && isPasswordValid;
+            submitBtn.disabled = !isFormValid;
+            return isFormValid;
+        }
+
         // --- Event Listeners ---
         [identifierInput, passwordInput].forEach(input => {
-            input.addEventListener('input', () => {
-                const isIdentifierValid = identifierInput.value.trim().length > 0;
-                const isPasswordValid = passwordInput.value.trim().length > 0;
-                submitBtn.disabled = !(isIdentifierValid && isPasswordValid);
-            });
+            input.addEventListener('input', validateForm);
         });
 
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            await submitLogin();
+            if (validateForm()) {
+                await submitLogin();
+            }
         });
 
-        // --- Login Logic ---
+        // --- Login Submission ---
         async function submitLogin() {
             submitBtn.disabled = true;
             submitBtn.textContent = 'در حال بررسی...';
             formStatus.style.display = 'none';
 
             const identifier = identifierInput.value.trim();
-            const password = passwordInput.value; // Get the entered password
+            const password = passwordInput.value;
 
             try {
-                // 1. Get a fresh client token for secure requests
-                const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, {
-                    headers: { 'X-Proxy-Secret': SHARED_SECRET }
-                });
+                const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
                 if (!tokenResponse.ok) throw new Error('خطا در ارتباط با سرور.');
                 const tokenData = await tokenResponse.json();
                 const clientToken = tokenData.token;
@@ -108,43 +145,31 @@
                 const isMobile = /^09\d{9}$/.test(identifier);
 
                 if (isMobile) {
-                    // Logic to find user by mobile number
-                    const queryParams = new URLSearchParams({
-                        orderBy: '"mobile"', equalTo: `"${identifier}"`, limitToFirst: '1'
-                    });
-                    const queryUrl = `${PROXY_URL}?path=users&${queryParams.toString()}`;
-
-                    const userCheckResponse = await fetch(queryUrl, {
-                        headers: { 'Authorization': `Bearer ${clientToken}` }
-                    });
+                    const queryParams = new URLSearchParams({ orderBy: '"mobile"', equalTo: `"${identifier}"` });
+                    const queryUrl = `${PROXY_URL}?path=users.json&${queryParams.toString()}`;
+                    
+                    const userCheckResponse = await fetch(queryUrl, { headers: { 'Authorization': `Bearer ${clientToken}` } });
                     if (!userCheckResponse.ok) throw new Error('خطا در جستجوی کاربر.');
                     const queryResult = await userCheckResponse.json();
+
                     if (queryResult && Object.keys(queryResult).length > 0) {
                         userData = Object.values(queryResult)[0];
                     }
                 } else {
-                    // Logic to find user by username
-                    const userCheckResponse = await fetch(`${PROXY_URL}?path=users/${identifier}`, {
-                        headers: { 'Authorization': `Bearer ${clientToken}` }
-                    });
-                    if (!userCheckResponse.ok) throw new Error('خطا در واکشی اطلاعات کاربر.');
-                    userData = await userCheckResponse.json();
+                    const userCheckResponse = await fetch(`${PROXY_URL}?path=users/${identifier}.json`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+                    if (userCheckResponse.status === 404) { // Explicitly handle not found
+                        userData = null;
+                    } else if (!userCheckResponse.ok) {
+                        throw new Error('خطا در واکشی اطلاعات کاربر.');
+                    } else {
+                        userData = await userCheckResponse.json();
+                    }
                 }
 
-                // 3. --- CRITICAL CHANGE: User and Password Verification ---
-                if (userData === null) {
-                    // Case 1: User does not exist
-                    throw new Error('نام کاربری یا رمز عبور اشتباه است.');
-                }
-                
-                if (userData.password !== password) {
-                    // Case 2: User exists, but password does not match
+                if (userData === null || userData.password !== password) {
                     throw new Error('نام کاربری یا رمز عبور اشتباه است.');
                 }
 
-                // If we reach here, both user exists and password is correct!
-                
-                // Success
                 console.log("Login successful for:", userData.displayName);
                 formStatus.textContent = `خوش آمدید، ${userData.displayName}! ورود موفقیت‌آمیز بود.`;
                 formStatus.className = 'success';
