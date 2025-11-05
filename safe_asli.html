@@ -2,54 +2,69 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>همیار - صفحه اصلی</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>همیار</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
         :root { --primary-color: #007bff; --success-color: #28a745; --danger-color: #e74c3c; --light-gray-color: #f8f9fa; --border-color: #dee2e6; --sent-bg: #e1f5fe; --received-bg: #f1f3f5; }
-        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Vazirmatn', sans-serif; margin: 0; background-color: var(--light-gray-color); color: #333; -webkit-user-select: none; user-select: none; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Vazirmatn', sans-serif; margin: 0; background-color: var(--light-gray-color); color: #333; -webkit-tap-highlight-color: transparent; /* ✅ FIX: Removes blue tap highlight on mobile */ }
 
-        .app-container { width: 100%; max-width: 400px; height: 100vh; margin: 0 auto; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        .app-container { width: 100%; max-width: 400px; height: 100vh; margin: 0 auto; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); overflow: hidden; /* ✅ FIX: Prevents main body scroll */ }
 
-        .app-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        /* Header */
+        .app-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .app-header h1 { font-size: 1.5em; margin: 0; color: var(--primary-color); }
-        .app-header button#logout-btn { background: none; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-family: 'Vazirmatn'; transition: background-color 0.2s, color 0.2s; }
-        .app-header button#logout-btn:hover { background-color: var(--danger-color); color: white; }
+        .app-header button { background: none; border: none; font-size: 1.2em; cursor: pointer; color: var(--danger-color); }
 
-        main { flex-grow: 1; position: relative; overflow: hidden; }
-        .view { width: 100%; height: 100%; display: none; flex-direction: column; }
+        /* Main Content Area */
+        main { flex-grow: 1; position: relative; overflow-y: auto; }
+        .view { display: none; height: 100%; width: 100%; flex-direction: column; }
         .view.active { display: flex; }
 
-        /* Card Swiping View */
-        .card-view { padding: 20px; justify-content: center; align-items: center; position: relative; }
-        .profile-card { width: 100%; height: 100%; max-height: 500px; border-radius: 15px; background-size: cover; background-position: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: absolute; display: flex; flex-direction: column; justify-content: flex-end; color: white; transition: transform 0.4s ease, opacity 0.4s ease; }
-        .profile-card.card--out-right { transform: translateX(150%) rotate(20deg); opacity: 0; }
-        .profile-card.card--out-left { transform: translateX(-150%) rotate(-20deg); opacity: 0; }
-        .profile-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); border-radius: 0 0 15px 15px; }
-        .card-info { padding: 20px; z-index: 2; }
-        .card-info h2 { margin: 0 0 5px; } .card-info p { margin: 0 0 10px; opacity: 0.9; }
-        .interests-container { display: flex; flex-wrap: wrap; gap: 5px; }
-        .interest-tag { background-color: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 12px; font-size: 0.8em; }
-
         /* Profile View */
-        .profile-view { padding: 20px; overflow-y: auto; }
-        .profile-field { margin-bottom: 20px; }
-        .profile-field label { font-weight: 700; color: #333; display: block; margin-bottom: 5px; }
-        .profile-field p, .profile-field input, .profile-field textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--light-gray-color); margin: 0; }
-        .profile-field textarea { min-height: 80px; resize: vertical; }
-        .profile-view button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1em; font-weight: 700; cursor: pointer; }
-        #edit-profile-btn { background-color: var(--primary-color); color: white; }
-        #save-profile-btn { background-color: var(--success-color); color: white; }
-        .edit-mode { display: none; } /* Hide edit fields by default */
-        .profile-view.is-editing .view-mode { display: none; }
-        .profile-view.is-editing .edit-mode { display: block; }
-        
-        /* Chat Views */
-        #conversation-list, #single-chat-view { height: 100%; }
-        /* ... Other chat styles remain the same ... */
+        #profile-view { padding: 25px; align-items: center; }
+        #profile-view img { width: 120px; height: 120px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        #profile-view h2 { margin: 0 0 10px; }
+        #profile-view p { color: #6c757d; margin: 5px 0; }
+        #profile-view .bio { background-color: var(--light-gray-color); padding: 15px; border-radius: 8px; margin-top: 20px; text-align: center; }
 
-        .main-footer { padding: 10px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
+        /* Card Swiping View */
+        #card-view { position: relative; }
+        #card-stack { flex-grow: 1; padding: 20px; display: flex; justify-content: center; align-items: center; position: relative; }
+        .profile-card { width: 100%; height: 100%; max-height: 500px; border-radius: 15px; background-size: cover; background-position: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: absolute; display: flex; flex-direction: column; justify-content: flex-end; color: white; transition: transform 0.4s ease, opacity 0.4s ease; cursor: grab; }
+        .profile-card.card--out-right { transform: translate(150%, 50px) rotate(20deg); opacity: 0; }
+        .profile-card.card--out-left { transform: translate(-150%, 50px) rotate(-20deg); opacity: 0; }
+        .profile-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); border-radius: 0 0 15px 15px; }
+        .card-info { padding: 20px; z-index: 2; } .card-info h2, .card-info p { margin: 0 0 5px; }
+        .card-actions { flex-shrink: 0; padding: 15px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; }
+        .action-btn { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--border-color); background-color: white; font-size: 2em; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; }
+        .action-btn:hover { transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn--dislike { color: var(--danger-color); border-color: var(--danger-color); }
+        .btn--like { color: var(--success-color); border-color: var(--success-color); }
+        .status-message { font-size: 1.2em; color: #aaa; text-align: center; padding: 20px; }
+
+        /* Chat Views */
+        #chat-view { height: 100%; }
+        #conversation-list { flex-grow: 1; overflow-y: auto; }
+        .conversation-item { display: flex; align-items: center; padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
+        .conversation-item:hover { background-color: var(--light-gray-color); }
+        .conversation-item img { width: 50px; height: 50px; border-radius: 50%; margin-left: 15px; }
+        .conversation-item h3 { margin: 0; font-size: 1.1em; }
+        #single-chat-view { height: 100%; display: none; flex-direction: column; }
+        .chat-header { flex-shrink: 0; display: flex; align-items: center; padding: 10px; border-bottom: 1px solid var(--border-color); }
+        .chat-header button { background: none; border: none; font-size: 1.5em; cursor: pointer; margin-left: 10px; }
+        .chat-header h2 { margin: 0; font-size: 1.2em; }
+        #messages-area { flex-grow: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column-reverse; }
+        .message { max-width: 70%; padding: 10px 15px; border-radius: 18px; margin-bottom: 10px; word-wrap: break-word; }
+        .message.sent { background-color: var(--sent-bg); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .message.received { background-color: var(--received-bg); align-self: flex-end; border-bottom-right-radius: 4px; }
+        #message-form { flex-shrink: 0; display: flex; padding: 10px; border-top: 1px solid var(--border-color); }
+        #message-form input { flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 20px; font-family: 'Vazirmatn'; }
+        #message-form button { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-right: 10px; font-size: 1.5em; cursor: pointer; }
+
+        /* Main Footer Navigation */
+        .app-footer { flex-shrink: 0; padding: 10px 0; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
         .nav-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: #ccc; transition: color 0.2s; }
         .nav-btn.active { color: var(--primary-color); }
     </style>
@@ -57,184 +72,273 @@
 <body>
 
     <div class="app-container">
-        <header class="app-header"><h1>همیار</h1><button id="logout-btn">خروج</button></header>
+        <header class="app-header"><h1 id="header-title">همیار</h1><button id="logout-btn">🚪</button></header>
 
-        <main>
-            <!-- View 1: Card Swiping -->
-            <div id="card-view" class="view active card-view">
-                <div id="status-message" class="status-message">در حال بارگذاری...</div>
-            </div>
-
-            <!-- View 2: Chat -->
-            <div id="chat-view" class="view chat-view">
-                <!-- ... Chat HTML structure remains the same ... -->
+        <main id="main-content">
+            <!-- View 1: My Profile -->
+            <div id="profile-view" class="view">
+                <img id="my-profile-pic" src="https://i.pravatar.cc/150?u=me" alt="My Profile">
+                <h2 id="my-display-name"></h2>
+                <p id="my-username"></p>
+                <p id="my-age-gender"></p>
+                <p id="my-mobile"></p>
+                <div class="bio" id="my-bio"></div>
             </div>
             
-            <!-- View 3: Profile -->
-            <div id="profile-view" class="view profile-view">
-                <div class="profile-field">
-                    <label>نام نمایشی</label>
-                    <p class="view-mode" id="profile-displayName"></p>
-                    <input class="edit-mode" type="text" id="edit-displayName">
+            <!-- View 2: Card Swiping -->
+            <div id="card-view" class="view">
+                <div id="card-stack">
+                    <div id="status-message" class="status-message">در حال آماده سازی...</div>
                 </div>
-                <div class="profile-field">
-                    <label>سن</label>
-                    <p class="view-mode" id="profile-age"></p>
-                    <input class="edit-mode" type="number" id="edit-age" min="18" max="99">
+                <div class="card-actions">
+                    <button class="action-btn btn--dislike" id="dislike-btn">✖</button>
+                    <button class="action-btn btn--like" id="like-btn">✔</button>
                 </div>
-                <div class="profile-field">
-                    <label>درباره من</label>
-                    <p class="view-mode" id="profile-bio"></p>
-                    <textarea class="edit-mode" id="edit-bio"></textarea>
+            </div>
+
+            <!-- View 3: Chat -->
+            <div id="chat-view" class="view">
+                <div id="conversation-list"></div>
+                <div id="single-chat-view">
+                    <div class="chat-header"><button id="back-to-list-btn">➡️</button><h2 id="chat-partner-name"></h2></div>
+                    <div id="messages-area"></div>
+                    <form id="message-form"><input type="text" id="message-input" placeholder="پیام..." autocomplete="off"><button type="submit">⬆️</button></form>
                 </div>
-                <div class="profile-field">
-                    <label>علاقه‌مندی‌ها (با ویرگول جدا کنید)</label>
-                    <p class="view-mode" id="profile-interests"></p>
-                    <input class="edit-mode" type="text" id="edit-interests">
-                </div>
-                <button class="view-mode" id="edit-profile-btn">ویرایش پروفایل</button>
-                <button class="edit-mode" id="save-profile-btn">ذخیره تغییرات</button>
             </div>
         </main>
 
-        <footer class="main-footer">
-            <button class="nav-btn" id="nav-profile-btn">👤</button>
+        <footer class="app-footer">
             <button class="nav-btn" id="nav-chat-btn">💬</button>
-            <button class="nav-btn active" id="nav-cards-btn">🃏</button>
+            <button class="nav-btn" id="nav-cards-btn">🃏</button>
+            <button class="nav-btn" id="nav-profile-btn">👤</button>
         </footer>
     </div>
 
     <script>
+        // --- CONFIG & DOM ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
-        
-        // --- DOM Elements ---
-        const views = {
-            cards: document.getElementById('card-view'),
-            chat: document.getElementById('chat-view'),
-            profile: document.getElementById('profile-view')
+        const DOM = {
+            headerTitle: document.getElementById('header-title'),
+            logoutBtn: document.getElementById('logout-btn'),
+            views: document.querySelectorAll('.view'),
+            nav: {
+                profile: document.getElementById('nav-profile-btn'),
+                cards: document.getElementById('nav-cards-btn'),
+                chat: document.getElementById('nav-chat-btn')
+            },
+            profile: {
+                pic: document.getElementById('my-profile-pic'),
+                displayName: document.getElementById('my-display-name'),
+                username: document.getElementById('my-username'),
+                ageGender: document.getElementById('my-age-gender'),
+                mobile: document.getElementById('my-mobile'),
+                bio: document.getElementById('my-bio')
+            },
+            cards: {
+                stack: document.getElementById('card-stack'),
+                status: document.getElementById('status-message'),
+                likeBtn: document.getElementById('like-btn'),
+                dislikeBtn: document.getElementById('dislike-btn')
+            },
+            chat: {
+                list: document.getElementById('conversation-list'),
+                single: document.getElementById('single-chat-view'),
+                backBtn: document.getElementById('back-to-list-btn'),
+                partnerName: document.getElementById('chat-partner-name'),
+                messagesArea: document.getElementById('messages-area'),
+                form: document.getElementById('message-form'),
+                input: document.getElementById('message-input')
+            }
         };
-        const navButtons = {
-            cards: document.getElementById('nav-cards-btn'),
-            chat: document.getElementById('nav-chat-btn'),
-            profile: document.getElementById('nav-profile-btn')
-        };
-        const profileFields = {
-            displayName: document.getElementById('profile-displayName'),
-            age: document.getElementById('profile-age'),
-            bio: document.getElementById('profile-bio'),
-            interests: document.getElementById('profile-interests'),
-        };
-        const editProfileFields = {
-            displayName: document.getElementById('edit-displayName'),
-            age: document.getElementById('edit-age'),
-            bio: document.getElementById('edit-bio'),
-            interests: document.getElementById('edit-interests'),
-        };
-        const editProfileBtn = document.getElementById('edit-profile-btn');
-        const saveProfileBtn = document.getElementById('save-profile-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        
-        // --- App State ---
-        let currentUser = null;
-        let clientToken = null;
 
-        // --- AUTH & INIT ---
+        // --- APP STATE ---
+        let state = { currentUser: null, clientToken: null, allUsers: {}, usersToDisplay: [], matches: [], activeChatPartner: null, messagePollingInterval: null, isInteracting: false };
+
+        // --- INITIALIZATION ---
         (async () => {
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) { window.location.href = 'login.html'; return; }
-            currentUser = JSON.parse(storedUser);
-            
-            Object.keys(navButtons).forEach(key => {
-                navButtons[key].addEventListener('click', () => showView(key));
-            });
-            logoutBtn.addEventListener('click', logout);
-            editProfileBtn.addEventListener('click', toggleEditMode);
-            saveProfileBtn.addEventListener('click', handleSaveProfile);
-            
+            state.currentUser = JSON.parse(storedUser);
+
+            setupEventListeners();
             await initializeApp();
         })();
 
         async function initializeApp() {
-            await refreshClientToken();
-            renderProfile();
-            // Other initializations like fetching cards and chats...
+            try {
+                DOM.cards.status.textContent = 'در حال اتصال...';
+                await refreshClientToken();
+                DOM.cards.status.textContent = 'در حال واکشی اطلاعات...';
+                const [allUsers, seenUsers] = await Promise.all([fetchAllUsers(), fetchSeenUsers()]);
+                allUsers.forEach(user => state.allUsers[user.username] = user);
+
+                state.usersToDisplay = Object.values(state.allUsers).filter(user =>
+                    user.username !== state.currentUser.username && !seenUsers.includes(user.username)
+                );
+                
+                await fetchMatches();
+                
+                renderMyProfile();
+                renderNextCard();
+                renderConversationList();
+
+                showView('cards'); // Default view
+            } catch (error) {
+                console.error("Initialization Error:", error);
+                DOM.cards.status.textContent = `خطای بارگذاری: ${error.message}`;
+            }
+        }
+        
+        // --- EVENT LISTENERS ---
+        function setupEventListeners() {
+            DOM.logoutBtn.addEventListener('click', logout);
+            DOM.nav.profile.addEventListener('click', () => showView('profile'));
+            DOM.nav.cards.addEventListener('click', () => showView('cards'));
+            DOM.nav.chat.addEventListener('click', () => showView('chat'));
+            DOM.cards.likeBtn.addEventListener('click', () => handleCardInteraction(true));
+            DOM.cards.dislikeBtn.addEventListener('click', () => handleCardInteraction(false));
+            DOM.chat.backBtn.addEventListener('click', showConversationList);
+            DOM.chat.form.addEventListener('submit', handleSendMessage);
         }
 
         // --- VIEW MANAGEMENT ---
         function showView(viewName) {
-            Object.keys(views).forEach(key => {
-                views[key].classList.toggle('active', key === viewName);
-                navButtons[key].classList.toggle('active', key === viewName);
+            DOM.views.forEach(v => v.classList.remove('active'));
+            document.getElementById(`${viewName}-view`).classList.add('active');
+            Object.values(DOM.nav).forEach(btn => btn.classList.remove('active'));
+            if (DOM.nav[viewName]) DOM.nav[viewName].classList.add('active');
+            DOM.headerTitle.textContent = { profile: 'پروفایل من', cards: 'همیار', chat: 'پیام‌ها' }[viewName] || 'همیار';
+        }
+
+        // --- DATA FETCHING ---
+        async function refreshClientToken() {
+            const r = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+            if (!r.ok) throw new Error('خطا در دریافت توکن.');
+            state.clientToken = (await r.json()).token;
+        }
+        async function fetchAllUsers() {
+            const r = await fetch(`${PROXY_URL}?path=users`, { headers: { 'Authorization': `Bearer ${state.clientToken}` } });
+            if (!r.ok) throw new Error('خطا در واکشی کاربران.');
+            return Object.values(await r.json() || {});
+        }
+        async function fetchSeenUsers() {
+            const r = await fetch(`${PROXY_URL}?path=interactions/${state.currentUser.username}`, { headers: { 'Authorization': `Bearer ${state.clientToken}` } });
+            return r.ok ? Object.keys(await r.json() || {}) : [];
+        }
+        async function fetchMatches() {
+            const r = await fetch(`${PROXY_URL}?path=interactions/${state.currentUser.username}`, { headers: { 'Authorization': `Bearer ${state.clientToken}` } });
+            const myLikes = await r.json() || {};
+            const likedUsernames = Object.keys(myLikes).filter(key => myLikes[key] === 'liked');
+            const promises = likedUsernames.map(async name => {
+                const r2 = await fetch(`${PROXY_URL}?path=interactions/${name}/${state.currentUser.username}`, { headers: { 'Authorization': `Bearer ${state.clientToken}` } });
+                return await r2.json() === 'liked' ? state.allUsers[name] : null;
+            });
+            state.matches = (await Promise.all(promises)).filter(Boolean);
+        }
+
+        // --- UI RENDERING ---
+        function renderMyProfile() {
+            const u = state.currentUser;
+            DOM.profile.pic.src = `https://i.pravatar.cc/150?u=${u.username}`;
+            DOM.profile.displayName.textContent = u.displayName;
+            DOM.profile.username.textContent = `@${u.username}`;
+            DOM.profile.ageGender.textContent = `${u.age} ساله - ${u.gender === 'male' ? 'مرد' : 'زن'}`;
+            DOM.profile.mobile.textContent = u.mobile;
+            DOM.profile.bio.textContent = u.bio || 'بیوگرافی ثبت نشده.';
+        }
+        function renderNextCard() {
+            DOM.cards.stack.innerHTML = ''; // Clear previous card
+            if (state.usersToDisplay.length === 0) {
+                DOM.cards.stack.innerHTML = `<div class="status-message">کاربر دیگری برای نمایش وجود ندارد!</div>`;
+                return;
+            }
+            const user = state.usersToDisplay[0];
+            const card = document.createElement('div');
+            card.className = 'profile-card';
+            card.style.backgroundImage = `url(https://i.pravatar.cc/500?u=${user.username})`;
+            card.innerHTML = `<div class="card-info"><h2>${user.displayName}, ${user.age}</h2><p>${user.bio || ''}</p></div>`;
+            DOM.cards.stack.appendChild(card);
+        }
+        function renderConversationList() {
+            DOM.chat.list.innerHTML = '';
+            if (state.matches.length === 0) { DOM.chat.list.innerHTML = '<div class="status-message">هنوز هیچ تطابقی نداری!</div>'; return; }
+            state.matches.forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'conversation-item';
+                item.innerHTML = `<img src="https://i.pravatar.cc/100?u=${user.username}"><h3>${user.displayName}</h3>`;
+                item.onclick = () => openChat(user);
+                DOM.chat.list.appendChild(item);
             });
         }
-        
-        // --- PROFILE LOGIC ---
-        function renderProfile() {
-            profileFields.displayName.textContent = currentUser.displayName;
-            profileFields.age.textContent = currentUser.age;
-            profileFields.bio.textContent = currentUser.bio || 'بیوگرافی ثبت نشده است.';
-            profileFields.interests.textContent = Array.isArray(currentUser.interests) ? currentUser.interests.join('، ') : '';
+
+        // --- ACTIONS & INTERACTIONS ---
+        function handleCardInteraction(liked) {
+            if (state.isInteracting || state.usersToDisplay.length === 0) return;
+            state.isInteracting = true;
+            const card = DOM.cards.stack.querySelector('.profile-card');
+            const targetUsername = state.usersToDisplay[0].username;
+            card.classList.add(liked ? 'card--out-right' : 'card--out-left');
+            saveInteraction(targetUsername, liked ? 'liked' : 'disliked');
+            setTimeout(() => {
+                state.usersToDisplay.shift();
+                renderNextCard();
+                state.isInteracting = false;
+            }, 400);
         }
-
-        function toggleEditMode() {
-            editProfileFields.displayName.value = currentUser.displayName;
-            editProfileFields.age.value = currentUser.age;
-            editProfileFields.bio.value = currentUser.bio || '';
-            editProfileFields.interests.value = Array.isArray(currentUser.interests) ? currentUser.interests.join('، ') : '';
-            views.profile.classList.add('is-editing');
+        async function saveInteraction(target, action) {
+            await fetch(`${PROXY_URL}?path=interactions/${state.currentUser.username}/${target}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.clientToken}` },
+                body: JSON.stringify(action)
+            });
         }
-
-        async function handleSaveProfile() {
-            saveProfileBtn.disabled = true;
-            saveProfileBtn.textContent = 'در حال ذخیره...';
-
-            const updatedData = {
-                displayName: editProfileFields.displayName.value.trim(),
-                age: parseInt(editProfileFields.age.value),
-                bio: editProfileFields.bio.value.trim(),
-                interests: editProfileFields.interests.value.split('،').map(i => i.trim()).filter(Boolean)
-            };
-
-            try {
-                const response = await fetch(`${PROXY_URL}?path=users/${currentUser.username}`, {
-                    method: 'PATCH', // PATCH only updates specified fields
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}` },
-                    body: JSON.stringify(updatedData)
-                });
-                if (!response.ok) throw new Error('خطا در به‌روزرسانی اطلاعات.');
-                
-                // Update local state and localStorage
-                currentUser = { ...currentUser, ...updatedData };
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                
-                renderProfile(); // Re-render with new data
-                views.profile.classList.remove('is-editing');
-
-            } catch (error) {
-                alert(error.message);
-            } finally {
-                saveProfileBtn.disabled = false;
-                saveProfileBtn.textContent = 'ذخیره تغییرات';
-            }
+        function openChat(partner) {
+            state.activeChatPartner = partner;
+            DOM.chat.list.style.display = 'none';
+            DOM.chat.single.style.display = 'flex';
+            DOM.chat.partnerName.textContent = partner.displayName;
+            loadMessages();
+            if (state.messagePollingInterval) clearInterval(state.messagePollingInterval);
+            state.messagePollingInterval = setInterval(loadMessages, 5000);
         }
-
-        // --- DATA FETCHING & OTHER LOGIC ---
-        async function refreshClientToken() {
-            const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-            if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
-            clientToken = (await response.json()).token;
+        function showConversationList() {
+            state.activeChatPartner = null;
+            DOM.chat.list.style.display = 'block';
+            DOM.chat.single.style.display = 'none';
+            if (state.messagePollingInterval) clearInterval(state.messagePollingInterval);
         }
-
+        async function loadMessages() {
+            if (!state.activeChatPartner) return;
+            const chatId = [state.currentUser.username, state.activeChatPartner.username].sort().join('_');
+            const r = await fetch(`${PROXY_URL}?path=messages/${chatId}`, { headers: { 'Authorization': `Bearer ${state.clientToken}` } });
+            const data = await r.json() || {};
+            DOM.chat.messagesArea.innerHTML = '';
+            Object.values(data).sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp)).forEach(msg => {
+                const div = document.createElement('div');
+                div.className = `message ${msg.senderId === state.currentUser.username ? 'sent' : 'received'}`;
+                div.textContent = msg.text;
+                DOM.chat.messagesArea.prepend(div);
+            });
+        }
+        async function handleSendMessage(e) {
+            e.preventDefault();
+            const text = DOM.chat.input.value.trim();
+            if (!text || !state.activeChatPartner) return;
+            const chatId = [state.currentUser.username, state.activeChatPartner.username].sort().join('_');
+            const message = { senderId: state.currentUser.username, text, timestamp: new Date().toISOString() };
+            DOM.chat.input.value = '';
+            await fetch(`${PROXY_URL}?path=messages/${chatId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.clientToken}` },
+                body: JSON.stringify(message)
+            });
+            await loadMessages();
+        }
         function logout() {
             localStorage.removeItem('currentUser');
             window.location.href = 'index.html';
         }
-        
-        // NOTE: The complete chat and card swiping logic from the previous response
-        // should be integrated here. For brevity in this example, only the new
-        // profile logic is shown in full detail, but the structure is complete.
-
     </script>
 </body>
 </html>
