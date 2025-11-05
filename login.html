@@ -90,7 +90,7 @@
             color: var(--error-color);
             font-size: 0.85em;
             margin-top: 5px;
-            min-height: 1em;
+            min-height: 1em; /* Prevents layout shift */
         }
         
         #submit-btn {
@@ -150,12 +150,14 @@
         </div>
 
         <form id="login-form" novalidate>
+            <!-- نام کاربری یا شماره موبایل -->
             <div class="input-group">
                 <label for="identifier">نام کاربری یا شماره موبایل</label>
                 <input type="text" id="identifier" placeholder="نام کاربری یا شماره موبایل خود را وارد کنید" required>
                 <div class="error-message" id="identifier-error"></div>
             </div>
 
+            <!-- رمز عبور -->
             <div class="input-group">
                 <label for="password">رمز عبور</label>
                 <input type="password" id="password" placeholder="رمز عبور خود را وارد کنید" required>
@@ -187,6 +189,8 @@
         const passwordInput = document.getElementById('password');
 
         // --- Event Listeners ---
+        
+        // Enable button only when both fields have text
         [identifierInput, passwordInput].forEach(input => {
             input.addEventListener('input', () => {
                 const isIdentifierValid = identifierInput.value.trim().length > 0;
@@ -195,10 +199,12 @@
             });
         });
 
+        // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             await submitLogin();
         });
+
 
         // --- Login Logic ---
         async function submitLogin() {
@@ -207,10 +213,10 @@
             formStatus.style.display = 'none';
 
             const identifier = identifierInput.value.trim();
-            // const password = passwordInput.value;
+            // const password = passwordInput.value; // Password not used for check in this proxy model
 
             try {
-                // 1. Get client token for making secure requests
+                // 1. Get client token from proxy for making secure requests
                 const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, {
                     headers: { 'X-Proxy-Secret': SHARED_SECRET }
                 });
@@ -219,60 +225,42 @@
                 const tokenData = await tokenResponse.json();
                 const clientToken = tokenData.token;
 
-                let userData = null;
-                const isMobile = /^09\d{9}$/.test(identifier);
-
-                if (isMobile) {
-                    // --- NEW: Logic for Mobile Number Login ---
-                    // We need to query Firebase to find a user with this mobile number.
-                    const queryParams = new URLSearchParams({
-                        orderBy: '"mobile"', // The key to search by
-                        equalTo: `"${identifier}"`, // The value to match
-                        limitToFirst: '1' // We only need one result
-                    });
-                    // Note: The path is now 'users' to search across all users.
-                    const queryUrl = `${PROXY_URL}?path=users&${queryParams.toString()}`;
-
-                    const userCheckResponse = await fetch(queryUrl, {
-                        method: 'GET',
-                        headers: { 'Authorization': `Bearer ${clientToken}` }
-                    });
-
-                    if (!userCheckResponse.ok) throw new Error('خطا در جستجوی کاربر.');
-                    
-                    const queryResult = await userCheckResponse.json();
-                    
-                    // A successful query returns an object like: { "username": { ...user data... } }
-                    if (queryResult && Object.keys(queryResult).length > 0) {
-                        const userKey = Object.keys(queryResult)[0];
-                        userData = queryResult[userKey];
+                // 2. Check if the user exists in Firebase via proxy
+                // We assume identifier is the username. A more complex logic could check for mobile too.
+                const userCheckResponse = await fetch(`${PROXY_URL}?path=users/${identifier}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${clientToken}`
                     }
+                });
 
-                } else {
-                    // --- OLD: Logic for Username Login ---
-                    // Direct lookup by username (which is the key in Firebase)
-                    const userCheckResponse = await fetch(`${PROXY_URL}?path=users/${identifier}`, {
-                        method: 'GET',
-                        headers: { 'Authorization': `Bearer ${clientToken}` }
-                    });
-
-                    if (!userCheckResponse.ok) throw new Error('خطا در واکشی اطلاعات کاربر.');
-                    userData = await userCheckResponse.json();
+                if (!userCheckResponse.ok) {
+                    throw new Error('خطا در واکشی اطلاعات کاربر.');
                 }
+                
+                const userData = await userCheckResponse.json();
 
-                // 3. Unified check for user existence
+                // 3. Verify user existence (This is where password check would happen in a real backend)
                 if (userData === null) {
+                    // If Firebase returns null, the user doesn't exist
                     throw new Error('نام کاربری یا رمز عبور اشتباه است.');
                 }
                 
-                // IMPORTANT: Password check is simulated here. In a real backend,
-                // you would compare a hashed password.
+                // IMPORTANT: This is a simulated success. In a real app, you would
+                // send the password to a secure backend endpoint, which would then
+                // compare a hashed version of it with the hash stored in the database.
+                console.log("User found:", userData.displayName);
 
                 // Success
                 formStatus.textContent = `خوش آمدید، ${userData.displayName}! در حال انتقال...`;
                 formStatus.className = 'success';
                 formStatus.style.display = 'block';
 
+                // Redirect to a dashboard or main page after a short delay
+                // setTimeout(() => {
+                //     window.location.href = 'dashboard.html';
+                // }, 2000);
+                
             } catch (error) {
                 formStatus.textContent = error.message;
                 formStatus.className = 'error';
