@@ -178,38 +178,28 @@
         </div>
 
         <form id="register-form" novalidate>
-            <!-- تصویر پروفایل -->
             <div class="profile-pic-group">
                 <img id="profile-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjZWQ0ZGEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjAgMjF2LTIuMDRhNC45OCA0Ljk4IDAgMCAwLTQuOTgtNC45OEg4Ljk4QTQuOTggNC45OCAwIDAgMCA0IDIxLjAyVjIxIj48L3BhdGg+PGNpcmNsZSBjeD0iMTIiIGN5PSI3IiByPSI0Ij48L2NpcmNsZT48L3N2Zz4=" alt="Profile Preview">
                 <div>
                     <label for="profilePic">انتخاب تصویر</label>
                     <input type="file" id="profilePic" accept="image/*">
-                    <div class="error-message" id="profilePic-error"></div>
                 </div>
             </div>
-
-            <!-- نام نمایشی -->
             <div class="input-group">
                 <label for="displayName">نام نمایشی</label>
                 <input type="text" id="displayName" placeholder="نامی که دیگران می‌بینند" required>
                 <div class="error-message" id="displayName-error"></div>
             </div>
-
-            <!-- نام کاربری -->
             <div class="input-group">
                 <label for="username">نام کاربری (انگلیسی)</label>
                 <input type="text" id="username" placeholder="فقط حروف انگلیسی، اعداد و _" required pattern="^[a-zA-Z0-9_]{3,15}$">
                 <div class="error-message" id="username-error"></div>
             </div>
-
-            <!-- شماره موبایل -->
             <div class="input-group">
                 <label for="mobile">شماره موبایل</label>
                 <input type="tel" id="mobile" placeholder="مثال: 09123456789" required>
                 <div class="error-message" id="mobile-error"></div>
             </div>
-
-            <!-- سن و جنسیت (در یک ردیف) -->
             <div style="display: flex; gap: 20px;">
                 <div class="input-group" style="width: 50%;">
                     <label for="age">سن</label>
@@ -227,8 +217,6 @@
                     <div class="error-message" id="gender-error"></div>
                 </div>
             </div>
-            
-            <!-- رمز عبور -->
             <div class="input-group">
                 <label for="password">رمز عبور</label>
                 <input type="password" id="password" placeholder="حداقل ۸ کاراکتر" required>
@@ -239,38 +227,28 @@
                 <input type="password" id="passwordConfirm" placeholder="رمز عبور را دوباره وارد کنید" required>
                 <div class="error-message" id="passwordConfirm-error"></div>
             </div>
-
-            <!-- درباره من -->
             <div class="input-group">
                 <label for="bio">درباره من (اختیاری)</label>
                 <textarea id="bio" placeholder="کمی درباره خودتان بنویسید..."></textarea>
             </div>
-
-            <!-- علاقه‌مندی‌ها -->
             <div class="input-group">
                 <label for="interests">علاقه‌مندی‌ها (اختیاری)</label>
                 <input type="text" id="interests" placeholder="با ویرگول (،) جدا کنید. مثال: فیلم، موسیقی، ورزش">
             </div>
-
-            <!-- قوانین و مقررات -->
             <div class="input-group terms-group">
                 <input type="checkbox" id="terms" required>
                 <label for="terms">با <a href="#">قوانین و مقررات</a> موافقم.</label>
                 <div class="error-message" id="terms-error"></div>
             </div>
-            
             <button type="submit" id="submit-btn" disabled>ثبت‌نام</button>
-
             <div id="form-status"></div>
         </form>
     </div>
 
     <script>
-        // --- CONFIG ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
 
-        // --- DOM Elements ---
         const form = document.getElementById('register-form');
         const submitBtn = document.getElementById('submit-btn');
         const formStatus = document.getElementById('form-status');
@@ -287,21 +265,15 @@
         };
         const profilePreview = document.getElementById('profile-preview');
 
-        // --- Event Listeners ---
-        
-        // Profile picture preview
         inputs.profilePic.addEventListener('change', () => {
             const file = inputs.profilePic.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    profilePreview.src = e.target.result;
-                }
+                reader.onload = (e) => profilePreview.src = e.target.result;
                 reader.readAsDataURL(file);
             }
         });
 
-        // Real-time validation on input change
         for (const key in inputs) {
             inputs[key].addEventListener('input', () => {
                 validateField(key);
@@ -309,17 +281,11 @@
             });
         }
 
-        // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (validateAllFields()) {
-                await submitForm();
-            }
+            if (validateAllFields()) await submitForm();
         });
 
-
-        // --- Validation Logic ---
-        
         function showError(field, message) {
             const errorElement = document.getElementById(`${field}-error`);
             errorElement.textContent = message;
@@ -333,16 +299,10 @@
         function validateField(field) {
             const input = inputs[field];
             let isValid = true;
-            
-            // Simple validation based on type and required attribute
             if (input.required && !input.value.trim() && input.type !== 'checkbox') {
                 showError(field, 'این فیلد الزامی است.');
                 isValid = false;
-            } else {
-                hideError(field);
-            }
-
-            // Specific validations
+            } else { hideError(field); }
             switch(field) {
                 case 'username':
                     if (!/^[a-zA-Z0-9_]{3,15}$/.test(input.value)) {
@@ -363,24 +323,14 @@
                     }
                     break;
                 case 'password':
-                    if (input.value.length < 8) {
-                        showError(field, 'رمز عبور باید حداقل 8 کاراکتر باشد.');
-                        isValid = false;
-                    }
-                    // Re-validate confirmation if password changes
+                    if (input.value.length < 8) { showError(field, 'رمز عبور باید حداقل 8 کاراکتر باشد.'); isValid = false; }
                     validateField('passwordConfirm');
                     break;
                 case 'passwordConfirm':
-                    if (input.value !== inputs.password.value) {
-                        showError(field, 'رمزهای عبور با یکدیگر مطابقت ندارند.');
-                        isValid = false;
-                    }
+                    if (input.value !== inputs.password.value) { showError(field, 'رمزهای عبور با یکدیگر مطابقت ندارند.'); isValid = false; }
                     break;
                 case 'terms':
-                     if (!input.checked) {
-                        showError(field, 'شما باید با قوانین و مقررات موافقت کنید.');
-                        isValid = false;
-                    }
+                     if (!input.checked) { showError(field, 'شما باید با قوانین و مقررات موافقت کنید.'); isValid = false; }
                     break;
             }
             return isValid;
@@ -388,11 +338,7 @@
 
         function validateAllFields() {
             let isFormValid = true;
-            for (const key in inputs) {
-                if (!validateField(key)) {
-                    isFormValid = false;
-                }
-            }
+            for (const key in inputs) { if (!validateField(key)) isFormValid = false; }
             return isFormValid;
         }
         
@@ -400,43 +346,35 @@
             submitBtn.disabled = !validateAllFields();
         }
 
-        // --- Form Submission ---
         async function submitForm() {
             submitBtn.disabled = true;
             submitBtn.textContent = 'در حال ارسال...';
             formStatus.style.display = 'none';
 
             try {
-                // 1. Get client token from proxy
                 const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, {
                     headers: { 'X-Proxy-Secret': SHARED_SECRET }
                 });
                 if (!tokenResponse.ok) throw new Error('خطا در دریافت توکن احراز هویت.');
-                
                 const tokenData = await tokenResponse.json();
                 const clientToken = tokenData.token;
 
-                // 2. Prepare user data
+                // --- CRITICAL CHANGE IS HERE ---
+                // We are now including the password in the data sent to Firebase.
                 const userData = {
                     displayName: inputs.displayName.value.trim(),
                     username: inputs.username.value.trim(),
                     mobile: inputs.mobile.value.trim(),
                     age: parseInt(inputs.age.value),
                     gender: inputs.gender.value,
+                    password: inputs.password.value, // The password is now being saved!
                     bio: document.getElementById('bio').value.trim(),
                     interests: document.getElementById('interests').value.trim().split('،').map(i => i.trim()),
-                    // Note: We are not sending the password directly to Firebase. 
-                    // In a real app, password should be hashed on a secure server.
-                    // For this proxy example, we just don't include it in the public user profile.
                     createdAt: new Date().toISOString()
                 };
 
-                // In a real app, you would also handle the profile picture upload, 
-                // get a URL, and add it to userData. That's a more complex process.
-
-                // 3. Send data to Firebase via proxy
                 const registerResponse = await fetch(`${PROXY_URL}?path=users/${userData.username}`, {
-                    method: 'PUT', // PUT creates or overwrites the data at the specified path
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${clientToken}`
@@ -449,12 +387,11 @@
                     throw new Error(errorData.error || 'خطا در ثبت اطلاعات در سرور.');
                 }
                 
-                // Success
-                formStatus.textContent = 'ثبت‌نام با موفقیت انجام شد! به زودی منتقل می‌شوید...';
+                formStatus.textContent = 'ثبت‌نام با موفقیت انجام شد! حالا می‌توانید وارد شوید.';
                 formStatus.className = 'success';
                 formStatus.style.display = 'block';
                 form.reset();
-                profilePreview.src = 'data:image/svg+xml;...'; // Reset preview
+                profilePreview.src = 'data:image/svg+xml;base64,...';
                 
             } catch (error) {
                 formStatus.textContent = error.message;
