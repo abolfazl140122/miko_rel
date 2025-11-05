@@ -40,9 +40,18 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); }
-            50% { transform: scale(1); box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12); }
-            100% { transform: scale(0.95); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); }
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            }
+            50% {
+                transform: scale(1);
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            }
         }
 
         #status-message {
@@ -90,30 +99,39 @@
 
             if (storedUser) {
                 // کاربر قبلا با موفقیت وارد شده است
-                const user = JSON.parse(storedUser);
-                
-                // پیام خوش‌آمدگویی مجدد را نمایش می‌دهیم
-                statusMessageElement.textContent = `خوش آمدید مجدد، ${user.displayName || user.username}!`;
-                spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
+                try {
+                    const user = JSON.parse(storedUser);
+                    
+                    // پیام خوش‌آمدگویی مجدد را نمایش می‌دهیم
+                    statusMessageElement.textContent = `خوش آمدید مجدد، ${user.displayName || user.username}!`;
+                    spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
 
-                // پس از تاخیر، کاربر را به صفحه اصلی هدایت می‌کنیم
-                setTimeout(() => {
-                    window.location.href = 'safe_asli.html';
-                }, REDIRECT_DELAY);
+                    // پس از تاخیر، کاربر را به صفحه اصلی هدایت می‌کنیم
+                    setTimeout(() => {
+                        window.location.href = 'safe_asli.html';
+                    }, REDIRECT_DELAY);
+
+                } catch (e) {
+                    // اگر اطلاعات ذخیره شده معتبر نبود، آن را پاک کرده و به صفحه ثبت‌نام هدایت می‌کنیم
+                    localStorage.removeItem('currentUser');
+                    redirectToRegister();
+                }
 
             } else {
                 // کاربر وارد نشده یا برای اولین بار است که اپ را باز می‌کند
-                
-                // پیام خوش‌آمدگویی اولیه را نمایش می‌دهیم
-                statusMessageElement.textContent = 'به همیار خوش آمدید!';
-                spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
-
-                // پس از تاخیر، کاربر را به صفحه ثبت‌نام هدایت می‌کنیم
-                // اگر می‌خواهید به صفحه ورود هدایت شود، 'login.html' را جایگزین کنید
-                setTimeout(() => {
-                    window.location.href = 'register.html'; 
-                }, REDIRECT_DELAY);
+                redirectToRegister();
             }
+        }
+        
+        function redirectToRegister() {
+            // پیام خوش‌آمدگویی اولیه را نمایش می‌دهیم
+            statusMessageElement.textContent = 'به همیار خوش آمدید!';
+            spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
+
+            // پس از تاخیر، کاربر را به صفحه ثبت‌نام هدایت می‌کنیم
+            setTimeout(() => {
+                window.location.href = 'register.html'; 
+            }, REDIRECT_DELAY);
         }
 
         // اجرای تابع پس از بارگذاری کامل صفحه
