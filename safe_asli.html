@@ -15,7 +15,7 @@
             margin: 0;
             background-color: var(--light-gray-color);
             color: #333;
-            -webkit-user-select: none; /* Disable text selection */
+            -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
@@ -23,7 +23,7 @@
 
         .app-container {
             width: 100%;
-            max-width: 400px; /* Typical mobile width */
+            max-width: 400px;
             height: 100vh;
             margin: 0 auto;
             background-color: white;
@@ -32,7 +32,6 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
         }
 
-        /* Header */
         .app-header {
             padding: 15px;
             border-bottom: 1px solid var(--border-color);
@@ -60,8 +59,6 @@
             color: white;
         }
 
-
-        /* Main Content - Card Stack */
         .card-container {
             flex-grow: 1;
             padding: 20px;
@@ -88,11 +85,10 @@
             transition: transform 0.4s ease, opacity 0.4s ease;
         }
         
-        /* Card Animations */
         .profile-card.card--out-right { transform: translateX(150%) rotate(20deg); opacity: 0; }
         .profile-card.card--out-left { transform: translateX(-150%) rotate(-20deg); opacity: 0; }
 
-        .profile-card::after { /* Gradient overlay for text readability */
+        .profile-card::after {
             content: '';
             position: absolute;
             bottom: 0;
@@ -113,10 +109,9 @@
         .status-message {
             font-size: 1.2em;
             color: #aaa;
+            text-align: center;
         }
 
-
-        /* Footer - Action Buttons */
         .action-footer {
             padding: 20px;
             border-top: 1px solid var(--border-color);
@@ -143,7 +138,6 @@
         }
         .btn--dislike { color: var(--danger-color); border-color: var(--danger-color); }
         .btn--like { color: var(--success-color); border-color: var(--success-color); }
-
     </style>
 </head>
 <body>
@@ -155,7 +149,6 @@
         </header>
 
         <main class="card-container" id="card-stack">
-            <!-- Profile cards will be injected here -->
             <div id="status-message" class="status-message">در حال بارگذاری...</div>
         </main>
 
@@ -166,41 +159,32 @@
     </div>
 
     <script>
-        // --- CONFIG ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
 
-        // --- DOM Elements ---
         const cardStack = document.getElementById('card-stack');
         const statusMessage = document.getElementById('status-message');
         const likeBtn = document.getElementById('like-btn');
         const dislikeBtn = document.getElementById('dislike-btn');
         const logoutBtn = document.getElementById('logout-btn');
 
-        // --- App State ---
         let currentUser = null;
         let usersToDisplay = [];
         let clientToken = null;
-        let isInteracting = false; // Prevents double clicks
+        let isInteracting = false;
 
-        // --- AUTHENTICATION & INITIALIZATION ---
-        
-        // This function runs automatically when the page loads
         (async () => {
-            // 1. Page Protection: Check if user is logged in
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
                 window.location.href = 'login.html';
-                return; // Stop execution
+                return;
             }
             currentUser = JSON.parse(storedUser);
 
-            // 2. Add event listeners
             likeBtn.addEventListener('click', () => handleInteraction(true));
             dislikeBtn.addEventListener('click', () => handleInteraction(false));
             logoutBtn.addEventListener('click', logout);
             
-            // 3. Start the main app logic
             await initializeApp();
         })();
 
@@ -213,7 +197,6 @@
                 const allUsers = await fetchAllUsers();
                 const seenUsers = await fetchSeenUsers();
                 
-                // Filter out the current user and users they've already seen
                 usersToDisplay = allUsers.filter(user => 
                     user.username !== currentUser.username && !seenUsers.includes(user.username)
                 );
@@ -226,13 +209,10 @@
             }
         }
 
-        // --- DATA FETCHING ---
-
         async function refreshClientToken() {
             const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
             if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
-            const data = await response.json();
-            clientToken = data.token;
+            clientToken = (await response.json()).token;
         }
 
         async function fetchAllUsers() {
@@ -244,16 +224,16 @@
 
         async function fetchSeenUsers() {
             const response = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
-            if (!response.ok) throw new Error('خطا در واکشی سوابق.');
+            if (!response.ok) return []; // If no interactions, it might fail, so return empty array
             const data = await response.json();
             return data ? Object.keys(data) : [];
         }
 
-        // --- UI & INTERACTIONS ---
-
         function renderNextCard() {
             statusMessage.style.display = 'none';
-            cardStack.innerHTML = ''; // Clear previous card
+            // Clear only the card, not the status message if it's the only thing there
+            const existingCard = cardStack.querySelector('.profile-card');
+            if (existingCard) existingCard.remove();
 
             if (usersToDisplay.length === 0) {
                 statusMessage.textContent = 'کاربر دیگری برای نمایش وجود ندارد!';
@@ -261,20 +241,12 @@
                 return;
             }
 
-            const nextUser = usersToDisplay[0]; // Get the next user from the top of the array
-            
+            const nextUser = usersToDisplay[0];
             const card = document.createElement('div');
             card.className = 'profile-card';
-            // Use a placeholder image if none is available
             card.style.backgroundImage = `url(https://i.pravatar.cc/500?u=${nextUser.username})`;
             card.dataset.username = nextUser.username;
-
-            card.innerHTML = `
-                <div class="card-info">
-                    <h2>${nextUser.displayName}, ${nextUser.age}</h2>
-                    <p>${nextUser.bio || 'بیوگرافی ثبت نشده است.'}</p>
-                </div>
-            `;
+            card.innerHTML = `<div class="card-info"><h2>${nextUser.displayName}, ${nextUser.age}</h2><p>${nextUser.bio || 'بیوگرافی ثبت نشده است.'}</p></div>`;
             cardStack.appendChild(card);
         }
 
@@ -285,36 +257,25 @@
             const card = document.querySelector('.profile-card');
             const targetUsername = card.dataset.username;
 
-            // Animate card out
             card.classList.add(liked ? 'card--out-right' : 'card--out-left');
-
-            // Save interaction to the new "interactions" collection
             saveInteraction(targetUsername, liked ? 'liked' : 'disliked');
             
-            // After animation, render the next card
             setTimeout(() => {
-                usersToDisplay.shift(); // Remove the user we just interacted with
+                usersToDisplay.shift();
                 renderNextCard();
                 isInteracting = false;
-            }, 400); // Must match CSS transition duration
+            }, 400);
         }
         
         async function saveInteraction(targetUsername, action) {
             try {
-                // We don't wait for token refresh here for faster UI, but in a real app you might.
                 const response = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}/${targetUsername}`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${clientToken}`
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}` },
                     body: JSON.stringify(action)
                 });
-                if (!response.ok) {
-                    console.error('Failed to save interaction for', targetUsername);
-                } else {
-                    console.log(`Interaction (${action}) saved for ${targetUsername}`);
-                }
+                if (!response.ok) console.error('Failed to save interaction for', targetUsername);
+                else console.log(`Interaction (${action}) saved for ${targetUsername}`);
             } catch (error) {
                 console.error("Save Interaction Error:", error);
             }
@@ -322,9 +283,8 @@
 
         function logout() {
             localStorage.removeItem('currentUser');
-            window.location.href = 'login.html';
+            window.location.href = 'index.html'; // Go to loading screen which will redirect to register
         }
-
     </script>
 </body>
 </html>
