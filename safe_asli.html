@@ -14,47 +14,78 @@
             --border-color: #dee2e6;
             --sent-bg: #e1f5fe;
             --received-bg: #f1f3f5;
-            --superlike-color: #8e44ad;
+            --text-color: #333;
+            --secondary-text-color: #777;
         }
-        *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Vazirmatn', sans-serif; margin: 0; background-color: var(--light-gray-color); color: #333; -webkit-user-select: none; user-select: none; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* حذف هایلایت آبی زشت در موبایل */
+        }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            margin: 0;
+            background-color: var(--light-gray-color);
+            color: var(--text-color);
+            -webkit-user-select: none;
+            user-select: none;
+        }
 
-        .app-container { width: 100%; max-width: 400px; height: 100vh; margin: 0 auto; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            margin: 0 auto;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
 
         /* Header */
-        .app-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .app-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         .app-header h1 { font-size: 1.5em; margin: 0; color: var(--primary-color); }
         .app-header button { background: none; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-family: 'Vazirmatn'; transition: background-color 0.2s, color 0.2s; }
         .app-header button:hover { background-color: var(--danger-color); color: white; }
 
         /* Main Content Area */
-        main { flex-grow: 1; position: relative; overflow-y: auto; }
-        .view { height: 100%; display: none; } /* Common class for all views */
-        .view.active { display: flex; flex-direction: column; }
-
-        /* Card Swiping View - IMPROVED */
-        .card-view { padding: 20px; justify-content: space-between; align-items: center; }
-        .card-container { width: 100%; flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; min-height: 400px;}
+        main {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden; /* جلوگیری از اسکرول همزمان دو صفحه */
+        }
+        
+        /* Universal View Styles */
+        .view {
+            height: 100%;
+            display: none; /* All views hidden by default */
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .view.active {
+            display: flex; /* Show active view */
+        }
+        
+        /* Card Swiping View */
+        .card-view { justify-content: center; align-items: center; position: relative; padding: 20px; }
         .profile-card { width: 100%; height: 100%; max-height: 500px; border-radius: 15px; background-size: cover; background-position: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: absolute; display: flex; flex-direction: column; justify-content: flex-end; color: white; transition: transform 0.4s ease, opacity 0.4s ease; }
         .profile-card.card--out-right { transform: translateX(150%) rotate(20deg); opacity: 0; }
         .profile-card.card--out-left { transform: translateX(-150%) rotate(-20deg); opacity: 0; }
         .profile-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); border-radius: 0 0 15px 15px; }
         .card-info { padding: 20px; z-index: 2; }
-        .card-info h2 { margin: 0 0 5px; font-size: 1.8em; }
-        .card-info p { margin: 0; opacity: 0.9; font-size: 1.1em; }
+        .card-info h2 { margin: 0 0 5px; } .card-info p { margin: 0; opacity: 0.9; }
         .status-message { font-size: 1.2em; color: #aaa; text-align: center; padding: 20px; }
-        .card-actions { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 15px 0; }
-        .action-btn { background-color: white; border: 1px solid var(--border-color); color: #aaa; width: 60px; height: 60px; border-radius: 50%; font-size: 2em; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; }
-        .action-btn:hover { transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        .action-btn.dislike { color: var(--danger-color); }
-        .action-btn.like { color: var(--success-color); }
         
         /* Chat Views */
-        .chat-view { height: 100%; }
         #conversation-list { padding: 10px 0; width: 100%; }
         .conversation-item { display: flex; align-items: center; padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
         .conversation-item:hover { background-color: var(--light-gray-color); }
-        .conversation-item img { width: 50px; height: 50px; border-radius: 50%; margin-left: 15px; object-fit: cover; }
+        .conversation-item img { width: 50px; height: 50px; border-radius: 50%; margin-left: 15px; }
         .conversation-item h3 { margin: 0; font-size: 1.1em; }
         #single-chat-view { height: 100%; display: none; flex-direction: column; width: 100%;}
         .chat-header { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid var(--border-color); }
@@ -68,21 +99,24 @@
         #message-form input { flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 20px; font-family: 'Vazirmatn'; }
         #message-form button { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-right: 10px; font-size: 1.5em; cursor: pointer; }
 
-        /* NEW: Profile View */
-        .profile-view { padding: 30px 20px; align-items: center; text-align: center; }
-        .profile-avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-color); box-shadow: 0 0 15px rgba(0,123,255,0.3); margin-bottom: 20px; }
-        .profile-name { font-size: 1.8em; font-weight: 700; margin: 0 0 5px; }
-        .profile-username { font-size: 1.1em; color: #888; margin-bottom: 25px; }
-        .profile-stats { display: flex; justify-content: space-around; width: 100%; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 15px 0; }
-        .stat-item { flex: 1; }
-        .stat-item h4 { margin: 0 0 5px; font-size: 1.5em; font-weight: 500; }
-        .stat-item p { margin: 0; color: #666; }
+        /* Profile View (New) */
+        .profile-header { padding: 25px; display: flex; flex-direction: column; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary-color); object-fit: cover; margin-bottom: 15px; }
+        .profile-name { font-size: 1.5em; font-weight: 700; margin: 0; }
+        .profile-status { font-size: 1em; color: var(--secondary-text-color); margin-top: 5px; }
+        .profile-body { padding: 15px; }
+        .profile-section-title { font-weight: 500; color: var(--primary-color); margin: 20px 10px 10px; font-size: 1em; }
+        .profile-item { display: flex; align-items: center; padding: 15px 10px; cursor: pointer; transition: background-color 0.2s; }
+        .profile-item:hover { background-color: var(--light-gray-color); }
+        .profile-item .icon { font-size: 1.5em; color: var(--secondary-text-color); margin-left: 20px; width: 30px; text-align: center; }
+        .profile-item .text-content { flex-grow: 1; }
+        .profile-item .title { font-size: 1.1em; }
+        .profile-item .subtitle { font-size: 0.9em; color: var(--secondary-text-color); }
 
         /* Main Footer Navigation */
-        .main-footer { padding: 10px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
-        .nav-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: #ccc; transition: color 0.2s, transform 0.2s; }
-        .nav-btn:hover { transform: scale(1.1); }
-        .nav-btn.active { color: var(--primary-color); }
+        .main-footer { padding: 10px 0; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
+        .nav-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: #ccc; transition: color 0.2s, transform 0.2s; display: flex; flex-direction: column; align-items: center; }
+        .nav-btn.active { color: var(--primary-color); transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -91,22 +125,16 @@
         <header class="app-header"><h1>همیار</h1><button id="logout-btn">خروج</button></header>
 
         <main>
-            <!-- View 1: Card Swiping (IMPROVED) -->
-            <div id="card-view" class="view">
-                <div id="card-container" class="card-container">
+            <!-- View 1: Card Swiping -->
+            <div id="card-view" class="view active">
+                <div class="card-view-content">
                     <div id="status-message" class="status-message">در حال بارگذاری...</div>
-                </div>
-                <div id="card-actions" class="card-actions" style="display: none;">
-                    <button class="action-btn dislike" id="dislike-btn">❌</button>
-                    <button class="action-btn like" id="like-btn">❤️</button>
                 </div>
             </div>
 
             <!-- View 2: Chat -->
             <div id="chat-view" class="view">
-                <!-- Sub-view 2a: Conversation List -->
                 <div id="conversation-list"></div>
-                <!-- Sub-view 2b: Single Chat -->
                 <div id="single-chat-view">
                     <div class="chat-header">
                         <button id="back-to-list-btn">➡️</button>
@@ -120,25 +148,59 @@
                 </div>
             </div>
             
-            <!-- NEW View 3: User Profile -->
-            <div id="profile-view" class="view active">
-                 <img id="profile-avatar" src="https://i.pravatar.cc/150" alt="پروفایل" class="profile-avatar">
-                 <h2 id="profile-name" class="profile-name">نام نمایشی</h2>
-                 <p id="profile-username" class="profile-username">@نام‌کاربری</p>
-                 <div class="profile-stats">
-                     <div class="stat-item">
-                         <h4 id="match-count">0</h4>
-                         <p>تطابق‌ها</p>
-                     </div>
-                 </div>
+            <!-- View 3: Profile (New) -->
+            <div id="profile-view" class="view">
+                <div class="profile-header">
+                    <img id="profile-avatar" src="https://i.pravatar.cc/200" alt="آواتار" class="profile-avatar">
+                    <h2 id="profile-name" class="profile-name">نام نمایشی</h2>
+                    <p id="profile-status" class="profile-status">آنلاین</p>
+                </div>
+                <div class="profile-body">
+                    <div class="profile-section-title">حساب کاربری</div>
+                    <div class="profile-item">
+                        <span class="icon">📞</span>
+                        <div class="text-content">
+                            <div class="title" id="profile-phone">+۹۸ ۹۰۰ ۰۰۰ ۰۰۰۰</div>
+                            <div class="subtitle">برای تغییر ضربه بزنید</div>
+                        </div>
+                    </div>
+                    <div class="profile-item">
+                        <span class="icon">@</span>
+                        <div class="text-content">
+                            <div class="title" id="profile-username">username</div>
+                            <div class="subtitle">نام کاربری</div>
+                        </div>
+                    </div>
+                     <div class="profile-item">
+                        <span class="icon">📝</span>
+                        <div class="text-content">
+                            <div class="title">بیوگرافی</div>
+                            <div class="subtitle">چند کلمه درباره خودتان بنویسید</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section-title">تنظیمات</div>
+                     <div class="profile-item">
+                        <span class="icon">🔔</span>
+                        <div class="text-content"><div class="title">اعلان‌ها و صداها</div></div>
+                    </div>
+                     <div class="profile-item">
+                        <span class="icon">🔒</span>
+                        <div class="text-content"><div class="title">حریم خصوصی و امنیت</div></div>
+                    </div>
+                     <div class="profile-item">
+                        <span class="icon">💾</span>
+                        <div class="text-content"><div class="title">داده‌ها و ذخیره‌سازی</div></div>
+                    </div>
+                </div>
             </div>
 
         </main>
 
         <footer class="main-footer">
             <button class="nav-btn" id="nav-chat-btn">💬</button>
-            <button class="nav-btn" id="nav-cards-btn">🃏</button>
-            <button class="nav-btn active" id="nav-profile-btn">👤</button> <!-- NEW PROFILE BUTTON -->
+            <button class="nav-btn active" id="nav-cards-btn">🃏</button>
+            <button class="nav-btn" id="nav-profile-btn">👤</button> <!-- New Button -->
         </footer>
     </div>
 
@@ -150,20 +212,15 @@
         const views = document.querySelectorAll('.view');
         const cardView = document.getElementById('card-view');
         const chatView = document.getElementById('chat-view');
-        const profileView = document.getElementById('profile-view');
+        const profileView = document.getElementById('profile-view'); // New
         
-        const cardContainer = document.getElementById('card-container');
-        const cardActions = document.getElementById('card-actions');
-        const statusMessage = document.getElementById('status-message');
-        const likeBtn = document.getElementById('like-btn');
-        const dislikeBtn = document.getElementById('dislike-btn');
-        
-        const logoutBtn = document.getElementById('logout-btn');
-        const navProfileBtn = document.getElementById('nav-profile-btn');
+        const navBtns = document.querySelectorAll('.nav-btn');
         const navCardsBtn = document.getElementById('nav-cards-btn');
         const navChatBtn = document.getElementById('nav-chat-btn');
-        const navButtons = [navProfileBtn, navCardsBtn, navChatBtn];
+        const navProfileBtn = document.getElementById('nav-profile-btn'); // New
 
+        const statusMessage = document.getElementById('status-message');
+        const logoutBtn = document.getElementById('logout-btn');
         const conversationList = document.getElementById('conversation-list');
         const singleChatView = document.getElementById('single-chat-view');
         const messagesArea = document.getElementById('messages-area');
@@ -176,8 +233,6 @@
         let currentUser = null;
         let clientToken = null;
         let allUsersData = {};
-        let usersToDisplay = [];
-        let currentCardIndex = 0;
         let matches = [];
         let activeChatPartner = null;
         let messagePollingInterval = null;
@@ -188,18 +243,14 @@
             if (!storedUser) { window.location.href = 'login.html'; return; }
             currentUser = JSON.parse(storedUser);
             
-            // Event Listeners
-            navProfileBtn.addEventListener('click', () => showView('profile'));
-            navCardsBtn.addEventListener('click', () => showView('cards'));
-            navChatBtn.addEventListener('click', () => showView('chat'));
+            navCardsBtn.addEventListener('click', () => showView('card-view'));
+            navChatBtn.addEventListener('click', () => showView('chat-view'));
+            navProfileBtn.addEventListener('click', () => showView('profile-view')); // New
             logoutBtn.addEventListener('click', logout);
             backToListBtn.addEventListener('click', showConversationList);
             messageForm.addEventListener('submit', handleSendMessage);
-            likeBtn.addEventListener('click', () => handleInteraction('liked'));
-            dislikeBtn.addEventListener('click', () => handleInteraction('disliked'));
             
             await initializeApp();
-            showView('profile'); // Start on the profile view
         })();
 
         async function initializeApp() {
@@ -208,107 +259,80 @@
                 const allUsers = await fetchAllUsers();
                 allUsers.forEach(user => { allUsersData[user.username] = user; });
                 
-                // Initialize all views
                 await initializeCardsView();
                 await initializeChatView();
-                renderProfileView(); // NEW
+                initializeProfileView(); // New
             } catch (error) {
                 console.error("Initialization Error:", error);
                 statusMessage.textContent = `خطا: ${error.message}`;
             }
         }
-        
-        // --- NEW & IMPROVED VIEW MANAGEMENT ---
-        function showView(viewName) {
-            views.forEach(v => v.classList.remove('active'));
-            navButtons.forEach(b => b.classList.remove('active'));
 
-            if (viewName === 'profile') {
-                profileView.classList.add('active');
-                navProfileBtn.classList.add('active');
-            } else if (viewName === 'cards') {
-                cardView.classList.add('active');
-                navCardsBtn.classList.add('active');
-            } else if (viewName === 'chat') {
-                chatView.classList.add('active');
-                navChatBtn.classList.add('active');
-                showConversationList();
+        // --- VIEW INITIALIZATION & MANAGEMENT ---
+
+        function showView(viewId) {
+            // Hide all views
+            views.forEach(view => view.classList.remove('active'));
+            // Deactivate all nav buttons
+            navBtns.forEach(btn => btn.classList.remove('active'));
+
+            // Show the target view
+            const targetView = document.getElementById(viewId);
+            if (targetView) targetView.classList.add('active');
+
+            // Activate the corresponding nav button
+            const targetBtn = document.getElementById(`nav-${viewId.split('-')[0]}-btn`);
+            if (targetBtn) targetBtn.classList.add('active');
+            
+            // Special logic for chat view
+            if (viewId === 'chat-view') {
+                 showConversationList();
             }
         }
 
-        // --- NEW: Profile View Logic ---
-        function renderProfileView() {
-            document.getElementById('profile-avatar').src = `https://i.pravatar.cc/150?u=${currentUser.username}`;
-            document.getElementById('profile-name').textContent = currentUser.displayName;
-            document.getElementById('profile-username').textContent = `@${currentUser.username}`;
-            document.getElementById('match-count').textContent = matches.length;
-        }
-
-        // --- IMPROVED: Cards View Logic ---
         async function initializeCardsView() {
             statusMessage.textContent = 'در حال واکشی کاربران...';
             const seenUsers = await fetchSeenUsers();
-            usersToDisplay = Object.values(allUsersData).filter(user =>
+            const usersToDisplay = Object.values(allUsersData).filter(user =>
                 user.username !== currentUser.username && !seenUsers.includes(user.username)
             );
-            currentCardIndex = 0;
-            renderNextCard();
-        }
-
-        function renderNextCard() {
-            cardContainer.innerHTML = ''; // Clear previous card
-            
-            if (currentCardIndex >= usersToDisplay.length) {
-                cardActions.style.display = 'none';
-                cardContainer.innerHTML = '<div class="status-message">کاربر جدیدی یافت نشد. بعداً دوباره سر بزنید!</div>';
-                return;
+            if (usersToDisplay.length > 0) {
+                 statusMessage.textContent = `${usersToDisplay.length} کاربر جدید یافت شد!`;
+            } else {
+                 statusMessage.textContent = 'کاربر جدیدی یافت نشد.';
             }
-
-            const user = usersToDisplay[currentCardIndex];
-            const card = document.createElement('div');
-            card.className = 'profile-card';
-            card.style.backgroundImage = `url('https://i.pravatar.cc/500?u=${user.username}')`;
-            card.innerHTML = `
-                <div class="card-info">
-                    <h2>${user.displayName}, ${user.age || 25}</h2>
-                    <p>${user.bio || 'بیوگرافی در دسترس نیست.'}</p>
-                </div>
-            `;
-            cardContainer.appendChild(card);
-            cardActions.style.display = 'flex';
         }
 
-        async function handleInteraction(action) {
-            if (currentCardIndex >= usersToDisplay.length) return;
-            const targetUser = usersToDisplay[currentCardIndex];
-            
-            // UI Feedback: Animate card out
-            const cardElement = cardContainer.querySelector('.profile-card');
-            if (cardElement) {
-                cardElement.classList.add(action === 'liked' ? 'card--out-right' : 'card--out-left');
-            }
-
-            // Save interaction to database (fire and forget for better UX)
-            fetch(`${PROXY_URL}?path=interactions/${currentUser.username}/${targetUser.username}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}` },
-                body: JSON.stringify(action)
-            });
-
-            // Move to next card after animation
-            setTimeout(() => {
-                currentCardIndex++;
-                renderNextCard();
-            }, 400);
-        }
-
-        // --- CHAT VIEW LOGIC (Mostly unchanged) ---
         async function initializeChatView() {
             await fetchMatches();
             renderConversationList();
-            renderProfileView(); // Update match count on profile page
         }
         
+        function initializeProfileView() {
+            document.getElementById('profile-avatar').src = `https://i.pravatar.cc/200?u=${currentUser.username}`;
+            document.getElementById('profile-name').textContent = currentUser.displayName;
+            document.getElementById('profile-username').textContent = currentUser.username;
+            // Phone number is not in the user object, so we'll use a placeholder.
+        }
+
+        // --- DATA FETCHING ---
+        async function refreshClientToken() {
+             const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+            if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
+            clientToken = (await response.json()).token;
+        }
+        async function fetchAllUsers() {
+            const response = await fetch(`${PROXY_URL}?path=users`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+            if (!response.ok) throw new Error('خطا در واکشی لیست کاربران.');
+            const data = await response.json();
+            return data ? Object.values(data) : [];
+        }
+        async function fetchSeenUsers() {
+             const response = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+            if (!response.ok) return [];
+            const data = await response.json();
+            return data ? Object.keys(data) : [];
+        }
         async function fetchMatches() {
             const myLikesResponse = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
             if (!myLikesResponse.ok) return;
@@ -320,12 +344,15 @@
             const matchPromises = myLikedUsers.map(async (likedUsername) => {
                 const theirLikesResponse = await fetch(`${PROXY_URL}?path=interactions/${likedUsername}/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
                 const theirAction = await theirLikesResponse.json();
-                if (theirAction === 'liked') return allUsersData[likedUsername];
+                if (theirAction === 'liked') {
+                    return allUsersData[likedUsername];
+                }
                 return null;
             });
             matches = (await Promise.all(matchPromises)).filter(Boolean);
         }
         
+        // --- UI & INTERACTIONS ---
         function renderConversationList() {
             conversationList.innerHTML = '';
             if (matches.length === 0) {
@@ -360,30 +387,6 @@
             if (messagePollingInterval) clearInterval(messagePollingInterval);
         }
 
-        async function loadMessages() { /* ... unchanged ... */ }
-        async function handleSendMessage(e) { /* ... unchanged ... */ }
-        function logout() { /* ... unchanged ... */ }
-        
-        // --- DATA FETCHING (Unchanged but included for completeness) ---
-        async function refreshClientToken() {
-             const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-            if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
-            clientToken = (await response.json()).token;
-        }
-        async function fetchAllUsers() {
-            const response = await fetch(`${PROXY_URL}?path=users`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
-            if (!response.ok) throw new Error('خطا در واکشی لیست کاربران.');
-            const data = await response.json();
-            return data ? Object.values(data) : [];
-        }
-        async function fetchSeenUsers() {
-             const response = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
-            if (!response.ok) return [];
-            const data = await response.json();
-            return data ? Object.keys(data) : [];
-        }
-        
-        // Stubs for functions that were unchanged but are required
         async function loadMessages() {
             if (!activeChatPartner) return;
             const chatId = [currentUser.username, activeChatPartner.username].sort().join('_');
@@ -392,7 +395,7 @@
             
             messagesArea.innerHTML = '';
             if (messagesData) {
-                Object.values(messagesData).sort((a, b) => b.timestamp.localeCompare(a.timestamp)).forEach(msg => {
+                Object.values(messagesData).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(msg => {
                     const msgDiv = document.createElement('div');
                     msgDiv.className = 'message ' + (msg.senderId === currentUser.username ? 'sent' : 'received');
                     msgDiv.textContent = msg.text;
@@ -400,13 +403,21 @@
                 });
             }
         }
+        
         async function handleSendMessage(e) {
             e.preventDefault();
             const text = messageInput.value.trim();
             if (!text || !activeChatPartner) return;
+            
             const chatId = [currentUser.username, activeChatPartner.username].sort().join('_');
-            const message = { senderId: currentUser.username, text: text, timestamp: new Date().toISOString() };
+            const message = {
+                senderId: currentUser.username,
+                text: text,
+                timestamp: new Date().toISOString()
+            };
+
             messageInput.value = '';
+            
             await fetch(`${PROXY_URL}?path=messages/${chatId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}` },
@@ -414,10 +425,12 @@
             });
             await loadMessages();
         }
+
         function logout() {
             localStorage.removeItem('currentUser');
-            window.location.href = 'index.html'; // Assuming you have an index/login page
+            window.location.href = 'index.html';
         }
+
     </script>
 </body>
 </html>
