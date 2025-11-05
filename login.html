@@ -44,12 +44,15 @@
                 <input type="text" id="identifier" placeholder="نام کاربری یا شماره موبایل خود را وارد کنید" required>
                 <div class="error-message" id="identifier-error"></div>
             </div>
+
             <div class="input-group">
                 <label for="password">رمز عبور</label>
                 <input type="password" id="password" placeholder="رمز عبور خود را وارد کنید" required>
                 <div class="error-message" id="password-error"></div>
             </div>
+            
             <button type="submit" id="submit-btn" disabled>ورود</button>
+
             <div id="form-status"></div>
         </form>
 
@@ -70,20 +73,45 @@
         const identifierInput = document.getElementById('identifier');
         const passwordInput = document.getElementById('password');
 
+        function showError(fieldId, message) {
+            const el = document.getElementById(`${fieldId}-error`);
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+        function hideError(fieldId) {
+            document.getElementById(`${fieldId}-error`).style.display = 'none';
+        }
+
         function validateForm() {
-            const identifierValue = identifierInput.value.trim();
-            const isMobile = /^09\d{9}$/.test(identifierValue);
-            const isUsername = /^[a-zA-Z0-9_]{3,15}$/.test(identifierValue);
-            const isIdentifierValid = identifierValue.length > 0 && (isMobile || isUsername);
-            const isPasswordValid = passwordInput.value.trim().length > 0;
-            submitBtn.disabled = !(isIdentifierValid && isPasswordValid);
+            let isIdentifierValid = true;
+            const idValue = identifierInput.value.trim();
+            if (idValue.length === 0) {
+                isIdentifierValid = false;
+            } else {
+                const isMobile = /^09\d{9}$/.test(idValue);
+                const isUsername = /^[a-zA-Z0-9_]{3,15}$/.test(idValue);
+                if (!isMobile && !isUsername) {
+                    showError('identifier', 'فرمت ورودی معتبر نیست.');
+                    isIdentifierValid = false;
+                } else {
+                    hideError('identifier');
+                }
+            }
+            
+            const isPasswordValid = passwordInput.value.length > 0;
+            const isFormValid = isIdentifierValid && isPasswordValid;
+            submitBtn.disabled = !isFormValid;
+            return isFormValid;
         }
 
         [identifierInput, passwordInput].forEach(input => input.addEventListener('input', validateForm));
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            await submitLogin();
+            if (validateForm()) {
+                await submitLogin();
+            }
         });
 
         async function submitLogin() {
@@ -101,13 +129,17 @@
                 const clientToken = tokenData.token;
 
                 let userData = null;
-                if (/^09\d{9}$/.test(identifier)) {
+                const isMobile = /^09\d{9}$/.test(identifier);
+
+                if (isMobile) {
                     const queryParams = new URLSearchParams({ orderBy: '"mobile"', equalTo: `"${identifier}"` });
                     const queryUrl = `${PROXY_URL}?path=users&${queryParams.toString()}`;
                     const response = await fetch(queryUrl, { headers: { 'Authorization': `Bearer ${clientToken}` } });
                     if (!response.ok) throw new Error('خطا در جستجوی کاربر.');
                     const result = await response.json();
-                    if (result && Object.keys(result).length > 0) userData = Object.values(result)[0];
+                    if (result && Object.keys(result).length > 0) {
+                        userData = Object.values(result)[0];
+                    }
                 } else {
                     const response = await fetch(`${PROXY_URL}?path=users/${identifier}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
                     if (!response.ok && response.status !== 404) throw new Error('خطا در واکشی اطلاعات.');
