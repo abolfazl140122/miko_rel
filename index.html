@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>همیار - در حال بارگذاری...</title>
     <style>
-        /* استفاده از یک فونت تمیز و مدرن */
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
 
-        /* تنظیمات کلی صفحه */
         body, html {
             margin: 0;
             padding: 0;
@@ -19,7 +17,6 @@
             direction: rtl;
         }
 
-        /* کانتینر اصلی با پس‌زمینه روشن و استایل کلاسیک */
         #loading-container {
             display: flex;
             flex-direction: column;
@@ -27,24 +24,21 @@
             align-items: center;
             width: 100%;
             height: 100%;
-            background-color: #f8f9fa; /* یک سفید مایل به خاکستری برای ظاهر حرفه‌ای */
-            color: #343a40; /* رنگ متن تیره برای خوانایی */
+            background-color: #f8f9fa;
+            color: #343a40;
             text-align: center;
-            transition: background-color 0.5s ease; /* انیمیشن نرم برای تغییرات */
+            transition: background-color 0.5s ease;
         }
 
-        /* استایل لوگو با سایه مناسب برای پس‌زمینه روشن */
         #logo {
-            width: 140px; /* کمی کوچک‌تر برای ظرافت بیشتر */
+            width: 140px;
             height: auto;
             margin-bottom: 30px;
             animation: pulse 2.5s infinite ease-in-out;
             border-radius: 50%;
-            /* سایه نرم و حرفه‌ای */
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
-        /* انیمیشن تنفس (پالس) برای لوگو */
         @keyframes pulse {
             0% {
                 transform: scale(0.95);
@@ -60,35 +54,31 @@
             }
         }
 
-        /* استایل پیام وضعیت */
         #status-message {
             font-size: 1.1em;
             font-weight: 500;
-            color: #495057; /* رنگ خاکستری تیره‌تر */
+            color: #495057;
         }
         
-        /* استایل پیام‌های موفق و خطا */
         #status-message.success {
-            color: #28a745; /* سبز استاندارد و زیبا */
+            color: #28a745;
             font-weight: 700;
         }
         #status-message.error {
-            color: #dc3545; /* قرمز استاندارد و واضح */
+            color: #dc3545;
             font-weight: 700;
         }
 
-        /* اسپینر (چرخنده لودینگ) با رنگ‌های جدید */
         .spinner {
-            border: 4px solid #dee2e6; /* حلقه اصلی به رنگ خاکستری روشن */
+            border: 4px solid #dee2e6;
             border-radius: 50%;
-            border-top: 4px solid #007bff; /* رنگ اصلی اسپینر (آبی) */
+            border-top: 4px solid #007bff;
             width: 35px;
             height: 35px;
             animation: spin 1s linear infinite;
             margin-top: 25px;
         }
         
-        /* انیمیشن چرخش اسپینر */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -99,20 +89,17 @@
 <body>
 
     <div id="loading-container">
-        <!-- لوگوی شما -->
-        <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/26f5a0b93e6e692276e10aa7de08d342d5402f66/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85.png" alt="لوگو اپلیکیشن همیار" id="logo">
+        <!-- ✅ لوگوی جدید با لینک مستقیم (خام) جایگزین شد -->
+        <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/c767edd7cb23c2f1a0314b935c515aa6b43c1905/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85%20%D8%A8%D8%AF%D9%88%D9%86%20%D9%BE%D8%B3%20%D8%B2%D9%85%DB%8C%D9%86%D9%87.png" alt="لوگو اپلیکیشن همیار" id="logo">
         
-        <!-- پیام وضعیت -->
         <p id="status-message">در حال آماده سازی...</p>
         
-        <!-- اسپینر -->
         <div id="spinner" class="spinner"></div>
     </div>
 
     <script>
-        // کدهای جاوااسکریپت بدون تغییر باقی می‌مانند چون عملکرد صحیح است
-
-        const PROXY_URL = 'firebase_proxy.php';
+        // ✅✅✅ مهم: آدرس کامل سرور واسط جایگزین شد
+        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
 
         const statusMessageElement = document.getElementById('status-message');
@@ -120,7 +107,6 @@
 
         async function connectToServer() {
             try {
-                // مرحله ۱: دریافت توکن دسترسی
                 statusMessageElement.innerText = 'در حال دریافت مجوز دسترسی...';
                 const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, {
                     method: 'GET',
@@ -130,6 +116,7 @@
                 });
 
                 if (!tokenResponse.ok) {
+                    // نمایش کد خطا برای درک بهتر مشکل
                     throw new Error(`خطا در دریافت توکن (${tokenResponse.status})`);
                 }
 
@@ -142,7 +129,6 @@
                 
                 console.log('توکن با موفقیت دریافت شد.');
 
-                // مرحله ۲: تست ارتباط با سرور اصلی
                 statusMessageElement.innerText = 'در حال اتصال به سرور اصلی...';
                 
                 const testResponse = await fetch(`${PROXY_URL}?path=test`, {
@@ -158,7 +144,6 @@
                 
                 console.log('ارتباط با سرور اصلی موفقیت‌آمیز بود.');
 
-                // مرحله ۳: نمایش پیام موفقیت
                 spinnerElement.style.display = 'none';
                 statusMessageElement.innerText = 'اتصال با موفقیت برقرار شد!';
                 statusMessageElement.classList.add('success');
@@ -166,6 +151,7 @@
             } catch (error) {
                 console.error('یک خطا رخ داد:', error);
                 spinnerElement.style.display = 'none';
+                // نمایش متن کامل خطا
                 statusMessageElement.innerText = `خطا در اتصال: ${error.message}`;
                 statusMessageElement.classList.add('error');
             }
