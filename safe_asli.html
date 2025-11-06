@@ -2,589 +2,302 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>همیار - صفحه اصلی</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
+        :root { --primary-color: #007bff; --success-color: #28a745; --danger-color: #e74c3c; --light-gray-color: #f8f9fa; --border-color: #dee2e6; --sent-bg: #e1f5fe; --received-bg: #f1f3f5; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Vazirmatn', sans-serif; margin: 0; background-color: var(--light-gray-color); color: #333; -webkit-user-select: none; user-select: none; }
+
+        .app-container { width: 100%; max-width: 400px; height: 100vh; margin: 0 auto; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+
+        /* Header */
+        .app-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .app-header h1 { font-size: 1.5em; margin: 0; color: var(--primary-color); }
+        .app-header button { background: none; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-family: 'Vazirmatn'; transition: background-color 0.2s, color 0.2s; }
+        .app-header button:hover { background-color: var(--danger-color); color: white; }
+
+        /* Main Content Area */
+        main { flex-grow: 1; position: relative; overflow-y: auto; }
+
+        /* Card Swiping View */
+        .card-view { height: 100%; padding: 20px; display: flex; justify-content: center; align-items: center; position: relative; }
+        .profile-card { /* ... styles from original file ... */ }
+        .status-message { font-size: 1.2em; color: #aaa; text-align: center; padding: 20px; }
         
-        :root {
-            --primary-color: #007bff;
-            --primary-light: #e6f2ff;
-            --success-color: #28a745;
-            --danger-color: #e74c3c;
-            --background-color: #f4f6f8;
-            --card-bg-color: #ffffff;
-            --border-color: #e9ecef;
-            --text-color: #343a40;
-            --secondary-text-color: #6c757d;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-        }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            margin: 0;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            -webkit-user-select: none;
-            user-select: none;
-            overscroll-behavior-y: contain; /* Prevents pull-to-refresh */
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 420px;
-            height: 100vh;
-            margin: 0 auto;
-            background-color: var(--card-bg-color);
-            display: flex;
-            flex-direction: column;
-            box-shadow: var(--shadow);
-        }
-
-        .app-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--card-bg-color);
-        }
-
-        .app-header h1 {
-            font-size: 1.6em;
-            margin: 0;
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        #logout-btn {
-            background: none;
-            border: 1px solid var(--danger-color);
-            color: var(--danger-color);
-            padding: 6px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-family: 'Vazirmatn';
-            transition: all 0.2s ease;
-        }
-        #logout-btn:hover {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        main {
-            flex-grow: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .view {
-            height: 100%;
-            display: none;
-            flex-direction: column;
-            overflow-y: auto;
-            background-color: var(--background-color);
-            padding-bottom: 70px; /* Space for footer */
-        }
-        .view.active {
-            display: flex;
-        }
-        .hidden {
-            display: none !important;
-        }
-
-        /* Profile View */
-        .profile-header {
-            background: linear-gradient(to bottom, var(--primary-color), #0056b3);
-            color: white;
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-        #edit-profile-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid white;
-            color: white;
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-family: 'Vazirmatn';
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        #edit-profile-btn:hover {
-             background: rgba(255, 255, 255, 0.3);
-        }
-        .profile-avatar {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            border: 4px solid white;
-            object-fit: cover;
-            margin-bottom: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        #profile-name-view, .profile-edit-input {
-            font-size: 1.8em;
-            font-weight: 700;
-            margin: 0;
-            border: none;
-            text-align: center;
-            background-color: transparent;
-            font-family: 'Vazirmatn';
-            color: white;
-        }
-        .profile-edit-input {
-            border-bottom: 2px solid rgba(255, 255, 255, 0.7);
-            width: 80%;
-            padding: 5px;
-        }
-        .profile-edit-input::placeholder { color: rgba(255,255,255,0.7); }
-
-        #profile-status {
-            font-size: 1em;
-            color: #d1eaff;
-            margin-top: 8px;
-            background-color: rgba(0,0,0,0.1);
-            padding: 2px 10px;
-            border-radius: 12px;
-        }
-
-        .profile-body {
-            padding: 10px;
-        }
-        .profile-section {
-            background-color: var(--card-bg-color);
-            border-radius: 12px;
-            margin-bottom: 15px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-        .profile-section-title {
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 20px 15px 10px;
-            font-size: 1.1em;
-        }
-        .profile-item {
-            display: flex;
-            align-items: center;
-            padding: 18px 15px;
-            transition: background-color 0.2s;
+        /* Chat Views */
+        .chat-view { height: 100%; display: none; /* Hidden by default */ flex-direction: column; }
+        
+        /* --- NEW: Search Container --- */
+        #search-container {
+            padding: 10px 15px;
             border-bottom: 1px solid var(--border-color);
         }
-        .profile-item:last-child {
-            border-bottom: none;
-        }
-        .profile-item[data-action] { cursor: pointer; }
-        .profile-item[data-action]:hover { background-color: #f8f9fa; }
-
-        .profile-item .icon {
-            font-size: 1.6em;
-            color: var(--primary-color);
-            margin-left: 20px;
-            width: 30px;
-            text-align: center;
-        }
-        .profile-item .text-content { flex-grow: 1; }
-        .profile-item .title { font-size: 1.1em; color: var(--text-color); }
-        .profile-item .subtitle { font-size: 0.9em; color: var(--secondary-text-color); }
-
-        .profile-edit-controls {
-            padding: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        .profile-edit-controls button {
-            padding: 10px 25px;
+        #search-user-input {
+            width: 100%;
+            padding: 10px 15px;
             border-radius: 20px;
+            border: 1px solid var(--border-color);
             font-family: 'Vazirmatn';
-            cursor: pointer;
-            border: 1px solid;
             font-size: 1em;
-            transition: all 0.2s ease;
         }
-        #save-profile-btn {
-            background-color: var(--success-color);
-            color: white;
-            border-color: var(--success-color);
+        #search-results {
+            padding: 0 10px;
         }
-        #cancel-edit-btn {
-            background-color: transparent;
-            color: var(--danger-color);
-            border-color: var(--danger-color);
-        }
-        #save-profile-btn:hover { filter: brightness(1.1); }
-        #cancel-edit-btn:hover { background-color: var(--danger-color); color: white; }
-        
-        /* Chat View */
-        #chat-view .conversation-list {
-            padding: 10px;
-            width: 100%;
-        }
-        .conversation-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            cursor: pointer;
-            border-radius: 12px;
-            background-color: var(--card-bg-color);
-            margin-bottom: 10px;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .conversation-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        }
-        .conversation-item img {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            margin-left: 15px;
-            object-fit: cover;
-        }
-        .conversation-item .details { flex-grow: 1; }
-        .conversation-item h3 { margin: 0; font-size: 1.1em; font-weight: 500; }
-        .conversation-item p { margin: 4px 0 0; font-size: 0.9em; color: var(--secondary-text-color); }
-        .no-messages {
-            text-align: center;
-            margin-top: 50px;
-            color: var(--secondary-text-color);
-        }
+        /* --- END NEW --- */
 
-        /* Footer Navigation */
-        .main-footer {
-            padding: 10px 0;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            background-color: var(--card-bg-color);
-        }
-        .nav-btn {
-            background: none;
-            border: none;
-            font-size: 1.8em;
-            cursor: pointer;
-            color: #b0bec5;
-            transition: all 0.2s ease-in-out;
-        }
-        .nav-btn.active {
-            color: var(--primary-color);
-            transform: scale(1.2) translateY(-3px);
-        }
+
+        /* Conversation List */
+        #conversation-list { padding: 10px 0; }
+        .conversation-item { display: flex; align-items: center; padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
+        .conversation-item:hover { background-color: var(--light-gray-color); }
+        .conversation-item img { width: 50px; height: 50px; border-radius: 50%; margin-left: 15px; }
+        .conversation-item h3 { margin: 0; font-size: 1.1em; }
+
+        /* Main Footer Navigation */
+        .main-footer { padding: 10px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
+        .nav-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: #ccc; transition: color 0.2s; }
+        .nav-btn.active { color: var(--primary-color); }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <header class="app-header">
-            <h1>همیار</h1>
-            <button id="logout-btn">خروج</button>
-        </header>
+        <header class="app-header"><h1>همیار</h1><button id="logout-btn">خروج</button></header>
 
         <main>
-            <!-- Card View -->
-            <div id="card-view" class="view active">
-                 <p style="text-align: center; margin-top: 50px; color: var(--secondary-text-color);">صفحه کارت‌ها (دوست‌یابی)</p>
+            <!-- View 1: Card Swiping -->
+            <div id="card-view" class="card-view">
+                <div id="status-message" class="status-message">در حال بارگذاری...</div>
             </div>
-            
-            <!-- Chat List View -->
-            <div id="chat-view" class="view">
-                 <div class="conversation-list" id="conversation-list">
-                    <!-- Data will be loaded by JS -->
-                 </div>
-                 <div id="no-messages-placeholder" class="no-messages hidden">
-                    <h3>شما هنوز هیچ پیامی ندارید</h3>
-                    <p>وقتی گفتگویی را شروع کنید، اینجا نمایش داده می‌شود.</p>
-                 </div>
-            </div>
-            
-            <!-- Profile View -->
-            <div id="profile-view" class="view">
-                <div class="profile-header">
-                    <button id="edit-profile-btn">ویرایش</button>
-                    <img id="profile-avatar" src="https://i.pravatar.cc/200" alt="آواتار" class="profile-avatar">
-                    
-                    <span id="profile-name-view">...</span>
-                    <input type="text" id="profile-name-edit" class="profile-edit-input hidden" placeholder="نام نمایشی">
-                    
-                    <p id="profile-status">آنلاین</p>
-                </div>
 
-                <div class="profile-body">
-                    <div id="edit-controls" class="profile-edit-controls hidden">
-                        <button id="save-profile-btn">ذخیره</button>
-                        <button id="cancel-edit-btn">انصراف</button>
-                    </div>
-                    
-                    <div class="profile-section">
-                        <div class="profile-item">
-                            <span class="icon">📞</span>
-                            <div class="text-content">
-                                <div class="title" id="profile-phone">...</div>
-                                <div class="subtitle">شماره تلفن (غیرقابل تغییر)</div>
-                            </div>
-                        </div>
-                        <div class="profile-item">
-                            <span class="icon">@</span>
-                            <div class="text-content">
-                                <span class="title" id="profile-username-view">...</span>
-                                <input type="text" id="profile-username-edit" class="profile-edit-input hidden" placeholder="نام کاربری">
-                                <div class="subtitle">نام کاربری</div>
-                            </div>
-                        </div>
-                         <div class="profile-item">
-                            <span class="icon">📝</span>
-                            <div class="text-content">
-                                <span class="title" id="profile-bio-view">...</span>
-                                 <input type="text" id="profile-bio-edit" class="profile-edit-input hidden" placeholder="بیوگرافی جدید...">
-                                <div class="subtitle">بیوگرافی</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="profile-section-title">تنظیمات</div>
-                    <div class="profile-section">
-                         <div class="profile-item" data-action="notifications">
-                            <span class="icon">🔔</span>
-                            <div class="text-content"><div class="title">اعلان‌ها و صداها</div></div>
-                        </div>
-                         <div class="profile-item" data-action="privacy">
-                            <span class="icon">🔒</span>
-                            <div class="text-content"><div class="title">حریم خصوصی و امنیت</div></div>
-                        </div>
-                         <div class="profile-item" data-action="data">
-                            <span class="icon">💾</span>
-                            <div class="text-content"><div class="title">داده‌ها و ذخیره‌سازی</div></div>
-                        </div>
-                    </div>
+            <!-- View 2: Chat -->
+            <div id="chat-view" class="chat-view">
+                <!-- NEW: Search area added here -->
+                <div id="search-container">
+                    <input type="text" id="search-user-input" placeholder="جستجوی کاربر بر اساس نام کاربری...">
                 </div>
+                <div id="search-results"></div>
+                
+                <!-- Sub-view 2a: Conversation List (for matches) -->
+                <div id="conversation-list"></div>
             </div>
         </main>
 
         <footer class="main-footer">
-            <button class="nav-btn" id="nav-profile-btn">👤</button>
-            <button class="nav-btn active" id="nav-chat-btn">💬</button>
-            <button class="nav-btn" id="nav-cards-btn">🃏</button>
+            <button class="nav-btn" id="nav-chat-btn">💬</button>
+            <button class="nav-btn active" id="nav-cards-btn">🃏</button>
         </footer>
     </div>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- PROXY & SECRET ---
-            const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-            const SHARED_SECRET = 'miko1234';
+        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        const SHARED_SECRET = 'miko1234';
+        
+        // --- DOM Elements ---
+        const cardView = document.getElementById('card-view');
+        const chatView = document.getElementById('chat-view');
+        const statusMessage = document.getElementById('status-message');
+        const logoutBtn = document.getElementById('logout-btn');
+        const navCardsBtn = document.getElementById('nav-cards-btn');
+        const navChatBtn = document.getElementById('nav-chat-btn');
+        const conversationList = document.getElementById('conversation-list');
+        
+        // --- NEW: Search Elements ---
+        const searchUserInput = document.getElementById('search-user-input');
+        const searchResults = document.getElementById('search-results');
+
+        // --- App State ---
+        let currentUser = null;
+        let clientToken = null;
+        let allUsersData = {}; // Store all users by username for quick lookup
+        let matches = []; // List of users we've matched with
+
+        // --- AUTH & INIT ---
+        (async () => {
+            const storedUser = localStorage.getItem('currentUser');
+            if (!storedUser) { window.location.href = 'login.html'; return; }
+            currentUser = JSON.parse(storedUser);
             
-            // --- DOM Elements ---
-            const views = document.querySelectorAll('.view');
-            const navBtns = document.querySelectorAll('.nav-btn');
-            const logoutBtn = document.getElementById('logout-btn');
-
-            // Profile View Elements
-            const editProfileBtn = document.getElementById('edit-profile-btn');
-            const saveProfileBtn = document.getElementById('save-profile-btn');
-            const cancelEditBtn = document.getElementById('cancel-edit-btn');
-            const editControls = document.getElementById('edit-controls');
+            navCardsBtn.addEventListener('click', () => showView('cards'));
+            navChatBtn.addEventListener('click', () => showView('chat'));
+            logoutBtn.addEventListener('click', logout);
             
-            const profileNameView = document.getElementById('profile-name-view');
-            const profileNameEdit = document.getElementById('profile-name-edit');
-            const profileUsernameView = document.getElementById('profile-username-view');
-            const profileUsernameEdit = document.getElementById('profile-username-edit');
-            const profileBioView = document.getElementById('profile-bio-view');
-            const profileBioEdit = document.getElementById('profile-bio-edit');
-            const profilePhone = document.getElementById('profile-phone');
-            const profileAvatar = document.getElementById('profile-avatar');
-
-            // Chat View Elements
-            const conversationList = document.getElementById('conversation-list');
-            const noMessagesPlaceholder = document.getElementById('no-messages-placeholder');
-
-            // --- App State ---
-            let currentUser = null;
-            let clientToken = null;
-
-            // --- AUTH & INIT ---
-            (async () => {
-                const storedUser = localStorage.getItem('currentUser');
-                if (!storedUser) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-                currentUser = JSON.parse(storedUser);
-                
-                setupEventListeners();
-                await initializeApp();
-            })();
-
-            function setupEventListeners() {
-                navBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const viewId = btn.id.replace('nav-', '').replace('-btn', '-view');
-                        showView(viewId);
-                    });
-                });
-                
-                logoutBtn.addEventListener('click', logout);
-                editProfileBtn.addEventListener('click', () => toggleEditMode(true));
-                cancelEditBtn.addEventListener('click', () => toggleEditMode(false));
-                saveProfileBtn.addEventListener('click', handleProfileSave);
-            }
-
-            async function initializeApp() {
-                try {
-                    await refreshClientToken();
-                    // Fetch the latest user data from the server
-                    const fullUserData = await fetchUserData(currentUser.username);
-                    if (fullUserData) {
-                        currentUser = fullUserData;
-                        localStorage.setItem('currentUser', JSON.stringify(currentUser)); // Update storage
-                    }
-
-                    initializeProfileView();
-                    initializeChatView();
-                    // Set the initial view based on the active button
-                    const activeNavBtn = document.querySelector('.nav-btn.active');
-                    if (activeNavBtn) {
-                        const initialViewId = activeNavBtn.id.replace('nav-', '').replace('-btn', '-view');
-                        showView(initialViewId);
-                    }
-
-                } catch (error) {
-                    console.error("Initialization Error:", error);
-                    alert(`خطا در بارگذاری اولیه برنامه: ${error.message}`);
-                }
-            }
+            // --- NEW: Event Listener for Search Input ---
+            searchUserInput.addEventListener('input', handleUserSearch);
             
-            function showView(viewId) {
-                views.forEach(view => view.classList.remove('active'));
-                navBtns.forEach(btn => btn.classList.remove('active'));
+            await initializeApp();
+        })();
+
+        async function initializeApp() {
+            try {
+                await refreshClientToken();
+                // We already fetch all users, which is perfect for our search feature
+                const allUsers = await fetchAllUsers();
+                allUsers.forEach(user => { allUsersData[user.username] = user; });
                 
-                const targetView = document.getElementById(viewId);
-                const targetNav = document.getElementById(`nav-${viewId.split('-')[0]}-btn`);
-
-                if (targetView) targetView.classList.add('active');
-                if (targetNav) targetNav.classList.add('active');
+                await initializeCardsView();
+                await initializeChatView();
+            } catch (error) {
+                console.error("Initialization Error:", error);
+                statusMessage.textContent = `خطا: ${error.message}`;
             }
+        }
 
-            // --- PROFILE VIEW LOGIC ---
-            function initializeProfileView() {
-                profileAvatar.src = `https://i.pravatar.cc/200?u=${currentUser.username}`;
-                profileNameView.textContent = currentUser.displayName || 'نام نمایشی ثبت نشده';
-                profileUsernameView.textContent = currentUser.username || 'نام کاربری';
-                // ** نمایش کامل شماره تلفن **
-                profilePhone.textContent = currentUser.phone || 'شماره ثبت نشده';
-                profileBioView.textContent = currentUser.bio || 'چند کلمه درباره خودتان بنویسید.';
+        // --- VIEW INITIALIZATION ---
+        async function initializeCardsView() {
+            // ... (No changes here)
+             statusMessage.textContent = 'در حال واکشی کاربران...';
+            const seenUsers = await fetchSeenUsers();
+            const usersToDisplay = Object.values(allUsersData).filter(user =>
+                user.username !== currentUser.username && !seenUsers.includes(user.username)
+            );
+            if (usersToDisplay.length > 0) {
+                 statusMessage.textContent = `${usersToDisplay.length} کاربر جدید یافت شد!`;
+            } else {
+                 statusMessage.textContent = 'کاربر جدیدی یافت نشد.';
             }
+        }
 
-            function toggleEditMode(isEditing) {
-                [profileNameView, profileUsernameView, profileBioView].forEach(el => el.classList.toggle('hidden', isEditing));
-                [profileNameEdit, profileUsernameEdit, profileBioEdit].forEach(el => el.classList.toggle('hidden', !isEditing));
-                editControls.classList.toggle('hidden', !isEditing);
-                editProfileBtn.classList.toggle('hidden', isEditing);
+        async function initializeChatView() {
+            await fetchMatches();
+            renderConversationList();
+        }
 
-                if (isEditing) {
-                    profileNameEdit.value = currentUser.displayName || '';
-                    profileUsernameEdit.value = currentUser.username || '';
-                    profileBioEdit.value = currentUser.bio || '';
-                }
-            }
+        // --- DATA FETCHING ---
+        async function refreshClientToken() {
+             const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+            if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
+            clientToken = (await response.json()).token;
+        }
+        async function fetchAllUsers() {
+            const response = await fetch(`${PROXY_URL}?path=users`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+            if (!response.ok) throw new Error('خطا در واکشی لیست کاربران.');
+            const data = await response.json();
+            return data ? Object.values(data) : [];
+        }
+        async function fetchSeenUsers() {
+             const response = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+            if (!response.ok) return [];
+            const data = await response.json();
+            return data ? Object.keys(data) : [];
+        }
 
-            async function handleProfileSave() {
-                const updatedData = {
-                    displayName: profileNameEdit.value.trim(),
-                    username: profileUsernameEdit.value.trim(),
-                    bio: profileBioEdit.value.trim(),
-                };
+        async function fetchMatches() {
+            // ... (No changes here)
+            const myLikesResponse = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+            if (!myLikesResponse.ok) return;
+            const myLikesData = await myLikesResponse.json();
+            if (!myLikesData) return;
 
-                if (!updatedData.displayName || !updatedData.username) {
-                    alert('نام نمایشی و نام کاربری نمی‌توانند خالی باشند.');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`${PROXY_URL}?path=users/${currentUser.username}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}` },
-                        body: JSON.stringify(updatedData)
-                    });
-                    if (!response.ok) throw new Error('خطا در ذخیره‌سازی اطلاعات.');
-                    
-                    currentUser = { ...currentUser, ...updatedData };
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-                    initializeProfileView();
-                    toggleEditMode(false);
-                    alert('پروفایل با موفقیت به‌روزرسانی شد!');
-
-                } catch (error) {
-                    alert(error.message);
-                }
-            }
+            const myLikedUsers = Object.keys(myLikesData).filter(key => myLikesData[key] === 'liked');
             
-            // --- CHAT VIEW LOGIC ---
-            function initializeChatView() {
-                // This is a placeholder. You need to fetch actual chat data from your server.
-                const dummyConversations = [
-                    { name: 'پشتیبانی همیار', lastMessage: 'سلام! چطور میتونم کمکتون کنم؟', avatar: 'https://i.pravatar.cc/150?u=support', type: 'PV' },
-                    { name: 'دورهمی دوستانه', lastMessage: 'علی: بچه‌ها آخر هفته برنامه چیه؟', avatar: 'https://i.pravatar.cc/150?u=group1', type: 'Group' },
-                    { name: 'کانال اطلاع‌رسانی', lastMessage: 'آپدیت جدید اپلیکیشن منتشر شد!', avatar: 'https://i.pravatar.cc/150?u=channel', type: 'Channel' }
-                ];
-                
-                // Set to true to see the "no messages" placeholder
-                const noMessages = false; 
-                
-                if (noMessages || dummyConversations.length === 0) {
-                    noMessagesPlaceholder.classList.remove('hidden');
-                    conversationList.classList.add('hidden');
-                } else {
-                    noMessagesPlaceholder.classList.add('hidden');
-                    conversationList.classList.remove('hidden');
-                    conversationList.innerHTML = dummyConversations.map(convo => `
-                        <div class="conversation-item">
-                            <img src="${convo.avatar}" alt="${convo.name}">
-                            <div class="details">
-                                <h3>${convo.name}</h3>
-                                <p>${convo.lastMessage}</p>
-                            </div>
-                        </div>
-                    `).join('');
+            const matchPromises = myLikedUsers.map(async (likedUsername) => {
+                const theirLikesResponse = await fetch(`${PROXY_URL}?path=interactions/${likedUsername}/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+                const theirAction = await theirLikesResponse.json();
+                if (theirAction === 'liked') {
+                    return allUsersData[likedUsername];
                 }
+                return null;
+            });
+            matches = (await Promise.all(matchPromises)).filter(Boolean);
+        }
+        
+        // --- UI & INTERACTIONS ---
+        function showView(viewName) {
+            if (viewName === 'cards') {
+                cardView.style.display = 'flex';
+                chatView.style.display = 'none';
+                navCardsBtn.classList.add('active');
+                navChatBtn.classList.remove('active');
+            } else {
+                cardView.style.display = 'none';
+                chatView.style.display = 'flex';
+                navCardsBtn.classList.remove('active');
+                navChatBtn.classList.add('active');
+                // --- NEW: Reset search when switching to chat view ---
+                searchUserInput.value = '';
+                searchResults.innerHTML = '';
+                conversationList.style.display = 'block'; // Show match list by default
+            }
+        }
+
+        function renderConversationList() {
+            conversationList.innerHTML = '';
+            const listTitle = document.createElement('h3');
+            listTitle.textContent = 'گفتگوهای شما';
+            listTitle.style.padding = '10px 15px 0';
+            listTitle.style.color = '#777';
+            conversationList.appendChild(listTitle);
+
+            if (matches.length === 0) {
+                conversationList.insertAdjacentHTML('beforeend', '<div class="status-message">هنوز هیچ تطابقی نداری!</div>');
+                return;
+            }
+            matches.forEach(user => {
+                const item = document.createElement('a'); // Using <a> tag for direct navigation
+                item.href = `pivi.html?with=${user.username}`;
+                item.className = 'conversation-item';
+                item.style.textDecoration = 'none';
+                item.style.color = 'inherit';
+                item.dataset.username = user.username;
+                item.innerHTML = `<img src="https://i.pravatar.cc/100?u=${user.username}" alt="${user.displayName}"><h3>${user.displayName}</h3>`;
+                conversationList.appendChild(item);
+            });
+        }
+
+        // --- NEW: Search Handling Functions ---
+        function handleUserSearch(e) {
+            const query = e.target.value.trim().toLowerCase();
+            searchResults.innerHTML = '';
+
+            if (query.length < 2) {
+                conversationList.style.display = 'block'; // If search is empty, show matches
+                return;
             }
 
-            // --- API & HELPER FUNCTIONS ---
-            async function refreshClientToken() {
-                const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-                if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
-                const data = await response.json();
-                clientToken = data.token;
-            }
-            
-            async function fetchUserData(username) {
-                const response = await fetch(`${PROXY_URL}?path=users/${username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
-                if (!response.ok) throw new Error('خطا در واکشی اطلاعات کاربر.');
-                return await response.json();
-            }
+            conversationList.style.display = 'none'; // Hide matches while searching
 
-            function logout() {
-                localStorage.removeItem('currentUser');
-                window.location.href = 'index.html';
+            const results = Object.values(allUsersData).filter(user => 
+                user.username.toLowerCase().includes(query) && user.username !== currentUser.username
+            );
+
+            if (results.length > 0) {
+                renderSearchResults(results);
+            } else {
+                searchResults.innerHTML = '<div class="status-message">کاربری با این مشخصات یافت نشد.</div>';
             }
-        });
+        }
+
+        function renderSearchResults(users) {
+            users.forEach(user => {
+                // We use an <a> tag to make it a clickable link to the pivi.html page
+                const item = document.createElement('a');
+                item.href = `pivi.html?with=${user.username}`;
+                // Re-using the same class for consistent styling
+                item.className = 'conversation-item'; 
+                item.style.textDecoration = 'none';
+                item.style.color = 'inherit';
+                
+                item.innerHTML = `
+                    <img src="https://i.pravatar.cc/100?u=${user.username}" alt="${user.displayName}">
+                    <div>
+                        <h3>${user.displayName}</h3>
+                        <p style="font-size: 0.9em; color: #888; margin:0;">@${user.username}</p>
+                    </div>
+                `;
+                searchResults.appendChild(item);
+            });
+        }
+        // --- END NEW FUNCTIONS ---
+
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html'; // Assuming you have an index/login page
+        }
+
     </script>
 </body>
 </html>
