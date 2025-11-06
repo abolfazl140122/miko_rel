@@ -13,9 +13,9 @@
 
         /* --- متغیرهای اصلی تم دارک --- */
         :root {
-            --background-color: #0F0F0F;
+            --background-color: #121212;
             --primary-color: #0095FF;
-            --secondary-color: #1A1A1A;
+            --secondary-color: #1E1E1E;
             --message-sent-bg: #1E88E5;
             --message-received-bg: #2C2C2C;
             --border-color: #30363d;
@@ -23,6 +23,7 @@
             --text-secondary: #8b949e;
             --online-indicator: #28a745;
             --typing-indicator: #AAAAAA;
+            --shadow-color: rgba(0, 0, 0, 0.2);
         }
 
         /* --- تنظیمات پایه و ریست --- */
@@ -35,10 +36,47 @@
         body {
             font-family: 'Vazirmatn', sans-serif;
             background-color: var(--background-color);
+            /* گرادیان ظریف برای زیبایی بیشتر */
+            background-image: radial-gradient(circle at top, #1a1a1a, #121212);
             color: var(--text-primary);
             overflow: hidden;
             -webkit-user-select: none;
             user-select: none;
+        }
+
+        /* --- لودر تمام‌صفحه --- */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+        .loading-dots {
+            display: flex;
+            align-items: center;
+        }
+        .loading-dots div {
+            width: 12px;
+            height: 12px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin: 0 4px;
+            animation: dot-flashing 1.2s infinite linear alternate;
+        }
+        .loading-dots div:nth-child(2) { animation-delay: 0.4s; }
+        .loading-dots div:nth-child(3) { animation-delay: 0.8s; }
+
+        @keyframes dot-flashing {
+            0% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.2; transform: scale(0.8); }
         }
 
         /* --- ساختار اصلی اپلیکیشن --- */
@@ -47,11 +85,17 @@
             max-width: 420px;
             height: 100vh;
             margin: 0 auto;
-            background-color: var(--background-color);
+            background-color: transparent; /* پس زمینه اصلی از body گرفته می‌شود */
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 25px rgba(0,0,0,0.2);
+            /* پنهان بودن اولیه برای انیمیشن ورود */
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
+        .app-container.visible {
+            opacity: 1;
+        }
+
 
         /* --- هدر صفحه چت --- */
         .chat-header {
@@ -61,48 +105,18 @@
             align-items: center;
             background-color: var(--secondary-color);
             flex-shrink: 0;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            position: relative;
+            z-index: 10;
         }
-        .chat-header .back-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-primary);
-            padding: 5px;
-        }
-        .chat-header .partner-info {
-            display: flex;
-            align-items: center;
-            margin-right: 15px; /* RTL margin */
-            flex-grow: 1;
-        }
-        .partner-info img {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            margin-left: 12px; /* RTL margin */
-            object-fit: cover;
-        }
-        .partner-details h2 {
-            font-size: 1.1em;
-            font-weight: 500;
-        }
-        .partner-details .status {
-            font-size: 0.8em;
-            color: var(--online-indicator);
-        }
-        .partner-details .status.typing {
-            color: var(--typing-indicator);
-            font-style: italic;
-        }
-        .options-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-secondary);
-        }
-        svg {
-            vertical-align: middle;
-        }
+        .chat-header .back-btn { background: none; border: none; cursor: pointer; color: var(--text-primary); padding: 5px; }
+        .chat-header .partner-info { display: flex; align-items: center; margin-right: 15px; flex-grow: 1; }
+        .partner-info img { width: 45px; height: 45px; border-radius: 50%; margin-left: 12px; object-fit: cover; }
+        .partner-details h2 { font-size: 1.1em; font-weight: 500; }
+        .partner-details .status { font-size: 0.8em; color: var(--online-indicator); }
+        .partner-details .status.typing { color: var(--typing-indicator); font-style: italic; }
+        .options-btn { background: none; border: none; cursor: pointer; color: var(--text-secondary); }
+        svg { vertical-align: middle; }
 
         /* --- بخش اصلی نمایش پیام‌ها --- */
         main {
@@ -113,30 +127,27 @@
             flex-direction: column-reverse; /* Important for keeping view at the bottom */
             scroll-behavior: smooth;
         }
-        #messages-area {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        #messages-area { display: flex; flex-direction: column; gap: 12px; }
 
         /* --- استایل حباب‌های پیام --- */
         .message {
             max-width: 75%;
             padding: 10px 15px;
-            border-radius: 18px;
+            border-radius: 20px;
             word-wrap: break-word;
             position: relative;
-            animation: fadeIn 0.3s ease;
+            animation: message-pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
         .message.sent {
             background-color: var(--message-sent-bg);
-            align-self: flex-start; /* RTL: flex-start is left */
-            border-bottom-left-radius: 5px;
+            align-self: flex-start; /* RTL: left */
+            border-bottom-left-radius: 6px;
         }
         .message.received {
             background-color: var(--message-received-bg);
-            align-self: flex-end; /* RTL: flex-end is right */
-            border-bottom-right-radius: 5px;
+            align-self: flex-end; /* RTL: right */
+            border-bottom-right-radius: 6px;
         }
         .message .timestamp {
             font-size: 0.7em;
@@ -144,86 +155,59 @@
             margin-top: 5px;
             text-align: left; /* Always LTR for time */
         }
-        .message.deleted .text {
-            font-style: italic;
-            color: var(--text-secondary);
-        }
+        .message.deleted .text { font-style: italic; color: var(--text-secondary); }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes message-pop-in {
+            from { opacity: 0; transform: scale(0.8) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         /* --- فرم ورودی پیام --- */
         #message-form {
             display: flex;
-            padding: 10px;
+            padding: 10px 15px;
             border-top: 1px solid var(--border-color);
             background: var(--secondary-color);
             align-items: center;
             flex-shrink: 0;
+            box-shadow: 0 -2px 10px var(--shadow-color);
         }
         #message-form .icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-secondary);
-            padding: 8px;
+            background: none; border: none; cursor: pointer; color: var(--text-secondary); padding: 8px;
+            transition: color 0.2s, transform 0.2s;
         }
+        #message-form .icon-btn:hover { color: var(--primary-color); transform: scale(1.1); }
         #message-form input {
-            flex-grow: 1;
-            padding: 12px 15px;
-            border: none;
-            border-radius: 20px;
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: var(--message-received-bg);
-            color: var(--text-primary);
-            outline: none;
-            transition: box-shadow 0.2s;
+            flex-grow: 1; padding: 12px 18px; border: none; border-radius: 22px; font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--background-color); color: var(--text-primary); outline: none; transition: box-shadow 0.2s;
         }
-        #message-form input:focus {
-            box-shadow: 0 0 0 2px var(--primary-color);
-        }
+        #message-form input:focus { box-shadow: 0 0 0 2px var(--primary-color); }
         #message-form button[type="submit"] {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            margin-right: 10px;
-            font-size: 1.5em;
-            cursor: pointer;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 45px; height: 45px;
+            margin-right: 10px; font-size: 1.5em; cursor: pointer; flex-shrink: 0; display: flex; align-items: center;
+            justify-content: center; transition: background-color 0.2s, transform 0.2s;
         }
+        #message-form button[type="submit"]:hover { background-color: #007acc; transform: scale(1.05); }
 
         /* --- وضعیت بارگذاری و خطا --- */
         .status-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            color: var(--text-secondary);
-            text-align: center;
+            display: flex; justify-content: center; align-items: center; height: 100%; color: var(--text-secondary); text-align: center;
         }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border-color);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <!-- لودر تمام صفحه -->
+    <div id="loading-overlay">
+        <div class="loading-dots">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+
+    <div class="app-container" id="app-container">
         <!-- هدر صفحه چت -->
         <header class="chat-header">
             <button class="back-btn" aria-label="بازگشت" onclick="history.back()">
@@ -264,38 +248,15 @@
     </div>
 
     <script>
-        /**
-         * ----------------------------------------------------------------
-         * # CHANGELOG (تغییرات این نسخه):
-         * ----------------------------------------------------------------
-         * 1.  **مدیریت چرخه عمر صفحه:** با استفاده از `pageshow` و `pagehide`، مشکل مقداردهی اولیه تکراری هنگام استفاده از دکمه‌های back/forward مرورگر (BFcache) حل شد.
-         * 2.  **محافظت از مقداردهی اولیه:** یک گارد (window.piviAppInitialized) اضافه شد تا اطمینان حاصل شود که تابع `initializeApp` تنها یک بار اجرا می‌شود.
-         * 3.  **مدیریت هوشمند Polling:** دریافت پیام‌ها هنگام غیرفعال بودن تب (document.hidden) متوقف و پس از فعال شدن مجدد، از سر گرفته می‌شود.
-         * 4.  **پشتیبانی از پارامترهای چندگانه URL:** کد به صورت خودکار پارامترهای 'uid' و 'with' را برای یافتن کاربر مقصد می‌پذیرد.
-         * 5.  **بهینه‌سازی رندر پیام:** از رندر مجدد کامل لیست پیام‌ها در صورتی که تغییری در داده‌ها وجود نداشته باشد، جلوگیری می‌شود.
-         * 6.  **مدیریت بهتر خطا:** پیام‌های خطای واضح‌تری برای کاربر در شرایط مختلف (عدم یافتن کاربر، خطای شبکه) نمایش داده می‌شود.
-         * 7.  **پاک‌سازی منابع:** Intervalها و Event Listenerها هنگام خروج از صفحه پاک‌سازی می‌شوند.
-         *
-         * ----------------------------------------------------------------
-         * # TEST PLAN (راهنمای تست):
-         * ----------------------------------------------------------------
-         * 1.  **تست دریافت توکن (cURL):**
-         *     curl -i -H "X-Proxy-Secret: miko1234" "https://miko.freehost.io/firebase_proxy.php?auth=token"
-         * 2.  **تست دریافت پیام‌ها (cURL):**
-         *     curl -H "Authorization: Bearer <TOKEN>" -H "X-User-Username: <YOUR_USERNAME>" "https://miko.freehost.io/firebase_proxy.php?path=pivi_chats/<CHAT_ID>/messages"
-         * 3.  **تست BFcache در مرورگر:**
-         *     - از صفحه اصلی (safe_asli.html) وارد این صفحه شوید.
-         *     - با دکمه Back مرورگر به صفحه اصلی برگردید.
-         *     - با دکمه Forward مرورگر دوباره به این صفحه بیایید.
-         *     - در تب Network چک کنید که درخواست‌های fetch مجدداً و به صورت تکراری ارسال نمی‌شوند و برنامه به درستی ادامه می‌یابد.
-         * ----------------------------------------------------------------
-         */
+        // --- CHANGELOG و TEST PLAN از کد اصلی حذف شد تا کد تمیزتر باشد ---
 
         // --- بخش ۱: تنظیمات و متغیرهای اصلی ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234'; // هشدار: این کلید در محیط پروداکشن نباید در سمت کلاینت باشد.
+        const SHARED_SECRET = 'miko1234';
 
         // --- ارجاع به عناصر DOM ---
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const appContainer = document.getElementById('app-container');
         const partnerNameEl = document.getElementById('partner-name');
         const partnerAvatarEl = document.getElementById('partner-avatar');
         const partnerStatusEl = document.getElementById('partner-status');
@@ -310,44 +271,34 @@
         let chatPartner = null;
         let chatId = null;
         let messagePollingInterval = null;
-        let lastMessagesHash = null; // برای بهینه‌سازی رندر
+        let lastMessagesHash = null;
 
         // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
-
-        // استفاده از `pageshow` برای مدیریت صحیح BFcache
         window.addEventListener('pageshow', (event) => {
             if (event.persisted) {
-                // صفحه از BFcache بازیابی شده است، فقط منابع را مجددا فعال کن
                 console.log('صفحه از کش بازیابی شد. فعال‌سازی مجدد...');
                 resumeApp();
             } else {
-                // صفحه برای اولین بار بارگذاری می‌شود
                 console.log('صفحه برای اولین بار بارگذاری شد. در حال مقداردهی اولیه...');
                 initializeApp();
             }
         });
 
-        // پاک‌سازی منابع هنگام خروج از صفحه
         window.addEventListener('pagehide', () => {
             console.log('صفحه در حال پنهان شدن است. پاک‌سازی منابع...');
             pauseApp();
         });
 
-        // مدیریت فعال یا غیرفعال بودن تب
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                pauseApp(); // تب غیرفعال شد، polling را متوقف کن
-            } else {
-                resumeApp(); // تب فعال شد، polling را ادامه بده
-            }
+            if (document.hidden) pauseApp();
+            else resumeApp();
         });
         
         async function initializeApp() {
-            // گارد برای جلوگیری از اجرای مجدد
             if (window.piviAppInitialized) return;
             window.piviAppInitialized = true;
 
-            showLoadingSpinner();
+            showLoading();
             
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
@@ -357,7 +308,6 @@
             currentUser = JSON.parse(storedUser);
 
             const urlParams = new URLSearchParams(window.location.search);
-            // پشتیبانی از هر دو پارامتر uid و with
             const partnerUsername = urlParams.get('uid') || urlParams.get('with');
             if (!partnerUsername) {
                 showError('کاربر مقصد مشخص نشده است. <br> لطفاً از صفحه اصلی وارد شوید.');
@@ -380,6 +330,9 @@
                 
                 await loadMessages();
                 startPolling();
+
+                // بعد از اتمام همه کارها، اپلیکیشن را نمایش بده
+                showApp();
                 
             } catch (error) {
                 console.error("خطا در مقداردهی اولیه:", error);
@@ -388,7 +341,6 @@
         }
         
         // --- بخش ۳: توابع مدیریت وضعیت برنامه (Pause/Resume) ---
-
         function startPolling() {
             if (messagePollingInterval) clearInterval(messagePollingInterval);
             messagePollingInterval = setInterval(loadMessages, 3000);
@@ -404,15 +356,24 @@
         }
 
         function resumeApp() {
-            // فقط در صورتی که برنامه قبلا مقداردهی شده باشد، polling را ادامه بده
             if (window.piviAppInitialized && !messagePollingInterval) {
-                // یکبار پیام‌ها را سریعا لود کن و سپس polling را شروع کن
                 loadMessages();
                 startPolling();
             }
         }
         
         // --- بخش ۴: توابع مرتبط با UI و نمایش خطا ---
+        function showLoading() {
+            loadingOverlay.style.opacity = '1';
+            appContainer.classList.remove('visible');
+        }
+
+        function showApp() {
+            loadingOverlay.style.opacity = '0';
+            // با تاخیر لودر را حذف می‌کنیم تا انیمیشن تمام شود
+            setTimeout(() => { loadingOverlay.style.display = 'none'; }, 500);
+            appContainer.classList.add('visible');
+        }
 
         function setupUI() {
             partnerNameEl.textContent = chatPartner.displayName;
@@ -428,20 +389,17 @@
             });
         }
         
-        function showLoadingSpinner() {
-            messagesArea.innerHTML = `<div class="status-container"><div class="spinner"></div></div>`;
-        }
-
         function showError(message) {
-            messagesArea.innerHTML = `<div class="status-container"><p>${message}</p></div>`;
+            // خطا را در همان لودر نمایش می‌دهیم و اپ را نشان نمی‌دهیم
+            loadingOverlay.innerHTML = `<div class="status-container"><p>${message}</p></div>`;
+            showLoading(); // اطمینان از نمایش لودر (که الان حاوی خطاست)
         }
         
         function scrollToBottom() {
-            mainContent.scrollTop = mainContent.scrollHeight;
+            mainContent.scrollTop = 0; // در حالت column-reverse اسکرول به بالا یعنی پایین لیست
         }
 
         // --- بخش ۵: ارتباط با سرور و واکشی اطلاعات ---
-
         async function refreshClientToken() {
             try {
                 const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
@@ -461,17 +419,15 @@
         }
 
         // --- بخش ۶: منطق اصلی چت (ارسال و دریافت پیام) ---
-
         async function loadMessages() {
             if (!chatId || !clientToken) return;
             try {
                 const response = await fetch(`${PROXY_URL}?path=pivi_chats/${chatId}/messages`, { 
                     headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username } 
                 });
-                if (!response.ok) return; // در صورت خطا، رندر مجدد نکن
+                if (!response.ok) return;
                 const messagesData = await response.json();
 
-                // بهینه‌سازی: فقط در صورت تغییر محتوا، DOM را آپدیت کن
                 const newHash = JSON.stringify(messagesData);
                 if (newHash === lastMessagesHash) return;
                 lastMessagesHash = newHash;
@@ -482,7 +438,6 @@
                 }
                 
                 messagesArea.innerHTML = '';
-                // حل مشکل داده‌های Object از Firebase: تبدیل به آرایه و مرتب‌سازی
                 const sortedMessages = Object.entries(messagesData).sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
                 sortedMessages.forEach(([msgId, msg]) => renderMessage(msgId, msg));
                 
@@ -523,9 +478,7 @@
             messageInput.value = '';
 
             try {
-                // ارسال پیام جدید
                 await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
-                // بروزرسانی اطلاعات کلی چت (آخرین پیام و زمان) برای نمایش در لیست چت‌ها
                 await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
                     lastMessage: text,
                     timestamp: message.timestamp,
@@ -535,13 +488,12 @@
             } catch(error) {
                 alert('خطا در ارسال پیام!');
                 console.error('خطای ارسال پیام:', error);
-                messageInput.value = text; // در صورت خطا، متن را به فیلد ورودی بازگردان
+                messageInput.value = text;
             }
         }
         
         async function deleteMessage(messageId) {
             try {
-                // حذف نرم (Soft Delete)
                 await apiRequest(`pivi_chats/${chatId}/messages/${messageId}`, 'PATCH', { deleted: true });
                 await loadMessages();
             } catch(error) {
