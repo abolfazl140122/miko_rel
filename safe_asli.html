@@ -2,193 +2,91 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>همیار - صفحه اصلی</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
+        :root { --primary-color: #007bff; --success-color: #28a745; --danger-color: #e74c3c; --light-gray-color: #f8f9fa; --border-color: #dee2e6; --sent-bg: #e1f5fe; --received-bg: #f1f3f5; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Vazirmatn', sans-serif; margin: 0; background-color: var(--light-gray-color); color: #333; -webkit-user-select: none; user-select: none; }
+
+        .app-container { width: 100%; max-width: 400px; height: 100vh; margin: 0 auto; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+
+        /* Header */
+        .app-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .app-header h1 { font-size: 1.5em; margin: 0; color: var(--primary-color); }
+        .app-header button { background: none; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-family: 'Vazirmatn'; transition: background-color 0.2s, color 0.2s; }
+        .app-header button:hover { background-color: var(--danger-color); color: white; }
+
+        /* Main Content Area */
+        main { flex-grow: 1; position: relative; overflow-y: auto; }
+
+        /* Card Swiping View */
+        .card-view { height: 100%; padding: 20px; display: flex; justify-content: center; align-items: center; position: relative; }
+        .profile-card { width: 100%; height: 100%; max-height: 500px; border-radius: 15px; background-size: cover; background-position: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: absolute; display: flex; flex-direction: column; justify-content: flex-end; color: white; transition: transform 0.4s ease, opacity 0.4s ease; }
+        .profile-card.card--out-right { transform: translateX(150%) rotate(20deg); opacity: 0; }
+        .profile-card.card--out-left { transform: translateX(-150%) rotate(-20deg); opacity: 0; }
+        .profile-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); border-radius: 0 0 15px 15px; }
+        .card-info { padding: 20px; z-index: 2; }
+        .card-info h2 { margin: 0 0 5px; } .card-info p { margin: 0; opacity: 0.9; }
+        .status-message { font-size: 1.2em; color: #aaa; text-align: center; padding: 20px; }
         
-        :root {
-            --primary-color: #007bff;
-            --danger-color: #dc3545;
-            --body-bg: #f0f2f5;
-            --header-bg: #ffffff;
-            --border-color: #dee2e6;
-        }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            margin: 0;
-            background-color: var(--body-bg);
-            color: #333;
-            -webkit-user-select: none;
-            user-select: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .app-container {
-            width: 100%;
-            height: 100%;
-            max-width: 450px;
-            background-color: white;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .app-header {
-            padding: 10px 15px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--header-bg);
-            flex-shrink: 0;
-        }
-
-        .app-header h1 {
-            font-size: 1.4em;
-            margin: 0;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        .app-header button {
-            background: var(--danger-color);
-            border: none;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Vazirmatn';
-            font-size: 0.9em;
-            transition: background-color 0.2s;
-        }
-
-        .app-header button:hover {
-            background-color: #c82333;
-        }
-
-        main {
-            flex-grow: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .view {
-            display: none;
-            height: 100%;
-            width: 100%;
-            flex-direction: column;
-            animation: viewFadeIn 0.4s ease;
-        }
+        /* Chat Views */
+        .chat-view { height: 100%; display: none; /* Hidden by default */ flex-direction: column; }
         
-        @keyframes viewFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        /* Conversation List */
+        #conversation-list { padding: 10px 0; }
+        .conversation-item { display: flex; align-items: center; padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
+        .conversation-item:hover { background-color: var(--light-gray-color); }
+        .conversation-item img { width: 50px; height: 50px; border-radius: 50%; margin-left: 15px; }
+        .conversation-item h3 { margin: 0; font-size: 1.1em; }
 
-        .view.active {
-            display: flex;
-        }
+        /* Single Chat View */
+        #single-chat-view { height: 100%; display: none; flex-direction: column; }
+        .chat-header { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid var(--border-color); }
+        .chat-header button { background: none; border: none; font-size: 1.5em; cursor: pointer; margin-left: 10px; }
+        .chat-header h2 { margin: 0; font-size: 1.2em; }
+        #messages-area { flex-grow: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column-reverse; }
+        .message { max-width: 70%; padding: 10px 15px; border-radius: 18px; margin-bottom: 10px; word-wrap: break-word; }
+        .message.sent { background-color: var(--sent-bg); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .message.received { background-color: var(--received-bg); align-self: flex-end; border-bottom-right-radius: 4px; }
+        #message-form { display: flex; padding: 10px; border-top: 1px solid var(--border-color); }
+        #message-form input { flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 20px; font-family: 'Vazirmatn'; }
+        #message-form button { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-right: 10px; font-size: 1.5em; cursor: pointer; }
 
-        #card-view {
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .status-message {
-            font-size: 1.1em;
-            color: #6c757d;
-        }
-
-        #conversation-list {
-            padding-top: 8px;
-        }
-
-        .conversation-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s;
-        }
-        
-        .conversation-item:last-child {
-            border-bottom: none;
-        }
-
-        .conversation-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .conversation-item img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-left: 15px;
-            object-fit: cover;
-        }
-
-        .conversation-item h3 {
-            margin: 0;
-            font-size: 1.1em;
-            font-weight: 500;
-        }
-
-        .main-footer {
-            padding: 5px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background-color: var(--header-bg);
-            flex-shrink: 0;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            font-size: 2em;
-            cursor: pointer;
-            color: #adb5bd;
-            transition: color 0.2s;
-            padding: 10px 20px;
-        }
-
-        .nav-btn.active {
-            color: var(--primary-color);
-        }
+        /* Main Footer Navigation */
+        .main-footer { padding: 10px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
+        .nav-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: #ccc; transition: color 0.2s; }
+        .nav-btn.active { color: var(--primary-color); }
     </style>
 </head>
 <body>
+
     <div class="app-container">
-        <header class="app-header">
-            <h1>همیار</h1>
-            <button id="logout-btn">خروج از حساب</button>
-        </header>
+        <header class="app-header"><h1>همیار</h1><button id="logout-btn">خروج</button></header>
 
         <main>
-            <!-- View 1: Card Swiping (Placeholder) -->
-            <div id="card-view" class="view active">
+            <!-- View 1: Card Swiping -->
+            <div id="card-view" class="card-view">
                 <div id="status-message" class="status-message">در حال بارگذاری...</div>
             </div>
-            <!-- View 2: Chat List -->
-            <div id="chat-view" class="view">
+
+            <!-- View 2: Chat -->
+            <div id="chat-view" class="chat-view">
+                <!-- Sub-view 2a: Conversation List -->
                 <div id="conversation-list"></div>
+                <!-- Sub-view 2b: Single Chat -->
+                <div id="single-chat-view">
+                    <div class="chat-header">
+                        <button id="back-to-list-btn">➡️</button>
+                        <h2 id="chat-partner-name"></h2>
+                    </div>
+                    <div id="messages-area"></div>
+                    <form id="message-form">
+                        <input type="text" id="message-input" placeholder="پیام خود را بنویسید..." autocomplete="off">
+                        <button type="submit">⬆️</button>
+                    </form>
+                </div>
             </div>
         </main>
 
@@ -199,10 +97,9 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234'; // This MUST match the secret in your PHP proxy
-
+        const SHARED_SECRET = 'miko1234';
+        
         // --- DOM Elements ---
         const cardView = document.getElementById('card-view');
         const chatView = document.getElementById('chat-view');
@@ -211,172 +108,209 @@
         const navCardsBtn = document.getElementById('nav-cards-btn');
         const navChatBtn = document.getElementById('nav-chat-btn');
         const conversationList = document.getElementById('conversation-list');
+        const singleChatView = document.getElementById('single-chat-view');
+        const messagesArea = document.getElementById('messages-area');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const chatPartnerName = document.getElementById('chat-partner-name');
+        const backToListBtn = document.getElementById('back-to-list-btn');
 
         // --- App State ---
         let currentUser = null;
         let clientToken = null;
+        let allUsersData = {}; // Store all users by username for quick lookup
+        let matches = []; // List of users we've matched with
+        let activeChatPartner = null; // The user we are currently chatting with
+        let messagePollingInterval = null;
 
-        // --- AUTH & INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', async () => {
+        // --- AUTH & INIT ---
+        (async () => {
             const storedUser = localStorage.getItem('currentUser');
-            if (!storedUser) {
-                window.location.href = 'login.html';
-                return;
-            }
+            if (!storedUser) { window.location.href = 'login.html'; return; }
             currentUser = JSON.parse(storedUser);
-
-            setupEventListeners();
-            await initializeApp();
-        });
-
-        async function initializeApp() {
-            try {
-                // Step 1: Get a secure client token from the proxy. This is mandatory for all other API calls.
-                await refreshClientToken();
-                console.log("Client token received successfully.");
-
-                // Step 2: Fetch all necessary data in parallel for performance.
-                const [allUsers, matches] = await Promise.all([
-                    fetchAllUsers(),
-                    fetchMatches()
-                ]);
-
-                // Step 3: Initialize the UI with the fetched data.
-                initializeCardsView(allUsers);
-                renderConversationList(matches);
-            } catch (error) {
-                console.error("Initialization Error:", error);
-                const friendlyMessage = `خطا در بارگذاری برنامه: ${error.message}`;
-                statusMessage.textContent = friendlyMessage;
-                alert(friendlyMessage);
-            }
-        }
-
-        function setupEventListeners() {
+            
             navCardsBtn.addEventListener('click', () => showView('cards'));
             navChatBtn.addEventListener('click', () => showView('chat'));
             logoutBtn.addEventListener('click', logout);
+            backToListBtn.addEventListener('click', showConversationList);
+            messageForm.addEventListener('submit', handleSendMessage);
+            
+            await initializeApp();
+        })();
+
+        async function initializeApp() {
+            try {
+                await refreshClientToken();
+                const allUsers = await fetchAllUsers();
+                allUsers.forEach(user => { allUsersData[user.username] = user; });
+                
+                // Initialize both views
+                await initializeCardsView();
+                await initializeChatView();
+            } catch (error) {
+                console.error("Initialization Error:", error);
+                statusMessage.textContent = `خطا: ${error.message}`;
+            }
         }
 
-        // --- VIEW LOGIC ---
+        // --- VIEW INITIALIZATION ---
+        async function initializeCardsView() {
+            statusMessage.textContent = 'در حال واکشی کاربران...';
+            const seenUsers = await fetchSeenUsers();
+            const usersToDisplay = Object.values(allUsersData).filter(user =>
+                user.username !== currentUser.username && !seenUsers.includes(user.username)
+            );
+            // This part is simplified for brevity, assuming card swiping logic is established
+            if (usersToDisplay.length > 0) {
+                 statusMessage.textContent = `${usersToDisplay.length} کاربر جدید یافت شد!`;
+            } else {
+                 statusMessage.textContent = 'کاربر جدیدی یافت نشد.';
+            }
+        }
+
+        async function initializeChatView() {
+            await fetchMatches();
+            renderConversationList();
+        }
+
+        // --- DATA FETCHING ---
+        async function refreshClientToken() { /* ... */ }
+        async function fetchAllUsers() { /* ... */ }
+        async function fetchSeenUsers() { /* ... */ }
+
+        async function fetchMatches() {
+            const myLikesResponse = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+            if (!myLikesResponse.ok) return;
+            const myLikesData = await myLikesResponse.json();
+            if (!myLikesData) return;
+
+            const myLikedUsers = Object.keys(myLikesData).filter(key => myLikesData[key] === 'liked');
+            
+            const matchPromises = myLikedUsers.map(async (likedUsername) => {
+                const theirLikesResponse = await fetch(`${PROXY_URL}?path=interactions/${likedUsername}/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+                const theirAction = await theirLikesResponse.json();
+                if (theirAction === 'liked') {
+                    return allUsersData[likedUsername];
+                }
+                return null;
+            });
+            matches = (await Promise.all(matchPromises)).filter(Boolean); // Filter out nulls
+        }
+        
+        // --- UI & INTERACTIONS ---
         function showView(viewName) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             if (viewName === 'cards') {
-                cardView.classList.add('active');
+                cardView.style.display = 'flex';
+                chatView.style.display = 'none';
                 navCardsBtn.classList.add('active');
+                navChatBtn.classList.remove('active');
             } else {
-                chatView.classList.add('active');
+                cardView.style.display = 'none';
+                chatView.style.display = 'flex';
+                navCardsBtn.classList.remove('active');
                 navChatBtn.classList.add('active');
+                showConversationList();
             }
         }
 
-        function initializeCardsView(allUsers) {
-            // This is a placeholder for the card swiping functionality.
-            const otherUsersCount = allUsers.filter(u => u.uid !== currentUser.uid).length;
-            if (otherUsersCount > 0) {
-                statusMessage.textContent = `شما می‌توانید ${otherUsersCount} کاربر جدید را مشاهده کنید.`;
-            } else {
-                statusMessage.textContent = 'در حال حاضر کاربر جدیدی برای نمایش وجود ندارد.';
-            }
-        }
-
-        function renderConversationList(matches) {
+        function renderConversationList() {
             conversationList.innerHTML = '';
-            if (!matches || matches.length === 0) {
-                conversationList.innerHTML = '<div class="status-message" style="padding: 20px;">هنوز هیچ گفتگویی نداری. برای شروع، کاربران دیگر را لایک کن!</div>';
+            if (matches.length === 0) {
+                conversationList.innerHTML = '<div class="status-message">هنوز هیچ تطابقی نداری!</div>';
                 return;
             }
             matches.forEach(user => {
-                if (!user) return; // Skip if a user object is null
                 const item = document.createElement('div');
                 item.className = 'conversation-item';
-                item.innerHTML = `
-                    <img src="https://i.pravatar.cc/100?u=${user.username}" alt="${user.displayName}">
-                    <h3>${user.displayName}</h3>`;
-                
-                // CRITICAL: Navigate to pivi.html with the partner's username
-                item.addEventListener('click', () => {
-                    window.location.href = `pivi.html?with=${user.username}`;
-                });
+                item.dataset.username = user.username;
+                item.innerHTML = `<img src="https://i.pravatar.cc/100?u=${user.username}" alt="${user.displayName}"><h3>${user.displayName}</h3>`;
+                item.addEventListener('click', () => openChat(user));
                 conversationList.appendChild(item);
             });
         }
 
-        // --- DATA FETCHING ---
-        async function refreshClientToken() {
-            // This special request requires the X-Proxy-Secret header for authentication.
-            const tokenResponse = await apiRequest('?auth=token', 'GET', null, { 'X-Proxy-Secret': SHARED_SECRET });
-            if (!tokenResponse || !tokenResponse.token) throw new Error("Could not retrieve a valid client token.");
+        function openChat(partner) {
+            activeChatPartner = partner;
+            conversationList.style.display = 'none';
+            singleChatView.style.display = 'flex';
+            chatPartnerName.textContent = partner.displayName;
+            loadMessages();
+
+            if (messagePollingInterval) clearInterval(messagePollingInterval);
+            messagePollingInterval = setInterval(loadMessages, 5000); // Poll every 5 seconds
+        }
+
+        function showConversationList() {
+            activeChatPartner = null;
+            conversationList.style.display = 'block';
+            singleChatView.style.display = 'none';
+            if (messagePollingInterval) clearInterval(messagePollingInterval);
+        }
+
+        async function loadMessages() {
+            if (!activeChatPartner) return;
+            const chatId = [currentUser.username, activeChatPartner.username].sort().join('_');
+            const response = await fetch(`${PROXY_URL}?path=messages/${chatId}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+            const messagesData = await response.json();
             
-            clientToken = tokenResponse.token;
-            localStorage.setItem('clientToken', clientToken); // Save token for pivi.html
+            messagesArea.innerHTML = '';
+            if (messagesData) {
+                Object.values(messagesData).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(msg => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'message ' + (msg.senderId === currentUser.username ? 'sent' : 'received');
+                    msgDiv.textContent = msg.text;
+                    messagesArea.appendChild(msgDiv);
+                });
+            }
         }
-
-        async function fetchAllUsers() {
-            const data = await apiRequest('?path=users', 'GET');
-            return data ? Object.values(data) : [];
-        }
-
-        async function fetchMatches() {
-            // Logic to find matches: Users that I've liked AND have liked me back.
-            const myInteractions = await apiRequest(`?path=interactions/${currentUser.uid}`, 'GET') || {};
-            const myLikedUids = Object.keys(myInteractions).filter(uid => myInteractions[uid] === 'liked');
-
-            if (myLikedUids.length === 0) return []; // No likes, no matches.
+        
+        async function handleSendMessage(e) {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            if (!text || !activeChatPartner) return;
             
-            const matchPromises = myLikedUids.map(async likedUid => {
-                const theirInteraction = await apiRequest(`?path=interactions/${likedUid}/${currentUser.uid}`, 'GET');
-                if (theirInteraction === 'liked') {
-                    // It's a match! Fetch this user's full profile.
-                    return await apiRequest(`?path=users/${likedUid}`, 'GET');
-                }
-                return null;
-            });
-
-            // Wait for all checks to complete and filter out any non-matches (null values).
-            return (await Promise.all(matchPromises)).filter(Boolean);
-        }
-
-        // --- GENERIC API HELPER ---
-        async function apiRequest(url, method, body = null, extraHeaders = {}) {
-            const headers = {
-                'Content-Type': 'application/json',
-                ...extraHeaders
+            const chatId = [currentUser.username, activeChatPartner.username].sort().join('_');
+            const message = {
+                senderId: currentUser.username,
+                text: text,
+                timestamp: new Date().toISOString()
             };
-            // For all requests other than getting the token, we use the Bearer token.
-            if (clientToken && !url.includes('auth=token')) {
-                 headers['Authorization'] = `Bearer ${clientToken}`;
-            }
 
-            const options = { method, headers };
+            messageInput.value = ''; // Clear input immediately for better UX
             
-            // CRITICAL: Embed the current user's UID in the request body for methods that write data.
-            // The proxy will use this to tell Firebase who is making the request, enforcing security rules.
-            if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
-                let requestBody = body || {};
-                requestBody.auth_override_uid = currentUser.uid;
-                options.body = JSON.stringify(requestBody);
-            }
-
-            try {
-                const response = await fetch(`${PROXY_URL}${url}`, options);
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: 'خطای ناشناخته' }));
-                    throw new Error(errorData.error || `خطای سرور: ${response.status}`);
-                }
-                return response.status === 204 ? null : response.json();
-            } catch (error) {
-                console.error("API Request Failed:", error);
-                throw error; // Re-throw the error to be handled by the calling function.
-            }
+            await fetch(`${PROXY_URL}?path=messages/${chatId}`, {
+                method: 'POST', // POST is like push() in Firebase REST API
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}` },
+                body: JSON.stringify(message)
+            });
+            await loadMessages(); // Refresh messages immediately after sending
         }
 
         function logout() {
-            // Clear all stored data and redirect to the login page.
-            localStorage.clear();
-            window.location.href = 'login.html';
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
         }
+
+        // Dummy functions for refreshClientToken, fetchAllUsers, fetchSeenUsers
+        // These need to be filled with the actual fetch logic from your previous safe_asli.html
+        async function refreshClientToken() {
+             const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+            if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
+            clientToken = (await response.json()).token;
+        }
+        async function fetchAllUsers() {
+            const response = await fetch(`${PROXY_URL}?path=users`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+            if (!response.ok) throw new Error('خطا در واکشی لیست کاربران.');
+            const data = await response.json();
+            return data ? Object.values(data) : [];
+        }
+        async function fetchSeenUsers() {
+             const response = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
+            if (!response.ok) return [];
+            const data = await response.json();
+            return data ? Object.keys(data) : [];
+        }
+
     </script>
 </body>
 </html>
