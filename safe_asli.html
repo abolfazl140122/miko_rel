@@ -495,15 +495,11 @@
             }
 
             const chatListHtml = recentChats.map(chat => {
-                // --- FIX START: Robustly find partner and handle data structure ---
-                // 1. Defensively check if chat and chat.members exist to prevent errors
                 if (!chat || !chat.members) {
                     console.warn('Skipping malformed chat object:', chat);
                     return ''; // Skip rendering this invalid item
                 }
-                // 2. Convert members object keys to an array to use .find()
                 const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
-                // --- FIX END ---
 
                 const partnerData = allUsers[partnerUsername];
                 if (!partnerData) return ''; 
@@ -540,8 +536,7 @@
         // --- SECTION: HTML Template Generators ---
 
         function createChatItemHtml(partnerData, lastMessage, timestamp) {
-            // --- FIX: Replaced pravatar with a more reliable avatar service ---
-            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName)}&background=1E90FF&color=fff&size=100`;
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=1E90FF&color=fff&size=100`;
             
             return `
                 <div class="chat-item" data-uid="${partnerData.username}">
@@ -550,7 +545,7 @@
                         ${partnerData.isOnline ? '<div class="online-indicator"></div>' : ''}
                     </div>
                     <div class="chat-details">
-                        <h3>${partnerData.displayName}</h3>
+                        <h3>${partnerData.displayName || partnerData.username}</h3>
                         <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
                     </div>
                     <div class="chat-meta">
@@ -560,8 +555,7 @@
         }
 
         function createSearchResultHtml(userData) {
-            // --- FIX: Replaced pravatar with a more reliable avatar service ---
-            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName)}&background=161B22&color=fff&size=100`;
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
             
             return `
                 <div class="search-result-item" data-uid="${userData.username}">
@@ -570,7 +564,7 @@
                         ${userData.isOnline ? '<div class="online-indicator"></div>' : ''}
                     </div>
                     <div class="chat-details">
-                        <h3>${userData.displayName}</h3>
+                        <h3>${userData.displayName || userData.username}</h3>
                         <p class="last-message">@${userData.username}</p>
                     </div>
                 </div>`;
@@ -579,16 +573,25 @@
 
         // --- SECTION: Event Handlers & Interactions ---
 
+        /**
+         * --- FIX: Made the search handler robust against missing data ---
+         * Handles user input in the search box to filter and display users.
+         */
         function handleSearch() {
             const query = searchInput.value.toLowerCase().trim();
             if (!query) {
                 renderChatList(); 
                 return;
             }
-            const filteredUsers = Object.values(allUsers).filter(user => 
-                user.username.toLowerCase().includes(query) ||
-                user.displayName.toLowerCase().includes(query)
-            );
+            
+            const filteredUsers = Object.values(allUsers).filter(user => {
+                // Defensive check: ensure user object and properties exist before searching.
+                if (!user) return false;
+                const usernameMatch = user.username && user.username.toLowerCase().includes(query);
+                const displayNameMatch = user.displayName && user.displayName.toLowerCase().includes(query);
+                return usernameMatch || displayNameMatch;
+            });
+
             renderSearchResults(filteredUsers);
         }
 
@@ -596,8 +599,10 @@
             mainContent.querySelectorAll('[data-uid]').forEach(item => {
                 item.addEventListener('click', () => {
                     const targetUid = item.dataset.uid;
-                    console.log(`Navigating to chat with user: ${targetUid}`);
-                    window.location.href = `pivi.html?uid=${targetUid}`;
+                    if (targetUid) {
+                        console.log(`Navigating to chat with user: ${targetUid}`);
+                        window.location.href = `pivi.html?uid=${targetUid}`;
+                    }
                 });
             });
         }
@@ -607,9 +612,8 @@
         function showProfile() {
             if (!currentUser) return;
             
-            // --- FIX: Replaced pravatar with a more reliable avatar service ---
-            profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName)}&background=0D1117&color=fff&size=150`;
-            profileDisplayName.textContent = currentUser.displayName;
+            profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=0D1117&color=fff&size=150`;
+            profileDisplayName.textContent = currentUser.displayName || currentUser.username;
             profileUsername.textContent = `@${currentUser.username}`;
 
             profileOverlay.classList.add('active');
