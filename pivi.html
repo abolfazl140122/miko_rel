@@ -84,7 +84,7 @@
         .chat-header .partner-info { display: flex; align-items: center; margin-right: 15px; flex-grow: 1; cursor: pointer; }
         .partner-info img { width: 45px; height: 45px; border-radius: 50%; margin-left: 12px; object-fit: cover; }
         .partner-details h2 { font-size: 1.1em; font-weight: 500; }
-        .partner-details .status { font-size: 0.8em; color: var(--online-indicator); }
+        .partner-details .status { font-size: 0.8em; color: var(--online-indicator); transition: color 0.3s; }
         .partner-details .status.offline { color: var(--text-secondary); }
         .options-btn { background: none; border: none; cursor: pointer; color: var(--text-secondary); }
         svg { vertical-align: middle; }
@@ -124,7 +124,7 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
         
-        /* --- [جدید] استایل فرم غیرفعال پیام --- */
+        /* --- استایل فرم غیرفعال پیام --- */
         #message-form-wrapper {
             flex-shrink: 0;
             position: relative;
@@ -148,10 +148,12 @@
             display: flex; padding: 10px 15px; border-top: 1px solid var(--border-color);
             background: var(--secondary-color); align-items: center;
             box-shadow: 0 -2px 10px var(--shadow-color);
+            transition: opacity 0.3s, filter 0.3s;
         }
         #message-form.disabled {
             pointer-events: none;
             opacity: 0.5;
+            filter: grayscale(80%);
         }
         #message-form .icon-btn {
             background: none; border: none; cursor: pointer; color: var(--text-secondary); padding: 8px;
@@ -217,7 +219,7 @@
         .profile-info-list li:last-child { border-bottom: none; }
         .profile-info-list strong { color: var(--text-primary); }
 
-        /* --- [جدید] استایل دکمه مسدودسازی --- */
+        /* --- استایل دکمه مسدودسازی --- */
         #block-user-btn {
             background-color: transparent;
             border: 1px solid var(--danger-color);
@@ -263,7 +265,6 @@
             <div id="messages-area"></div>
         </main>
 
-        <!-- [جدید] Wrapper برای فرم پیام و پوشش مسدودسازی -->
         <div id="message-form-wrapper">
             <div id="blocked-user-overlay">شما این کاربر را مسدود کرده‌اید.</div>
             <form id="message-form">
@@ -279,7 +280,25 @@
 
     <!-- منوی گزینه‌های پیام (مخفی) -->
     <div id="message-options-menu">
-        <!-- محتوای منو بدون تغییر باقی می‌ماند -->
+        <div id="menu-initial-options">
+            <div class="menu-option" id="edit-msg-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>ویرایش</span>
+            </div>
+            <div class="menu-option danger" id="delete-msg-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                <span>حذف</span>
+            </div>
+        </div>
+        <div id="menu-delete-confirm" style="display: none;">
+             <div class="menu-option danger" id="delete-for-all-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg>
+                <span>حذف برای همه</span>
+            </div>
+            <div class="menu-option" id="cancel-delete-btn">
+                <span>لغو</span>
+            </div>
+        </div>
     </div>
 
     <!-- صفحه پروفایل کاربر (مخفی) -->
@@ -293,7 +312,6 @@
                 <li>وضعیت: <strong id="profile-card-status">...</strong></li>
                 <li>شناسه کاربری: <strong id="profile-card-uid">...</strong></li>
             </ul>
-            <!-- [جدید] دکمه مسدودسازی کاربر -->
             <button id="block-user-btn">مسدود کردن کاربر</button>
         </div>
     </div>
@@ -313,11 +331,10 @@
         const messagesArea = document.getElementById('messages-area');
         const messageForm = document.getElementById('message-form');
         const messageInput = document.getElementById('message-input');
-        
         const messageOptionsMenu = document.getElementById('message-options-menu');
         const profileOverlay = document.getElementById('profile-overlay');
-        const blockUserBtn = document.getElementById('block-user-btn'); // [جدید]
-        const blockedUserOverlay = document.getElementById('blocked-user-overlay'); // [جدید]
+        const blockUserBtn = document.getElementById('block-user-btn');
+        const blockedUserOverlay = document.getElementById('blocked-user-overlay');
         let activeMessageId = null;
 
         // --- وضعیت کلی اپلیکیشن ---
@@ -326,15 +343,15 @@
         let chatPartner = null;
         let chatId = null;
         let messagePollingInterval = null;
-        let presencePollingInterval = null; // [جدید]
+        let presencePollingInterval = null;
         let lastMessagesHash = null;
-        let isPartnerBlocked = false; // [جدید]
+        let isPartnerBlocked = false;
 
         // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
         window.addEventListener('load', initializeApp);
-        window.addEventListener('beforeunload', () => updatePresence(false)); // [اصلاح شده]
+        window.addEventListener('beforeunload', () => updatePresence(false));
         document.addEventListener('visibilitychange', () => {
-             updatePresence(!document.hidden); // [اصلاح شده]
+            updatePresence(!document.hidden);
             if (document.hidden) pauseApp();
             else resumeApp();
         });
@@ -342,7 +359,7 @@
         async function initializeApp() {
             if (window.piviAppInitialized) return;
             window.piviAppInitialized = true;
-            showLoading();
+            showLoading(); // تابع فراخوانی می‌شود
             
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
@@ -358,21 +375,21 @@
 
             try {
                 await refreshClientToken();
-                await fetchCurrentUserData(); // [جدید] واکشی اطلاعات کاربر فعلی برای لیست مسدودی
+                await fetchCurrentUserData();
                 await fetchPartnerData(partnerUsername);
                 if (!chatPartner) { showError('کاربر مورد نظر پیدا نشد.'); return; }
                 
                 chatId = [currentUser.username, chatPartner.username].sort().join('_');
                 
-                checkBlockStatus(); // [جدید] بررسی وضعیت مسدود بودن
-                updateBlockUI(); // [جدید] به‌روزرسانی UI بر اساس وضعیت مسدود بودن
+                checkBlockStatus();
+                updateBlockUI();
 
                 setupUI();
                 setupEventListeners();
                 await loadMessages();
                 
                 startPolling();
-                updatePresence(true); // [جدید] اعلام حضور آنلاین
+                updatePresence(true);
                 showApp();
             } catch (error) {
                 console.error("خطا در مقداردهی اولیه:", error);
@@ -383,11 +400,10 @@
         // --- بخش ۳: توابع مدیریت وضعیت برنامه (Pause/Resume) ---
         function startPolling() {
             if (messagePollingInterval) clearInterval(messagePollingInterval);
-            messagePollingInterval = setInterval(loadMessages, 5000); // افزایش فاصله زمانی برای بهینگی
+            messagePollingInterval = setInterval(loadMessages, 5000);
             
-            // [جدید] Polling جداگانه برای وضعیت آنلاین بودن
             if (presencePollingInterval) clearInterval(presencePollingInterval);
-            presencePollingInterval = setInterval(pollPartnerStatus, 10000); // هر ۱۰ ثانیه
+            presencePollingInterval = setInterval(pollPartnerStatus, 10000);
         }
         function pauseApp() {
             clearInterval(messagePollingInterval);
@@ -403,8 +419,28 @@
             }
         }
         
-        // --- بخش ۴: توابع مرتبط با UI و نمایش خطا ---
-        // (توابع showLoading, showApp, showError, scrollToBottom بدون تغییر باقی می‌مانند)
+        // --- بخش ۴: توابع مرتبط با UI و نمایش خطا [بخش اصلاح شده] ---
+        function showLoading() {
+            loadingOverlay.style.opacity = '1';
+            loadingOverlay.style.display = 'flex';
+            appContainer.classList.remove('visible');
+        }
+        function showApp() {
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => { loadingOverlay.style.display = 'none'; }, 500);
+            appContainer.classList.add('visible');
+        }
+        function showError(message) {
+            messagesArea.innerHTML = ''; // پاک کردن پیام‌های قبلی
+            const statusContainer = document.createElement('div');
+            statusContainer.className = 'status-container';
+            statusContainer.innerHTML = `<p>${message}</p>`;
+            messagesArea.appendChild(statusContainer);
+            showApp(); // نمایش اپلیکیشن با پیام خطا
+        }
+        function scrollToBottom() {
+            mainContent.scrollTop = 0; // به دلیل flex-direction: column-reverse
+        }
         
         function setupUI() {
             partnerNameEl.textContent = chatPartner.displayName;
@@ -418,11 +454,16 @@
             profileOverlay.addEventListener('click', (e) => {
                  if(e.target === profileOverlay) hideProfileOverlay();
             });
-            // رویدادهای منوی پیام... (بدون تغییر)
-            blockUserBtn.addEventListener('click', handleBlockToggle); // [جدید]
+            messagesArea.addEventListener('click', handleMessageClick);
+            document.addEventListener('click', hideMenusOnClickOutside);
+            document.getElementById('edit-msg-btn').addEventListener('click', handleEditAction);
+            document.getElementById('delete-msg-btn').addEventListener('click', showDeleteConfirmation);
+            document.getElementById('delete-for-all-btn').addEventListener('click', handleDeleteAction);
+            document.getElementById('cancel-delete-btn').addEventListener('click', hideMessageOptionsMenu);
+            blockUserBtn.addEventListener('click', handleBlockToggle);
         }
         
-        // --- [بخش جدید] مدیریت وضعیت آنلاین/آفلاین (Presence) ---
+        // --- بخش ۵: مدیریت وضعیت آنلاین/آفلاین (Presence) ---
         async function updatePresence(isOnline) {
             if (!currentUser || !clientToken) return;
             const presenceData = {
@@ -430,7 +471,6 @@
                 lastSeen: new Date().toISOString()
             };
             try {
-                 // از keepalive برای اطمینان از ارسال درخواست هنگام خروج از صفحه استفاده می‌کنیم
                 await apiRequest(`users/${currentUser.username}`, 'PATCH', presenceData, true);
             } catch (error) {
                 console.error("خطا در به‌روزرسانی وضعیت حضور:", error);
@@ -457,31 +497,25 @@
                 partnerStatusEl.className = 'status';
             } else {
                 const lastSeenDate = lastSeen ? new Date(lastSeen) : null;
-                const statusText = lastSeenDate ? `آخرین بازدید ${lastSeenDate.toLocaleDateString('fa-IR')} ساعت ${lastSeenDate.toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'})}` : 'آفلاین';
+                const statusText = lastSeenDate ? `آخرین بازدید در ${lastSeenDate.toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'})}` : 'آفلاین';
                 partnerStatusEl.textContent = statusText;
                 partnerStatusEl.className = 'status offline';
             }
         }
 
-        // --- [بخش جدید] مدیریت مسدودسازی کاربر ---
+        // --- بخش ۶: مدیریت مسدودسازی کاربر ---
         function checkBlockStatus() {
-            if (currentUser.blockedUsers && currentUser.blockedUsers[chatPartner.username]) {
-                isPartnerBlocked = true;
-            } else {
-                isPartnerBlocked = false;
-            }
+            isPartnerBlocked = !!(currentUser.blockedUsers && currentUser.blockedUsers[chatPartner.username]);
         }
 
         function updateBlockUI() {
             if (isPartnerBlocked) {
                 messageForm.classList.add('disabled');
-                messageInput.disabled = true;
                 blockedUserOverlay.style.display = 'block';
                 blockUserBtn.textContent = 'رفع مسدودیت';
                 blockUserBtn.classList.add('unblock');
             } else {
                 messageForm.classList.remove('disabled');
-                messageInput.disabled = false;
                 blockedUserOverlay.style.display = 'none';
                 blockUserBtn.textContent = 'مسدود کردن کاربر';
                 blockUserBtn.classList.remove('unblock');
@@ -492,60 +526,107 @@
             const action = isPartnerBlocked ? 'unblock' : 'block';
             const confirmationText = isPartnerBlocked 
                 ? `آیا از رفع مسدودیت ${chatPartner.displayName} اطمینان دارید؟`
-                : `آیا می‌خواهید ${chatPartner.displayName} را مسدود کنید؟\nشما دیگر پیامی از او دریافت نخواهید کرد.`;
+                : `آیا می‌خواهید ${chatPartner.displayName} را مسدود کنید؟`;
             
             if (!confirm(confirmationText)) return;
 
             try {
                 if (action === 'block') {
                     await apiRequest(`users/${currentUser.username}/blockedUsers/${chatPartner.username}`, 'PUT', true);
-                    isPartnerBlocked = true;
                     if (!currentUser.blockedUsers) currentUser.blockedUsers = {};
                     currentUser.blockedUsers[chatPartner.username] = true;
                 } else {
                     await apiRequest(`users/${currentUser.username}/blockedUsers/${chatPartner.username}`, 'DELETE');
-                    isPartnerBlocked = false;
                     if (currentUser.blockedUsers) delete currentUser.blockedUsers[chatPartner.username];
                 }
+                isPartnerBlocked = !isPartnerBlocked;
                 updateBlockUI();
             } catch (error) {
-                alert(`خطا در ${action === 'block' ? 'مسدود کردن' : 'رفع مسدودیت'} کاربر.`);
+                alert(`خطا در انجام عملیات.`);
                 console.error(error);
             }
         }
 
-        // --- بخش ۵: ارتباط با سرور و واکشی اطلاعات ---
-        // (تابع refreshClientToken بدون تغییر)
-
+        // --- بخش ۷: ارتباط با سرور و واکشی اطلاعات ---
+        async function refreshClientToken() {
+            try {
+                const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+                if (!response.ok) throw new Error(`خطای ${response.status} در دریافت توکن`);
+                clientToken = (await response.json()).token;
+            } catch (error) {
+                throw new Error(`خطای شبکه در دریافت توکن: ${error.message}`);
+            }
+        }
         async function fetchCurrentUserData() {
              const data = await apiRequest(`users/${currentUser.username}`, 'GET');
              if(data) {
-                // اطلاعات کاربر فعلی را با داده‌های به‌روز از سرور تکمیل می‌کنیم
                 currentUser = { ...currentUser, ...data };
              }
         }
-
         async function fetchPartnerData(username) {
              chatPartner = await apiRequest(`users/${username}`, 'GET');
         }
 
-        // --- بخش ۶: منطق اصلی چت (ارسال و دریافت پیام) ---
-        async function loadMessages() { /* بدون تغییر */ }
-        function renderMessage(msgId, msg) { /* بدون تغییر */ }
+        // --- بخش ۸: منطق اصلی چت (ارسال و دریافت پیام) ---
+        async function loadMessages() {
+            if (!chatId || !clientToken) return;
+            try {
+                const response = await fetch(`${PROXY_URL}?path=pivi_chats/${chatId}/messages`, { 
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username } 
+                });
+                if (!response.ok) return;
+                const messagesData = await response.json();
+
+                const newHash = JSON.stringify(messagesData);
+                if (newHash === lastMessagesHash) return;
+                lastMessagesHash = newHash;
+
+                if (!messagesData) {
+                    messagesArea.innerHTML = `<div class="status-container" style="text-align:center; color: var(--text-secondary);"><p>هنوز پیامی رد و بدل نشده است.</p></div>`;
+                    return;
+                }
+                
+                messagesArea.innerHTML = '';
+                const sortedMessages = Object.entries(messagesData).sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
+                sortedMessages.forEach(([msgId, msg]) => renderMessage(msgId, msg));
+                scrollToBottom();
+            } catch(error) {
+                console.error("خطا در بارگذاری پیام‌ها:", error);
+            }
+        }
+
+        function renderMessage(msgId, msg) {
+            const msgDiv = document.createElement('div');
+            const isSent = msg.senderId === currentUser.username;
+            msgDiv.className = 'message ' + (isSent ? 'sent' : 'received');
+            msgDiv.dataset.id = msgId;
+
+            let textContent = msg.deleted ? 'این پیام حذف شده است' : (msg.text || "");
+            if (msg.deleted) msgDiv.classList.add('deleted');
+
+            const timestamp = new Date(msg.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+            const editedIndicator = msg.edited ? `<span class="edited-indicator">(ویرایش شده)</span>` : '';
+
+            msgDiv.innerHTML = `
+                <div class="text">${textContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+                <div class="timestamp">${editedIndicator}${timestamp}</div>`;
+            
+            messagesArea.appendChild(msgDiv);
+        }
 
         async function handleSendMessage(e) {
             e.preventDefault();
             const text = messageInput.value.trim();
             if (!text || !chatPartner || isPartnerBlocked) return;
             
-            // [اصلاح شده] افزودن receiverId برای بررسی در قوانین Firebase
             const message = { 
                 senderId: currentUser.username, 
-                receiverId: chatPartner.username, // مهم برای قوانین مسدودسازی
+                receiverId: chatPartner.username,
                 text, 
                 timestamp: new Date().toISOString(), 
                 deleted: false 
             };
+            const tempInputValue = text;
             messageInput.value = '';
 
             try {
@@ -553,33 +634,88 @@
                 await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
                     lastMessage: text,
                     timestamp: message.timestamp,
-                    members: { [currentUser.username]: true, [chatPartner.username]: true } // ساختار صحیح برای قوانین
+                    members: { [currentUser.username]: true, [chatPartner.username]: true }
                 });
                 await loadMessages();
             } catch(error) {
-                // [اصلاح شده] نمایش خطای مشخص‌تری اگر کاربر مسدود شده باشد
                 if(error.message.includes("blocked")) {
                     alert('ارسال پیام ممکن نیست. شما توسط این کاربر مسدود شده‌اید.');
                 } else {
                     alert('خطا در ارسال پیام!');
                 }
-                messageInput.value = text;
+                messageInput.value = tempInputValue;
             }
         }
         
-        async function deleteMessage(messageId) { /* بدون تغییر */ }
-        async function editMessage(messageId, newText) { /* بدون تغییر */ }
+        async function deleteMessage(messageId) {
+            try {
+                await apiRequest(`pivi_chats/${chatId}/messages/${messageId}`, 'PATCH', { deleted: true, text: '' });
+                await loadMessages();
+            } catch(error) {
+                alert('خطا در حذف پیام.');
+            }
+        }
         
-        // --- مدیریت منوها و پروفایل ---
+        async function editMessage(messageId, newText) {
+            try {
+                await apiRequest(`pivi_chats/${chatId}/messages/${messageId}`, 'PATCH', { text: newText, edited: true });
+                await loadMessages();
+            } catch(error) {
+                alert('خطا در ویرایش پیام.');
+            }
+        }
+        
+        // --- بخش ۹: مدیریت منوها و پروفایل [بخش اصلاح شده] ---
+        function handleMessageClick(e) {
+            const messageElement = e.target.closest('.message.sent:not(.deleted)');
+            if (messageElement) {
+                activeMessageId = messageElement.dataset.id;
+                showMessageOptionsMenu(messageElement);
+            }
+        }
+        function showMessageOptionsMenu(element) {
+            document.getElementById('menu-initial-options').style.display = 'block';
+            document.getElementById('menu-delete-confirm').style.display = 'none';
+            const rect = element.getBoundingClientRect();
+            messageOptionsMenu.style.top = `${window.scrollY + rect.top - messageOptionsMenu.offsetHeight - 10}px`;
+            messageOptionsMenu.style.left = `${rect.left}px`;
+            messageOptionsMenu.classList.add('visible');
+        }
+        function hideMessageOptionsMenu() {
+            messageOptionsMenu.classList.remove('visible');
+            activeMessageId = null;
+        }
+        function hideMenusOnClickOutside(e) {
+            if (!messageOptionsMenu.contains(e.target) && !e.target.closest('.message.sent')) {
+                hideMessageOptionsMenu();
+            }
+        }
+        async function handleEditAction() {
+            if (!activeMessageId) return;
+            const messageNode = document.querySelector(`.message[data-id="${activeMessageId}"] .text`);
+            const currentText = messageNode ? messageNode.innerText : '';
+            const newText = prompt('پیام جدید را وارد کنید:', currentText);
+            if (newText && newText.trim() !== "" && newText.trim() !== currentText) {
+                await editMessage(activeMessageId, newText.trim());
+            }
+            hideMessageOptionsMenu();
+        }
+        function showDeleteConfirmation() {
+            document.getElementById('menu-initial-options').style.display = 'none';
+            document.getElementById('menu-delete-confirm').style.display = 'block';
+        }
+        async function handleDeleteAction() {
+            if (!activeMessageId) return;
+            await deleteMessage(activeMessageId);
+            hideMessageOptionsMenu();
+        }
+
         function showProfileOverlay() {
             if (!chatPartner) return;
-            // پر کردن اطلاعات کارت پروفایل
             document.getElementById('profile-card-avatar').src = `https://i.pravatar.cc/120?u=${chatPartner.username}`;
             document.getElementById('profile-card-name').textContent = chatPartner.displayName;
             document.getElementById('profile-card-username').textContent = `@${chatPartner.username}`;
             document.getElementById('profile-card-uid').textContent = chatPartner.username;
-            
-            // [اصلاح شده] استفاده از تابع به‌روزرسانی وضعیت
             const statusEl = document.getElementById('profile-card-status');
             if(chatPartner.isOnline) {
                 statusEl.textContent = 'آنلاین';
@@ -588,33 +724,32 @@
                 statusEl.textContent = 'آفلاین';
                 statusEl.style.color = 'var(--text-secondary)';
             }
-            
-            updateBlockUI(); // اطمینان از صحیح بودن دکمه مسدودیت هنگام باز شدن پروفایل
+            updateBlockUI();
             profileOverlay.classList.add('visible');
         }
-        function hideProfileOverlay() { /* بدون تغییر */ }
-        
-        // --- بخش ۷: تابع کمکی برای ارسال درخواست‌های API ---
-        async function apiRequest(path, method, body, keepalive = false) { // [اصلاح شده]
+        function hideProfileOverlay() {
+            profileOverlay.classList.remove('visible');
+        }
+
+        // --- بخش ۱۰: تابع کمکی برای ارسال درخواست‌های API ---
+        async function apiRequest(path, method, body, keepalive = false) {
             const options = {
                 method,
                 headers: { 
                     'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}`,
                     'X-User-Username': currentUser.username
                 },
-                keepalive: keepalive // [جدید]
+                keepalive: keepalive
             };
             if (body) options.body = JSON.stringify(body);
             
             const response = await fetch(`${PROXY_URL}?path=${path}`, options);
-            const responseData = await response.json();
+            const responseData = await response.json().catch(() => ({}));
             if (!response.ok) {
                 throw new Error(responseData.error || `یک خطای ${response.status} رخ داد.`);
             }
             return responseData;
         }
-
-        // (سایر توابع مدیریت منوی پیام بدون تغییر باقی می‌مانند)
     </script>
 </body>
 </html>
