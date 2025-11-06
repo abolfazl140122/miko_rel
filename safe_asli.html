@@ -2,7 +2,6 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <!-- CHANGE 1: Optimized viewport for better mobile experience -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>پیام‌رسان همیار</title>
     <style>
@@ -24,9 +23,6 @@
             box-sizing: border-box;
         }
 
-        /* --- CHANGE 2: Full Height Layout Fix for Mobile --- */
-        /* This ensures the app container correctly takes up 100% of the screen height */
-        /* on mobile devices, preventing the footer from being cut off. */
         html, body {
             height: 100%;
             margin: 0;
@@ -40,7 +36,6 @@
             color: var(--text-primary);
             -webkit-user-select: none;
             user-select: none;
-             /* For a more native feel on touch devices */
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -48,7 +43,6 @@
         .app-container {
             width: 100%;
             max-width: 420px;
-            /* Use 100% height relative to the body instead of 100vh */
             height: 100%;
             margin: 0 auto;
             background-color: var(--background-color);
@@ -101,7 +95,6 @@
             position: relative;
             overflow-y: auto;
         }
-        /* Hide scrollbar */
         main::-webkit-scrollbar { display: none; }
         main { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -223,29 +216,26 @@
             color: var(--primary-color);
         }
 
-        /* --- CHANGE 3: Profile Overlay Styles for Fullscreen Mobile View --- */
+        /* --- Profile Overlay Styles --- */
         .profile-overlay {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0; /* Ensure it spans full width */
-            bottom: 0; /* Ensure it spans full height */
+            right: 0;
+            bottom: 0;
             width: 100%;
             height: 100%;
             background-color: var(--background-color);
             z-index: 100;
-            transform: translateY(100%); /* Start hidden below the screen */
+            transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             display: flex;
             flex-direction: column;
-            
-            /* These lines ensure the content inside is centered horizontally */
-            /* even if the overlay itself is fullscreen */
             max-width: 420px; 
             margin: 0 auto;
         }
         .profile-overlay.active {
-            transform: translateY(0); /* Slide into view */
+            transform: translateY(0);
         }
         .profile-header {
             display: flex;
@@ -321,7 +311,7 @@
             color: var(--text-secondary);
         }
         #logout-btn {
-            color: #ff4d4d; /* Red color for logout */
+            color: #ff4d4d;
         }
          #logout-btn svg {
             color: #ff4d4d;
@@ -330,6 +320,7 @@
     </style>
 </head>
 <body>
+
     <div class="app-container">
         <!-- TOP BAR with search -->
         <header class="app-header">
@@ -366,7 +357,7 @@
         </footer>
     </div>
 
-    <!-- NEW: Profile Overlay HTML Structure -->
+    <!-- Profile Overlay HTML Structure -->
     <div class="profile-overlay" id="profile-overlay">
         <header class="profile-header">
             <button class="close-btn" id="close-profile-btn">
@@ -403,13 +394,12 @@
     <script>
         // --- SECTION: App Configuration ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234'; // Note: In a real production app, this secret should not be in the client-side code.
+        const SHARED_SECRET = 'miko1234';
 
         // --- SECTION: DOM Element References ---
         const mainContent = document.getElementById('main-content');
         const searchInput = document.getElementById('search-input');
         
-        // --- NEW: Profile Overlay Elements ---
         const profileOverlay = document.getElementById('profile-overlay');
         const openProfileBtn = document.getElementById('nav-profile-btn');
         const closeProfileBtn = document.getElementById('close-profile-btn');
@@ -422,63 +412,46 @@
         // --- SECTION: App State ---
         let currentUser = null;
         let clientToken = null;
-        let allUsers = {}; // Store users as a map {username: userData} for O(1) lookups
-        let recentChats = []; // Store chat data as a sorted array
+        let allUsers = {};
+        let recentChats = [];
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Authenticate user by checking local storage
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
-                // In a real app, this should redirect to a login page.
-                // For now, we show an error message.
-                // window.location.href = 'login.html';
                 showErrorMessage('خطای احراز هویت. لطفاً ابتدا وارد شوید.');
+                // In a real app, redirect: window.location.href = 'login.html';
                 return;
             }
             currentUser = JSON.parse(storedUser);
 
-            // 2. Add event listeners for UI elements
             searchInput.addEventListener('input', handleSearch);
-            
-            // --- NEW: Event Listeners for Profile ---
             openProfileBtn.addEventListener('click', showProfile);
             closeProfileBtn.addEventListener('click', hideProfile);
             logoutBtn.addEventListener('click', handleLogout);
 
-            // 3. Load all initial data from the server
             await loadInitialData();
         });
 
-        /**
-         * Fetches all necessary data (token, users, chats) from the backend to populate the UI.
-         */
         async function loadInitialData() {
             showLoadingSpinner();
             try {
-                // First, get a client token for authenticated requests
                 await refreshClientToken();
 
-                // Fetch all users and recent chats in parallel for better performance
                 const [usersResponse, chatsResponse] = await Promise.all([
                     fetchProxyData('users'),
                     fetchProxyData('pivi_chats')
                 ]);
 
-                // Process and store the fetched data
-                // Firebase returns objects (maps), so we convert them to the format our app needs.
                 if (usersResponse) {
-                    // Convert the users object into a map for easy lookup by username
                     Object.values(usersResponse).forEach(user => { allUsers[user.username] = user; });
                 }
                 
                 if (chatsResponse) {
-                    // Convert the chats object into an array and sort it by the most recent message
                     recentChats = Object.values(chatsResponse)
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 }
 
-                // Render the main chat list with the processed data
                 renderChatList();
 
             } catch (error) {
@@ -488,10 +461,6 @@
         }
 
         // --- SECTION: Data Fetching ---
-
-        /**
-         * Refreshes the client token for making secure API calls to the proxy.
-         */
         async function refreshClientToken() {
             const response = await fetch(`${PROXY_URL}?auth=token`, {
                 headers: { 'X-Proxy-Secret': SHARED_SECRET }
@@ -501,11 +470,6 @@
             clientToken = data.token;
         }
 
-        /**
-         * A generic function to fetch data from the Firebase proxy, including necessary authentication headers.
-         * @param {string} path - The API path to fetch (e.g., 'users', 'pivi_chats').
-         * @returns {Promise<any>} The JSON data from the response.
-         */
         async function fetchProxyData(path) {
             if (!clientToken || !currentUser) throw new Error('کاربر احراز هویت نشده است.');
 
@@ -520,7 +484,7 @@
         }
 
         // --- SECTION: UI Rendering ---
-
+        
         /**
          * Renders the list of recent chats in the main content area.
          */
@@ -530,35 +494,27 @@
                 return;
             }
 
-            // ========================= START: CODE FIX =========================
-            const chatListHtml = recentChats
-                // 1. Filter out any invalid chat items that might not have a 'members' object
-                .filter(chat => chat && chat.members)
-                .map(chat => {
-                    // 2. Get an array of member usernames from the 'members' object's keys
-                    const membersArray = Object.keys(chat.members);
-                
-                    // 3. Find the partner's username from the newly created array
-                    const partnerUsername = membersArray.find(m => m !== currentUser.username);
+            const chatListHtml = recentChats.map(chat => {
+                // --- FIX START: Robustly find partner and handle data structure ---
+                // 1. Defensively check if chat and chat.members exist to prevent errors
+                if (!chat || !chat.members) {
+                    console.warn('Skipping malformed chat object:', chat);
+                    return ''; // Skip rendering this invalid item
+                }
+                // 2. Convert members object keys to an array to use .find()
+                const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
+                // --- FIX END ---
 
-                    // If for some reason a partner isn't found, or their data doesn't exist, skip this chat item
-                    if (!partnerUsername) return '';
-                    const partnerData = allUsers[partnerUsername];
-                    if (!partnerData) return ''; 
+                const partnerData = allUsers[partnerUsername];
+                if (!partnerData) return ''; 
 
-                    return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp);
-                }).join('');
-            // ========================== END: CODE FIX ==========================
+                return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp);
+            }).join('');
             
             mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
             addClickListenersToItems();
         }
 
-
-        /**
-         * Renders the results of a user search in the main content area.
-         * @param {Array<Object>} results - An array of user objects that match the search query.
-         */
         function renderSearchResults(results) {
              if (results.length === 0) {
                 mainContent.innerHTML = '<div class="status-container"><p>کاربری با این مشخصات یافت نشد.</p></div>';
@@ -569,9 +525,6 @@
             addClickListenersToItems();
         }
         
-        /**
-         * Displays a loading spinner in the main content area while data is being fetched.
-         */
         function showLoadingSpinner() {
             mainContent.innerHTML = `
                 <div class="status-container">
@@ -580,28 +533,20 @@
                 </div>`;
         }
         
-        /**
-         * Displays a user-friendly error message in the main content area.
-         * @param {string} message - The error message to display.
-         */
         function showErrorMessage(message) {
             mainContent.innerHTML = `<div class="status-container"><p>${message}</p></div>`;
         }
 
         // --- SECTION: HTML Template Generators ---
 
-        /**
-         * Creates the HTML string for a single chat item in the list.
-         * @param {Object} partnerData - The user object for the chat partner.
-         * @param {string} lastMessage - The last message exchanged in the chat.
-         * @param {string} timestamp - The ISO string timestamp of the last message.
-         * @returns {string} The generated HTML string for the chat item.
-         */
         function createChatItemHtml(partnerData, lastMessage, timestamp) {
+            // --- FIX: Replaced pravatar with a more reliable avatar service ---
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName)}&background=1E90FF&color=fff&size=100`;
+            
             return `
                 <div class="chat-item" data-uid="${partnerData.username}">
                     <div class="profile-picture">
-                        <img src="https://i.pravatar.cc/100?u=${partnerData.username}" alt="${partnerData.displayName}">
+                        <img src="${avatarUrl}" alt="${partnerData.displayName}">
                         ${partnerData.isOnline ? '<div class="online-indicator"></div>' : ''}
                     </div>
                     <div class="chat-details">
@@ -614,16 +559,14 @@
                 </div>`;
         }
 
-        /**
-         * Creates the HTML string for a single search result item.
-         * @param {Object} userData - The user object for the search result.
-         * @returns {string} The generated HTML string for the search item.
-         */
         function createSearchResultHtml(userData) {
+            // --- FIX: Replaced pravatar with a more reliable avatar service ---
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName)}&background=161B22&color=fff&size=100`;
+            
             return `
                 <div class="search-result-item" data-uid="${userData.username}">
                     <div class="profile-picture">
-                        <img src="https://i.pravatar.cc/100?u=${userData.username}" alt="${userData.displayName}">
+                        <img src="${avatarUrl}" alt="${userData.displayName}">
                         ${userData.isOnline ? '<div class="online-indicator"></div>' : ''}
                     </div>
                     <div class="chat-details">
@@ -636,76 +579,49 @@
 
         // --- SECTION: Event Handlers & Interactions ---
 
-        /**
-         * Handles the input event on the search bar for live filtering of users.
-         */
         function handleSearch() {
             const query = searchInput.value.toLowerCase().trim();
-
-            // If the search bar is cleared, show the main chat list again
             if (!query) {
                 renderChatList(); 
                 return;
             }
-
-            const allUsersArray = Object.values(allUsers);
-            const filteredUsers = allUsersArray.filter(user => 
+            const filteredUsers = Object.values(allUsers).filter(user => 
                 user.username.toLowerCase().includes(query) ||
                 user.displayName.toLowerCase().includes(query)
             );
-
             renderSearchResults(filteredUsers);
         }
 
-        /**
-         * Adds click listeners to all chat or search result items to enable navigation.
-         */
         function addClickListenersToItems() {
-            const items = mainContent.querySelectorAll('[data-uid]');
-            items.forEach(item => {
+            mainContent.querySelectorAll('[data-uid]').forEach(item => {
                 item.addEventListener('click', () => {
                     const targetUid = item.dataset.uid;
                     console.log(`Navigating to chat with user: ${targetUid}`);
-                    // This line will navigate to the private chat page.
-                    // Replace 'pivi.html' if your chat page has a different name.
                     window.location.href = `pivi.html?uid=${targetUid}`;
                 });
             });
         }
         
-        // --- NEW: Functions for Profile Page ---
+        // --- Functions for Profile Page ---
 
-        /**
-         * Populates and displays the profile overlay.
-         */
         function showProfile() {
             if (!currentUser) return;
-
-            // Populate the data
-            profileImage.src = `https://i.pravatar.cc/150?u=${currentUser.username}`;
+            
+            // --- FIX: Replaced pravatar with a more reliable avatar service ---
+            profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName)}&background=0D1117&color=fff&size=150`;
             profileDisplayName.textContent = currentUser.displayName;
             profileUsername.textContent = `@${currentUser.username}`;
 
-            // Show the overlay with a sliding animation
             profileOverlay.classList.add('active');
         }
 
-        /**
-         * Hides the profile overlay.
-         */
         function hideProfile() {
             profileOverlay.classList.remove('active');
         }
 
-        /**
-         * Handles the user logout process.
-         */
         function handleLogout() {
-            // Ask for confirmation before logging out
             if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
-                // Clear user data from local storage
                 localStorage.removeItem('currentUser');
-                // Redirect to the login page (assuming it's named login.html)
                 window.location.href = 'login.html'; 
             }
         }
