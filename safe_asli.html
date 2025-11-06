@@ -6,40 +6,187 @@
     <title>همیار - صفحه اصلی</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
-        :root { --primary-color: #007bff; --danger-color: #dc3545; --body-bg: #f0f2f5; --header-bg: #ffffff; --border-color: #dee2e6; }
-        *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Vazirmatn', sans-serif; margin: 0; background-color: var(--body-bg); color: #333; -webkit-user-select: none; user-select: none; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .app-container { width: 100%; height: 100%; max-width: 450px; background-color: white; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
-        .app-header { padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background-color: var(--header-bg); flex-shrink: 0; }
-        .app-header h1 { font-size: 1.4em; margin: 0; font-weight: 700; color: var(--primary-color); }
-        .app-header button { background: var(--danger-color); border: none; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Vazirmatn'; transition: background-color 0.2s; }
-        .app-header button:hover { background-color: #c82333; }
-        main { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
-        .view { display: none; height: 100%; width: 100%; flex-direction: column; }
-        .view.active { display: flex; }
-        #card-view { justify-content: center; align-items: center; padding: 20px; text-align: center; }
-        .status-message { font-size: 1.1em; color: #6c757d; }
-        #conversation-list { padding-top: 8px; }
-        .conversation-item { display: flex; align-items: center; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; }
-        .conversation-item:hover { background-color: #f8f9fa; }
-        .conversation-item img { width: 50px; height: 50px; border-radius: 50%; margin-left: 15px; }
-        .conversation-item h3 { margin: 0; font-size: 1.1em; font-weight: 500; }
-        .main-footer { padding: 5px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; background-color: var(--header-bg); }
-        .nav-btn { background: none; border: none; font-size: 2em; cursor: pointer; color: #adb5bd; transition: color 0.2s; padding: 10px 20px; }
-        .nav-btn.active { color: var(--primary-color); }
+        
+        :root {
+            --primary-color: #007bff;
+            --danger-color: #dc3545;
+            --body-bg: #f0f2f5;
+            --header-bg: #ffffff;
+            --border-color: #dee2e6;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            margin: 0;
+            background-color: var(--body-bg);
+            color: #333;
+            -webkit-user-select: none;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            height: 100%;
+            max-width: 450px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .app-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--header-bg);
+            flex-shrink: 0;
+        }
+
+        .app-header h1 {
+            font-size: 1.4em;
+            margin: 0;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .app-header button {
+            background: var(--danger-color);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Vazirmatn';
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        .app-header button:hover {
+            background-color: #c82333;
+        }
+
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .view {
+            display: none;
+            height: 100%;
+            width: 100%;
+            flex-direction: column;
+            animation: viewFadeIn 0.4s ease;
+        }
+        
+        @keyframes viewFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        #card-view {
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .status-message {
+            font-size: 1.1em;
+            color: #6c757d;
+        }
+
+        #conversation-list {
+            padding-top: 8px;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+        
+        .conversation-item:last-child {
+            border-bottom: none;
+        }
+
+        .conversation-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .conversation-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-left: 15px;
+            object-fit: cover;
+        }
+
+        .conversation-item h3 {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .main-footer {
+            padding: 5px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: var(--header-bg);
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #adb5bd;
+            transition: color 0.2s;
+            padding: 10px 20px;
+        }
+
+        .nav-btn.active {
+            color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
         <header class="app-header">
             <h1>همیار</h1>
-            <button id="logout-btn">خروج</button>
+            <button id="logout-btn">خروج از حساب</button>
         </header>
 
         <main>
+            <!-- View 1: Card Swiping (Placeholder) -->
             <div id="card-view" class="view active">
-                <div id="status-message" class="status-message">در حال بارگذاری کاربران...</div>
+                <div id="status-message" class="status-message">در حال بارگذاری...</div>
             </div>
+            <!-- View 2: Chat List -->
             <div id="chat-view" class="view">
                 <div id="conversation-list"></div>
             </div>
@@ -54,7 +201,7 @@
     <script>
         // --- CONFIGURATION ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234'; // <-- !!! این مقدار باید با سرور یکی باشد
+        const SHARED_SECRET = 'miko1234'; // This MUST match the secret in your PHP proxy
 
         // --- DOM Elements ---
         const cardView = document.getElementById('card-view');
@@ -68,7 +215,6 @@
         // --- App State ---
         let currentUser = null;
         let clientToken = null;
-        let allUsersData = {}; 
 
         // --- AUTH & INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -85,25 +231,24 @@
 
         async function initializeApp() {
             try {
-                // 1. اولین و مهم‌ترین کار: گرفتن توکن از پراکسی
+                // Step 1: Get a secure client token from the proxy. This is mandatory for all other API calls.
                 await refreshClientToken();
                 console.log("Client token received successfully.");
 
-                // 2. واکشی تمام کاربران و لیست تطابق‌ها (Matches)
+                // Step 2: Fetch all necessary data in parallel for performance.
                 const [allUsers, matches] = await Promise.all([
                     fetchAllUsers(),
                     fetchMatches()
                 ]);
 
-                allUsers.forEach(user => { allUsersData[user.username] = user; });
-                
-                // 3. راه‌اندازی نماهای مختلف
+                // Step 3: Initialize the UI with the fetched data.
                 initializeCardsView(allUsers);
                 renderConversationList(matches);
             } catch (error) {
                 console.error("Initialization Error:", error);
-                statusMessage.textContent = `خطا در بارگذاری برنامه: ${error.message}`;
-                alert(`خطا در ارتباط با سرور: ${error.message}`);
+                const friendlyMessage = `خطا در بارگذاری برنامه: ${error.message}`;
+                statusMessage.textContent = friendlyMessage;
+                alert(friendlyMessage);
             }
         }
 
@@ -127,31 +272,31 @@
         }
 
         function initializeCardsView(allUsers) {
-            // این بخش برای نمایش کارت‌های کاربران است. برای سادگی، فقط یک پیام نمایش می‌دهیم.
+            // This is a placeholder for the card swiping functionality.
             const otherUsersCount = allUsers.filter(u => u.uid !== currentUser.uid).length;
             if (otherUsersCount > 0) {
-                statusMessage.textContent = `${otherUsersCount} کاربر برای مشاهده یافت شد.`;
+                statusMessage.textContent = `شما می‌توانید ${otherUsersCount} کاربر جدید را مشاهده کنید.`;
             } else {
-                statusMessage.textContent = 'در حال حاضر کاربر دیگری برای نمایش وجود ندارد.';
+                statusMessage.textContent = 'در حال حاضر کاربر جدیدی برای نمایش وجود ندارد.';
             }
         }
 
         function renderConversationList(matches) {
             conversationList.innerHTML = '';
-            if (matches.length === 0) {
-                conversationList.innerHTML = '<div class="status-message" style="padding: 20px;">هنوز هیچ تطابقی نداری!</div>';
+            if (!matches || matches.length === 0) {
+                conversationList.innerHTML = '<div class="status-message" style="padding: 20px;">هنوز هیچ گفتگویی نداری. برای شروع، کاربران دیگر را لایک کن!</div>';
                 return;
             }
             matches.forEach(user => {
-                if (!user) return;
+                if (!user) return; // Skip if a user object is null
                 const item = document.createElement('div');
                 item.className = 'conversation-item';
                 item.innerHTML = `
                     <img src="https://i.pravatar.cc/100?u=${user.username}" alt="${user.displayName}">
                     <h3>${user.displayName}</h3>`;
                 
+                // CRITICAL: Navigate to pivi.html with the partner's username
                 item.addEventListener('click', () => {
-                    // مهم: هدایت به صفحه چت خصوصی با نام کاربری طرف مقابل
                     window.location.href = `pivi.html?with=${user.username}`;
                 });
                 conversationList.appendChild(item);
@@ -160,10 +305,12 @@
 
         // --- DATA FETCHING ---
         async function refreshClientToken() {
-            // برای گرفتن توکن، باید هدر امن را ارسال کنیم
-            clientToken = await apiRequest('?auth=token', 'GET', null, { 'X-Proxy-Secret': SHARED_SECRET });
-            if (!clientToken || !clientToken.token) throw new Error("Could not retrieve a valid client token.");
-            localStorage.setItem('clientToken', clientToken.token); // ذخیره توکن برای استفاده در صفحات دیگر
+            // This special request requires the X-Proxy-Secret header for authentication.
+            const tokenResponse = await apiRequest('?auth=token', 'GET', null, { 'X-Proxy-Secret': SHARED_SECRET });
+            if (!tokenResponse || !tokenResponse.token) throw new Error("Could not retrieve a valid client token.");
+            
+            clientToken = tokenResponse.token;
+            localStorage.setItem('clientToken', clientToken); // Save token for pivi.html
         }
 
         async function fetchAllUsers() {
@@ -172,58 +319,61 @@
         }
 
         async function fetchMatches() {
-            // منطق پیدا کردن Match: کسانی که من لایک کرده‌ام و آن‌ها هم من را لایک کرده‌اند
+            // Logic to find matches: Users that I've liked AND have liked me back.
             const myInteractions = await apiRequest(`?path=interactions/${currentUser.uid}`, 'GET') || {};
             const myLikedUids = Object.keys(myInteractions).filter(uid => myInteractions[uid] === 'liked');
 
-            if (myLikedUids.length === 0) return [];
+            if (myLikedUids.length === 0) return []; // No likes, no matches.
             
             const matchPromises = myLikedUids.map(async likedUid => {
                 const theirInteraction = await apiRequest(`?path=interactions/${likedUid}/${currentUser.uid}`, 'GET');
                 if (theirInteraction === 'liked') {
-                    // کاربر پیدا شد! اطلاعات کامل او را از دیتابیس می‌خوانیم
+                    // It's a match! Fetch this user's full profile.
                     return await apiRequest(`?path=users/${likedUid}`, 'GET');
                 }
                 return null;
             });
-            return (await Promise.all(matchPromises)).filter(Boolean); // حذف مقادیر null
+
+            // Wait for all checks to complete and filter out any non-matches (null values).
+            return (await Promise.all(matchPromises)).filter(Boolean);
         }
 
-        // --- API HELPER ---
+        // --- GENERIC API HELPER ---
         async function apiRequest(url, method, body = null, extraHeaders = {}) {
-            const token = localStorage.getItem('clientToken');
             const headers = {
                 'Content-Type': 'application/json',
                 ...extraHeaders
             };
-            if (token && !url.includes('auth=token')) {
-                 headers['Authorization'] = `Bearer ${token}`;
+            // For all requests other than getting the token, we use the Bearer token.
+            if (clientToken && !url.includes('auth=token')) {
+                 headers['Authorization'] = `Bearer ${clientToken}`;
             }
 
             const options = { method, headers };
             
-            // **مهم**: UID کاربر فعلی را برای شبیه‌سازی در پراکسی ارسال می‌کنیم
-            if (body) {
-                body.auth_override_uid = currentUser.uid;
-                options.body = JSON.stringify(body);
-            } else if (method !== 'GET') {
-                options.body = JSON.stringify({ auth_override_uid: currentUser.uid });
+            // CRITICAL: Embed the current user's UID in the request body for methods that write data.
+            // The proxy will use this to tell Firebase who is making the request, enforcing security rules.
+            if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+                let requestBody = body || {};
+                requestBody.auth_override_uid = currentUser.uid;
+                options.body = JSON.stringify(requestBody);
             }
 
-            // برای GET، باید UID را در URL بفرستیم، اما پراکسی ما آن را از body می‌خواند.
-            // پس ما همواره یک body حداقلی می‌فرستیم (پراکسی ما هوشمندانه عمل می‌کند).
-            // این رویکرد ساده‌تر است.
-
-            const response = await fetch(`${PROXY_URL}${url}`, options);
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'An unknown error occurred' }));
-                console.error(`API Error on ${url}:`, response.status, errorData);
-                throw new Error(errorData.error || `HTTP Error: ${response.status}`);
+            try {
+                const response = await fetch(`${PROXY_URL}${url}`, options);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'خطای ناشناخته' }));
+                    throw new Error(errorData.error || `خطای سرور: ${response.status}`);
+                }
+                return response.status === 204 ? null : response.json();
+            } catch (error) {
+                console.error("API Request Failed:", error);
+                throw error; // Re-throw the error to be handled by the calling function.
             }
-            return response.status === 204 ? null : response.json();
         }
 
         function logout() {
+            // Clear all stored data and redirect to the login page.
             localStorage.clear();
             window.location.href = 'login.html';
         }
