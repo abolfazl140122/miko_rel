@@ -200,6 +200,10 @@
             <div class="input-group"><label for="password">رمز عبور</label><div class="input-wrapper"><input type="password" id="password" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div><div class="error-message" id="password-error"></div></div>
             <div class="input-group"><label for="passwordConfirm">تکرار رمز عبور</label><div class="input-wrapper"><input type="password" id="passwordConfirm" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 5-5 4.9 4.9 0 0 1 3.3.8"></path></svg></div><div class="error-message" id="passwordConfirm-error"></div></div>
             <div class="input-group"><label for="bio">درباره من (اختیاری)</label><textarea id="bio" placeholder="کمی درباره خودتان بنویسید..."></textarea></div>
+            
+            <!-- [FIXED] The missing interests input field is added back here -->
+            <div class="input-group"><label for="interests">علاقه‌مندی‌ها (اختیاری)</label><div class="input-wrapper"><input type="text" id="interests" placeholder="با ویرگول (،) جدا کنید"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"></path></svg></div></div>
+            
             <div class="input-group terms-group"><input type="checkbox" id="terms" required style="width: auto;"><label for="terms">با <a href="#">قوانین و مقررات</a> موافقم.</label></div><div class="error-message" id="terms-error"></div>
             
             <button type="submit" id="submit-btn" disabled>
@@ -218,6 +222,7 @@
         const form = document.getElementById('register-form');
         const submitBtn = document.getElementById('submit-btn');
         const formStatus = document.getElementById('form-status');
+        // This object now correctly maps to all elements in the HTML
         const allInputs = {
             displayName: document.getElementById('displayName'),
             username: document.getElementById('username'),
@@ -228,7 +233,7 @@
             passwordConfirm: document.getElementById('passwordConfirm'),
             terms: document.getElementById('terms'),
             bio: document.getElementById('bio'),
-            interests: document.getElementById('interests'),
+            interests: document.getElementById('interests'), // This will now find the element
             profilePic: document.getElementById('profilePic')
         };
 
@@ -249,23 +254,15 @@
         // --- Validation Logic ---
         function validateField(fieldId) {
             const input = allInputs[fieldId];
-            // If element doesn't exist in DOM, don't validate.
             if (!input) return true; 
 
             let isValid = true;
             hideError(fieldId);
 
-            // Check for required fields
-            if (input.required) {
-                if (input.type === 'checkbox' && !input.checked) {
-                    showError(fieldId, 'شما باید با قوانین موافقت کنید.');
-                    isValid = false;
-                } else if (input.value.trim() === '') {
-                    showError(fieldId, 'این فیلد الزامی است.');
-                    isValid = false;
-                }
+            if (input.required && (input.type === 'checkbox' ? !input.checked : input.value.trim() === '')) {
+                showError(fieldId, input.type === 'checkbox' ? 'شما باید با قوانین موافقت کنید.' : 'این فیلد الزامی است.');
+                return false;
             }
-            if (!isValid) return false;
 
             // Specific validation rules
             switch(fieldId) {
@@ -294,7 +291,6 @@
                     }
                     break;
                 case 'passwordConfirm':
-                    // [FIXED] Securely check if password field exists before reading its value
                     if (!allInputs.password || input.value !== allInputs.password.value) {
                         showError(fieldId, 'رمزهای عبور مطابقت ندارند.');
                         isValid = false;
@@ -305,29 +301,23 @@
         }
 
         function checkFormValidity() {
-            // We only validate the required inputs for enabling the button
             const requiredFields = ['displayName', 'username', 'mobile', 'age', 'gender', 'password', 'passwordConfirm', 'terms'];
-            let isFormValid = true;
-            for (const key of requiredFields) {
-                if (!validateField(key)) isFormValid = false;
-            }
+            const isFormValid = requiredFields.every(key => validateField(key));
             submitBtn.disabled = !isFormValid;
             return isFormValid;
         }
 
         // --- Event Listeners ---
         Object.values(allInputs).forEach(input => {
-            if(!input) return; // Skip if element not found
+            if(!input) return;
             const eventType = ['checkbox', 'select-one', 'file'].includes(input.type) ? 'change' : 'input';
-            input.addEventListener(eventType, () => checkFormValidity());
+            input.addEventListener(eventType, checkFormValidity);
         });
 
         allInputs.profilePic.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
                 const reader = new FileReader();
-                reader.onload = (event) => {
-                    document.getElementById('profile-preview').src = event.target.result;
-                }
+                reader.onload = (event) => { document.getElementById('profile-preview').src = event.target.result; }
                 reader.readAsDataURL(e.target.files[0]);
             }
         });
@@ -345,12 +335,10 @@
             submitBtn.classList.add('loading');
             formStatus.style.display = 'none';
             try {
-                // 1. Get client token from proxy
                 const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
                 if (!tokenResponse.ok) throw new Error('خطا در دریافت توکن احراز هویت.');
                 const tokenData = await tokenResponse.json();
 
-                // 2. Prepare user data object
                 const userData = {
                     displayName: allInputs.displayName.value.trim(),
                     username: allInputs.username.value.trim().toLowerCase(),
@@ -359,33 +347,30 @@
                     gender: allInputs.gender.value,
                     password: allInputs.password.value,
                     bio: allInputs.bio.value.trim(),
-                    interests: allInputs.interests.value.trim().split(/[,،]/g).map(i => i.trim()).filter(Boolean),
+                    interests: allInputs.interests.value.trim(), // Storing as a comma-separated string
                     createdAt: new Date().toISOString(),
                     isOnline: false,
                     lastSeen: new Date().toISOString()
                 };
 
-                // 3. Send data to Firebase via proxy
                 const registerResponse = await fetch(`${PROXY_URL}?path=users/${userData.username}`, {
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json', 
                         'Authorization': `Bearer ${tokenData.token}`,
-                        'X-User-Username': userData.username // The critical header for your proxy
+                        'X-User-Username': userData.username
                     },
                     body: JSON.stringify(userData)
                 });
                 
                 const responseData = await registerResponse.json();
                 if (!registerResponse.ok) {
-                    // Check for specific Firebase permission denied error
                     if (responseData.error && responseData.error.toLowerCase().includes('permission_denied')) {
-                         throw new Error('خطا: قوانین پایگاه داده اجازه ثبت این اطلاعات را نمی‌دهد. لطفا قوانین فایربیس را بررسی کنید.');
+                         throw new Error('خطا: قوانین پایگاه داده اجازه ثبت این اطلاعات را نمی‌دهد.');
                     }
                     throw new Error(responseData.error || 'خطا در ثبت اطلاعات در سرور.');
                 }
                 
-                // 4. On success, store user and redirect
                 localStorage.setItem('currentUser', JSON.stringify({
                     username: userData.username,
                     displayName: userData.displayName
@@ -399,8 +384,8 @@
 
             } catch (error) {
                 formStatus.textContent = error.message;
-                formStatus.className = 'error';
                 formStatus.style.display = 'block';
+                formStatus.className = 'error';
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('loading');
