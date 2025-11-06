@@ -207,6 +207,7 @@
             align-items: center;
             height: 100%;
             color: var(--text-secondary);
+            text-align: center;
         }
         .spinner {
             width: 40px;
@@ -216,7 +217,7 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { to { transform: rotate(30deg); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
     </style>
 </head>
@@ -279,7 +280,7 @@
          * # TEST PLAN (راهنمای تست):
          * ----------------------------------------------------------------
          * 1.  **تست دریافت توکن (cURL):**
-         *     curl -i -H "X-Proxy-Secret: miko124" "https://miko.freehost.io/firebase_proxy.php?auth=token"
+         *     curl -i -H "X-Proxy-Secret: miko1234" "https://miko.freehost.io/firebase_proxy.php?auth=token"
          * 2.  **تست دریافت پیام‌ها (cURL):**
          *     curl -H "Authorization: Bearer <TOKEN>" -H "X-User-Username: <YOUR_USERNAME>" "https://miko.freehost.io/firebase_proxy.php?path=pivi_chats/<CHAT_ID>/messages"
          * 3.  **تست BFcache در مرورگر:**
@@ -292,7 +293,7 @@
 
         // --- بخش ۱: تنظیمات و متغیرهای اصلی ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko124'; // هشدار: این کلید در محیط پروداکشن نباید در سمت کلاینت باشد.
+        const SHARED_SECRET = 'miko1234'; // هشدار: این کلید در محیط پروداکشن نباید در سمت کلاینت باشد.
 
         // --- ارجاع به عناصر DOM ---
         const partnerNameEl = document.getElementById('partner-name');
@@ -317,18 +318,18 @@
         window.addEventListener('pageshow', (event) => {
             if (event.persisted) {
                 // صفحه از BFcache بازیابی شده است، فقط منابع را مجددا فعال کن
-                console.log('Page restored from BFcache. Resuming...');
+                console.log('صفحه از کش بازیابی شد. فعال‌سازی مجدد...');
                 resumeApp();
             } else {
                 // صفحه برای اولین بار بارگذاری می‌شود
-                console.log('Page loaded for the first time. Initializing...');
+                console.log('صفحه برای اولین بار بارگذاری شد. در حال مقداردهی اولیه...');
                 initializeApp();
             }
         });
 
         // پاک‌سازی منابع هنگام خروج از صفحه
         window.addEventListener('pagehide', () => {
-            console.log('Page is being hidden. Cleaning up resources.');
+            console.log('صفحه در حال پنهان شدن است. پاک‌سازی منابع...');
             pauseApp();
         });
 
@@ -359,7 +360,7 @@
             // پشتیبانی از هر دو پارامتر uid و with
             const partnerUsername = urlParams.get('uid') || urlParams.get('with');
             if (!partnerUsername) {
-                showError('کاربر مقصد مشخص نشده است. لطفاً از صفحه اصلی وارد شوید.');
+                showError('کاربر مقصد مشخص نشده است. <br> لطفاً از صفحه اصلی وارد شوید.');
                 return;
             }
 
@@ -381,7 +382,7 @@
                 startPolling();
                 
             } catch (error) {
-                console.error("Initialization Error:", error);
+                console.error("خطا در مقداردهی اولیه:", error);
                 showError(`خطا در بارگذاری چت: ${error.message}`);
             }
         }
@@ -391,14 +392,14 @@
         function startPolling() {
             if (messagePollingInterval) clearInterval(messagePollingInterval);
             messagePollingInterval = setInterval(loadMessages, 3000);
-            console.log('Polling started.');
+            console.log('دریافت خودکار پیام‌ها شروع شد.');
         }
 
         function pauseApp() {
             if (messagePollingInterval) {
                 clearInterval(messagePollingInterval);
                 messagePollingInterval = null;
-                console.log('Polling paused.');
+                console.log('دریافت خودکار پیام‌ها متوقف شد.');
             }
         }
 
@@ -488,7 +489,7 @@
                 scrollToBottom();
 
             } catch(error) {
-                console.error("Error loading messages:", error);
+                console.error("خطا در بارگذاری پیام‌ها:", error);
             }
         }
 
@@ -522,7 +523,9 @@
             messageInput.value = '';
 
             try {
+                // ارسال پیام جدید
                 await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
+                // بروزرسانی اطلاعات کلی چت (آخرین پیام و زمان) برای نمایش در لیست چت‌ها
                 await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
                     lastMessage: text,
                     timestamp: message.timestamp,
@@ -531,18 +534,19 @@
                 await loadMessages();
             } catch(error) {
                 alert('خطا در ارسال پیام!');
-                console.error('Send message error:', error);
-                messageInput.value = text;
+                console.error('خطای ارسال پیام:', error);
+                messageInput.value = text; // در صورت خطا، متن را به فیلد ورودی بازگردان
             }
         }
         
         async function deleteMessage(messageId) {
             try {
+                // حذف نرم (Soft Delete)
                 await apiRequest(`pivi_chats/${chatId}/messages/${messageId}`, 'PATCH', { deleted: true });
                 await loadMessages();
             } catch(error) {
                 alert('خطا در حذف پیام.');
-                console.error('Delete message error:', error);
+                console.error('خطای حذف پیام:', error);
             }
         }
 
