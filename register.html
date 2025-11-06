@@ -42,46 +42,18 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .form-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .form-header h1 {
-            margin: 0 0 10px;
-            font-size: 1.9rem;
-            color: var(--text-primary);
-        }
-        .form-header p {
-            margin: 0;
-            color: var(--text-secondary);
-            font-size: 1rem;
-        }
+        .form-header { text-align: center; margin-bottom: 25px; }
+        .form-header h1 { margin: 0 0 10px; font-size: 1.9rem; color: var(--text-primary); }
+        .form-header p { margin: 0; color: var(--text-secondary); font-size: 1rem; }
 
-        .input-group {
-            margin-bottom: 18px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
-            font-size: 0.95rem;
-        }
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        .input-wrapper svg {
-            position: absolute;
-            left: 15px;
-            width: 20px;
-            height: 20px;
-            color: var(--text-secondary);
-        }
+        .input-group { margin-bottom: 18px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #555; font-size: 0.95rem; }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-wrapper svg { position: absolute; right: 15px; width: 20px; height: 20px; color: var(--text-secondary); pointer-events: none; }
+        
         .input-group input, .input-group select, .input-group textarea {
             width: 100%;
-            padding: 12px 15px 12px 45px; /* Right padding for icon */
+            padding: 12px 45px 12px 15px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 1rem;
@@ -89,9 +61,6 @@
             background-color: var(--input-bg);
             transition: border-color 0.3s, box-shadow 0.3s;
         }
-        html[dir="rtl"] .input-wrapper svg { left: auto; right: 15px; }
-        html[dir="rtl"] .input-group input { padding: 12px 45px 12px 15px; }
-
         .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
             outline: none;
             border-color: var(--primary-color);
@@ -99,39 +68,14 @@
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
         }
         .input-group textarea { padding: 12px 15px; resize: vertical; min-height: 80px; }
+        .input-group select { padding-right: 15px; } /* No icon for select */
         
-        .error-message {
-            color: var(--error-color);
-            font-size: 0.85em;
-            margin-top: 5px;
-            min-height: 1.2em;
-            display: none;
-        }
+        .error-message { color: var(--error-color); font-size: 0.85em; margin-top: 5px; min-height: 1.2em; display: none; }
         
-        .profile-uploader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            cursor: pointer;
-        }
-        .profile-uploader .profile-preview {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--border-color);
-            background-color: #e9ecef;
-            transition: border-color 0.3s;
-        }
-        .profile-uploader:hover .profile-preview {
-            border-color: var(--primary-color);
-        }
-        .profile-uploader span {
-            font-weight: 500;
-            color: var(--primary-color);
-        }
+        .profile-uploader { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 25px; cursor: pointer; }
+        .profile-uploader .profile-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid var(--border-color); background-color: #e9ecef; transition: border-color 0.3s; }
+        .profile-uploader:hover .profile-preview { border-color: var(--primary-color); }
+        .profile-uploader span { font-weight: 500; color: var(--primary-color); }
         .profile-uploader input[type="file"] { display: none; }
 
         .form-row { display: flex; gap: 15px; }
@@ -143,38 +87,26 @@
         .terms-group a:hover { text-decoration: underline; }
         
         #submit-btn {
-            width: 100%; padding: 14px; border: none; border-radius: 8px;
-            background-color: var(--primary-color); color: white;
-            font-size: 1.1em; font-weight: 700; cursor: pointer;
-            transition: background-color 0.3s, opacity 0.3s;
-            display: flex; justify-content: center; align-items: center;
+            width: 100%; padding: 14px; border: none; border-radius: 8px; background-color: var(--primary-color);
+            color: white; font-size: 1.1em; font-weight: 700; cursor: pointer;
+            transition: background-color 0.3s, opacity 0.3s; display: flex; justify-content: center; align-items: center;
         }
         #submit-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
         #submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         
         .spinner {
-            width: 20px; height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: none;
+            width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #fff;
+            border-radius: 50%; animation: spin 1s linear infinite; display: none;
         }
         #submit-btn.loading .spinner { display: block; }
         #submit-btn.loading span { display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        #form-status {
-            text-align: center; margin-top: 20px; padding: 12px;
-            border-radius: 8px; display: none; font-weight: 500;
-        }
+        #form-status { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; display: none; font-weight: 500; }
         #form-status.success { background-color: #d4edda; color: #155724; }
         #form-status.error { background-color: #f8d7da; color: #721c24; }
 
-        .form-footer {
-            margin-top: 25px; text-align: center; font-size: 0.9em;
-            color: var(--text-secondary); border-top: 1px solid #eee; padding-top: 20px;
-        }
+        .form-footer { margin-top: 25px; text-align: center; font-size: 0.9em; color: var(--text-secondary); border-top: 1px solid #eee; padding-top: 20px; }
         .form-footer a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
         .form-footer a:hover { text-decoration: underline; }
     </style>
@@ -188,22 +120,19 @@
         </div>
         <form id="register-form" novalidate>
             <label for="profilePic" class="profile-uploader">
-                <img id="profile-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjZWQ0ZGEiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXVzZXItcm91bmQiPjxwYXRoIGQ9Ik0xOCAyMHYtMS4zNzJhNC45OSA0Ljk5IDAgMCAwLTIuNDgtNC4yOE02IDIwdi0xLjM3MmE0Ljk5IDQuOTkgMCAwIDEgMi40OC00LjI4TTQgMnYxM2E4IDggMCAwIDAgMTYgMFYyTTIgMjJoMjAiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IiIgcj0iNCIvPjwvc3ZnPg==" alt="Profile Preview" class="profile-preview">
+                <img id="profile-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjZWQ0ZGEiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xOCAyMHYtMS4zNzJhNC45OSA0Ljk5IDAgMCAwLTIuNDgtNC4yOE02IDIwdi0xLjM3MmE0Ljk5IDQuOTkgMCAwIDEgMi40OC00LjI4TTQgMnYxM2E4IDggMCAwIDAgMTYgMFYyTTIgMjJoMjAiLz48Y2lyY2xlIGN4PSIxMiIgY3k9Ijgigcj0iNCIvPjwvc3ZnPg==" alt="Profile Preview" class="profile-preview">
                 <span>انتخاب تصویر پروفایل</span>
                 <input type="file" id="profilePic" accept="image/*">
             </label>
 
-            <div class="input-group"><label for="displayName">نام نمایشی</label><div class="input-wrapper"><input type="text" id="displayName" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg></div><div class="error-message" id="displayName-error"></div></div>
+            <div class="input-group"><label for="displayName">نام نمایشی</label><div class="input-wrapper"><input type="text" id="displayName" placeholder="نامی که دیگران می‌بینند" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg></div><div class="error-message" id="displayName-error"></div></div>
             <div class="input-group"><label for="username">نام کاربری (انگلیسی)</label><div class="input-wrapper"><input type="text" id="username" placeholder="فقط حروف انگلیسی، اعداد و _" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M12 18h.01"></path><path d="M16 12h-4"></path></svg></div><div class="error-message" id="username-error"></div></div>
             <div class="input-group"><label for="mobile">شماره موبایل</label><div class="input-wrapper"><input type="tel" id="mobile" placeholder="مثال: 09123456789" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div><div class="error-message" id="mobile-error"></div></div>
             <div class="form-row"><div class="input-group"><label for="age">سن</label><input type="number" id="age" required min="18" max="99"><div class="error-message" id="age-error"></div></div><div class="input-group"><label for="gender">جنسیت</label><select id="gender" required><option value="" disabled selected>انتخاب...</option><option value="male">مرد</option><option value="female">زن</option></select><div class="error-message" id="gender-error"></div></div></div>
             <div class="input-group"><label for="password">رمز عبور</label><div class="input-wrapper"><input type="password" id="password" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div><div class="error-message" id="password-error"></div></div>
             <div class="input-group"><label for="passwordConfirm">تکرار رمز عبور</label><div class="input-wrapper"><input type="password" id="passwordConfirm" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 5-5 4.9 4.9 0 0 1 3.3.8"></path></svg></div><div class="error-message" id="passwordConfirm-error"></div></div>
             <div class="input-group"><label for="bio">درباره من (اختیاری)</label><textarea id="bio" placeholder="کمی درباره خودتان بنویسید..."></textarea></div>
-            
-            <!-- [FIXED] The missing interests input field is added back here -->
             <div class="input-group"><label for="interests">علاقه‌مندی‌ها (اختیاری)</label><div class="input-wrapper"><input type="text" id="interests" placeholder="با ویرگول (،) جدا کنید"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"></path></svg></div></div>
-            
             <div class="input-group terms-group"><input type="checkbox" id="terms" required style="width: auto;"><label for="terms">با <a href="#">قوانین و مقررات</a> موافقم.</label></div><div class="error-message" id="terms-error"></div>
             
             <button type="submit" id="submit-btn" disabled>
@@ -222,7 +151,6 @@
         const form = document.getElementById('register-form');
         const submitBtn = document.getElementById('submit-btn');
         const formStatus = document.getElementById('form-status');
-        // This object now correctly maps to all elements in the HTML
         const allInputs = {
             displayName: document.getElementById('displayName'),
             username: document.getElementById('username'),
@@ -233,7 +161,7 @@
             passwordConfirm: document.getElementById('passwordConfirm'),
             terms: document.getElementById('terms'),
             bio: document.getElementById('bio'),
-            interests: document.getElementById('interests'), // This will now find the element
+            interests: document.getElementById('interests'),
             profilePic: document.getElementById('profilePic')
         };
 
@@ -256,7 +184,6 @@
             const input = allInputs[fieldId];
             if (!input) return true; 
 
-            let isValid = true;
             hideError(fieldId);
 
             if (input.required && (input.type === 'checkbox' ? !input.checked : input.value.trim() === '')) {
@@ -264,40 +191,14 @@
                 return false;
             }
 
-            // Specific validation rules
             switch(fieldId) {
-                case 'username':
-                    if (!/^[a-zA-Z0-9_]{3,15}$/.test(input.value)) {
-                        showError(fieldId, 'نام کاربری باید 3 تا 15 کاراکتر انگلیسی، عدد یا _ باشد.');
-                        isValid = false;
-                    }
-                    break;
-                case 'mobile':
-                    if (!/^09\d{9}$/.test(input.value)) {
-                        showError(fieldId, 'فرمت شماره موبایل صحیح نیست (مثال: 09123456789).');
-                        isValid = false;
-                    }
-                    break;
-                case 'age':
-                    if (+input.value < 18 || +input.value > 99) {
-                        showError(fieldId, 'سن شما باید بین 18 تا 99 سال باشد.');
-                        isValid = false;
-                    }
-                    break;
-                case 'password':
-                    if (input.value.length < 8) {
-                        showError(fieldId, 'رمز عبور باید حداقل 8 کاراکتر باشد.');
-                        isValid = false;
-                    }
-                    break;
-                case 'passwordConfirm':
-                    if (!allInputs.password || input.value !== allInputs.password.value) {
-                        showError(fieldId, 'رمزهای عبور مطابقت ندارند.');
-                        isValid = false;
-                    }
-                    break;
+                case 'username': if (input.value && !/^[a-zA-Z0-9_]{3,15}$/.test(input.value)) { showError(fieldId, 'نام کاربری باید 3 تا 15 کاراکتر انگلیسی، عدد یا _ باشد.'); return false; } break;
+                case 'mobile': if (input.value && !/^09\d{9}$/.test(input.value)) { showError(fieldId, 'فرمت شماره موبایل صحیح نیست (مثال: 09123456789).'); return false; } break;
+                case 'age': if (input.value && (+input.value < 18 || +input.value > 99)) { showError(fieldId, 'سن شما باید بین 18 تا 99 سال باشد.'); return false; } break;
+                case 'password': if (input.value && input.value.length < 8) { showError(fieldId, 'رمز عبور باید حداقل 8 کاراکتر باشد.'); return false; } break;
+                case 'passwordConfirm': if (input.value && input.value !== allInputs.password.value) { showError(fieldId, 'رمزهای عبور مطابقت ندارند.'); return false; } break;
             }
-            return isValid;
+            return true;
         }
 
         function checkFormValidity() {
@@ -347,27 +248,25 @@
                     gender: allInputs.gender.value,
                     password: allInputs.password.value,
                     bio: allInputs.bio.value.trim(),
-                    interests: allInputs.interests.value.trim(), // Storing as a comma-separated string
+                    interests: allInputs.interests.value.trim(),
                     createdAt: new Date().toISOString(),
                     isOnline: false,
                     lastSeen: new Date().toISOString()
                 };
 
+                // [FIXED] Sending the required 'X-User-Username' header
                 const registerResponse = await fetch(`${PROXY_URL}?path=users/${userData.username}`, {
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json', 
                         'Authorization': `Bearer ${tokenData.token}`,
-                        'X-User-Username': userData.username
+                        'X-User-Username': userData.username // این هدر برای پراکسی شما ضروری است
                     },
                     body: JSON.stringify(userData)
                 });
                 
-                const responseData = await registerResponse.json();
+                const responseData = await registerResponse.json().catch(() => ({}));
                 if (!registerResponse.ok) {
-                    if (responseData.error && responseData.error.toLowerCase().includes('permission_denied')) {
-                         throw new Error('خطا: قوانین پایگاه داده اجازه ثبت این اطلاعات را نمی‌دهد.');
-                    }
                     throw new Error(responseData.error || 'خطا در ثبت اطلاعات در سرور.');
                 }
                 
@@ -376,11 +275,12 @@
                     displayName: userData.displayName
                 }));
                 
-                formStatus.textContent = 'ثبت‌نام موفق بود! در حال انتقال...';
+                formStatus.textContent = 'ثبت‌نام موفق بود! در حال انتقال به صفحه اصلی...';
                 formStatus.className = 'success';
                 formStatus.style.display = 'block';
                 
-                setTimeout(() => { window.location.href = 'pivi.html'; }, 2000);
+                // [FIXED] Redirecting to the correct main page
+                setTimeout(() => { window.location.href = 'safe_asli.html'; }, 2000);
 
             } catch (error) {
                 formStatus.textContent = error.message;
