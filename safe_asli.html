@@ -330,9 +330,6 @@
     </style>
 </head>
 <body>
-    <!-- بقیه کدهای HTML و اسکریپت بدون تغییر باقی می‌مانند -->
-    <!-- The rest of the HTML and script tags remain unchanged -->
-
     <div class="app-container">
         <!-- TOP BAR with search -->
         <header class="app-header">
@@ -533,19 +530,30 @@
                 return;
             }
 
-            const chatListHtml = recentChats.map(chat => {
-                // Find the chat partner's username
-                const partnerUsername = chat.members.find(m => m !== currentUser.username);
-                const partnerData = allUsers[partnerUsername];
-                // If partner data isn't found (e.g., user was deleted), skip rendering this chat item
-                if (!partnerData) return ''; 
+            // ========================= START: CODE FIX =========================
+            const chatListHtml = recentChats
+                // 1. Filter out any invalid chat items that might not have a 'members' object
+                .filter(chat => chat && chat.members)
+                .map(chat => {
+                    // 2. Get an array of member usernames from the 'members' object's keys
+                    const membersArray = Object.keys(chat.members);
+                
+                    // 3. Find the partner's username from the newly created array
+                    const partnerUsername = membersArray.find(m => m !== currentUser.username);
 
-                return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp);
-            }).join('');
+                    // If for some reason a partner isn't found, or their data doesn't exist, skip this chat item
+                    if (!partnerUsername) return '';
+                    const partnerData = allUsers[partnerUsername];
+                    if (!partnerData) return ''; 
+
+                    return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp);
+                }).join('');
+            // ========================== END: CODE FIX ==========================
             
             mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
             addClickListenersToItems();
         }
+
 
         /**
          * Renders the results of a user search in the main content area.
