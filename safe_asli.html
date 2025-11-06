@@ -2,85 +2,45 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>همیار - صفحه اصلی</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
-        :root { --primary-color: #007bff; --success-color: #28a745; --danger-color: #e74c3c; --light-gray-color: #f8f9fa; --border-color: #dee2e6; --sent-bg: #e1f5fe; --received-bg: #f1f3f5; }
+        :root { --primary-color: #007bff; --danger-color: #dc3545; --body-bg: #f0f2f5; --header-bg: #ffffff; --border-color: #dee2e6; }
         *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Vazirmatn', sans-serif; margin: 0; background-color: var(--light-gray-color); color: #333; -webkit-user-select: none; user-select: none; }
-
-        .app-container { width: 100%; max-width: 400px; height: 100vh; margin: 0 auto; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
-
-        /* Header */
-        .app-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .app-header h1 { font-size: 1.5em; margin: 0; color: var(--primary-color); }
-        .app-header button { background: none; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-family: 'Vazirmatn'; transition: background-color 0.2s, color 0.2s; }
-        .app-header button:hover { background-color: var(--danger-color); color: white; }
-
-        /* Main Content Area */
-        main { flex-grow: 1; position: relative; overflow-y: auto; }
-
-        /* Card Swiping View */
-        .card-view { height: 100%; padding: 20px; display: flex; justify-content: center; align-items: center; position: relative; }
-        .profile-card { /* ... styles from original file ... */ }
-        .status-message { font-size: 1.2em; color: #aaa; text-align: center; padding: 20px; }
-        
-        /* Chat Views */
-        .chat-view { height: 100%; display: none; /* Hidden by default */ flex-direction: column; }
-        
-        /* --- NEW: Search Container --- */
-        #search-container {
-            padding: 10px 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        #search-user-input {
-            width: 100%;
-            padding: 10px 15px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            font-family: 'Vazirmatn';
-            font-size: 1em;
-        }
-        #search-results {
-            padding: 0 10px;
-        }
-        /* --- END NEW --- */
-
-
-        /* Conversation List */
-        #conversation-list { padding: 10px 0; }
-        .conversation-item { display: flex; align-items: center; padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
-        .conversation-item:hover { background-color: var(--light-gray-color); }
+        body { font-family: 'Vazirmatn', sans-serif; margin: 0; background-color: var(--body-bg); color: #333; -webkit-user-select: none; user-select: none; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .app-container { width: 100%; height: 100%; max-width: 450px; background-color: white; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        .app-header { padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background-color: var(--header-bg); flex-shrink: 0; }
+        .app-header h1 { font-size: 1.4em; margin: 0; font-weight: 700; color: var(--primary-color); }
+        .app-header button { background: var(--danger-color); border: none; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Vazirmatn'; transition: background-color 0.2s; }
+        .app-header button:hover { background-color: #c82333; }
+        main { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .view { display: none; height: 100%; width: 100%; flex-direction: column; }
+        .view.active { display: flex; }
+        #card-view { justify-content: center; align-items: center; padding: 20px; text-align: center; }
+        .status-message { font-size: 1.1em; color: #6c757d; }
+        #conversation-list { padding-top: 8px; }
+        .conversation-item { display: flex; align-items: center; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; }
+        .conversation-item:hover { background-color: #f8f9fa; }
         .conversation-item img { width: 50px; height: 50px; border-radius: 50%; margin-left: 15px; }
-        .conversation-item h3 { margin: 0; font-size: 1.1em; }
-
-        /* Main Footer Navigation */
-        .main-footer { padding: 10px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
-        .nav-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: #ccc; transition: color 0.2s; }
+        .conversation-item h3 { margin: 0; font-size: 1.1em; font-weight: 500; }
+        .main-footer { padding: 5px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; background-color: var(--header-bg); }
+        .nav-btn { background: none; border: none; font-size: 2em; cursor: pointer; color: #adb5bd; transition: color 0.2s; padding: 10px 20px; }
         .nav-btn.active { color: var(--primary-color); }
     </style>
 </head>
 <body>
-
     <div class="app-container">
-        <header class="app-header"><h1>همیار</h1><button id="logout-btn">خروج</button></header>
+        <header class="app-header">
+            <h1>همیار</h1>
+            <button id="logout-btn">خروج</button>
+        </header>
 
         <main>
-            <!-- View 1: Card Swiping -->
-            <div id="card-view" class="card-view">
-                <div id="status-message" class="status-message">در حال بارگذاری...</div>
+            <div id="card-view" class="view active">
+                <div id="status-message" class="status-message">در حال بارگذاری کاربران...</div>
             </div>
-
-            <!-- View 2: Chat -->
-            <div id="chat-view" class="chat-view">
-                <!-- NEW: Search area added here -->
-                <div id="search-container">
-                    <input type="text" id="search-user-input" placeholder="جستجوی کاربر بر اساس نام کاربری...">
-                </div>
-                <div id="search-results"></div>
-                
-                <!-- Sub-view 2a: Conversation List (for matches) -->
+            <div id="chat-view" class="view">
                 <div id="conversation-list"></div>
             </div>
         </main>
@@ -92,9 +52,10 @@
     </div>
 
     <script>
+        // --- CONFIGURATION ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234';
-        
+        const SHARED_SECRET = 'miko1234'; // <-- !!! این مقدار باید با سرور یکی باشد
+
         // --- DOM Elements ---
         const cardView = document.getElementById('card-view');
         const chatView = document.getElementById('chat-view');
@@ -103,201 +64,169 @@
         const navCardsBtn = document.getElementById('nav-cards-btn');
         const navChatBtn = document.getElementById('nav-chat-btn');
         const conversationList = document.getElementById('conversation-list');
-        
-        // --- NEW: Search Elements ---
-        const searchUserInput = document.getElementById('search-user-input');
-        const searchResults = document.getElementById('search-results');
 
         // --- App State ---
         let currentUser = null;
         let clientToken = null;
-        let allUsersData = {}; // Store all users by username for quick lookup
-        let matches = []; // List of users we've matched with
+        let allUsersData = {}; 
 
-        // --- AUTH & INIT ---
-        (async () => {
+        // --- AUTH & INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', async () => {
             const storedUser = localStorage.getItem('currentUser');
-            if (!storedUser) { window.location.href = 'login.html'; return; }
+            if (!storedUser) {
+                window.location.href = 'login.html';
+                return;
+            }
             currentUser = JSON.parse(storedUser);
-            
-            navCardsBtn.addEventListener('click', () => showView('cards'));
-            navChatBtn.addEventListener('click', () => showView('chat'));
-            logoutBtn.addEventListener('click', logout);
-            
-            // --- NEW: Event Listener for Search Input ---
-            searchUserInput.addEventListener('input', handleUserSearch);
-            
+
+            setupEventListeners();
             await initializeApp();
-        })();
+        });
 
         async function initializeApp() {
             try {
+                // 1. اولین و مهم‌ترین کار: گرفتن توکن از پراکسی
                 await refreshClientToken();
-                // We already fetch all users, which is perfect for our search feature
-                const allUsers = await fetchAllUsers();
+                console.log("Client token received successfully.");
+
+                // 2. واکشی تمام کاربران و لیست تطابق‌ها (Matches)
+                const [allUsers, matches] = await Promise.all([
+                    fetchAllUsers(),
+                    fetchMatches()
+                ]);
+
                 allUsers.forEach(user => { allUsersData[user.username] = user; });
                 
-                await initializeCardsView();
-                await initializeChatView();
+                // 3. راه‌اندازی نماهای مختلف
+                initializeCardsView(allUsers);
+                renderConversationList(matches);
             } catch (error) {
                 console.error("Initialization Error:", error);
-                statusMessage.textContent = `خطا: ${error.message}`;
+                statusMessage.textContent = `خطا در بارگذاری برنامه: ${error.message}`;
+                alert(`خطا در ارتباط با سرور: ${error.message}`);
             }
         }
 
-        // --- VIEW INITIALIZATION ---
-        async function initializeCardsView() {
-            // ... (No changes here)
-             statusMessage.textContent = 'در حال واکشی کاربران...';
-            const seenUsers = await fetchSeenUsers();
-            const usersToDisplay = Object.values(allUsersData).filter(user =>
-                user.username !== currentUser.username && !seenUsers.includes(user.username)
-            );
-            if (usersToDisplay.length > 0) {
-                 statusMessage.textContent = `${usersToDisplay.length} کاربر جدید یافت شد!`;
-            } else {
-                 statusMessage.textContent = 'کاربر جدیدی یافت نشد.';
-            }
+        function setupEventListeners() {
+            navCardsBtn.addEventListener('click', () => showView('cards'));
+            navChatBtn.addEventListener('click', () => showView('chat'));
+            logoutBtn.addEventListener('click', logout);
         }
 
-        async function initializeChatView() {
-            await fetchMatches();
-            renderConversationList();
-        }
-
-        // --- DATA FETCHING ---
-        async function refreshClientToken() {
-             const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-            if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
-            clientToken = (await response.json()).token;
-        }
-        async function fetchAllUsers() {
-            const response = await fetch(`${PROXY_URL}?path=users`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
-            if (!response.ok) throw new Error('خطا در واکشی لیست کاربران.');
-            const data = await response.json();
-            return data ? Object.values(data) : [];
-        }
-        async function fetchSeenUsers() {
-             const response = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
-            if (!response.ok) return [];
-            const data = await response.json();
-            return data ? Object.keys(data) : [];
-        }
-
-        async function fetchMatches() {
-            // ... (No changes here)
-            const myLikesResponse = await fetch(`${PROXY_URL}?path=interactions/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
-            if (!myLikesResponse.ok) return;
-            const myLikesData = await myLikesResponse.json();
-            if (!myLikesData) return;
-
-            const myLikedUsers = Object.keys(myLikesData).filter(key => myLikesData[key] === 'liked');
-            
-            const matchPromises = myLikedUsers.map(async (likedUsername) => {
-                const theirLikesResponse = await fetch(`${PROXY_URL}?path=interactions/${likedUsername}/${currentUser.username}`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
-                const theirAction = await theirLikesResponse.json();
-                if (theirAction === 'liked') {
-                    return allUsersData[likedUsername];
-                }
-                return null;
-            });
-            matches = (await Promise.all(matchPromises)).filter(Boolean);
-        }
-        
-        // --- UI & INTERACTIONS ---
+        // --- VIEW LOGIC ---
         function showView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             if (viewName === 'cards') {
-                cardView.style.display = 'flex';
-                chatView.style.display = 'none';
+                cardView.classList.add('active');
                 navCardsBtn.classList.add('active');
-                navChatBtn.classList.remove('active');
             } else {
-                cardView.style.display = 'none';
-                chatView.style.display = 'flex';
-                navCardsBtn.classList.remove('active');
+                chatView.classList.add('active');
                 navChatBtn.classList.add('active');
-                // --- NEW: Reset search when switching to chat view ---
-                searchUserInput.value = '';
-                searchResults.innerHTML = '';
-                conversationList.style.display = 'block'; // Show match list by default
             }
         }
 
-        function renderConversationList() {
-            conversationList.innerHTML = '';
-            const listTitle = document.createElement('h3');
-            listTitle.textContent = 'گفتگوهای شما';
-            listTitle.style.padding = '10px 15px 0';
-            listTitle.style.color = '#777';
-            conversationList.appendChild(listTitle);
+        function initializeCardsView(allUsers) {
+            // این بخش برای نمایش کارت‌های کاربران است. برای سادگی، فقط یک پیام نمایش می‌دهیم.
+            const otherUsersCount = allUsers.filter(u => u.uid !== currentUser.uid).length;
+            if (otherUsersCount > 0) {
+                statusMessage.textContent = `${otherUsersCount} کاربر برای مشاهده یافت شد.`;
+            } else {
+                statusMessage.textContent = 'در حال حاضر کاربر دیگری برای نمایش وجود ندارد.';
+            }
+        }
 
+        function renderConversationList(matches) {
+            conversationList.innerHTML = '';
             if (matches.length === 0) {
-                conversationList.insertAdjacentHTML('beforeend', '<div class="status-message">هنوز هیچ تطابقی نداری!</div>');
+                conversationList.innerHTML = '<div class="status-message" style="padding: 20px;">هنوز هیچ تطابقی نداری!</div>';
                 return;
             }
             matches.forEach(user => {
-                const item = document.createElement('a'); // Using <a> tag for direct navigation
-                item.href = `pivi.html?with=${user.username}`;
+                if (!user) return;
+                const item = document.createElement('div');
                 item.className = 'conversation-item';
-                item.style.textDecoration = 'none';
-                item.style.color = 'inherit';
-                item.dataset.username = user.username;
-                item.innerHTML = `<img src="https://i.pravatar.cc/100?u=${user.username}" alt="${user.displayName}"><h3>${user.displayName}</h3>`;
+                item.innerHTML = `
+                    <img src="https://i.pravatar.cc/100?u=${user.username}" alt="${user.displayName}">
+                    <h3>${user.displayName}</h3>`;
+                
+                item.addEventListener('click', () => {
+                    // مهم: هدایت به صفحه چت خصوصی با نام کاربری طرف مقابل
+                    window.location.href = `pivi.html?with=${user.username}`;
+                });
                 conversationList.appendChild(item);
             });
         }
 
-        // --- NEW: Search Handling Functions ---
-        function handleUserSearch(e) {
-            const query = e.target.value.trim().toLowerCase();
-            searchResults.innerHTML = '';
-
-            if (query.length < 2) {
-                conversationList.style.display = 'block'; // If search is empty, show matches
-                return;
-            }
-
-            conversationList.style.display = 'none'; // Hide matches while searching
-
-            const results = Object.values(allUsersData).filter(user => 
-                user.username.toLowerCase().includes(query) && user.username !== currentUser.username
-            );
-
-            if (results.length > 0) {
-                renderSearchResults(results);
-            } else {
-                searchResults.innerHTML = '<div class="status-message">کاربری با این مشخصات یافت نشد.</div>';
-            }
+        // --- DATA FETCHING ---
+        async function refreshClientToken() {
+            // برای گرفتن توکن، باید هدر امن را ارسال کنیم
+            clientToken = await apiRequest('?auth=token', 'GET', null, { 'X-Proxy-Secret': SHARED_SECRET });
+            if (!clientToken || !clientToken.token) throw new Error("Could not retrieve a valid client token.");
+            localStorage.setItem('clientToken', clientToken.token); // ذخیره توکن برای استفاده در صفحات دیگر
         }
 
-        function renderSearchResults(users) {
-            users.forEach(user => {
-                // We use an <a> tag to make it a clickable link to the pivi.html page
-                const item = document.createElement('a');
-                item.href = `pivi.html?with=${user.username}`;
-                // Re-using the same class for consistent styling
-                item.className = 'conversation-item'; 
-                item.style.textDecoration = 'none';
-                item.style.color = 'inherit';
-                
-                item.innerHTML = `
-                    <img src="https://i.pravatar.cc/100?u=${user.username}" alt="${user.displayName}">
-                    <div>
-                        <h3>${user.displayName}</h3>
-                        <p style="font-size: 0.9em; color: #888; margin:0;">@${user.username}</p>
-                    </div>
-                `;
-                searchResults.appendChild(item);
+        async function fetchAllUsers() {
+            const data = await apiRequest('?path=users', 'GET');
+            return data ? Object.values(data) : [];
+        }
+
+        async function fetchMatches() {
+            // منطق پیدا کردن Match: کسانی که من لایک کرده‌ام و آن‌ها هم من را لایک کرده‌اند
+            const myInteractions = await apiRequest(`?path=interactions/${currentUser.uid}`, 'GET') || {};
+            const myLikedUids = Object.keys(myInteractions).filter(uid => myInteractions[uid] === 'liked');
+
+            if (myLikedUids.length === 0) return [];
+            
+            const matchPromises = myLikedUids.map(async likedUid => {
+                const theirInteraction = await apiRequest(`?path=interactions/${likedUid}/${currentUser.uid}`, 'GET');
+                if (theirInteraction === 'liked') {
+                    // کاربر پیدا شد! اطلاعات کامل او را از دیتابیس می‌خوانیم
+                    return await apiRequest(`?path=users/${likedUid}`, 'GET');
+                }
+                return null;
             });
+            return (await Promise.all(matchPromises)).filter(Boolean); // حذف مقادیر null
         }
-        // --- END NEW FUNCTIONS ---
 
+        // --- API HELPER ---
+        async function apiRequest(url, method, body = null, extraHeaders = {}) {
+            const token = localStorage.getItem('clientToken');
+            const headers = {
+                'Content-Type': 'application/json',
+                ...extraHeaders
+            };
+            if (token && !url.includes('auth=token')) {
+                 headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const options = { method, headers };
+            
+            // **مهم**: UID کاربر فعلی را برای شبیه‌سازی در پراکسی ارسال می‌کنیم
+            if (body) {
+                body.auth_override_uid = currentUser.uid;
+                options.body = JSON.stringify(body);
+            } else if (method !== 'GET') {
+                options.body = JSON.stringify({ auth_override_uid: currentUser.uid });
+            }
+
+            // برای GET، باید UID را در URL بفرستیم، اما پراکسی ما آن را از body می‌خواند.
+            // پس ما همواره یک body حداقلی می‌فرستیم (پراکسی ما هوشمندانه عمل می‌کند).
+            // این رویکرد ساده‌تر است.
+
+            const response = await fetch(`${PROXY_URL}${url}`, options);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'An unknown error occurred' }));
+                console.error(`API Error on ${url}:`, response.status, errorData);
+                throw new Error(errorData.error || `HTTP Error: ${response.status}`);
+            }
+            return response.status === 204 ? null : response.json();
+        }
 
         function logout() {
-            localStorage.removeItem('currentUser');
-            window.location.href = 'index.html'; // Assuming you have an index/login page
+            localStorage.clear();
+            window.location.href = 'login.html';
         }
-
     </script>
 </body>
 </html>
