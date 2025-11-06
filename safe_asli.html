@@ -414,6 +414,7 @@
         let clientToken = null;
         let allUsers = {};
         let recentChats = [];
+        let pollingIntervalId = null; // To hold the interval ID
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -453,6 +454,9 @@
                 }
 
                 renderChatList();
+                
+                // ADDED: Start polling for live updates after initial load
+                startRealtimeUpdates();
 
             } catch (error) {
                 console.error("Initialization Error:", error);
@@ -485,9 +489,6 @@
 
         // --- SECTION: UI Rendering ---
         
-        /**
-         * Renders the list of recent chats in the main content area.
-         */
         function renderChatList() {
             if (recentChats.length === 0) {
                 mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
@@ -569,14 +570,57 @@
                     </div>
                 </div>`;
         }
+        
+        // --- SECTION: Real-time Updates (ADDED) ---
+
+        /**
+         * Fetches the latest chat data and updates the UI if there are changes.
+         */
+        async function checkForUpdates() {
+            try {
+                // We only need to refresh the chats, not all users every time.
+                const newChatsResponse = await fetchProxyData('pivi_chats');
+
+                if (newChatsResponse) {
+                    const newRecentChats = Object.values(newChatsResponse)
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                    // A simple check to see if data has changed by comparing stringified versions.
+                    if (JSON.stringify(newRecentChats) !== JSON.stringify(recentChats)) {
+                        console.log('New chat data detected. Updating list.');
+                        recentChats = newRecentChats;
+
+                        // IMPORTANT: Only re-render if the user is not searching.
+                        // This prevents wiping out search results during a live update.
+                        if (searchInput.value.trim() === '') {
+                            renderChatList();
+                        }
+                    }
+                }
+            } catch (error) {
+                // For a background poll, it's better to log the error silently 
+                // than to show a disruptive error message to the user.
+                console.error("Polling Error:", error.message);
+            }
+        }
+
+        /**
+         * Starts the periodic polling for new data.
+         * @param {number} interval - The interval in milliseconds (e.g., 3000 for 3 seconds).
+         */
+        function startRealtimeUpdates(interval = 3000) {
+            // Clear any existing interval to prevent duplicates
+            if (pollingIntervalId) {
+                clearInterval(pollingIntervalId);
+            }
+            
+            console.log(`Starting real-time updates every ${interval / 1000} seconds.`);
+            pollingIntervalId = setInterval(checkForUpdates, interval);
+        }
 
 
         // --- SECTION: Event Handlers & Interactions ---
 
-        /**
-         * --- FIX: Made the search handler robust against missing data ---
-         * Handles user input in the search box to filter and display users.
-         */
         function handleSearch() {
             const query = searchInput.value.toLowerCase().trim();
             if (!query) {
@@ -585,7 +629,6 @@
             }
             
             const filteredUsers = Object.values(allUsers).filter(user => {
-                // Defensive check: ensure user object and properties exist before searching.
                 if (!user) return false;
                 const usernameMatch = user.username && user.username.toLowerCase().includes(query);
                 const displayNameMatch = user.displayName && user.displayName.toLowerCase().includes(query);
