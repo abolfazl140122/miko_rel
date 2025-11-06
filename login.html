@@ -12,10 +12,12 @@
             --primary-hover: #0056b3;
             --success-color: #28a745;
             --error-color: #dc3545;
-            --text-color: #333;
-            --text-light: #f8f9fa;
-            --border-color: rgba(255, 255, 255, 0.4);
-            --input-bg: rgba(255, 255, 255, 0.2);
+            --background-color: #f0f2f5;
+            --form-background: #ffffff;
+            --text-dark: #1c1e21;
+            --text-secondary: #606770;
+            --border-color: #ccd0d5;
+            --input-background: #f5f6f7;
         }
 
         *, *::before, *::after {
@@ -25,7 +27,7 @@
         body {
             font-family: 'Vazirmatn', sans-serif;
             margin: 0;
-            background: linear-gradient(135deg, #74EBD5 0%, #9FACE6 100%);
+            background-color: var(--background-color);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -36,18 +38,16 @@
         .form-container {
             width: 100%;
             max-width: 420px;
-            background-color: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background-color: var(--form-background);
             padding: 40px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.7s ease-out forwards;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.6s ease-out forwards;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .form-header {
@@ -56,19 +56,18 @@
         }
         .form-header h1 {
             margin: 0 0 10px;
-            font-size: 2.2em;
-            color: var(--text-light);
+            font-size: 2em;
+            color: var(--text-dark);
             font-weight: 700;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
         }
         .form-header p {
             margin: 0;
-            color: var(--text-light);
-            font-size: 1.1em;
+            color: var(--text-secondary);
+            font-size: 1.05em;
         }
 
         .input-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             position: relative;
         }
         .input-group .input-icon {
@@ -76,28 +75,30 @@
             top: 50%;
             right: 15px;
             transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-secondary);
             pointer-events: none;
         }
         .input-group input {
             width: 100%;
             padding: 14px 45px 14px 15px;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 1em;
             font-family: 'Vazirmatn', sans-serif;
-            background-color: var(--input-bg);
-            color: var(--text-light);
-            transition: all 0.3s ease;
+            background-color: var(--form-background);
+            color: var(--text-dark);
+            transition: all 0.2s ease-in-out;
+        }
+        .input-group input:hover {
+            border-color: #aab0b8;
         }
         .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: #8a8d91;
         }
         .input-group input:focus {
             outline: none;
-            border-color: white;
-            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
-            background-color: rgba(255, 255, 255, 0.3);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
         }
         .password-toggle {
             position: absolute;
@@ -105,28 +106,24 @@
             left: 15px;
             transform: translateY(-50%);
             cursor: pointer;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-secondary);
         }
         
         .error-message {
-            color: #ffdddd;
-            background-color: rgba(220, 53, 69, 0.4);
-            font-size: 0.9em;
-            margin-top: 8px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            min-height: 1em;
+            color: var(--error-color);
+            font-size: 0.85em;
+            margin-top: 6px;
             display: none;
         }
         
         #submit-btn {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             background-color: var(--primary-color);
             color: white;
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -138,11 +135,9 @@
         }
         #submit-btn:hover:not(:disabled) {
             background-color: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         #submit-btn:disabled {
-            opacity: 0.6;
+            background-color: #a0c9ff;
             cursor: not-allowed;
         }
         .spinner {
@@ -164,19 +159,19 @@
             display: none;
             font-weight: 500;
         }
-        #form-status.success { background-color: rgba(40, 167, 69, 0.8); color: white; }
-        #form-status.error { background-color: rgba(220, 53, 69, 0.8); color: white; }
+        #form-status.success { background-color: #e9f6ec; color: #155724; border: 1px solid #c3e6cb; }
+        #form-status.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         
         .form-footer {
             margin-top: 25px;
             text-align: center;
             font-size: 0.95em;
-            color: var(--text-light);
+            color: var(--text-secondary);
         }
         .form-footer a {
-            color: var(--text-light);
+            color: var(--primary-color);
             text-decoration: none;
-            font-weight: 700;
+            font-weight: 500;
         }
         .form-footer a:hover {
             text-decoration: underline;
@@ -225,6 +220,9 @@
     </div>
 
     <script>
+        // --- LOGIC (JavaScript) ---
+        // This part is identical to the previous version as it was already correct.
+        
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
 
@@ -293,7 +291,6 @@
                 const tokenData = await tokenResponse.json();
                 const clientToken = tokenData.token;
 
-                // --- ✅ FIX: ADDED 'X-User-Username' HEADER ---
                 const headers = {
                     'Authorization': `Bearer ${clientToken}`,
                     'X-User-Username': identifier 
@@ -313,7 +310,6 @@
                     }
                 } else {
                     const response = await fetch(`${PROXY_URL}?path=users/${identifier}`, { headers });
-                    // Handle 404 as valid "not found", but other errors as server errors
                     if (response.status === 404) {
                        userData = null;
                     } else if (!response.ok) {
@@ -347,7 +343,6 @@
             }
         }
         
-        // Initial validation check on page load
         validateForm();
     </script>
 </body>
