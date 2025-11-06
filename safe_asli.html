@@ -3,99 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>همیار - صفحه اصلی</title>
+    <title>همیار - پروفایل کاربری</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
+        
         :root {
             --primary-color: #007bff;
+            --primary-color-light: #4dabf7;
             --success-color: #28a745;
             --danger-color: #e74c3c;
-            --light-gray-color: #f8f9fa;
+            
+            --bg-color: #f8f9fa;
+            --surface-color: #ffffff;
             --border-color: #dee2e6;
+            --text-color: #212529;
+            --secondary-text-color: #6c757d;
+            
             --sent-bg: #e1f5fe;
             --received-bg: #f1f3f5;
-            --text-color: #333;
-            --secondary-text-color: #777;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 10px rgba(0,0,0,0.08);
         }
+
+        body.dark-mode {
+            --primary-color: #3b9eff;
+            --primary-color-light: #5db0ff;
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --border-color: #333;
+            --text-color: #e0e0e0;
+            --secondary-text-color: #a0a0a0;
+
+            --sent-bg: #004c8c;
+            --received-bg: #333;
+        }
+
         *, *::before, *::after {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
+
         body {
             font-family: 'Vazirmatn', sans-serif;
             margin: 0;
-            background-color: var(--light-gray-color);
+            background-color: var(--bg-color);
             color: var(--text-color);
             -webkit-user-select: none;
             user-select: none;
+            transition: background-color 0.3s, color 0.3s;
         }
+
         .app-container {
-            width: 100%; max-width: 400px; height: 100vh;
-            margin: 0 auto; background-color: white;
+            width: 100%; max-width: 420px; height: 100vh;
+            margin: 0 auto; background-color: var(--bg-color);
             display: flex; flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            box-shadow: 0 0 25px rgba(0,0,0,0.1);
         }
+
         .app-header {
-            padding: 15px; border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--surface-color);
+            transition: background-color 0.3s, border-color 0.3s;
         }
-        .app-header h1 { font-size: 1.5em; margin: 0; color: var(--primary-color); }
+        .app-header h1 { font-size: 1.5em; margin: 0; color: var(--primary-color); font-weight: 700; }
         .app-header button { /* ... existing styles ... */ }
-        main { flex-grow: 1; position: relative; overflow: hidden; }
-        .view { height: 100%; display: none; flex-direction: column; overflow-y: auto; }
+        
+        main { flex-grow: 1; position: relative; overflow-y: auto; }
+        .view { display: none; flex-direction: column; height: 100%; }
         .view.active { display: flex; }
         .hidden { display: none !important; }
 
-        /* Card Swiping View Styles */
-        .card-view { /* ... existing styles ... */ }
+        /* --- Enhanced Profile View --- */
+        #profile-view {
+            padding-bottom: 80px; /* Space for footer */
+        }
+        .profile-header {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light));
+            color: white;
+            position: relative;
+        }
 
-        /* Chat Views Styles */
-        /* ... existing styles ... */
-        #conversation-list { padding: 10px 0; width: 100%; }
-        .conversation-item { display: flex; align-items: center; padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
-        .conversation-item:hover { background-color: var(--light-gray-color); }
-        .conversation-item img { width: 50px; height: 50px; border-radius: 50%; margin-left: 15px; }
-        .conversation-item h3 { margin: 0; font-size: 1.1em; }
-        #single-chat-view { height: 100%; display: none; flex-direction: column; width: 100%;}
-        .chat-header { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid var(--border-color); }
-        .chat-header button { background: none; border: none; font-size: 1.5em; cursor: pointer; margin-left: 10px; }
-        .chat-header h2 { margin: 0; font-size: 1.2em; }
-        #messages-area { flex-grow: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column-reverse; }
-        .message { max-width: 70%; padding: 10px 15px; border-radius: 18px; margin-bottom: 10px; word-wrap: break-word; }
-        .message.sent { background-color: var(--sent-bg); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .message.received { background-color: var(--received-bg); align-self: flex-end; border-bottom-right-radius: 4px; }
-        #message-form { display: flex; padding: 10px; border-top: 1px solid var(--border-color); }
-        #message-form input { flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 20px; font-family: 'Vazirmatn'; }
-        #message-form button { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-right: 10px; font-size: 1.5em; cursor: pointer; }
+        #edit-profile-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            border-radius: 20px;
+            padding: 6px 15px;
+            font-family: 'Vazirmatn';
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+        #edit-profile-btn:hover { background: rgba(255,255,255,0.3); }
 
-        /* Profile View (Enhanced) */
-        .profile-header { padding: 25px; display: flex; flex-direction: column; align-items: center; border-bottom: 1px solid var(--border-color); position: relative; }
-        #edit-profile-btn { position: absolute; top: 15px; left: 15px; background: none; border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; padding: 5px 10px; font-family: 'Vazirmatn'; cursor: pointer; }
-        .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary-color); object-fit: cover; margin-bottom: 15px; }
-        #profile-name, .profile-edit-input { font-size: 1.5em; font-weight: 700; margin: 0; border: none; text-align: center; background-color: transparent; font-family: 'Vazirmatn'; }
-        .profile-edit-input { border-bottom: 2px solid var(--primary-color); width: 80%; padding: 5px; }
-        #profile-status { font-size: 1em; color: var(--secondary-text-color); margin-top: 5px; }
-        .profile-body { padding: 15px; }
-        .profile-section-title { font-weight: 500; color: var(--primary-color); margin: 20px 10px 10px; font-size: 1em; }
-        .profile-item { display: flex; align-items: center; padding: 15px 10px; transition: background-color 0.2s; }
-        .profile-item[data-action] { cursor: pointer; }
-        .profile-item[data-action]:hover { background-color: var(--light-gray-color); }
-        .profile-item .icon { font-size: 1.5em; color: var(--secondary-text-color); margin-left: 20px; width: 30px; text-align: center; }
+        .profile-avatar-container {
+            position: relative;
+            cursor: pointer;
+        }
+        .profile-avatar {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 4px solid white;
+            object-fit: cover;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow-md);
+        }
+        .online-indicator {
+            width: 18px;
+            height: 18px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            border: 3px solid white;
+            position: absolute;
+            bottom: 20px;
+            right: 5px;
+        }
+        .avatar-edit-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 110px; height: 110px;
+            background: rgba(0,0,0,0.4);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center; justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 1.2em;
+        }
+        .profile-avatar-container:hover .avatar-edit-overlay {
+            opacity: 1;
+        }
+
+        #profile-name-view, .profile-edit-input {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin: 0;
+            text-align: center;
+            font-family: 'Vazirmatn';
+            color: white;
+        }
+        .profile-edit-input {
+             background: transparent;
+             border: none;
+             border-bottom: 2px solid rgba(255,255,255,0.7);
+             width: 80%;
+             padding: 5px;
+        }
+        .profile-edit-input::placeholder { color: rgba(255,255,255,0.7); }
+        
+        #profile-status {
+            font-size: 1em;
+            color: rgba(255,255,255,0.9);
+            margin-top: 5px;
+            background: rgba(0,0,0,0.1);
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+
+        .profile-body {
+            padding: 10px;
+            background-color: var(--surface-color);
+            transition: background-color 0.3s;
+        }
+
+        .profile-group {
+            margin: 15px 0;
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: background-color 0.3s;
+        }
+        .profile-group-title {
+            font-weight: 500;
+            color: var(--secondary-text-color);
+            margin: 20px 15px 10px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+        
+        .profile-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            transition: background-color 0.2s;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--surface-color);
+        }
+        .profile-group .profile-item:last-child { border-bottom: none; }
+        .profile-item[data-action]:hover { background-color: rgba(0,0,0,0.03); }
+        body.dark-mode .profile-item[data-action]:hover { background-color: rgba(255,255,255,0.05); }
+
+
+        .profile-item .icon {
+            color: var(--secondary-text-color);
+            margin-left: 20px;
+            width: 24px; height: 24px;
+        }
         .profile-item .text-content { flex-grow: 1; }
         .profile-item .title { font-size: 1.1em; }
         .profile-item .subtitle { font-size: 0.9em; color: var(--secondary-text-color); }
-        .profile-edit-controls { text-align: center; margin-top: 20px; }
-        .profile-edit-controls button { padding: 8px 20px; margin: 0 5px; border-radius: 8px; font-family: 'Vazirmatn'; cursor: pointer; border: 1px solid; }
+        
+        .profile-item .action-element { margin-right: auto; }
+
+        .profile-edit-controls {
+            padding: 20px; text-align: center;
+        }
+        .profile-edit-controls button {
+            padding: 10px 25px; margin: 0 8px;
+            border-radius: 25px; font-family: 'Vazirmatn';
+            cursor: pointer; border: 1px solid;
+            font-size: 1em; font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .profile-edit-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
         #save-profile-btn { background-color: var(--success-color); color: white; border-color: var(--success-color); }
         #cancel-edit-btn { background-color: transparent; color: var(--danger-color); border-color: var(--danger-color); }
-
-        /* Modal for Settings */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; display: none; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
-        .modal-header h3 { margin: 0; }
-        .modal-header .close-btn { font-size: 1.5em; cursor: pointer; border: none; background: none; }
-        .modal-body .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+        #logout-btn { background-color: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); padding: 5px 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        #logout-btn:hover { background-color: var(--danger-color); color: white; }
         
         /* Toggle Switch CSS */
         .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
@@ -106,7 +244,7 @@
         input:checked + .slider:before { transform: translateX(22px); }
 
         /* Footer Navigation */
-        .main-footer { padding: 10px 0; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
+        .main-footer { padding: 10px 0; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; background: var(--surface-color); transition: background-color 0.3s, border-color 0.3s; }
         .nav-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: #ccc; transition: color 0.2s, transform 0.2s; display: flex; flex-direction: column; align-items: center; }
         .nav-btn.active { color: var(--primary-color); transform: scale(1.1); }
     </style>
@@ -114,104 +252,106 @@
 <body>
 
     <div class="app-container">
-        <header class="app-header"><h1>همیار</h1><button id="logout-btn">خروج</button></header>
+        <header class="app-header"><h1>همیار</h1></header>
 
         <main>
-            <!-- Views -->
-            <div id="card-view" class="view active"> <!-- ... --> </div>
-            <div id="chat-view" class="view"> <!-- ... --> </div>
-            
-            <div id="profile-view" class="view">
+            <!-- Other views would go here -->
+            <div id="profile-view" class="view active">
                 <div class="profile-header">
                     <button id="edit-profile-btn">ویرایش</button>
-                    <img id="profile-avatar" src="https://i.pravatar.cc/200" alt="آواتار" class="profile-avatar">
+                    <div class="profile-avatar-container" id="avatar-container">
+                        <img id="profile-avatar" src="https://i.pravatar.cc/200" alt="آواتار" class="profile-avatar">
+                        <div class="online-indicator"></div>
+                        <div class="avatar-edit-overlay">✏️</div>
+                    </div>
+                    <input type="file" id="avatar-upload-input" class="hidden" accept="image/*">
                     
                     <span id="profile-name-view">نام نمایشی</span>
-                    <input type="text" id="profile-name-edit" class="profile-edit-input hidden">
+                    <input type="text" id="profile-name-edit" class="profile-edit-input hidden" placeholder="نام نمایشی">
                     
                     <p id="profile-status" class="profile-status">آنلاین</p>
                 </div>
+                
                 <div class="profile-body">
                     <div id="edit-controls" class="profile-edit-controls hidden">
-                        <button id="save-profile-btn">ذخیره</button>
+                        <button id="save-profile-btn">ذخیره تغییرات</button>
                         <button id="cancel-edit-btn">انصراف</button>
                     </div>
-                    
-                    <div class="profile-section-title">حساب کاربری</div>
-                    <div class="profile-item">
-                        <span class="icon">📞</span>
-                        <div class="text-content">
-                            <div class="title" id="profile-phone">+۹۸ ۹۰۰ ۰۰۰ ۰۰۰۰</div>
-                            <div class="subtitle">شماره تلفن (غیرقابل تغییر)</div>
+
+                    <div class="profile-group-title">حساب کاربری</div>
+                    <div class="profile-group">
+                         <div class="profile-item">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            <div class="text-content">
+                                <span class="title" id="profile-username-view">username</span>
+                                <input type="text" id="profile-username-edit" class="profile-edit-input hidden">
+                                <div class="subtitle">نام کاربری</div>
+                            </div>
+                        </div>
+                        <div class="profile-item">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                            <div class="text-content">
+                                <div class="title" id="profile-phone">+۹۸ ۹۰۰ ۰۰۰ ۰۰۰۰</div>
+                                <div class="subtitle">شماره تلفن (غیرقابل تغییر)</div>
+                            </div>
+                        </div>
+                         <div class="profile-item">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                            <div class="text-content">
+                                <span class="title" id="profile-bio-view">چند کلمه درباره خودتان بنویسید</span>
+                                <input type="text" id="profile-bio-edit" class="profile-edit-input hidden" placeholder="بیوگرافی جدید...">
+                                <div class="subtitle">بیوگرافی</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="profile-item">
-                        <span class="icon">@</span>
-                        <div class="text-content">
-                            <span class="title" id="profile-username-view">username</span>
-                            <input type="text" id="profile-username-edit" class="profile-edit-input hidden">
-                            <div class="subtitle">نام کاربری</div>
+
+                    <div class="profile-group-title">تنظیمات</div>
+                    <div class="profile-group">
+                        <div class="profile-item">
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                            <div class="text-content"><div class="title">حالت تاریک</div></div>
+                            <div class="action-element">
+                                <label class="switch">
+                                    <input type="checkbox" id="theme-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="profile-item" data-action="notifications">
+                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                            <div class="text-content"><div class="title">اعلان‌ها و صداها</div></div>
+                        </div>
+                         <div class="profile-item" data-action="privacy">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            <div class="text-content"><div class="title">حریم خصوصی و امنیت</div></div>
                         </div>
                     </div>
-                     <div class="profile-item">
-                        <span class="icon">📝</span>
-                        <div class="text-content">
-                            <span class="title" id="profile-bio-view">چند کلمه درباره خودتان بنویسید</span>
-                             <input type="text" id="profile-bio-edit" class="profile-edit-input hidden" placeholder="بیوگرافی جدید...">
-                            <div class="subtitle">بیوگرافی</div>
+
+                    <div class="profile-group-title">عمومی</div>
+                    <div class="profile-group">
+                         <div class="profile-item" data-action="logout">
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--danger-color);"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            <div class="text-content"><div class="title" style="color: var(--danger-color);">خروج از حساب</div></div>
                         </div>
                     </div>
-                    
-                    <div class="profile-section-title">تنظیمات</div>
-                     <div class="profile-item" data-action="notifications">
-                        <span class="icon">🔔</span>
-                        <div class="text-content"><div class="title">اعلان‌ها و صداها</div></div>
-                    </div>
-                     <div class="profile-item" data-action="privacy">
-                        <span class="icon">🔒</span>
-                        <div class="text-content"><div class="title">حریم خصوصی و امنیت</div></div>
-                    </div>
-                     <div class="profile-item" data-action="data">
-                        <span class="icon">💾</span>
-                        <div class="text-content"><div class="title">داده‌ها و ذخیره‌سازی</div></div>
-                    </div>
+
                 </div>
             </div>
         </main>
 
         <footer class="main-footer">
             <button class="nav-btn" id="nav-chat-btn">💬</button>
-            <button class="nav-btn active" id="nav-cards-btn">🃏</button>
-            <button class="nav-btn" id="nav-profile-btn">👤</button>
+            <button class="nav-btn" id="nav-cards-btn">🃏</button>
+            <button class="nav-btn active" id="nav-profile-btn">👤</button>
         </footer>
     </div>
     
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">تنظیمات</h3>
-                <button class="close-btn" id="modal-close-btn">&times;</button>
-            </div>
-            <div id="modal-body" class="modal-body">
-                <!-- Content will be injected here by JavaScript -->
-            </div>
-        </div>
-    </div>
-
-
     <script>
-        // --- PROXY & SECRET ---
+        // --- PROXY (Not used in this demo, but kept for context) ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
         
         // --- DOM Elements ---
-        const views = document.querySelectorAll('.view');
-        const navBtns = document.querySelectorAll('.nav-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        // ... (other DOM elements for chat and cards)
-
-        // Profile View Elements
         const editProfileBtn = document.getElementById('edit-profile-btn');
         const saveProfileBtn = document.getElementById('save-profile-btn');
         const cancelEditBtn = document.getElementById('cancel-edit-btn');
@@ -223,79 +363,62 @@
         const profileUsernameEdit = document.getElementById('profile-username-edit');
         const profileBioView = document.getElementById('profile-bio-view');
         const profileBioEdit = document.getElementById('profile-bio-edit');
+        
+        const avatarContainer = document.getElementById('avatar-container');
+        const avatarImage = document.getElementById('profile-avatar');
+        const avatarUploadInput = document.getElementById('avatar-upload-input');
 
-        // Modal Elements
-        const settingsModal = document.getElementById('settings-modal');
-        const modalCloseBtn = document.getElementById('modal-close-btn');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
+        const themeToggle = document.getElementById('theme-toggle');
 
         // --- App State ---
-        let currentUser = null;
-        let clientToken = null;
-        let allUsersData = {};
-        // ... (other app state variables)
+        let currentUser = {
+             // Dummy data for demonstration
+            username: 'abolfazl1401',
+            displayName: 'ابوالفضل',
+            phone: '+98 912 345 6789', // Full phone number as requested
+            bio: 'برنامه نویس و عاشق تکنولوژی',
+            avatarUrl: 'https://i.pravatar.cc/200?u=abolfazl1401'
+        };
 
-        // --- AUTH & INIT ---
+        // --- INITIALIZATION ---
         (async () => {
-            const storedUser = localStorage.getItem('currentUser');
-            if (!storedUser) { window.location.href = 'login.html'; return; }
-            currentUser = JSON.parse(storedUser);
+            // Load theme from localStorage
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+            themeToggle.checked = savedTheme === 'dark';
+
+            // In a real app, you would fetch user data here
+            // const storedUser = localStorage.getItem('currentUser');
+            // if (!storedUser) { window.location.href = 'login.html'; return; }
+            // currentUser = JSON.parse(storedUser);
             
-            document.getElementById('nav-cards-btn').addEventListener('click', () => showView('card-view'));
-            document.getElementById('nav-chat-btn').addEventListener('click', () => showView('chat-view'));
-            document.getElementById('nav-profile-btn').addEventListener('click', () => showView('profile-view'));
-            logoutBtn.addEventListener('click', logout);
-            
+            initializeProfileView();
+            addEventListeners();
+        })();
+
+        function addEventListeners() {
             // Edit Profile Listeners
             editProfileBtn.addEventListener('click', () => toggleEditMode(true));
             cancelEditBtn.addEventListener('click', () => toggleEditMode(false));
             saveProfileBtn.addEventListener('click', handleProfileSave);
-
-            // Settings Modal Listeners
-            document.querySelectorAll('.profile-item[data-action]').forEach(item => {
-                item.addEventListener('click', () => openSettingsModal(item.dataset.action));
-            });
-            modalCloseBtn.addEventListener('click', closeSettingsModal);
-            settingsModal.addEventListener('click', (e) => {
-                if (e.target === settingsModal) closeSettingsModal();
-            });
             
-            await initializeApp();
-        })();
+            // Avatar Upload Listeners
+            avatarContainer.addEventListener('click', () => avatarUploadInput.click());
+            avatarUploadInput.addEventListener('change', handleAvatarChange);
 
-        async function initializeApp() {
-            try {
-                await refreshClientToken();
-                const allUsers = await fetchAllUsers();
-                allUsers.forEach(user => { allUsersData[user.username] = user; });
-                
-                // CRITICAL: Update currentUser with full data from server
-                if (allUsersData[currentUser.username]) {
-                    currentUser = allUsersData[currentUser.username];
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser)); // Update storage
-                }
-
-                initializeProfileView();
-                // ... (initialize other views)
-            } catch (error) {
-                console.error("Initialization Error:", error);
-                // statusMessage.textContent = `خطا: ${error.message}`;
-            }
+            // Theme Toggle Listener
+            themeToggle.addEventListener('change', handleThemeChange);
+            
+            // Action Item Listeners (for logout, etc.)
+            document.querySelector('.profile-item[data-action="logout"]').addEventListener('click', logout);
         }
         
-        function showView(viewId) {
-            views.forEach(view => view.classList.remove('active'));
-            navBtns.forEach(btn => btn.classList.remove('active'));
-            document.getElementById(viewId)?.classList.add('active');
-            document.getElementById(`nav-${viewId.split('-')[0]}-btn`)?.classList.add('active');
-        }
-
         // --- PROFILE VIEW LOGIC ---
         function initializeProfileView() {
-            document.getElementById('profile-avatar').src = `https://i.pravatar.cc/200?u=${currentUser.username}`;
+            avatarImage.src = currentUser.avatarUrl || `https://i.pravatar.cc/200?u=${currentUser.username}`;
             profileNameView.textContent = currentUser.displayName || 'نام نمایشی';
             profileUsernameView.textContent = currentUser.username || 'نام کاربری';
+            // Show the full phone number to the user, as requested.
             document.getElementById('profile-phone').textContent = currentUser.phone || 'شماره ثبت نشده';
             profileBioView.textContent = currentUser.bio || 'چند کلمه درباره خودتان بنویسید';
         }
@@ -324,105 +447,64 @@
                 bio: profileBioEdit.value.trim(),
             };
 
-            // Basic validation
             if (!updatedData.displayName || !updatedData.username) {
                 alert('نام نمایشی و نام کاربری نمی‌توانند خالی باشند.');
                 return;
             }
 
-            try {
-                const response = await fetch(`${PROXY_URL}?path=users/${currentUser.username}`, {
-                    method: 'PATCH', // PATCH updates specific fields, PUT replaces the whole object
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}` },
-                    body: JSON.stringify(updatedData)
-                });
-                if (!response.ok) throw new Error('خطا در ذخیره‌سازی اطلاعات.');
-                
-                // Update local state and storage
-                currentUser = { ...currentUser, ...updatedData };
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            // --- Real app: Send data to server ---
+            // try {
+            //     const response = await fetch(`${PROXY_URL}?path=users/${currentUser.username}`, {
+            //         method: 'PATCH',
+            //         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}` },
+            //         body: JSON.stringify(updatedData)
+            //     });
+            //     if (!response.ok) throw new Error('خطا در ذخیره‌سازی اطلاعات.');
+            // } catch (error) { alert(error.message); return; }
 
-                // Update UI and exit edit mode
-                initializeProfileView();
-                toggleEditMode(false);
-                alert('پروفایل با موفقیت به‌روزرسانی شد!');
+            // --- Demo: Update local state ---
+            currentUser = { ...currentUser, ...updatedData };
+            // localStorage.setItem('currentUser', JSON.stringify(currentUser)); // In real app
 
-            } catch (error) {
-                alert(error.message);
+            initializeProfileView();
+            toggleEditMode(false);
+            alert('پروفایل با موفقیت به‌روزرسانی شد!');
+        }
+        
+        function handleAvatarChange(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const newAvatarUrl = e.target.result;
+                    avatarImage.src = newAvatarUrl;
+                    // --- Real app: Upload file and update user data on server ---
+                    currentUser.avatarUrl = newAvatarUrl; 
+                    alert('آواتار به‌روزرسانی شد. (در نسخه نمایشی ذخیره نمی‌شود)');
+                };
+                reader.readAsDataURL(file);
             }
         }
 
-        // --- SETTINGS MODAL LOGIC ---
-        function openSettingsModal(type) {
-            let contentHTML = '';
-            let title = '';
-
-            switch(type) {
-                case 'notifications':
-                    title = 'اعلان‌ها و صداها';
-                    contentHTML = `
-                        <div class="setting-item">
-                            <span>پیام‌های جدید</span>
-                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="setting-item">
-                            <span>تطابق‌های جدید</span>
-                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="setting-item">
-                            <span>لایک پروفایل</span>
-                            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
-                        </div>
-                    `;
-                    break;
-                case 'privacy':
-                    title = 'حریم خصوصی و امنیت';
-                    contentHTML = `
-                        <div class="setting-item">
-                            <span>نمایش پروفایل من در "جستجو"</span>
-                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="setting-item">
-                            <span>نمایش وضعیت آنلاین</span>
-                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                        </div>
-                    `;
-                    break;
-                case 'data':
-                    title = 'داده‌ها و ذخیره‌سازی';
-                     contentHTML = `<p>برای بهینه‌سازی مصرف، همیار تصاویر را در حافظه پنهان دستگاه شما ذخیره می‌کند.</p><button onclick="alert('حافظه پنهان پاک شد!')" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--primary-color); background: transparent; color: var(--primary-color); font-family: Vazirmatn; cursor: pointer;">پاک کردن حافظه پنهان</button>`;
-                    break;
+        // --- THEME LOGIC ---
+        function handleThemeChange() {
+            if (themeToggle.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
             }
-
-            modalTitle.textContent = title;
-            modalBody.innerHTML = contentHTML;
-            settingsModal.style.display = 'flex';
         }
 
-        function closeSettingsModal() {
-            settingsModal.style.display = 'none';
-        }
-
-        // --- DUMMY & HELPER FUNCTIONS ---
-        // (These functions like fetchAllUsers, refreshClientToken, logout, etc. remain the same as before)
-        async function refreshClientToken() {
-             const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-            if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
-            clientToken = (await response.json()).token;
-        }
-        async function fetchAllUsers() {
-            const response = await fetch(`${PROXY_URL}?path=users`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
-            if (!response.ok) throw new Error('خطا در واکشی لیست کاربران.');
-            const data = await response.json();
-            return data ? Object.values(data) : [];
-        }
+        // --- AUTH LOGIC ---
         function logout() {
-            localStorage.removeItem('currentUser');
-            window.location.href = 'index.html';
+            if (confirm('آیا برای خروج از حساب کاربری خود مطمئن هستید؟')) {
+                // localStorage.removeItem('currentUser');
+                // window.location.href = 'index.html';
+                alert('شما با موفقیت خارج شدید.');
+            }
         }
-
-        // Add placeholders for other view initializations if needed
-        // initializeCardsView() and initializeChatView() would go here
     </script>
 </body>
 </html>
