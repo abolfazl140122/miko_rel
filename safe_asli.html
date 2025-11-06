@@ -253,7 +253,7 @@
     <script>
         // --- SECTION: App Configuration ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234';
+        const SHARED_SECRET = 'miko1234'; // Note: In a real production app, this secret should not be in the client-side code.
 
         // --- SECTION: DOM Element References ---
         const mainContent = document.getElementById('main-content');
@@ -262,30 +262,31 @@
         // --- SECTION: App State ---
         let currentUser = null;
         let clientToken = null;
-        let allUsers = {}; // Store users as a map {username: userData}
-        let recentChats = []; // Store chat data
+        let allUsers = {}; // Store users as a map {username: userData} for O(1) lookups
+        let recentChats = []; // Store chat data as a sorted array
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Authenticate user
+            // 1. Authenticate user by checking local storage
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
-                // In a real app, redirect to a login page
+                // In a real app, this should redirect to a login page.
+                // For now, we show an error message.
                 // window.location.href = 'login.html';
-                mainContent.innerHTML = '<div class="status-container"><p>خطای احراز هویت. لطفاً وارد شوید.</p></div>';
+                showErrorMessage('خطای احراز هویت. لطفاً ابتدا وارد شوید.');
                 return;
             }
             currentUser = JSON.parse(storedUser);
 
-            // 2. Add event listeners
+            // 2. Add event listeners for UI elements
             searchInput.addEventListener('input', handleSearch);
 
-            // 3. Load initial data
+            // 3. Load all initial data from the server
             await loadInitialData();
         });
 
         /**
-         * Fetches all necessary data from the backend to populate the UI.
+         * Fetches all necessary data (token, users, chats) from the backend to populate the UI.
          */
         async function loadInitialData() {
             showLoadingSpinner();
@@ -293,24 +294,26 @@
                 // First, get a client token for authenticated requests
                 await refreshClientToken();
 
-                // Fetch users and chats in parallel for performance
-                const [usersData, chatsData] = await Promise.all([
+                // Fetch all users and recent chats in parallel for better performance
+                const [usersResponse, chatsResponse] = await Promise.all([
                     fetchProxyData('users'),
                     fetchProxyData('pivi_chats')
                 ]);
 
                 // Process and store the fetched data
-                if (usersData) {
-                    // Convert array of users to a map for easy lookup
-                    usersData.forEach(user => { allUsers[user.username] = user; });
+                // Firebase returns objects (maps), so we convert them to the format our app needs.
+                if (usersResponse) {
+                    // Convert the users object into a map for easy lookup by username
+                    Object.values(usersResponse).forEach(user => { allUsers[user.username] = user; });
                 }
                 
-                if (chatsData) {
-                    // Assuming chatsData is an object with chat info
-                    recentChats = Object.values(chatsData).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                if (chatsResponse) {
+                    // Convert the chats object into an array and sort it by the most recent message
+                    recentChats = Object.values(chatsResponse)
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 }
 
-                // Render the main chat list
+                // Render the main chat list with the processed data
                 renderChatList();
 
             } catch (error) {
@@ -322,20 +325,20 @@
         // --- SECTION: Data Fetching ---
 
         /**
-         * Refreshes the client token for making secure API calls.
+         * Refreshes the client token for making secure API calls to the proxy.
          */
         async function refreshClientToken() {
             const response = await fetch(`${PROXY_URL}?auth=token`, {
                 headers: { 'X-Proxy-Secret': SHARED_SECRET }
             });
-            if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
+            if (!response.ok) throw new Error('امکان دریافت توکن امنیتی وجود ندارد.');
             const data = await response.json();
             clientToken = data.token;
         }
 
         /**
-         * A generic function to fetch data from the Firebase proxy.
-         * @param {string} path - The API path (e.g., 'users', 'pivi_chats').
+         * A generic function to fetch data from the Firebase proxy, including necessary authentication headers.
+         * @param {string} path - The API path to fetch (e.g., 'users', 'pivi_chats').
          * @returns {Promise<any>} The JSON data from the response.
          */
         async function fetchProxyData(path) {
@@ -347,7 +350,7 @@
                     'X-User-Username': currentUser.username
                 }
             });
-            if (!response.ok) throw new Error(`خطا در واکشی ${path}.`);
+            if (!response.ok) throw new Error(`خطا در واکشی اطلاعات از مسیر ${path}.`);
             return response.json();
         }
 
@@ -358,14 +361,16 @@
          */
         function renderChatList() {
             if (recentChats.length === 0) {
-                mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ چتی نداری!</p></div>';
+                mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
                 return;
             }
 
             const chatListHtml = recentChats.map(chat => {
+                // Find the chat partner's username
                 const partnerUsername = chat.members.find(m => m !== currentUser.username);
                 const partnerData = allUsers[partnerUsername];
-                if (!partnerData) return ''; // Skip if partner data is not available
+                // If partner data isn't found (e.g., user was deleted), skip rendering this chat item
+                if (!partnerData) return ''; 
 
                 return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp);
             }).join('');
@@ -375,12 +380,12 @@
         }
 
         /**
-         * Renders the results of a user search.
+         * Renders the results of a user search in the main content area.
          * @param {Array<Object>} results - An array of user objects that match the search query.
          */
         function renderSearchResults(results) {
              if (results.length === 0) {
-                mainContent.innerHTML = '<div class="status-container"><p>کاربری یافت نشد.</p></div>';
+                mainContent.innerHTML = '<div class="status-container"><p>کاربری با این مشخصات یافت نشد.</p></div>';
                 return;
             }
             const resultsHtml = results.map(user => createSearchResultHtml(user)).join('');
@@ -389,18 +394,18 @@
         }
         
         /**
-         * Displays a loading spinner in the main content area.
+         * Displays a loading spinner in the main content area while data is being fetched.
          */
         function showLoadingSpinner() {
             mainContent.innerHTML = `
                 <div class="status-container">
                     <div class="spinner"></div>
-                    <p>در حال بارگذاری...</p>
+                    <p>در حال بارگذاری اطلاعات...</p>
                 </div>`;
         }
         
         /**
-         * Displays an error message in the main content area.
+         * Displays a user-friendly error message in the main content area.
          * @param {string} message - The error message to display.
          */
         function showErrorMessage(message) {
@@ -410,11 +415,11 @@
         // --- SECTION: HTML Template Generators ---
 
         /**
-         * Creates the HTML string for a single chat item.
+         * Creates the HTML string for a single chat item in the list.
          * @param {Object} partnerData - The user object for the chat partner.
-         * @param {string} lastMessage - The last message exchanged.
+         * @param {string} lastMessage - The last message exchanged in the chat.
          * @param {string} timestamp - The ISO string timestamp of the last message.
-         * @returns {string} The generated HTML.
+         * @returns {string} The generated HTML string for the chat item.
          */
         function createChatItemHtml(partnerData, lastMessage, timestamp) {
             return `
@@ -425,7 +430,7 @@
                     </div>
                     <div class="chat-details">
                         <h3>${partnerData.displayName}</h3>
-                        <p class="last-message">${lastMessage || '...'}</p>
+                        <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
                     </div>
                     <div class="chat-meta">
                         <span>${new Date(timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
@@ -436,7 +441,7 @@
         /**
          * Creates the HTML string for a single search result item.
          * @param {Object} userData - The user object for the search result.
-         * @returns {string} The generated HTML.
+         * @returns {string} The generated HTML string for the search item.
          */
         function createSearchResultHtml(userData) {
             return `
@@ -456,13 +461,14 @@
         // --- SECTION: Event Handlers & Interactions ---
 
         /**
-         * Handles the input event on the search bar for live filtering.
+         * Handles the input event on the search bar for live filtering of users.
          */
         function handleSearch() {
             const query = searchInput.value.toLowerCase().trim();
 
+            // If the search bar is cleared, show the main chat list again
             if (!query) {
-                renderChatList(); // If search is cleared, show the chat list again
+                renderChatList(); 
                 return;
             }
 
@@ -476,18 +482,17 @@
         }
 
         /**
-         * Adds click listeners to all chat or search items to navigate to the chat page.
+         * Adds click listeners to all chat or search result items to enable navigation.
          */
         function addClickListenersToItems() {
             const items = mainContent.querySelectorAll('[data-uid]');
             items.forEach(item => {
                 item.addEventListener('click', () => {
                     const targetUid = item.dataset.uid;
-                    // In a real app, this would navigate to the private chat page
-                    // For now, we'll just log it.
-                    console.log(`Navigating to chat with: ${targetUid}`);
-                    // window.location.href = `pivi.html?uid=${targetUid}`;
-                    alert(`شبیه‌سازی باز کردن چت با کاربر: ${targetUid}`);
+                    console.log(`Navigating to chat with user: ${targetUid}`);
+                    // This line will navigate to the private chat page.
+                    // Replace 'pivi.html' if your chat page has a different name.
+                    window.location.href = `pivi.html?uid=${targetUid}`;
                 });
             });
         }
