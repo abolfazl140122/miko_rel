@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>پیام‌رسان همیار</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
@@ -17,10 +17,12 @@
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
             --online-indicator: #28a745;
+            --tab-indicator-color: #1E90FF;
         }
 
         *, *::before, *::after {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* Disable blue tap highlight on mobile */
         }
 
         body {
@@ -76,28 +78,68 @@
             width: 120px;
             transition: width 0.3s ease;
         }
-        .search-container input:focus {
-            width: 150px;
-        }
-        .search-container svg {
-            color: var(--text-secondary);
-        }
-        
-        /* --- Main Content Area --- */
-        main {
-            flex-grow: 1;
+        .search-container input:focus { width: 150px; }
+        .search-container svg { color: var(--text-secondary); }
+
+        /* --- NEW: Tab Navigation --- */
+        .tab-navigation {
+            display: flex;
+            background-color: var(--secondary-color);
+            border-bottom: 1px solid var(--border-color);
             position: relative;
+            flex-shrink: 0;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 15px 0;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+            transition: color 0.3s;
+            position: relative;
+        }
+        .tab-btn.active {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        .tab-indicator {
+            position: absolute;
+            bottom: 0;
+            height: 3px;
+            background-color: var(--tab-indicator-color);
+            border-radius: 3px 3px 0 0;
+            transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* --- Main Content Area (Swipe Container) --- */
+        .swipe-container {
+            flex-grow: 1;
+            overflow: hidden; /* This hides the other panels */
+            position: relative;
+        }
+        .swipe-wrapper {
+            display: flex;
+            height: 100%;
+            width: 300%; /* 3 panels */
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .tab-panel {
+            width: 33.3333%; /* Each panel takes 1/3 of the wrapper width */
+            height: 100%;
             overflow-y: auto;
         }
-        /* Hide scrollbar */
-        main::-webkit-scrollbar { display: none; }
-        main { -ms-overflow-style: none; scrollbar-width: none; }
+        .tab-panel::-webkit-scrollbar { display: none; }
+        .tab-panel { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* --- Chat List --- */
-        .chat-list {
+
+        /* --- Chat/User List Styling --- */
+        .list-container {
             padding: 10px 0;
         }
-        .chat-item, .search-result-item {
+        .list-item {
             display: flex;
             align-items: center;
             padding: 12px 20px;
@@ -105,7 +147,7 @@
             transition: background-color 0.2s;
             border-bottom: 1px solid var(--border-color);
         }
-        .chat-item:hover, .search-result-item:hover {
+        .list-item:hover {
             background-color: var(--secondary-hover);
         }
         .profile-picture {
@@ -116,6 +158,7 @@
             object-fit: cover;
             background-color: var(--primary-color);
             position: relative;
+            flex-shrink: 0;
         }
         .profile-picture img {
             width: 100%;
@@ -132,17 +175,17 @@
             bottom: 2px;
             right: 2px;
         }
-        .chat-details {
+        .item-details {
             flex-grow: 1;
             overflow: hidden;
         }
-        .chat-details h3 {
+        .item-details h3 {
             margin: 0;
             font-size: 1.1em;
             font-weight: 500;
             white-space: nowrap;
         }
-        .last-message {
+        .item-subtext {
             margin: 4px 0 0;
             font-size: 0.9em;
             color: var(--text-secondary);
@@ -150,10 +193,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .chat-meta {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
+        .item-meta {
             font-size: 0.8em;
             color: var(--text-secondary);
             flex-shrink: 0;
@@ -167,6 +207,8 @@
             height: 100%;
             flex-direction: column;
             color: var(--text-secondary);
+            padding: 20px;
+            text-align: center;
         }
         .spinner {
             width: 40px;
@@ -176,82 +218,11 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        .status-container p {
-            margin-top: 15px;
-        }
+        .status-container p { margin-top: 15px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* --- Footer Navigation --- */
-        .main-footer {
-            padding: 10px 0;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background-color: var(--secondary-color);
-            flex-shrink: 0;
-        }
-        .nav-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-secondary);
-            transition: color 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 0.7em;
-        }
-        .nav-btn svg {
-            width: 28px;
-            height: 28px;
-            margin-bottom: 4px;
-        }
-        .nav-btn.active {
-            color: var(--primary-color);
-        }
-
-        /* --- NEW: Profile Overlay Styles --- */
-        .profile-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--background-color);
-            z-index: 100;
-            transform: translateY(100%); /* Start hidden below the screen */
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            display: flex;
-            flex-direction: column;
-            max-width: 420px; /* Match app container width */
-            margin: 0 auto;
-        }
-        .profile-overlay.active {
-            transform: translateY(0); /* Slide into view */
-        }
-        .profile-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--secondary-color);
-            flex-shrink: 0;
-        }
-        .profile-header h2 {
-            margin: 0;
-            font-size: 1.4em;
-        }
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            cursor: pointer;
-        }
-        .profile-content {
-            flex-grow: 1;
-            overflow-y: auto;
+        /* --- NEW: Profile Panel Styles --- */
+        #tab-panel-profile .profile-content {
             padding: 30px 20px;
             display: flex;
             flex-direction: column;
@@ -296,19 +267,13 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .profile-actions li:hover {
-            background-color: var(--secondary-hover);
-        }
+        .profile-actions li:hover { background-color: var(--secondary-hover); }
         .profile-actions li svg {
             margin-left: 15px;
             color: var(--text-secondary);
         }
-        #logout-btn {
-            color: #ff4d4d; /* Red color for logout */
-        }
-         #logout-btn svg {
-            color: #ff4d4d;
-        }
+        #logout-btn { color: #ff4d4d; }
+        #logout-btn svg { color: #ff4d4d; }
 
     </style>
 </head>
@@ -320,66 +285,60 @@
             <h1>همیار</h1>
             <div class="search-container">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="search-input" placeholder="جستجوی کاربر...">
+                <input type="text" id="search-input" placeholder="جستجو...">
             </div>
         </header>
 
-        <!-- MAIN CONTENT: Chat list or search results -->
-        <main id="main-content">
-            <!-- Loading spinner will be shown here initially -->
-        </main>
+        <!-- NEW: TAB NAVIGATION -->
+        <nav class="tab-navigation">
+            <button class="tab-btn" data-index="2">پروفایل</button>
+            <button class="tab-btn" data-index="1">کاربران</button>
+            <button class="tab-btn active" data-index="0">چت‌ها</button>
+            <div class="tab-indicator" id="tab-indicator"></div>
+        </nav>
 
-        <!-- BOTTOM NAVIGATION BAR -->
-        <footer class="main-footer">
-            <button class="nav-btn" id="nav-profile-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <span>پروفایل</span>
-            </button>
-            <button class="nav-btn">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                <span>دوستان</span>
-            </button>
-            <button class="nav-btn active" id="nav-chats-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span>چت‌ها</span>
-            </button>
-             <button class="nav-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                <span>خانه</span>
-            </button>
-        </footer>
-    </div>
 
-    <!-- NEW: Profile Overlay HTML Structure -->
-    <div class="profile-overlay" id="profile-overlay">
-        <header class="profile-header">
-            <button class="close-btn" id="close-profile-btn">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-            <h2>پروفایل</h2>
-            <div style="width: 24px;"></div> <!-- Spacer -->
-        </header>
-        <main class="profile-content">
-            <div class="profile-main-pic">
-                <img id="profile-image" src="" alt="عکس پروفایل">
+        <!-- MAIN CONTENT: Swipeable panels -->
+        <main class="swipe-container" id="swipe-container">
+            <div class="swipe-wrapper" id="swipe-wrapper">
+                
+                <!-- Panel 0: Chats -->
+                <section id="tab-panel-chats" class="tab-panel">
+                    <!-- Loading spinner will be shown here initially -->
+                </section>
+
+                <!-- Panel 1: Users -->
+                <section id="tab-panel-users" class="tab-panel">
+                     <!-- User list will be rendered here -->
+                </section>
+
+                <!-- Panel 2: Profile -->
+                <section id="tab-panel-profile" class="tab-panel">
+                    <div class="profile-content">
+                        <div class="profile-main-pic">
+                            <img id="profile-image" src="" alt="عکس پروفایل">
+                        </div>
+                        <h3 id="profile-display-name"></h3>
+                        <p id="profile-username"></p>
+            
+                        <ul class="profile-actions">
+                            <li>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <span>ویرایش پروفایل</span>
+                            </li>
+                            <li>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>تنظیمات</span>
+                            </li>
+                             <li id="logout-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                <span>خروج از حساب</span>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
             </div>
-            <h3 id="profile-display-name"></h3>
-            <p id="profile-username"></p>
-
-            <ul class="profile-actions">
-                <li>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    <span>ویرایش پروفایل</span>
-                </li>
-                <li>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    <span>تنظیمات</span>
-                </li>
-                 <li id="logout-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    <span>خروج از حساب</span>
-                </li>
-            </ul>
         </main>
     </div>
 
@@ -387,16 +346,19 @@
     <script>
         // --- SECTION: App Configuration ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234'; // Note: In a real production app, this secret should not be in the client-side code.
+        const SHARED_SECRET = 'miko1234';
 
         // --- SECTION: DOM Element References ---
-        const mainContent = document.getElementById('main-content');
         const searchInput = document.getElementById('search-input');
+        const swipeContainer = document.getElementById('swipe-container');
+        const swipeWrapper = document.getElementById('swipe-wrapper');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabIndicator = document.getElementById('tab-indicator');
         
-        // --- NEW: Profile Overlay Elements ---
-        const profileOverlay = document.getElementById('profile-overlay');
-        const openProfileBtn = document.getElementById('nav-profile-btn');
-        const closeProfileBtn = document.getElementById('close-profile-btn');
+        const chatsPanel = document.getElementById('tab-panel-chats');
+        const usersPanel = document.getElementById('tab-panel-users');
+        const profilePanel = document.getElementById('tab-panel-profile');
+
         const logoutBtn = document.getElementById('logout-btn');
         const profileImage = document.getElementById('profile-image');
         const profileDisplayName = document.getElementById('profile-display-name');
@@ -406,76 +368,62 @@
         // --- SECTION: App State ---
         let currentUser = null;
         let clientToken = null;
-        let allUsers = {}; // Store users as a map {username: userData} for O(1) lookups
-        let recentChats = []; // Store chat data as a sorted array
+        let allUsers = {};
+        let recentChats = [];
+        let activeTabIndex = 0; // 0: Chats, 1: Users, 2: Profile
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Authenticate user by checking local storage
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
-                // In a real app, this should redirect to a login page.
-                // For now, we show an error message.
-                // window.location.href = 'login.html';
-                showErrorMessage('خطای احراز هویت. لطفاً ابتدا وارد شوید.');
+                showErrorMessage('خطای احراز هویت. لطفاً ابتدا وارد شوید.', chatsPanel);
                 return;
             }
             currentUser = JSON.parse(storedUser);
 
-            // 2. Add event listeners for UI elements
+            // Add event listeners
             searchInput.addEventListener('input', handleSearch);
-            
-            // --- NEW: Event Listeners for Profile ---
-            openProfileBtn.addEventListener('click', showProfile);
-            closeProfileBtn.addEventListener('click', hideProfile);
             logoutBtn.addEventListener('click', handleLogout);
+            setupTabNavigation();
+            setupSwipeGestures();
 
-            // 3. Load all initial data from the server
             await loadInitialData();
+            switchToTab(0, false); // Start on chats tab without animation
         });
 
-        /**
-         * Fetches all necessary data (token, users, chats) from the backend to populate the UI.
-         */
         async function loadInitialData() {
-            showLoadingSpinner();
+            showLoadingSpinner(chatsPanel);
+            showLoadingSpinner(usersPanel);
             try {
-                // First, get a client token for authenticated requests
                 await refreshClientToken();
 
-                // Fetch all users and recent chats in parallel for better performance
                 const [usersResponse, chatsResponse] = await Promise.all([
                     fetchProxyData('users'),
                     fetchProxyData('pivi_chats')
                 ]);
 
-                // Process and store the fetched data
-                // Firebase returns objects (maps), so we convert them to the format our app needs.
                 if (usersResponse) {
-                    // Convert the users object into a map for easy lookup by username
                     Object.values(usersResponse).forEach(user => { allUsers[user.username] = user; });
                 }
                 
                 if (chatsResponse) {
-                    // Convert the chats object into an array and sort it by the most recent message
                     recentChats = Object.values(chatsResponse)
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 }
 
-                // Render the main chat list with the processed data
+                // Render all content
                 renderChatList();
+                renderUserList();
+                renderProfile();
 
             } catch (error) {
                 console.error("Initialization Error:", error);
-                showErrorMessage(`خطا در بارگذاری اطلاعات: ${error.message}`);
+                showErrorMessage(`خطا در بارگذاری اطلاعات: ${error.message}`, chatsPanel);
+                showErrorMessage(`خطا در بارگذاری کاربران.`, usersPanel);
             }
         }
 
         // --- SECTION: Data Fetching ---
-
-        /**
-         * Refreshes the client token for making secure API calls to the proxy.
-         */
         async function refreshClientToken() {
             const response = await fetch(`${PROXY_URL}?auth=token`, {
                 headers: { 'X-Proxy-Secret': SHARED_SECRET }
@@ -485,11 +433,6 @@
             clientToken = data.token;
         }
 
-        /**
-         * A generic function to fetch data from the Firebase proxy, including necessary authentication headers.
-         * @param {string} path - The API path to fetch (e.g., 'users', 'pivi_chats').
-         * @returns {Promise<any>} The JSON data from the response.
-         */
         async function fetchProxyData(path) {
             if (!clientToken || !currentUser) throw new Error('کاربر احراز هویت نشده است.');
 
@@ -505,184 +448,193 @@
 
         // --- SECTION: UI Rendering ---
 
-        /**
-         * Renders the list of recent chats in the main content area.
-         */
-        function renderChatList() {
-            if (recentChats.length === 0) {
-                mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
+        function renderChatList(chatsToRender = recentChats) {
+            if (chatsToRender.length === 0) {
+                const message = (searchInput.value.trim() !== '') ? 'هیچ گفتگویی با این مشخصات یافت نشد.' : 'هنوز هیچ گفتگویی وجود ندارد.';
+                showErrorMessage(message, chatsPanel);
                 return;
             }
 
-            const chatListHtml = recentChats.map(chat => {
-                // Find the chat partner's username
+            const listHtml = chatsToRender.map(chat => {
                 const partnerUsername = chat.members.find(m => m !== currentUser.username);
                 const partnerData = allUsers[partnerUsername];
-                // If partner data isn't found (e.g., user was deleted), skip rendering this chat item
                 if (!partnerData) return ''; 
-
-                return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp);
+                return createListItemHtml(partnerData, chat.lastMessage, chat.timestamp, 'chat');
             }).join('');
             
-            mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
-            addClickListenersToItems();
+            chatsPanel.innerHTML = `<div class="list-container">${listHtml}</div>`;
+            addClickListenersToItems(chatsPanel);
         }
-
-        /**
-         * Renders the results of a user search in the main content area.
-         * @param {Array<Object>} results - An array of user objects that match the search query.
-         */
-        function renderSearchResults(results) {
-             if (results.length === 0) {
-                mainContent.innerHTML = '<div class="status-container"><p>کاربری با این مشخصات یافت نشد.</p></div>';
+        
+        function renderUserList(usersToRender = Object.values(allUsers)) {
+             if (usersToRender.length === 0) {
+                const message = (searchInput.value.trim() !== '') ? 'کاربری با این مشخصات یافت نشد.' : 'لیست کاربران خالی است.';
+                showErrorMessage(message, usersPanel);
                 return;
             }
-            const resultsHtml = results.map(user => createSearchResultHtml(user)).join('');
-            mainContent.innerHTML = `<div class="chat-list">${resultsHtml}</div>`;
-            addClickListenersToItems();
+            const listHtml = usersToRender
+                .filter(user => user.username !== currentUser.username) // Exclude self
+                .map(user => createListItemHtml(user, `@${user.username}`, null, 'user')).join('');
+                
+            usersPanel.innerHTML = `<div class="list-container">${listHtml}</div>`;
+            addClickListenersToItems(usersPanel);
+        }
+
+        function renderProfile() {
+            if (!currentUser) return;
+            profileImage.src = `https://i.pravatar.cc/150?u=${currentUser.username}`;
+            profileImage.alt = currentUser.displayName;
+            profileDisplayName.textContent = currentUser.displayName;
+            profileUsername.textContent = `@${currentUser.username}`;
         }
         
-        /**
-         * Displays a loading spinner in the main content area while data is being fetched.
-         */
-        function showLoadingSpinner() {
-            mainContent.innerHTML = `
-                <div class="status-container">
-                    <div class="spinner"></div>
-                    <p>در حال بارگذاری اطلاعات...</p>
-                </div>`;
+        function showLoadingSpinner(panel) {
+            panel.innerHTML = `<div class="status-container"><div class="spinner"></div><p>در حال بارگذاری...</p></div>`;
         }
         
-        /**
-         * Displays a user-friendly error message in the main content area.
-         * @param {string} message - The error message to display.
-         */
-        function showErrorMessage(message) {
-            mainContent.innerHTML = `<div class="status-container"><p>${message}</p></div>`;
+        function showErrorMessage(message, panel) {
+            panel.innerHTML = `<div class="status-container"><p>${message}</p></div>`;
         }
 
         // --- SECTION: HTML Template Generators ---
-
-        /**
-         * Creates the HTML string for a single chat item in the list.
-         * @param {Object} partnerData - The user object for the chat partner.
-         * @param {string} lastMessage - The last message exchanged in the chat.
-         * @param {string} timestamp - The ISO string timestamp of the last message.
-         * @returns {string} The generated HTML string for the chat item.
-         */
-        function createChatItemHtml(partnerData, lastMessage, timestamp) {
+        function createListItemHtml(userData, subtext, timestamp, type) {
             return `
-                <div class="chat-item" data-uid="${partnerData.username}">
-                    <div class="profile-picture">
-                        <img src="https://i.pravatar.cc/100?u=${partnerData.username}" alt="${partnerData.displayName}">
-                        ${partnerData.isOnline ? '<div class="online-indicator"></div>' : ''}
-                    </div>
-                    <div class="chat-details">
-                        <h3>${partnerData.displayName}</h3>
-                        <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
-                    </div>
-                    <div class="chat-meta">
-                        <span>${new Date(timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                </div>`;
-        }
-
-        /**
-         * Creates the HTML string for a single search result item.
-         * @param {Object} userData - The user object for the search result.
-         * @returns {string} The generated HTML string for the search item.
-         */
-        function createSearchResultHtml(userData) {
-            return `
-                <div class="search-result-item" data-uid="${userData.username}">
+                <div class="list-item" data-uid="${userData.username}">
                     <div class="profile-picture">
                         <img src="https://i.pravatar.cc/100?u=${userData.username}" alt="${userData.displayName}">
                         ${userData.isOnline ? '<div class="online-indicator"></div>' : ''}
                     </div>
-                    <div class="chat-details">
+                    <div class="item-details">
                         <h3>${userData.displayName}</h3>
-                        <p class="last-message">@${userData.username}</p>
+                        <p class="item-subtext">${subtext || 'هنوز پیامی ارسال نشده'}</p>
                     </div>
+                    ${timestamp ? `<div class="item-meta">
+                        <span>${new Date(timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>` : ''}
                 </div>`;
         }
 
+        // --- SECTION: Navigation & Interactions ---
 
-        // --- SECTION: Event Handlers & Interactions ---
+        function setupTabNavigation() {
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const index = parseInt(btn.dataset.index);
+                    switchToTab(index);
+                });
+            });
+        }
 
-        /**
-         * Handles the input event on the search bar for live filtering of users.
-         */
+        function switchToTab(index, animate = true) {
+            if (index < 0 || index > 2) return;
+            
+            swipeWrapper.style.transition = animate ? 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)' : 'none';
+
+            activeTabIndex = index;
+            const percentage = -100 * (2 - index) / 3; // Calculation for RTL layout
+            swipeWrapper.style.transform = `translateX(${percentage}%)`;
+
+            // Update active button
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.tab-btn[data-index="${index}"]`).classList.add('active');
+
+            // Update indicator
+            const activeButton = document.querySelector('.tab-btn.active');
+            tabIndicator.style.width = `${activeButton.offsetWidth}px`;
+            tabIndicator.style.right = `${activeButton.offsetLeft}px`;
+            
+            // Update search placeholder and functionality
+            searchInput.value = ''; // Clear search on tab switch
+            handleSearch(); // Re-render original list for the new tab
+            if (index === 0) searchInput.placeholder = "جستجوی چت...";
+            else if (index === 1) searchInput.placeholder = "جستجوی کاربر...";
+            else searchInput.placeholder = "جستجو غیرفعال";
+            searchInput.disabled = (index === 2);
+        }
+
+        function setupSwipeGestures() {
+            let touchStartX = 0;
+            let touchMoveX = 0;
+            let isSwiping = false;
+
+            swipeContainer.addEventListener('touchstart', e => {
+                touchStartX = e.touches[0].clientX;
+                isSwiping = true;
+                swipeWrapper.style.transition = 'none'; // Disable transition during swipe
+            });
+
+            swipeContainer.addEventListener('touchmove', e => {
+                if (!isSwiping) return;
+                touchMoveX = e.touches[0].clientX;
+                const diff = touchMoveX - touchStartX;
+                const basePercentage = -100 * (2 - activeTabIndex) / 3;
+                const movePercentage = (diff / swipeContainer.offsetWidth) * 100;
+                swipeWrapper.style.transform = `translateX(${basePercentage + movePercentage}%)`;
+            });
+
+            swipeContainer.addEventListener('touchend', e => {
+                if (!isSwiping) return;
+                isSwiping = false;
+                const diff = touchMoveX - touchStartX;
+                const threshold = swipeContainer.offsetWidth / 4;
+
+                if (diff > threshold) { // Swipe right (to previous tab in RTL)
+                    switchToTab(activeTabIndex + 1);
+                } else if (diff < -threshold) { // Swipe left (to next tab in RTL)
+                    switchToTab(activeTabIndex - 1);
+                } else {
+                    // Snap back to current tab
+                    switchToTab(activeTabIndex);
+                }
+            });
+        }
+        
         function handleSearch() {
             const query = searchInput.value.toLowerCase().trim();
 
-            // If the search bar is cleared, show the main chat list again
-            if (!query) {
-                renderChatList(); 
-                return;
+            if (activeTabIndex === 0) { // Search Chats
+                if (!query) {
+                    renderChatList(recentChats);
+                    return;
+                }
+                const filteredChats = recentChats.filter(chat => {
+                     const partnerUsername = chat.members.find(m => m !== currentUser.username);
+                     const partnerData = allUsers[partnerUsername];
+                     return partnerData && partnerData.displayName.toLowerCase().includes(query);
+                });
+                renderChatList(filteredChats);
+
+            } else if (activeTabIndex === 1) { // Search Users
+                if (!query) {
+                    renderUserList(Object.values(allUsers));
+                    return;
+                }
+                const allUsersArray = Object.values(allUsers);
+                const filteredUsers = allUsersArray.filter(user => 
+                    user.username.toLowerCase().includes(query) ||
+                    user.displayName.toLowerCase().includes(query)
+                );
+                renderUserList(filteredUsers);
             }
-
-            const allUsersArray = Object.values(allUsers);
-            const filteredUsers = allUsersArray.filter(user => 
-                user.username.toLowerCase().includes(query) ||
-                user.displayName.toLowerCase().includes(query)
-            );
-
-            renderSearchResults(filteredUsers);
         }
 
-        /**
-         * Adds click listeners to all chat or search result items to enable navigation.
-         */
-        function addClickListenersToItems() {
-            const items = mainContent.querySelectorAll('[data-uid]');
+        function addClickListenersToItems(panel) {
+            const items = panel.querySelectorAll('.list-item');
             items.forEach(item => {
                 item.addEventListener('click', () => {
                     const targetUid = item.dataset.uid;
                     console.log(`Navigating to chat with user: ${targetUid}`);
-                    // This line will navigate to the private chat page.
-                    // Replace 'pivi.html' if your chat page has a different name.
                     window.location.href = `pivi.html?uid=${targetUid}`;
                 });
             });
         }
         
-        // --- NEW: Functions for Profile Page ---
-
-        /**
-         * Populates and displays the profile overlay.
-         */
-        function showProfile() {
-            if (!currentUser) return;
-
-            // Populate the data
-            profileImage.src = `https://i.pravatar.cc/150?u=${currentUser.username}`;
-            profileDisplayName.textContent = currentUser.displayName;
-            profileUsername.textContent = `@${currentUser.username}`;
-
-            // Show the overlay with a sliding animation
-            profileOverlay.classList.add('active');
-        }
-
-        /**
-         * Hides the profile overlay.
-         */
-        function hideProfile() {
-            profileOverlay.classList.remove('active');
-        }
-
-        /**
-         * Handles the user logout process.
-         */
         function handleLogout() {
-            // Ask for confirmation before logging out
             if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
-                // Clear user data from local storage
                 localStorage.removeItem('currentUser');
-                // Redirect to the login page (assuming it's named login.html)
                 window.location.href = 'login.html'; 
             }
         }
-
     </script>
 </body>
 </html>
