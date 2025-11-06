@@ -89,7 +89,6 @@
             background-color: var(--input-bg);
             transition: border-color 0.3s, box-shadow 0.3s;
         }
-        /* RTL support for icon */
         html[dir="rtl"] .input-wrapper svg { left: auto; right: 15px; }
         html[dir="rtl"] .input-group input { padding: 12px 45px 12px 15px; }
 
@@ -144,19 +143,11 @@
         .terms-group a:hover { text-decoration: underline; }
         
         #submit-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--primary-color);
-            color: white;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
+            width: 100%; padding: 14px; border: none; border-radius: 8px;
+            background-color: var(--primary-color); color: white;
+            font-size: 1.1em; font-weight: 700; cursor: pointer;
             transition: background-color 0.3s, opacity 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
         }
         #submit-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
         #submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -186,12 +177,6 @@
         }
         .form-footer a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
         .form-footer a:hover { text-decoration: underline; }
-
-        @media (max-width: 500px) {
-            body { padding: 10px 5px; }
-            .form-container { padding: 20px; }
-            .form-header h1 { font-size: 1.6rem; }
-        }
     </style>
 </head>
 <body>
@@ -229,12 +214,11 @@
     </div>
 
     <script>
-        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234';
+        // --- DOM Elements ---
         const form = document.getElementById('register-form');
         const submitBtn = document.getElementById('submit-btn');
         const formStatus = document.getElementById('form-status');
-        const inputs = {
+        const allInputs = {
             displayName: document.getElementById('displayName'),
             username: document.getElementById('username'),
             mobile: document.getElementById('mobile'),
@@ -242,55 +226,103 @@
             gender: document.getElementById('gender'),
             password: document.getElementById('password'),
             passwordConfirm: document.getElementById('passwordConfirm'),
-            terms: document.getElementById('terms')
+            terms: document.getElementById('terms'),
+            bio: document.getElementById('bio'),
+            interests: document.getElementById('interests'),
+            profilePic: document.getElementById('profilePic')
         };
 
+        // --- Constants ---
+        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        const SHARED_SECRET = 'miko1234';
+
+        // --- Utility Functions ---
         function showError(fieldId, message) {
             const el = document.getElementById(`${fieldId}-error`);
             if (el) { el.textContent = message; el.style.display = 'block'; }
-            const inputEl = document.getElementById(fieldId);
-            if(inputEl) inputEl.parentElement.classList.add('error'); // Visual feedback
         }
         function hideError(fieldId) {
             const el = document.getElementById(`${fieldId}-error`);
             if (el) el.style.display = 'none';
-             const inputEl = document.getElementById(fieldId);
-            if(inputEl) inputEl.parentElement.classList.remove('error');
         }
 
+        // --- Validation Logic ---
         function validateField(fieldId) {
-            const input = inputs[fieldId];
-            if (!input) return true;
+            const input = allInputs[fieldId];
+            // If element doesn't exist in DOM, don't validate.
+            if (!input) return true; 
+
             let isValid = true;
             hideError(fieldId);
+
+            // Check for required fields
             if (input.required) {
-                if (input.type === 'checkbox' && !input.checked) { showError(fieldId, 'شما باید با قوانین موافقت کنید.'); isValid = false; }
-                else if (input.value.trim() === '') { showError(fieldId, 'این فیلد الزامی است.'); isValid = false; }
+                if (input.type === 'checkbox' && !input.checked) {
+                    showError(fieldId, 'شما باید با قوانین موافقت کنید.');
+                    isValid = false;
+                } else if (input.value.trim() === '') {
+                    showError(fieldId, 'این فیلد الزامی است.');
+                    isValid = false;
+                }
             }
             if (!isValid) return false;
+
+            // Specific validation rules
             switch(fieldId) {
-                case 'username': if (!/^[a-zA-Z0-9_]{3,15}$/.test(input.value)) { showError(fieldId, 'نام کاربری باید 3 تا 15 کاراکتر انگلیسی، عدد یا _ باشد.'); isValid = false; } break;
-                case 'mobile': if (!/^09\d{9}$/.test(input.value)) { showError(fieldId, 'فرمت شماره موبایل صحیح نیست (مثال: 09123456789).'); isValid = false; } break;
-                case 'age': if (+input.value < 18 || +input.value > 99) { showError(fieldId, 'سن شما باید بین 18 تا 99 سال باشد.'); isValid = false; } break;
-                case 'password': if (input.value.length < 8) { showError(fieldId, 'رمز عبور باید حداقل 8 کاراکتر باشد.'); isValid = false; } break;
-                case 'passwordConfirm': if (input.value !== inputs.password.value) { showError(fieldId, 'رمزهای عبور مطابقت ندارند.'); isValid = false; } break;
+                case 'username':
+                    if (!/^[a-zA-Z0-9_]{3,15}$/.test(input.value)) {
+                        showError(fieldId, 'نام کاربری باید 3 تا 15 کاراکتر انگلیسی، عدد یا _ باشد.');
+                        isValid = false;
+                    }
+                    break;
+                case 'mobile':
+                    if (!/^09\d{9}$/.test(input.value)) {
+                        showError(fieldId, 'فرمت شماره موبایل صحیح نیست (مثال: 09123456789).');
+                        isValid = false;
+                    }
+                    break;
+                case 'age':
+                    if (+input.value < 18 || +input.value > 99) {
+                        showError(fieldId, 'سن شما باید بین 18 تا 99 سال باشد.');
+                        isValid = false;
+                    }
+                    break;
+                case 'password':
+                    if (input.value.length < 8) {
+                        showError(fieldId, 'رمز عبور باید حداقل 8 کاراکتر باشد.');
+                        isValid = false;
+                    }
+                    break;
+                case 'passwordConfirm':
+                    // [FIXED] Securely check if password field exists before reading its value
+                    if (!allInputs.password || input.value !== allInputs.password.value) {
+                        showError(fieldId, 'رمزهای عبور مطابقت ندارند.');
+                        isValid = false;
+                    }
+                    break;
             }
             return isValid;
         }
 
         function checkFormValidity() {
+            // We only validate the required inputs for enabling the button
+            const requiredFields = ['displayName', 'username', 'mobile', 'age', 'gender', 'password', 'passwordConfirm', 'terms'];
             let isFormValid = true;
-            for (const key in inputs) { if (!validateField(key)) isFormValid = false; }
+            for (const key of requiredFields) {
+                if (!validateField(key)) isFormValid = false;
+            }
             submitBtn.disabled = !isFormValid;
             return isFormValid;
         }
 
-        Object.values(inputs).forEach(input => {
-            const eventType = ['checkbox', 'select-one'].includes(input.type) ? 'change' : 'input';
+        // --- Event Listeners ---
+        Object.values(allInputs).forEach(input => {
+            if(!input) return; // Skip if element not found
+            const eventType = ['checkbox', 'select-one', 'file'].includes(input.type) ? 'change' : 'input';
             input.addEventListener(eventType, () => checkFormValidity());
         });
 
-        document.getElementById('profilePic').addEventListener('change', (e) => {
+        allInputs.profilePic.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
@@ -307,60 +339,69 @@
             }
         });
 
+        // --- Form Submission ---
         async function submitForm() {
             submitBtn.disabled = true;
             submitBtn.classList.add('loading');
             formStatus.style.display = 'none';
             try {
+                // 1. Get client token from proxy
                 const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
                 if (!tokenResponse.ok) throw new Error('خطا در دریافت توکن احراز هویت.');
                 const tokenData = await tokenResponse.json();
 
+                // 2. Prepare user data object
                 const userData = {
-                    displayName: inputs.displayName.value.trim(),
-                    username: inputs.username.value.trim().toLowerCase(),
-                    mobile: inputs.mobile.value.trim(),
-                    age: parseInt(inputs.age.value),
-                    gender: inputs.gender.value,
-                    password: inputs.password.value, // In a real app, this should be hashed on the server.
-                    bio: document.getElementById('bio').value.trim(),
-                    interests: document.getElementById('interests').value.trim().split(/[,،]/g).map(i => i.trim()).filter(Boolean),
+                    displayName: allInputs.displayName.value.trim(),
+                    username: allInputs.username.value.trim().toLowerCase(),
+                    mobile: allInputs.mobile.value.trim(),
+                    age: parseInt(allInputs.age.value),
+                    gender: allInputs.gender.value,
+                    password: allInputs.password.value,
+                    bio: allInputs.bio.value.trim(),
+                    interests: allInputs.interests.value.trim().split(/[,،]/g).map(i => i.trim()).filter(Boolean),
                     createdAt: new Date().toISOString(),
                     isOnline: false,
                     lastSeen: new Date().toISOString()
                 };
 
-                // [FIXED] The missing header is added here
+                // 3. Send data to Firebase via proxy
                 const registerResponse = await fetch(`${PROXY_URL}?path=users/${userData.username}`, {
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json', 
                         'Authorization': `Bearer ${tokenData.token}`,
-                        'X-User-Username': userData.username // The critical fix
+                        'X-User-Username': userData.username // The critical header for your proxy
                     },
                     body: JSON.stringify(userData)
                 });
                 
                 const responseData = await registerResponse.json();
                 if (!registerResponse.ok) {
+                    // Check for specific Firebase permission denied error
+                    if (responseData.error && responseData.error.toLowerCase().includes('permission_denied')) {
+                         throw new Error('خطا: قوانین پایگاه داده اجازه ثبت این اطلاعات را نمی‌دهد. لطفا قوانین فایربیس را بررسی کنید.');
+                    }
                     throw new Error(responseData.error || 'خطا در ثبت اطلاعات در سرور.');
                 }
                 
+                // 4. On success, store user and redirect
                 localStorage.setItem('currentUser', JSON.stringify({
                     username: userData.username,
                     displayName: userData.displayName
                 }));
                 
-                formStatus.textContent = 'ثبت‌نام موفق بود! در حال انتقال به صفحه اصلی...';
+                formStatus.textContent = 'ثبت‌نام موفق بود! در حال انتقال...';
                 formStatus.className = 'success';
                 formStatus.style.display = 'block';
                 
-                setTimeout(() => { window.location.href = 'pivi.html'; }, 2000); // Redirect to chat list or main page
+                setTimeout(() => { window.location.href = 'pivi.html'; }, 2000);
 
             } catch (error) {
                 formStatus.textContent = error.message;
                 formStatus.className = 'error';
                 formStatus.style.display = 'block';
+            } finally {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('loading');
             }
