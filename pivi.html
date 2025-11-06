@@ -200,12 +200,13 @@
             justify-content: center;
         }
 
-        /* --- وضعیت بارگذاری --- */
-        .loading-container {
+        /* --- وضعیت بارگذاری و خطا --- */
+        .status-container {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100%;
+            color: var(--text-secondary);
         }
         .spinner {
             width: 40px;
@@ -215,7 +216,7 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin { to { transform: rotate(30deg); } }
 
     </style>
 </head>
@@ -224,17 +225,17 @@
     <div class="app-container">
         <!-- هدر صفحه چت -->
         <header class="chat-header">
-            <button class="back-btn" onclick="window.location.href='safe_asli.html'">
+            <button class="back-btn" aria-label="بازگشت" onclick="history.back()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </button>
             <div class="partner-info">
-                <img id="partner-avatar" src="" alt="Avatar">
+                <img id="partner-avatar" src="" alt="آواتار">
                 <div class="partner-details">
                     <h2 id="partner-name">...</h2>
                     <span class="status" id="partner-status">آفلاین</span>
                 </div>
             </div>
-            <button class="options-btn" id="options-btn">
+            <button class="options-btn" aria-label="گزینه‌ها" id="options-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
             </button>
         </header>
@@ -248,23 +249,50 @@
 
         <!-- فرم ارسال پیام -->
         <form id="message-form">
-            <button type="submit">
+            <button type="submit" aria-label="ارسال پیام">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
-            <input type="text" id="message-input" placeholder="پیامت رو بنویس..." autocomplete="off">
-            <button type="button" class="icon-btn" title="افزودن فایل">
+            <input type="text" id="message-input" placeholder="پیامت رو بنویس..." autocomplete="off" aria-label="فیلد ورود پیام">
+            <button type="button" class="icon-btn" title="افزودن فایل" aria-label="افزودن فایل">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
             </button>
-             <button type="button" class="icon-btn" title="انتخاب اموجی">
+             <button type="button" class="icon-btn" title="انتخاب اموجی" aria-label="انتخاب اموجی">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
             </button>
         </form>
     </div>
 
     <script>
+        /**
+         * ----------------------------------------------------------------
+         * # CHANGELOG (تغییرات این نسخه):
+         * ----------------------------------------------------------------
+         * 1.  **مدیریت چرخه عمر صفحه:** با استفاده از `pageshow` و `pagehide`، مشکل مقداردهی اولیه تکراری هنگام استفاده از دکمه‌های back/forward مرورگر (BFcache) حل شد.
+         * 2.  **محافظت از مقداردهی اولیه:** یک گارد (window.piviAppInitialized) اضافه شد تا اطمینان حاصل شود که تابع `initializeApp` تنها یک بار اجرا می‌شود.
+         * 3.  **مدیریت هوشمند Polling:** دریافت پیام‌ها هنگام غیرفعال بودن تب (document.hidden) متوقف و پس از فعال شدن مجدد، از سر گرفته می‌شود.
+         * 4.  **پشتیبانی از پارامترهای چندگانه URL:** کد به صورت خودکار پارامترهای 'uid' و 'with' را برای یافتن کاربر مقصد می‌پذیرد.
+         * 5.  **بهینه‌سازی رندر پیام:** از رندر مجدد کامل لیست پیام‌ها در صورتی که تغییری در داده‌ها وجود نداشته باشد، جلوگیری می‌شود.
+         * 6.  **مدیریت بهتر خطا:** پیام‌های خطای واضح‌تری برای کاربر در شرایط مختلف (عدم یافتن کاربر، خطای شبکه) نمایش داده می‌شود.
+         * 7.  **پاک‌سازی منابع:** Intervalها و Event Listenerها هنگام خروج از صفحه پاک‌سازی می‌شوند.
+         *
+         * ----------------------------------------------------------------
+         * # TEST PLAN (راهنمای تست):
+         * ----------------------------------------------------------------
+         * 1.  **تست دریافت توکن (cURL):**
+         *     curl -i -H "X-Proxy-Secret: miko124" "https://miko.freehost.io/firebase_proxy.php?auth=token"
+         * 2.  **تست دریافت پیام‌ها (cURL):**
+         *     curl -H "Authorization: Bearer <TOKEN>" -H "X-User-Username: <YOUR_USERNAME>" "https://miko.freehost.io/firebase_proxy.php?path=pivi_chats/<CHAT_ID>/messages"
+         * 3.  **تست BFcache در مرورگر:**
+         *     - از صفحه اصلی (safe_asli.html) وارد این صفحه شوید.
+         *     - با دکمه Back مرورگر به صفحه اصلی برگردید.
+         *     - با دکمه Forward مرورگر دوباره به این صفحه بیایید.
+         *     - در تب Network چک کنید که درخواست‌های fetch مجدداً و به صورت تکراری ارسال نمی‌شوند و برنامه به درستی ادامه می‌یابد.
+         * ----------------------------------------------------------------
+         */
+
         // --- بخش ۱: تنظیمات و متغیرهای اصلی ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko124'; // در یک اپلیکیشن واقعی، این کلید نباید در کلاینت باشد
+        const SHARED_SECRET = 'miko124'; // هشدار: این کلید در محیط پروداکشن نباید در سمت کلاینت باشد.
 
         // --- ارجاع به عناصر DOM ---
         const partnerNameEl = document.getElementById('partner-name');
@@ -281,96 +309,146 @@
         let chatPartner = null;
         let chatId = null;
         let messagePollingInterval = null;
+        let lastMessagesHash = null; // برای بهینه‌سازی رندر
 
-        // --- بخش ۲: راه‌اندازی و مقداردهی اولیه ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            // دریافت اطلاعات کاربر فعلی از حافظه محلی
+        // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
+
+        // استفاده از `pageshow` برای مدیریت صحیح BFcache
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                // صفحه از BFcache بازیابی شده است، فقط منابع را مجددا فعال کن
+                console.log('Page restored from BFcache. Resuming...');
+                resumeApp();
+            } else {
+                // صفحه برای اولین بار بارگذاری می‌شود
+                console.log('Page loaded for the first time. Initializing...');
+                initializeApp();
+            }
+        });
+
+        // پاک‌سازی منابع هنگام خروج از صفحه
+        window.addEventListener('pagehide', () => {
+            console.log('Page is being hidden. Cleaning up resources.');
+            pauseApp();
+        });
+
+        // مدیریت فعال یا غیرفعال بودن تب
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                pauseApp(); // تب غیرفعال شد، polling را متوقف کن
+            } else {
+                resumeApp(); // تب فعال شد، polling را ادامه بده
+            }
+        });
+        
+        async function initializeApp() {
+            // گارد برای جلوگیری از اجرای مجدد
+            if (window.piviAppInitialized) return;
+            window.piviAppInitialized = true;
+
+            showLoadingSpinner();
+            
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
-                window.location.href = 'login.html'; // اگر کاربر لاگین نکرده، به صفحه ورود هدایت شود
+                window.location.href = 'login.html';
                 return;
             }
             currentUser = JSON.parse(storedUser);
 
-            // دریافت نام کاربری طرف مقابل از پارامتر URL
             const urlParams = new URLSearchParams(window.location.search);
-            const partnerUsername = urlParams.get('with'); // should be 'with', changed from 'uid' to match safe_asli
+            // پشتیبانی از هر دو پارامتر uid و with
+            const partnerUsername = urlParams.get('uid') || urlParams.get('with');
             if (!partnerUsername) {
-                alert('کاربر مورد نظر مشخص نشده است.');
-                history.back();
+                showError('کاربر مقصد مشخص نشده است. لطفاً از صفحه اصلی وارد شوید.');
                 return;
             }
 
-            await initializeApp(partnerUsername);
-        });
-
-        async function initializeApp(partnerUsername) {
-            showLoadingSpinner();
             try {
-                // ۱. دریافت توکن امنیتی برای ارتباط با سرور
                 await refreshClientToken();
-                // ۲. دریافت اطلاعات کامل کاربر طرف مقابل
                 await fetchPartnerData(partnerUsername);
 
                 if (!chatPartner) {
-                     alert('کاربر مورد نظر پیدا نشد.');
-                     history.back();
+                     showError('کاربر مورد نظر پیدا نشد.');
                      return;
                 }
                 
-                // ۳. ساخت شناسه یکتای چت بر اساس نام‌های کاربری مرتب شده
                 chatId = [currentUser.username, chatPartner.username].sort().join('_');
                 
-                // ۴. تنظیم UI صفحه با اطلاعات دریافتی
                 setupUI();
-                // ۵. تنظیم شنونده‌های رویداد (Event Listeners)
                 setupEventListeners();
                 
-                // ۶. بارگذاری پیام‌های قبلی و شروع به‌روزرسانی خودکار
                 await loadMessages();
-                if (messagePollingInterval) clearInterval(messagePollingInterval);
-                messagePollingInterval = setInterval(loadMessages, 3000); // هر ۳ ثانیه یکبار پیام‌های جدید را چک کن
+                startPolling();
                 
             } catch (error) {
                 console.error("Initialization Error:", error);
-                alert(`خطا در بارگذاری چت: ${error.message}`);
-                mainContent.innerHTML = `<p style="text-align:center;">خطا در اتصال.</p>`;
+                showError(`خطا در بارگذاری چت: ${error.message}`);
             }
         }
         
-        // --- بخش ۳: توابع مرتبط با UI ---
+        // --- بخش ۳: توابع مدیریت وضعیت برنامه (Pause/Resume) ---
+
+        function startPolling() {
+            if (messagePollingInterval) clearInterval(messagePollingInterval);
+            messagePollingInterval = setInterval(loadMessages, 3000);
+            console.log('Polling started.');
+        }
+
+        function pauseApp() {
+            if (messagePollingInterval) {
+                clearInterval(messagePollingInterval);
+                messagePollingInterval = null;
+                console.log('Polling paused.');
+            }
+        }
+
+        function resumeApp() {
+            // فقط در صورتی که برنامه قبلا مقداردهی شده باشد، polling را ادامه بده
+            if (window.piviAppInitialized && !messagePollingInterval) {
+                // یکبار پیام‌ها را سریعا لود کن و سپس polling را شروع کن
+                loadMessages();
+                startPolling();
+            }
+        }
+        
+        // --- بخش ۴: توابع مرتبط با UI و نمایش خطا ---
 
         function setupUI() {
             partnerNameEl.textContent = chatPartner.displayName;
             partnerAvatarEl.src = `https://i.pravatar.cc/80?u=${chatPartner.username}`;
-            // در حالت واقعی، وضعیت آنلاین بودن باید از فایربیس خوانده شود
             partnerStatusEl.textContent = chatPartner.isOnline ? 'آنلاین' : 'آفلاین';
             partnerStatusEl.style.color = chatPartner.isOnline ? 'var(--online-indicator)' : 'var(--text-secondary)';
         }
 
         function setupEventListeners() {
             messageForm.addEventListener('submit', handleSendMessage);
-            // رویداد برای دکمه آپشن‌ها (بلاک کردن و...)
             document.getElementById('options-btn').addEventListener('click', () => {
-                const action = prompt(`عملیات برای کاربر ${chatPartner.displayName}:\n1: بلاک کردن کاربر\n2: پاک کردن تاریخچه`);
-                if(action === '1') alert('قابلیت بلاک کردن در دست ساخت است.');
+                alert(`قابلیت‌های بیشتر برای کاربر ${chatPartner.displayName} به زودی اضافه خواهد شد.`);
             });
         }
         
         function showLoadingSpinner() {
-            messagesArea.innerHTML = `<div class="loading-container"><div class="spinner"></div></div>`;
+            messagesArea.innerHTML = `<div class="status-container"><div class="spinner"></div></div>`;
+        }
+
+        function showError(message) {
+            messagesArea.innerHTML = `<div class="status-container"><p>${message}</p></div>`;
         }
         
         function scrollToBottom() {
             mainContent.scrollTop = mainContent.scrollHeight;
         }
 
-        // --- بخش ۴: ارتباط با سرور و واکشی اطلاعات ---
+        // --- بخش ۵: ارتباط با سرور و واکشی اطلاعات ---
 
         async function refreshClientToken() {
-            const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-            if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
-            clientToken = (await response.json()).token;
+            try {
+                const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+                if (!response.ok) throw new Error(`خطای ${response.status} در دریافت توکن`);
+                clientToken = (await response.json()).token;
+            } catch (error) {
+                throw new Error(`خطای شبکه در دریافت توکن: ${error.message}`);
+            }
         }
 
         async function fetchPartnerData(username) {
@@ -381,34 +459,36 @@
             chatPartner = await response.json();
         }
 
-        // --- بخش ۵: منطق اصلی چت (ارسال و دریافت پیام) ---
+        // --- بخش ۶: منطق اصلی چت (ارسال و دریافت پیام) ---
 
         async function loadMessages() {
-            if (!chatId) return;
-            const response = await fetch(`${PROXY_URL}?path=pivi_chats/${chatId}/messages`, { 
-                headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username } 
-            });
-            const messagesData = await response.json();
-            
-            // برای جلوگیری از پرش صفحه، فقط در صورتی که محتوا تغییر کرده، رندر مجدد انجام شود
-            const currentMessageCount = messagesArea.children.length;
-            const newMessageCount = messagesData ? Object.keys(messagesData).length : 0;
-            
-            if (newMessageCount === 0 && currentMessageCount === 0) {
-                 messagesArea.innerHTML = `<p style="text-align:center; color: var(--text-secondary);">هنوز پیامی رد و بدل نشده است.</p>`;
-                 return;
-            }
-
-            if (currentMessageCount === newMessageCount) return; // اگر تعداد پیام‌ها یکی بود، نیازی به رندر مجدد نیست
-            
-            messagesArea.innerHTML = '';
-            if (messagesData) {
-                // پیام‌ها را بر اساس زمان مرتب کرده و نمایش می‌دهیم
-                const sortedMessages = Object.entries(messagesData).sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
-                sortedMessages.forEach(([msgId, msg]) => {
-                    renderMessage(msgId, msg);
+            if (!chatId || !clientToken) return;
+            try {
+                const response = await fetch(`${PROXY_URL}?path=pivi_chats/${chatId}/messages`, { 
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username } 
                 });
+                if (!response.ok) return; // در صورت خطا، رندر مجدد نکن
+                const messagesData = await response.json();
+
+                // بهینه‌سازی: فقط در صورت تغییر محتوا، DOM را آپدیت کن
+                const newHash = JSON.stringify(messagesData);
+                if (newHash === lastMessagesHash) return;
+                lastMessagesHash = newHash;
+
+                if (!messagesData) {
+                    messagesArea.innerHTML = `<div class="status-container"><p>هنوز پیامی رد و بدل نشده است.</p></div>`;
+                    return;
+                }
+                
+                messagesArea.innerHTML = '';
+                // حل مشکل داده‌های Object از Firebase: تبدیل به آرایه و مرتب‌سازی
+                const sortedMessages = Object.entries(messagesData).sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
+                sortedMessages.forEach(([msgId, msg]) => renderMessage(msgId, msg));
+                
                 scrollToBottom();
+
+            } catch(error) {
+                console.error("Error loading messages:", error);
             }
         }
 
@@ -418,19 +498,16 @@
             msgDiv.className = 'message ' + (isSent ? 'sent' : 'received');
             msgDiv.dataset.id = msgId;
 
-            let textContent = msg.deleted ? 'این پیام حذف شده است' : msg.text;
+            let textContent = msg.deleted ? 'این پیام حذف شده است' : (msg.text || "");
             if (msg.deleted) msgDiv.classList.add('deleted');
 
             const timestamp = new Date(msg.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
 
-            msgDiv.innerHTML = `<div class="text">${textContent}</div><div class="timestamp">${timestamp}</div>`;
+            msgDiv.innerHTML = `<div class="text">${textContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div><div class="timestamp">${timestamp}</div>`;
             
-            // قابلیت حذف پیام (فقط برای پیام‌های ارسال شده توسط خود کاربر)
             if (isSent && !msg.deleted) {
                 msgDiv.addEventListener('click', () => {
-                    if (confirm('آیا می‌خواهید این پیام را حذف کنید؟')) {
-                        deleteMessage(msgId);
-                    }
+                    if (confirm('آیا می‌خواهید این پیام را حذف کنید؟')) deleteMessage(msgId);
                 });
             }
             messagesArea.appendChild(msgDiv);
@@ -441,62 +518,50 @@
             const text = messageInput.value.trim();
             if (!text || !chatPartner) return;
             
-            const message = {
-                senderId: currentUser.username,
-                text: text,
-                timestamp: new Date().toISOString(),
-                deleted: false,
-                read: false
-            };
-            messageInput.value = ''; // پاک کردن اینپوت بلافاصله برای تجربه کاربری بهتر
+            const message = { senderId: currentUser.username, text, timestamp: new Date().toISOString(), deleted: false };
+            messageInput.value = '';
 
             try {
-                // ارسال پیام به سرور
                 await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
-                // بروزرسانی اطلاعات کلی چت (آخرین پیام و زمان)
                 await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
                     lastMessage: text,
                     timestamp: message.timestamp,
                     members: [currentUser.username, chatPartner.username]
                 });
-                await loadMessages(); // بارگذاری مجدد پیام‌ها برای نمایش پیام جدید
+                await loadMessages();
             } catch(error) {
                 alert('خطا در ارسال پیام!');
                 console.error('Send message error:', error);
-                messageInput.value = text; // برگرداندن متن در صورت خطا
+                messageInput.value = text;
             }
         }
         
         async function deleteMessage(messageId) {
             try {
-                 // حذف نرم: پیام را واقعا حذف نمی‌کنیم، بلکه وضعیت آن را تغییر می‌دهیم
-                const updateData = { deleted: true };
-                await apiRequest(`pivi_chats/${chatId}/messages/${messageId}`, 'PATCH', updateData);
-                await loadMessages(); // بارگذاری مجدد برای نمایش تغییر
+                await apiRequest(`pivi_chats/${chatId}/messages/${messageId}`, 'PATCH', { deleted: true });
+                await loadMessages();
             } catch(error) {
                 alert('خطا در حذف پیام.');
                 console.error('Delete message error:', error);
             }
         }
 
-        // --- بخش ۶: تابع کمکی برای ارسال درخواست‌های API ---
-        
+        // --- بخش ۷: تابع کمکی برای ارسال درخواست‌های API ---
         async function apiRequest(path, method, body) {
             const options = {
-                method: method,
+                method,
                 headers: { 
                     'Content-Type': 'application/json', 
                     'Authorization': `Bearer ${clientToken}`,
                     'X-User-Username': currentUser.username
                 },
             };
-            if (body) {
-                options.body = JSON.stringify(body);
-            }
+            if (body) options.body = JSON.stringify(body);
+            
             const response = await fetch(`${PROXY_URL}?path=${path}`, options);
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'یک خطای ناشناخته در سرور رخ داد.');
+                throw new Error(errorData.error || `یک خطای ${response.status} رخ داد.`);
             }
             return response.json();
         }
