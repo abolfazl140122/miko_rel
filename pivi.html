@@ -2,47 +2,178 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>چت شخصی - همیار</title>
-    <!-- استفاده کامل از استایل‌های صفحه اصلی برای یکپارچگی ظاهری -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
-        :root { --primary-color: #007bff; --success-color: #28a745; --danger-color: #e74c3c; --light-gray-color: #f8f9fa; --border-color: #dee2e6; --sent-bg: #e1f5fe; --received-bg: #f1f3f5; }
-        *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Vazirmatn', sans-serif; margin: 0; background-color: var(--light-gray-color); color: #333; -webkit-user-select: none; user-select: none; overflow: hidden; }
+        
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --body-bg: #f0f2f5;
+            --chat-bg: #e5ddd5;
+            --header-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --sent-bg: #dcf8c6;
+            --received-bg: #ffffff;
+            --text-primary: #333;
+            --text-secondary: #6c757d;
+            --modal-overlay-bg: rgba(0, 0, 0, 0.5);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
 
-        .app-container { width: 100%; max-width: 400px; height: 100vh; margin: 0 auto; background-color: white; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
 
-        /* Header اختصاصی برای چت */
-        .chat-header { padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .chat-header .back-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: #555; }
-        .chat-header .partner-info { display: flex; align-items: center; cursor: pointer; }
-        .chat-header .partner-info img { width: 40px; height: 40px; border-radius: 50%; margin-left: 10px; }
-        .chat-header .partner-info h2 { font-size: 1.2em; margin: 0; }
-        .chat-header .options-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: #555; }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            margin: 0;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            -webkit-user-select: none;
+            user-select: none;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
-        /* Main Content Area */
-        main { flex-grow: 1; position: relative; overflow-y: auto; display: flex; flex-direction: column-reverse; padding: 10px; }
-        #messages-area { display: flex; flex-direction: column; gap: 8px; }
-        .message { max-width: 75%; padding: 10px 15px; border-radius: 18px; word-wrap: break-word; position: relative; }
+        .app-container {
+            width: 100%;
+            height: 100%;
+            max-width: 450px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .chat-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--header-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .chat-header .back-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: var(--text-secondary); padding: 5px; }
+        .chat-header .partner-info { display: flex; align-items: center; cursor: pointer; gap: 12px; }
+        .chat-header .partner-info img { width: 45px; height: 45px; border-radius: 50%; }
+        .chat-header .partner-info h2 { font-size: 1.1em; font-weight: 500; margin: 0; }
+        .chat-header .options-btn { background: none; border: none; font-size: 1.8em; cursor: pointer; color: var(--text-secondary); padding: 5px; }
+
+        /* Main Content */
+        main {
+            flex-grow: 1;
+            position: relative;
+            background-color: var(--chat-bg);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column-reverse;
+            padding: 15px;
+        }
+        #messages-area {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            position: relative;
+            box-shadow: var(--shadow);
+            line-height: 1.5;
+        }
         .message.sent { background-color: var(--sent-bg); align-self: flex-start; border-bottom-left-radius: 4px; }
         .message.received { background-color: var(--received-bg); align-self: flex-end; border-bottom-right-radius: 4px; }
-        .message .timestamp { font-size: 0.7em; color: #888; margin-top: 5px; text-align: left; }
-        .message.deleted .text { font-style: italic; color: #999; }
-        .message .edited-indicator { font-size: 0.7em; color: #888; margin-right: 5px; }
+        .message .meta { font-size: 0.75em; color: var(--text-secondary); margin-top: 5px; text-align: left; direction: ltr; }
+        .message.deleted .text { font-style: italic; color: var(--text-secondary); }
+        .message .meta .edited-indicator { margin-left: 5px; }
 
         /* Message Form */
-        #message-form { display: flex; padding: 10px; border-top: 1px solid var(--border-color); background: white; }
-        #message-form input { flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 20px; font-family: 'Vazirmatn'; }
-        #message-form button { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-right: 10px; font-size: 1.5em; cursor: pointer; flex-shrink: 0; }
+        #message-form {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid var(--border-color);
+            background: var(--header-bg);
+            flex-shrink: 0;
+            gap: 10px;
+        }
+        #message-input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-family: 'Vazirmatn';
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+        #message-input:focus { outline: none; border-color: var(--primary-color); }
+        #message-input:disabled { background-color: #e9ecef; cursor: not-allowed; }
+        #message-form button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.6em;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        #message-form button:hover { background-color: #0056b3; }
         
-        /* Modal and Context Menu Styles */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 350px; }
-        .modal-content h3 { margin-top: 0; }
-        .modal-content button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--light-gray-color); cursor: pointer; font-family: 'Vazirmatn'; }
-        .modal-content button.danger { border-color: var(--danger-color); color: var(--danger-color); }
-        .modal-content #edit-input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; }
+        /* Modal and Context Menu */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--modal-overlay-bg);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 { margin-top: 0; font-weight: 500; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--body-bg);
+            cursor: pointer;
+            font-family: 'Vazirmatn';
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
+        .modal-content button:hover { background-color: #e2e6ea; }
+        .modal-content button.danger { border-color: transparent; background-color: var(--danger-color); color: white; }
+        .modal-content button.danger:hover { background-color: #c82333; }
+        .modal-content button.success { border-color: transparent; background-color: var(--success-color); color: white; }
+        .modal-content button.success:hover { background-color: #218838; }
+        .modal-content textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; font-family: 'Vazirmatn'; resize: vertical; }
     </style>
 </head>
 <body>
@@ -51,7 +182,7 @@
         <header class="chat-header">
             <button class="back-btn" onclick="history.back()">➡️</button>
             <div class="partner-info" id="partner-info">
-                <img id="partner-avatar" src="" alt="">
+                <img id="partner-avatar" src="" alt="Avatar">
                 <h2 id="partner-name">...</h2>
             </div>
             <button class="options-btn" id="options-btn">⋮</button>
@@ -59,13 +190,13 @@
 
         <main>
             <div id="messages-area">
-                <!-- Messages will be loaded here -->
+                <!-- Messages will be loaded here dynamically -->
             </div>
         </main>
 
         <form id="message-form">
             <input type="text" id="message-input" placeholder="پیام خود را بنویسید..." autocomplete="off">
-            <button type="submit">⬆️</button>
+            <button type="submit" aria-label="Send">⬆️</button>
         </form>
     </div>
 
@@ -74,7 +205,7 @@
         <div class="modal-content">
             <h3>گزینه‌ها</h3>
             <button id="view-profile-btn">مشاهده پروفایل</button>
-            <button id="block-user-btn" class="danger">مسدود کردن کاربر</button>
+            <button id="toggle-block-btn">مسدود کردن کاربر</button>
             <button data-close>بستن</button>
         </div>
     </div>
@@ -92,7 +223,7 @@
         <div class="modal-content">
             <h3>ویرایش پیام</h3>
             <textarea id="edit-input" rows="4"></textarea>
-            <button id="save-edit-btn">ذخیره</button>
+            <button id="save-edit-btn" class="success">ذخیره</button>
             <button data-close>انصراف</button>
         </div>
     </div>
@@ -105,7 +236,6 @@
             <button data-close>انصراف</button>
         </div>
     </div>
-
 
     <script>
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
@@ -126,22 +256,25 @@
         const contextMenuModal = document.getElementById('context-menu-modal');
         const viewProfileBtn = document.getElementById('view-profile-btn');
         const partnerInfo = document.getElementById('partner-info');
-        const blockUserBtn = document.getElementById('block-user-btn');
+        const toggleBlockBtn = document.getElementById('toggle-block-btn');
 
         // --- App State ---
-        let currentUser = null;
+        let currentUser = null; // Will hold full user data from DB
         let clientToken = null;
         let chatPartner = null;
         let chatId = null;
+        let isPartnerBlocked = false;
         let messagePollingInterval = null;
-        let editingMessageId = null;
         let contextMessageId = null;
 
         // --- AUTH & INIT ---
-        (async () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const storedUser = localStorage.getItem('currentUser');
-            if (!storedUser) { window.location.href = 'login.html'; return; }
-            currentUser = JSON.parse(storedUser);
+            if (!storedUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const basicCurrentUser = JSON.parse(storedUser);
 
             const urlParams = new URLSearchParams(window.location.search);
             const partnerUsername = urlParams.get('with');
@@ -151,13 +284,20 @@
                 return;
             }
 
-            await initializeApp(partnerUsername);
-        })();
+            await initializeApp(basicCurrentUser.username, partnerUsername);
+        });
 
-        async function initializeApp(partnerUsername) {
+        async function initializeApp(currentUsername, partnerUsername) {
             try {
                 await refreshClientToken();
-                await fetchPartnerData(partnerUsername);
+                // Fetch both users' data in parallel for efficiency
+                const [partnerData, currentUserData] = await Promise.all([
+                    fetchUserData(partnerUsername),
+                    fetchUserData(currentUsername)
+                ]);
+
+                chatPartner = partnerData;
+                currentUser = currentUserData;
 
                 if (!chatPartner) {
                      alert('کاربر یافت نشد.');
@@ -165,15 +305,19 @@
                      return;
                 }
                 
-                // Generate a consistent chat ID
+                // Generate a consistent chat ID by sorting usernames alphabetically
                 chatId = [currentUser.username, chatPartner.username].sort().join('__');
+                
+                // Check initial block status
+                isPartnerBlocked = currentUser.blockedUsers && currentUser.blockedUsers[chatPartner.username] === true;
                 
                 setupUI();
                 setupEventListeners();
                 
                 await loadMessages();
                 if (messagePollingInterval) clearInterval(messagePollingInterval);
-                messagePollingInterval = setInterval(loadMessages, 3000); // Poll for new messages
+                // Start polling for new messages every 3 seconds
+                messagePollingInterval = setInterval(loadMessages, 3000); 
                 
             } catch (error) {
                 console.error("Initialization Error:", error);
@@ -184,6 +328,23 @@
         function setupUI() {
             partnerNameEl.textContent = chatPartner.displayName;
             partnerAvatarEl.src = `https://i.pravatar.cc/80?u=${chatPartner.username}`;
+            updateBlockStatusUI();
+        }
+
+        function updateBlockStatusUI() {
+            if (isPartnerBlocked) {
+                toggleBlockBtn.textContent = 'رفع انسداد';
+                toggleBlockBtn.classList.remove('danger');
+                toggleBlockBtn.classList.add('success');
+                messageInput.disabled = true;
+                messageInput.placeholder = "شما این کاربر را مسدود کرده‌اید.";
+            } else {
+                toggleBlockBtn.textContent = 'مسدود کردن کاربر';
+                toggleBlockBtn.classList.remove('success');
+                toggleBlockBtn.classList.add('danger');
+                messageInput.disabled = false;
+                messageInput.placeholder = "پیام خود را بنویسید...";
+            }
         }
 
         function setupEventListeners() {
@@ -194,49 +355,47 @@
                 optionsModal.style.display = 'none';
                 showProfileModal();
             });
-            blockUserBtn.addEventListener('click', handleBlockUser);
+            toggleBlockBtn.addEventListener('click', handleToggleBlock);
             
-            // Modal close listeners
-            document.querySelectorAll('.modal-overlay [data-close]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    btn.closest('.modal-overlay').style.display = 'none';
+            // Generic modal close listeners
+            document.querySelectorAll('.modal-overlay [data-close], .modal-overlay').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    if (e.target === el) {
+                        el.closest('.modal-overlay').style.display = 'none';
+                    }
                 });
             });
 
-            // Message context menu listeners
-            document.getElementById('context-edit-btn').addEventListener('click', handleEditMessage);
+            // Message context menu action listeners
+            document.getElementById('context-edit-btn').addEventListener('click', showEditModal);
             document.getElementById('context-delete-btn').addEventListener('click', handleDeleteMessage);
             document.getElementById('save-edit-btn').addEventListener('click', saveEditedMessage);
         }
 
         // --- DATA FETCHING ---
         async function refreshClientToken() {
-            const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-            if (!response.ok) throw new Error('خطا در دریافت توکن امنیتی.');
-            clientToken = (await response.json()).token;
+            clientToken = await apiRequest('?auth=token', 'GET', null, { 'X-Proxy-Secret': SHARED_SECRET });
         }
 
-        async function fetchPartnerData(username) {
-             const response = await fetch(`${PROXY_URL}?path=users&orderBy="username"&equalTo="${username}"`, {
-                headers: { 'Authorization': `Bearer ${clientToken}` }
-            });
-            if (!response.ok) throw new Error('خطا در واکشی اطلاعات کاربر.');
-            const data = await response.json();
-            if (data && Object.keys(data).length > 0) {
-                 const key = Object.keys(data)[0];
-                 chatPartner = data[key];
-            }
+        async function fetchUserData(username) {
+             const response = await apiRequest(`?path=users&orderBy="username"&equalTo="${username}"`, 'GET');
+             if (response && Object.keys(response).length > 0) {
+                 const key = Object.keys(response)[0];
+                 // Return the full user object, including nested data like 'blockedUsers'
+                 return { ...response[key], firebaseKey: key }; 
+             }
+             return null;
         }
 
         // --- CORE CHAT LOGIC ---
         async function loadMessages() {
             if (!chatId) return;
-            const response = await fetch(`${PROXY_URL}?path=pivi_chats/${chatId}/messages`, { headers: { 'Authorization': `Bearer ${clientToken}` } });
-            const messagesData = await response.json();
+            const messagesData = await apiRequest(`?path=pivi_chats/${chatId}/messages`, 'GET');
             
-            messagesArea.innerHTML = '';
+            messagesArea.innerHTML = ''; // Clear previous messages
             if (messagesData) {
-                const sortedMessages = Object.entries(messagesData).sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
+                // Sort messages by timestamp before rendering
+                const sortedMessages = Object.entries(messagesData).sort((a, b) => a[1].timestamp.localeCompare(b[1].timestamp));
                 sortedMessages.forEach(([msgId, msg]) => {
                     renderMessage(msgId, msg);
                 });
@@ -248,24 +407,20 @@
             msgDiv.className = 'message ' + (msg.senderId === currentUser.username ? 'sent' : 'received');
             msgDiv.dataset.id = msgId;
 
-            let textContent = '';
-            if (msg.deleted) {
-                msgDiv.classList.add('deleted');
-                textContent = 'این پیام حذف شده است';
-            } else {
-                textContent = msg.text;
-            }
+            let textContent = msg.deleted ? 'این پیام حذف شده است' : msg.text;
+            if (msg.deleted) msgDiv.classList.add('deleted');
 
             const editedIndicator = msg.edited ? '<span class="edited-indicator">(ویرایش شده)</span>' : '';
+            const time = new Date(msg.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
 
             msgDiv.innerHTML = `
-                <div class="text">${textContent}</div>
-                <div class="timestamp">${new Date(msg.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })} ${editedIndicator}</div>
+                <div class="text">${textContent.replace(/\n/g, '<br>')}</div>
+                <div class="meta">${time} ${editedIndicator}</div>
             `;
             
-            // Add long-press/context-click event only for sent messages
+            // Add context menu event (right-click or long-press) only for non-deleted sent messages
             if (msg.senderId === currentUser.username && !msg.deleted) {
-                msgDiv.addEventListener('click', (e) => {
+                msgDiv.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                     contextMessageId = msgId;
                     contextMenuModal.style.display = 'flex';
@@ -277,7 +432,7 @@
         async function handleSendMessage(e) {
             e.preventDefault();
             const text = messageInput.value.trim();
-            if (!text || !chatPartner) return;
+            if (!text || !chatPartner || isPartnerBlocked) return;
             
             const message = {
                 senderId: currentUser.username,
@@ -288,61 +443,58 @@
             };
             messageInput.value = '';
 
-            // Create chat members if it's the first message
-            await apiRequest(`pivi_chats/${chatId}/members`, 'PUT', {
-                [currentUser.username]: true,
-                [chatPartner.username]: true
-            });
+            try {
+                // Ensure chat members are set. PUT is idempotent, so it's safe to call every time.
+                await apiRequest(`?path=pivi_chats/${chatId}/members`, 'PUT', {
+                    [currentUser.username]: true,
+                    [chatPartner.username]: true
+                });
 
-            // Send the message (POST creates a unique ID)
-            await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
-            await loadMessages();
+                // POST creates a new unique ID for the message
+                await apiRequest(`?path=pivi_chats/${chatId}/messages`, 'POST', message);
+                await loadMessages();
+            } catch(error) {
+                console.error("Send message failed:", error);
+                alert('خطا در ارسال پیام.');
+            }
         }
 
-        // --- MESSAGE ACTIONS ---
-        function handleEditMessage() {
+        // --- MESSAGE ACTIONS (EDIT/DELETE) ---
+        function showEditModal() {
             contextMenuModal.style.display = 'none';
-            editingMessageId = contextMessageId;
-            const messageDiv = document.querySelector(`.message[data-id="${editingMessageId}"] .text`);
+            const messageDiv = document.querySelector(`.message[data-id="${contextMessageId}"] .text`);
             if (messageDiv) {
-                document.getElementById('edit-input').value = messageDiv.textContent;
+                document.getElementById('edit-input').value = messageDiv.textContent.trim();
                 editModal.style.display = 'flex';
             }
         }
 
         async function saveEditedMessage() {
             const newText = document.getElementById('edit-input').value.trim();
-            if (!newText || !editingMessageId) return;
+            if (!newText || !contextMessageId) return;
 
-            const updateData = {
-                text: newText,
-                edited: true
-            };
+            const updateData = { text: newText, edited: true };
             
-            await apiRequest(`pivi_chats/${chatId}/messages/${editingMessageId}`, 'PATCH', updateData);
+            await apiRequest(`?path=pivi_chats/${chatId}/messages/${contextMessageId}`, 'PATCH', updateData);
             
             editModal.style.display = 'none';
-            editingMessageId = null;
             await loadMessages();
         }
 
         async function handleDeleteMessage() {
+            contextMenuModal.style.display = 'none';
             if (!contextMessageId) return;
-            const confirmation = confirm('آیا از حذف این پیام مطمئن هستید؟ این عمل غیرقابل بازگشت است.');
+            
+            const confirmation = confirm('آیا از حذف این پیام مطمئن هستید؟');
             if (confirmation) {
                  // Soft delete: update the message instead of removing it
-                const updateData = {
-                    text: 'این پیام حذف شده است',
-                    deleted: true
-                };
-                await apiRequest(`pivi_chats/${chatId}/messages/${contextMessageId}`, 'PATCH', updateData);
-                contextMenuModal.style.display = 'none';
-                contextMessageId = null;
+                const updateData = { text: 'این پیام حذف شده است', deleted: true };
+                await apiRequest(`?path=pivi_chats/${chatId}/messages/${contextMessageId}`, 'PATCH', updateData);
                 await loadMessages();
             }
         }
 
-        // --- USER ACTIONS ---
+        // --- USER ACTIONS (PROFILE/BLOCK) ---
         function showProfileModal() {
             document.getElementById('profile-modal-name').textContent = chatPartner.displayName;
             document.getElementById('profile-modal-username').textContent = chatPartner.username;
@@ -350,33 +502,61 @@
             profileModal.style.display = 'flex';
         }
 
-        async function handleBlockUser() {
-            const confirmation = confirm(`آیا میخواهید ${chatPartner.displayName} را مسدود کنید؟ شما دیگر از این کاربر پیامی دریافت نخواهید کرد.`);
-            if (confirmation) {
-                await apiRequest(`users/${currentUser.username}/blockedUsers/${chatPartner.username}`, 'PUT', true);
-                alert(`${chatPartner.displayName} مسدود شد.`);
-                optionsModal.style.display = 'none';
-                // You might want to disable the message input here
-                messageInput.disabled = true;
-                messageInput.placeholder = "شما این کاربر را مسدود کرده‌اید.";
+        async function handleToggleBlock() {
+            const action = isPartnerBlocked ? 'unblock' : 'block';
+            const confirmMsg = action === 'block'
+                ? `آیا میخواهید ${chatPartner.displayName} را مسدود کنید؟`
+                : `آیا میخواهید ${chatPartner.displayName} را از انسداد خارج کنید؟`;
+
+            if (confirm(confirmMsg)) {
+                try {
+                    if (action === 'block') {
+                        // To block, PUT 'true' at the partner's username key
+                        await apiRequest(`?path=users/${currentUser.username}/blockedUsers/${chatPartner.username}`, 'PUT', true);
+                        isPartnerBlocked = true;
+                        alert(`${chatPartner.displayName} مسدود شد.`);
+                    } else {
+                        // To unblock, DELETE the key
+                        await apiRequest(`?path=users/${currentUser.username}/blockedUsers/${chatPartner.username}`, 'DELETE');
+                        isPartnerBlocked = false;
+                        alert(`${chatPartner.displayName} از انسداد خارج شد.`);
+                    }
+                    updateBlockStatusUI(); // Update UI after action
+                } catch(error) {
+                    console.error("Block/Unblock failed:", error);
+                    alert('عملیات ناموفق بود.');
+                } finally {
+                    optionsModal.style.display = 'none';
+                }
             }
         }
 
         // --- API HELPER ---
-        async function apiRequest(path, method, body) {
-            const options = {
-                method: method,
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}` },
+        async function apiRequest(url, method, body = null, extraHeaders = {}) {
+            const headers = {
+                'Content-Type': 'application/json',
+                ...extraHeaders
             };
+            if (clientToken && !url.includes('auth=token')) {
+                 headers['Authorization'] = `Bearer ${clientToken.token || clientToken}`;
+            }
+
+            const options = { method, headers };
             if (body) {
                 options.body = JSON.stringify(body);
             }
-            const response = await fetch(`${PROXY_URL}?path=${path}`, options);
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'یک خطای ناشناخته رخ داد.');
+            if(method === 'DELETE' && options.body) {
+                delete options.body; // DELETE requests should not have a body
             }
-            return response.json();
+
+            const response = await fetch(`${PROXY_URL}${url}`, options);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'An unknown error occurred.' }));
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
+            // Some responses like DELETE might not have a body
+            const responseText = await response.text();
+            return responseText ? JSON.parse(responseText) : null;
         }
 
     </script>
