@@ -1,141 +1,96 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>همیار - در حال بارگذاری...</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            overflow: hidden;
-            direction: rtl;
-        }
-
-        #loading-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 100%;
-            background-color: #f8f9fa;
-            color: #343a40;
-            text-align: center;
-            transition: opacity 0.5s ease;
-        }
-
-        #logo {
-            width: 140px;
-            height: auto;
-            margin-bottom: 30px;
-            animation: pulse 2.5s infinite ease-in-out;
-            border-radius: 50%;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            }
-            50% {
-                transform: scale(1);
-                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            }
-        }
-
-        #status-message {
-            font-size: 1.2em;
-            font-weight: 500;
-            color: #495057;
-        }
-        
-        .spinner {
-            border: 4px solid #dee2e6;
-            border-radius: 50%;
-            border-top: 4px solid #007bff;
-            width: 35px;
-            height: 35px;
-            animation: spin 1s linear infinite;
-            margin-top: 25px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>همیار - در حال بررسی اتصال...</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
+    body, html {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      font-family: 'Vazirmatn', sans-serif;
+      background: #f8f9fa; color: #343a40;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      direction: rtl;
+    }
+    #logo { width: 130px; border-radius: 50%; margin-bottom: 25px;
+      animation: pulse 2.5s infinite ease-in-out; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(0.95); }
+      50% { transform: scale(1); }
+    }
+    #status-message { font-size: 1.1em; font-weight: 500; color: #495057; text-align: center; }
+    .spinner {
+      border: 4px solid #dee2e6;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      animation: spin 1s linear infinite;
+      margin-top: 25px;
+    }
+    @keyframes spin { 0% {transform: rotate(0);} 100% {transform: rotate(360deg);} }
+  </style>
 </head>
 <body>
+  <img id="logo" src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/main/logo.png" alt="لوگو">
+  <p id="status-message">در حال بررسی اتصال به سرور...</p>
+  <div id="spinner" class="spinner"></div>
 
-    <div id="loading-container">
-        <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/c767edd7cb23c2f1a0314b935c515aa6b43c1905/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85%20%D8%A8%D8%AF%D9%88%D9%86%20%D9%BE%D8%B3%20%D8%B2%D9%85%DB%8C%D9%86%D9%87.png" alt="لوگو اپلیکیشن همیار" id="logo">
-        <p id="status-message">در حال بررسی وضعیت ورود...</p>
-        <div id="spinner" class="spinner"></div>
-    </div>
+  <script>
+    const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+    const SHARED_SECRET = 'miko1234';
+    const statusEl = document.getElementById('status-message');
+    const spinner = document.getElementById('spinner');
 
-    <script>
-        // --- CONFIG ---
-        const REDIRECT_DELAY = 2000; // 2 ثانیه تاخیر قبل از هدایت کاربر
+    async function connectToServer() {
+      try {
+        statusEl.textContent = 'در حال دریافت توکن دسترسی...';
 
-        // --- DOM Elements ---
-        const statusMessageElement = document.getElementById('status-message');
-        const spinnerElement = document.getElementById('spinner');
+        // گام 1: درخواست توکن از سرور
+        const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, {
+          method: 'GET',
+          headers: { 'X-Proxy-Secret': SHARED_SECRET }
+        });
+        if (!tokenResponse.ok) throw new Error(`توکن دریافت نشد (${tokenResponse.status})`);
 
-        // --- Main Logic ---
-        function checkLoginStatus() {
-            // از localStorage برای بررسی وجود اطلاعات کاربر استفاده می‌کنیم
-            const storedUser = localStorage.getItem('currentUser');
+        const tokenData = await tokenResponse.json();
+        const clientToken = tokenData.token;
+        if (!clientToken) throw new Error('پاسخ سرور فاقد توکن بود.');
 
-            if (storedUser) {
-                // کاربر قبلا با موفقیت وارد شده است
-                try {
-                    const user = JSON.parse(storedUser);
-                    
-                    // پیام خوش‌آمدگویی مجدد را نمایش می‌دهیم
-                    statusMessageElement.textContent = `خوش آمدید مجدد، ${user.displayName || user.username}!`;
-                    spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
+        // گام 2: تست اتصال واقعی به Firebase (از طریق پروکسی)
+        statusEl.textContent = 'در حال بررسی وضعیت ورود...';
+        const testResponse = await fetch(`${PROXY_URL}?path=test`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${clientToken}`,
+            'X-User-Username': 'guest'
+          }
+        });
+        if (!testResponse.ok) throw new Error(`ارتباط با سرور برقرار نشد (${testResponse.status})`);
 
-                    // پس از تاخیر، کاربر را به صفحه اصلی هدایت می‌کنیم
-                    setTimeout(() => {
-                        window.location.href = 'safe_asli.html';
-                    }, REDIRECT_DELAY);
-
-                } catch (e) {
-                    // اگر اطلاعات ذخیره شده معتبر نبود، آن را پاک کرده و به صفحه ثبت‌نام هدایت می‌کنیم
-                    localStorage.removeItem('currentUser');
-                    redirectToRegister();
-                }
-
-            } else {
-                // کاربر وارد نشده یا برای اولین بار است که اپ را باز می‌کند
-                redirectToRegister();
-            }
-        }
-        
-        function redirectToRegister() {
-            // پیام خوش‌آمدگویی اولیه را نمایش می‌دهیم
-            statusMessageElement.textContent = 'به همیار خوش آمدید!';
-            spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
-
-            // پس از تاخیر، کاربر را به صفحه ثبت‌نام هدایت می‌کنیم
-            setTimeout(() => {
-                window.location.href = 'register.html'; 
-            }, REDIRECT_DELAY);
+        const result = await testResponse.json();
+        if (result.ok) {
+          spinner.style.display = 'none';
+          statusEl.style.color = '#28a745';
+          statusEl.textContent = 'اتصال برقرار شد ✅ در حال ورود...';
+          // ✅ هدایت به صفحه اصلی یا ورود
+          setTimeout(() => window.location.href = 'register.html', 1500);
+        } else {
+          throw new Error('پاسخ نامعتبر از سرور.');
         }
 
-        // اجرای تابع پس از بارگذاری کامل صفحه
-        window.onload = checkLoginStatus;
-    </script>
+      } catch (err) {
+        console.error(err);
+        spinner.style.display = 'none';
+        statusEl.style.color = '#dc3545';
+        statusEl.textContent = `خطا در اتصال: ${err.message}`;
+      }
+    }
+
+    window.onload = connectToServer;
+  </script>
 </body>
 </html>
