@@ -15,8 +15,6 @@
             font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             overflow: hidden;
             direction: rtl;
-            background-color: #f8f9fa;
-            color: #343a40;
         }
 
         #loading-container {
@@ -30,8 +28,6 @@
             color: #343a40;
             text-align: center;
             transition: opacity 0.5s ease;
-            padding: 18px;
-            box-sizing: border-box;
         }
 
         #logo {
@@ -62,7 +58,6 @@
             font-size: 1.2em;
             font-weight: 500;
             color: #495057;
-            min-height: 44px;
         }
         
         .spinner {
@@ -79,174 +74,112 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        #retry-button {
-            display: none;
-            margin-top: 22px;
-            padding: 9px 22px;
-            font-size: 1em;
-            font-family: 'Vazirmatn', sans-serif;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            background-color: #007bff;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.15);
-        }
-
-        .status-success { color: #28a745 !important; }
-        .status-error { color: #dc3545 !important; }
-
     </style>
 </head>
 <body>
 
     <div id="loading-container">
-        <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/c767edd7cb23c2f1a0314b935c515aa6b43c1905/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85%20%D8%A8%D8%AF%D9%88%D9%86%20%D9%BE%D8%B3%20%D8%B2%D9%85%DB%8C%D9%86%D9%87.png" alt="لوگو اپلیکیشن همیار" id="logo" onerror="this.style.display='none'">
-        <p id="status-message">در حال آماده‌سازی...</p>
+        <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/c767edd7cb23c2f1a0314b935c515aa6b43c1905/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85%20%D8%A8%D8%AF%D9%88%D9%86%20%D9%BE%D8%B3%20%D8%B2%D9%85%DB%8C%D9%86%D9%87.png" alt="لوگو اپلیکیشن همیار" id="logo">
+        <p id="status-message">در حال بررسی وضعیت ورود...</p>
         <div id="spinner" class="spinner"></div>
-        <button id="retry-button">تلاش مجدد</button>
     </div>
 
     <script>
         // --- CONFIG ---
-        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234';
-        const REDIRECT_DELAY = 1500;
-        const REQUEST_TIMEOUT = 12000;
-        const DEBUG = true;
+        // !!! مهم: آدرس کامل سرور PHP خود را در اینجا قرار دهید
+        const PROXY_SERVER_URL = 'https://your-domain.com/path/to/your/proxy.php'; 
+        const REDIRECT_DELAY = 1500; // 1.5 ثانیه تاخیر قبل از هدایت کاربر
 
-        // --- DOM ---
+        // --- DOM Elements ---
         const statusMessageElement = document.getElementById('status-message');
         const spinnerElement = document.getElementById('spinner');
-        const retryButton = document.getElementById('retry-button');
-        
-        // --- SCRIPT ---
 
-        // <!--
-        //   نکته مهم: این اسکریپت انتظار دارد که شناسه کاربر از طریق پارامتر URL ارسال شود.
-        //   مثال: loader.html?username=USER_UNIQUE_ID
-        //   اپلیکیشن شما (بخش نیتیو) باید این پارامتر را هنگام باز کردن WebView به URL اضافه کند.
-        // -->
+        /**
+         * این تابع وظیفه اصلی بررسی وضعیت ورود کاربر را بر عهده دارد
+         * با ارسال یک درخواست به سرور، اعتبار توکن و وجود کاربر را بررسی می‌کند
+         */
+        async function checkLoginStatus() {
+            // مرحله ۱: سعی می‌کنیم اطلاعات جلسه کاربر را از localStorage بخوانیم
+            const sessionDataString = localStorage.getItem('mikoUserSession');
 
-        function log(...args) { if (DEBUG && typeof console !== 'undefined') console.log(...args); }
-
-        function showStatus(text, { isLoading=false, isError=false, isSuccess=false } = {}) {
-            statusMessageElement.textContent = text;
-            statusMessageElement.className = '';
-            if (isError) statusMessageElement.classList.add('status-error');
-            if (isSuccess) statusMessageElement.classList.add('status-success');
-            spinnerElement.style.display = isLoading ? 'block' : 'none';
-            retryButton.style.display = isError ? 'inline-block' : 'none';
-        }
-
-        function fetchWithTimeout(url, opts={}) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-            return fetch(url, { ...opts, signal: controller.signal })
-                .then(res => { clearTimeout(id); return res; })
-                .catch(err => { clearTimeout(id); throw err; });
-        }
-
-        async function requestToken() {
-            showStatus('دریافت توکن از سرور...', { isLoading: true });
-            log('Requesting token from', PROXY_URL);
-            try {
-                const res = await fetchWithTimeout(`${PROXY_URL}?auth=token`, {
-                    method: 'GET',
-                    headers: { 'X-Proxy-Secret': SHARED_SECRET }
-                });
-                if (!res.ok) throw new Error('خطا در دریافت توکن: ' + res.status);
-                const j = await res.json();
-                if (!j || !j.token) throw new Error('توکن در پاسخ نبود');
-                log('Token:', j.token);
-                return j.token;
-            } catch (err) {
-                if (err.name === 'AbortError') throw new Error('ارتباط با سرور کند یا ناموجود است');
-                if (err instanceof TypeError) throw new Error('خطای شبکه یا CORS/SSL');
-                throw err;
+            if (!sessionDataString) {
+                // اگر هیچ اطلاعاتی ذخیره نشده بود، کاربر وارد نشده است
+                console.log("No session data found. Redirecting to register.");
+                redirectToRegister('به همیار خوش آمدید!');
+                return;
             }
-        }
 
-        async function checkUserStatus(token, username) {
-            showStatus('بررسی وضعیت حساب کاربری...', { isLoading: true });
-            log(`Checking status for user: ${username}`);
+            let sessionData;
             try {
-                // فرض می‌کنیم سرور شما می‌تواند با یک پارامتر جدید، وضعیت کاربر را بررسی کند
-                // ما از هدر X-User-Username برای ارسال نام کاربری استفاده می‌کنیم
-                const res = await fetchWithTimeout(`${PROXY_URL}?action=checkUser`, {
+                sessionData = JSON.parse(sessionDataString);
+                // بررسی می‌کنیم که اطلاعات لازم (توکن و نام کاربری) وجود داشته باشد
+                if (!sessionData.token || !sessionData.username) {
+                    throw new Error("Invalid session data structure.");
+                }
+            } catch (e) {
+                // اگر داده ذخیره شده معتبر نبود، آن را پاک کرده و به صفحه ثبت‌نام هدایت می‌کنیم
+                console.error("Failed to parse session data:", e);
+                localStorage.removeItem('mikoUserSession');
+                redirectToRegister('اطلاعات ورود شما نامعتبر است.');
+                return;
+            }
+
+            // مرحله ۲: یک درخواست به سرور برای اعتبارسنجی ارسال می‌کنیم
+            // بهترین راه برای بررسی، درخواست اطلاعات خود کاربر است. اگر موفقیت‌آمیز بود یعنی همه چیز درست است.
+            const validationPath = `users/${sessionData.username}`;
+            statusMessageElement.textContent = 'در حال اعتبارسنجی جلسه...';
+
+            try {
+                const response = await fetch(`${PROXY_SERVER_URL}?path=${validationPath}`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'X-User-Username': username
+                        // این هدرها برای احراز هویت در سرور PHP شما ضروری هستند
+                        'Authorization': `Bearer ${sessionData.token}`,
+                        'X-User-Username': sessionData.username
                     }
                 });
-                if (!res.ok) throw new Error('پاسخ سرور ناموفق بود: ' + res.status);
-                const j = await res.json();
-                log('User status response:', j);
-                
-                // سرور باید یک پاسخ جیسون مانند { "exists": true } یا { "exists": false } برگرداند
-                if (typeof j.exists !== 'boolean') {
-                    throw new Error('پاسخ نامعتبر از سرور دریافت شد');
-                }
-                
-                return j;
 
-            } catch (err) {
-                if (err.name === 'AbortError') throw new Error('ارتباط با سرور کند یا ناموجود است');
-                if (err instanceof TypeError) throw new Error('خطای شبکه یا CORS/SSL');
-                throw err;
-            }
-        }
-
-        async function init() {
-            retryButton.style.display = 'none';
-            showStatus('در حال بررسی وضعیت...', { isLoading: true });
-            
-            try {
-                // 1. دریافت نام کاربری از پارامتر URL
-                const params = new URLSearchParams(window.location.search);
-                const username = params.get('username');
-
-                if (!username) {
-                    throw new Error('شناسه کاربری در URL مشخص نشده است.');
-                }
-                log('Username found:', username);
-
-                // 2. دریافت توکن دسترسی
-                const token = await requestToken();
-                
-                // 3. بررسی وضعیت کاربر (آیا ثبت‌نام کرده؟)
-                const status = await checkUserStatus(token, username);
-
-                // 4. تصمیم‌گیری و هدایت کاربر
-                if (status.exists) {
-                    showStatus('شما قبلاً ثبت‌نام کرده‌اید. در حال ورود...', { isSuccess: true });
-                    setTimeout(() => {
-                        window.location.href = 'safe_asli.html';
-                    }, REDIRECT_DELAY);
+                if (response.ok) {
+                    // پاسخ موفقیت آمیز (کد 200) یعنی توکن معتبر است و کاربر وجود دارد
+                    const userData = await response.json();
+                    if (userData !== null) {
+                        // کاربر با موفقیت اعتبارسنجی شد
+                        console.log("Session validated successfully for user:", sessionData.username);
+                        statusMessageElement.textContent = `خوش آمدید مجدد، ${userData.displayName || sessionData.username}!`;
+                        spinnerElement.style.display = 'none';
+                        setTimeout(() => window.location.href = 'safe_asli.html', REDIRECT_DELAY);
+                    } else {
+                        // این حالت یعنی کاربر از دیتابیس حذف شده است
+                        throw new Error('User not found in database.');
+                    }
                 } else {
-                    showStatus('به صفحه ثبت‌نام منتقل می‌شوید...', { isSuccess: true });
-                    setTimeout(() => {
-                        // نام کاربری را به صفحه ثبت‌نام هم ارسال می‌کنیم تا در آنجا استفاده شود
-                        window.location.href = `register.html?username=${username}`;
-                    }, REDIRECT_DELAY);
+                    // اگر پاسخ موفقیت‌آمیز نبود (مثلا 401 Unauthorized)
+                    throw new Error(`Server responded with status: ${response.status}`);
                 }
 
-            } catch (err) {
-                log('Init error:', err);
-                const errorMessage = 'خطا در اتصال: ' + (err.message || 'خطای نامشخص');
-                showStatus(errorMessage, { isError: true });
-                // نمایش alert در WebView تا کاربر حتما خطا را ببیند
-                try { 
-                    if (typeof alert === 'function') alert(errorMessage);
-                } catch(e){}
+            } catch (error) {
+                // در صورت بروز هرگونه خطا (خطای شبکه، توکن نامعتبر، کاربر حذف شده و...)
+                console.error("Session validation failed:", error.message);
+                localStorage.removeItem('mikoUserSession');
+                redirectToRegister('جلسه شما منقضی شده. لطفا مجدد وارد شوید.');
             }
         }
+        
+        /**
+         * کاربر را به صفحه ثبت‌نام هدایت می‌کند
+         * @param {string} message - پیامی که قبل از هدایت نمایش داده می‌شود
+         */
+        function redirectToRegister(message) {
+            statusMessageElement.textContent = message;
+            spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
 
-        retryButton.addEventListener('click', init);
-        window.addEventListener('load', init);
+            setTimeout(() => {
+                window.location.href = 'register.html'; 
+            }, REDIRECT_DELAY + 500); // کمی تاخیر بیشتر برای خواندن پیام
+        }
+
+        // اجرای تابع اصلی پس از بارگذاری کامل صفحه
+        window.onload = checkLoginStatus;
     </script>
 </body>
 </html>
