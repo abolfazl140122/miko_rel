@@ -1,349 +1,241 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ورود به حساب کاربری - همیار</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
-        
-        :root {
-            --primary-color: #007BFF;
-            --primary-hover: #0056b3;
-            --success-color: #28a745;
-            --error-color: #dc3545;
-            --background-color: #f0f2f5;
-            --form-background: #ffffff;
-            --text-dark: #1c1e21;
-            --text-secondary: #606770;
-            --border-color: #ccd0d5;
-            --input-background: #f5f6f7;
-        }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            margin: 0;
-            background-color: var(--background-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .form-container {
-            width: 100%;
-            max-width: 420px;
-            background-color: var(--form-background);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .form-header h1 {
-            margin: 0 0 10px;
-            font-size: 2em;
-            color: var(--text-dark);
-            font-weight: 700;
-        }
-        .form-header p {
-            margin: 0;
-            color: var(--text-secondary);
-            font-size: 1.05em;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-        .input-group .input-icon {
-            position: absolute;
-            top: 50%;
-            right: 15px;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-            pointer-events: none;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 14px 45px 14px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1em;
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: var(--form-background);
-            color: var(--text-dark);
-            transition: all 0.2s ease-in-out;
-        }
-        .input-group input:hover {
-            border-color: #aab0b8;
-        }
-        .input-group input::placeholder {
-            color: #8a8d91;
-        }
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
-        }
-        .password-toggle {
-            position: absolute;
-            top: 50%;
-            left: 15px;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: var(--text-secondary);
-        }
-        
-        .error-message {
-            color: var(--error-color);
-            font-size: 0.85em;
-            margin-top: 6px;
-            display: none;
-        }
-        
-        #submit-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--primary-color);
-            color: white;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        #submit-btn:hover:not(:disabled) {
-            background-color: var(--primary-hover);
-        }
-        #submit-btn:disabled {
-            background-color: #a0c9ff;
-            cursor: not-allowed;
-        }
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        #form-status {
-            text-align: center;
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            display: none;
-            font-weight: 500;
-        }
-        #form-status.success { background-color: #e9f6ec; color: #155724; border: 1px solid #c3e6cb; }
-        #form-status.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        
-        .form-footer {
-            margin-top: 25px;
-            text-align: center;
-            font-size: 0.95em;
-            color: var(--text-secondary);
-        }
-        .form-footer a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .form-footer a:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ورود به حساب کاربری - همیار</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
+    :root {
+      --primary-color: #007BFF;
+      --primary-hover: #0056b3;
+      --success-color: #28a745;
+      --error-color: #dc3545;
+      --text-light: #f8f9fa;
+      --border-color: rgba(255, 255, 255, 0.4);
+      --input-bg: rgba(255, 255, 255, 0.2);
+    }
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #74EBD5 0%, #9FACE6 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .form-container {
+      width: 100%;
+      max-width: 420px;
+      background-color: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+    .form-header { text-align: center; margin-bottom: 30px; }
+    .form-header h1 {
+      margin: 0;
+      font-size: 2.2em;
+      color: var(--text-light);
+      font-weight: 700;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+    .form-header p {
+      margin: 5px 0 0;
+      color: var(--text-light);
+      font-size: 1.1em;
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 25px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 14px 45px 14px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background-color: var(--input-bg);
+      color: var(--text-light);
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+    .input-group input:focus {
+      outline: none;
+      border-color: white;
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.3);
+    }
+    .input-group .input-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.7);
+    }
+    #submit-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background-color: var(--primary-color);
+      color: white;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    #submit-btn:hover { background-color: var(--primary-hover); }
+    #submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #form-status {
+      text-align: center;
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 500;
+      display: none;
+    }
+    #form-status.success { background-color: rgba(40,167,69,0.8); color: #fff; }
+    #form-status.error { background-color: rgba(220,53,69,0.8); color: #fff; }
+    .form-footer {
+      margin-top: 25px;
+      text-align: center;
+      color: var(--text-light);
+    }
+    .form-footer a {
+      color: var(--text-light);
+      font-weight: bold;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="form-container">
-        <div class="form-header">
-            <h1>ورود به حساب</h1>
-            <p>خوشحالیم که دوباره شما را می‌بینیم!</p>
-        </div>
-
-        <form id="login-form" novalidate>
-            <div class="input-group">
-                <input type="text" id="identifier" placeholder="نام کاربری یا موبایل" required>
-                <span class="input-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </span>
-                <div class="error-message" id="identifier-error"></div>
-            </div>
-
-            <div class="input-group">
-                <input type="password" id="password" placeholder="رمز عبور" required>
-                <span class="input-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                </span>
-                <span class="password-toggle" id="password-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                </span>
-                <div class="error-message" id="password-error"></div>
-            </div>
-            
-            <button type="submit" id="submit-btn" disabled>
-                <span id="btn-text">ورود</span>
-                <div class="spinner" id="btn-spinner"></div>
-            </button>
-
-            <div id="form-status"></div>
-        </form>
-
-        <div class="form-footer">
-            حساب کاربری ندارید؟ <a href="register.html">ثبت‌نام کنید</a>
-        </div>
+  <div class="form-container">
+    <div class="form-header">
+      <h1>ورود به حساب</h1>
+      <p>خوشحالیم که دوباره شما را می‌بینیم!</p>
     </div>
 
-    <script>
-        // --- LOGIC (JavaScript) ---
-        // This part is identical to the previous version as it was already correct.
-        
-        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234';
+    <form id="login-form">
+      <div class="input-group">
+        <input type="text" id="identifier" placeholder="نام کاربری یا موبایل" required />
+        <span class="input-icon">👤</span>
+      </div>
 
-        const form = document.getElementById('login-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const btnText = document.getElementById('btn-text');
-        const btnSpinner = document.getElementById('btn-spinner');
-        const formStatus = document.getElementById('form-status');
-        const identifierInput = document.getElementById('identifier');
-        const passwordInput = document.getElementById('password');
-        const passwordToggle = document.getElementById('password-toggle');
+      <div class="input-group">
+        <input type="password" id="password" placeholder="رمز عبور" required />
+        <span class="input-icon">🔒</span>
+      </div>
 
-        function showError(fieldId, message) {
-            const el = document.getElementById(`${fieldId}-error`);
-            el.textContent = message;
-            el.style.display = 'block';
-        }
+      <button type="submit" id="submit-btn" disabled>
+        <span id="btn-text">ورود</span>
+        <div class="spinner" id="btn-spinner"></div>
+      </button>
 
-        function hideError(fieldId) {
-            document.getElementById(`${fieldId}-error`).style.display = 'none';
-        }
+      <div id="form-status"></div>
+    </form>
 
-        function validateForm() {
-            let isIdentifierValid = true;
-            const idValue = identifierInput.value.trim();
-            if (idValue.length === 0) {
-                isIdentifierValid = false;
-            } else {
-                hideError('identifier');
-            }
-            
-            const isPasswordValid = passwordInput.value.length > 0;
-            submitBtn.disabled = !(isIdentifierValid && isPasswordValid);
-        }
+    <div class="form-footer">
+      حساب کاربری ندارید؟ <a href="register.html">ثبت‌نام کنید</a>
+    </div>
+  </div>
 
-        [identifierInput, passwordInput].forEach(input => input.addEventListener('input', validateForm));
+  <script>
+    const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+    const SHARED_SECRET = 'miko1234';
 
-        passwordToggle.addEventListener('click', () => {
-            const isPassword = passwordInput.type === 'password';
-            passwordInput.type = isPassword ? 'text' : 'password';
-            passwordToggle.innerHTML = isPassword 
-                ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
-                : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    const form = document.getElementById('login-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+    const formStatus = document.getElementById('form-status');
+    const identifierInput = document.getElementById('identifier');
+    const passwordInput = document.getElementById('password');
+
+    // فعال‌سازی دکمه فقط وقتی فیلدها پر هستند
+    [identifierInput, passwordInput].forEach(el => el.addEventListener('input', () => {
+      submitBtn.disabled = !(identifierInput.value.trim() && passwordInput.value);
+    }));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await handleLogin();
+    });
+
+    async function handleLogin() {
+      submitBtn.disabled = true;
+      btnSpinner.style.display = 'block';
+      btnText.textContent = 'در حال بررسی...';
+      formStatus.style.display = 'none';
+
+      const usernameOrMobile = identifierInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      try {
+        // دریافت توکن از سرور PHP
+        const tokenRes = await fetch(`${PROXY_URL}?auth=token`, {
+          headers: { 'X-Proxy-Secret': SHARED_SECRET }
         });
+        if (!tokenRes.ok) throw new Error('عدم دریافت توکن از سرور.');
+        const tokenData = await tokenRes.json();
+        const token = tokenData.token;
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            validateForm();
-            if (!submitBtn.disabled) {
-                await submitLogin();
-            }
-        });
+        // بررسی وجود کاربر در Firebase
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'X-User-Username': usernameOrMobile
+        };
 
-        async function submitLogin() {
-            submitBtn.disabled = true;
-            btnText.textContent = 'در حال بررسی...';
-            btnSpinner.style.display = 'block';
-            formStatus.style.display = 'none';
+        let userData = null;
+        const isMobile = /^09\d{9}$/.test(usernameOrMobile);
 
-            const identifier = identifierInput.value.trim();
-            const password = passwordInput.value;
-
-            try {
-                const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-                if (!tokenResponse.ok) throw new Error('خطا در ارتباط با سرور.');
-                const tokenData = await tokenResponse.json();
-                const clientToken = tokenData.token;
-
-                const headers = {
-                    'Authorization': `Bearer ${clientToken}`,
-                    'X-User-Username': identifier 
-                };
-
-                let userData = null;
-                const isMobile = /^09\d{9}$/.test(identifier);
-
-                if (isMobile) {
-                    const queryParams = new URLSearchParams({ orderBy: '"mobile"', equalTo: `"${identifier}"` });
-                    const queryUrl = `${PROXY_URL}?path=users&${queryParams.toString()}`;
-                    const response = await fetch(queryUrl, { headers });
-                    if (!response.ok) throw new Error('خطا در جستجوی کاربر.');
-                    const result = await response.json();
-                    if (result && Object.keys(result).length > 0) {
-                        userData = Object.values(result)[0];
-                    }
-                } else {
-                    const response = await fetch(`${PROXY_URL}?path=users/${identifier}`, { headers });
-                    if (response.status === 404) {
-                       userData = null;
-                    } else if (!response.ok) {
-                        throw new Error('خطا در واکشی اطلاعات کاربر.');
-                    } else {
-                       userData = await response.json();
-                    }
-                }
-
-                if (userData === null || userData.password !== password) {
-                    throw new Error('نام کاربری یا رمز عبور اشتباه است.');
-                }
-
-                localStorage.setItem('currentUser', JSON.stringify(userData));
-
-                formStatus.textContent = `خوش آمدید، ${userData.displayName}! در حال انتقال...`;
-                formStatus.className = 'success';
-                formStatus.style.display = 'block';
-
-                setTimeout(() => {
-                    window.location.href = 'safe_asli.html';
-                }, 1500);
-
-            } catch (error) {
-                formStatus.textContent = error.message;
-                formStatus.className = 'error';
-                formStatus.style.display = 'block';
-                submitBtn.disabled = false;
-                btnText.textContent = 'ورود';
-                btnSpinner.style.display = 'none';
-            }
+        if (isMobile) {
+          const queryParams = new URLSearchParams({ orderBy: '"mobile"', equalTo: `"${usernameOrMobile}"` });
+          const response = await fetch(`${PROXY_URL}?path=users&${queryParams.toString()}`, { headers });
+          if (!response.ok) throw new Error('خطا در جستجوی کاربر.');
+          const result = await response.json();
+          if (result && Object.keys(result).length > 0) userData = Object.values(result)[0];
+        } else {
+          const response = await fetch(`${PROXY_URL}?path=users/${usernameOrMobile}`, { headers });
+          if (response.status === 200) userData = await response.json();
         }
-        
-        validateForm();
-    </script>
+
+        if (!userData || userData.password !== password) {
+          throw new Error('نام کاربری یا رمز عبور اشتباه است.');
+        }
+
+        // ✅ ورود موفق - هدایت به صفحه اصلی
+        formStatus.textContent = `خوش آمدید ${userData.displayName}!`;
+        formStatus.className = 'success';
+        formStatus.style.display = 'block';
+
+        setTimeout(() => { window.location.href = 'safe_asli.html'; }, 1500);
+
+      } catch (err) {
+        formStatus.textContent = err.message;
+        formStatus.className = 'error';
+        formStatus.style.display = 'block';
+        submitBtn.disabled = false;
+        btnSpinner.style.display = 'none';
+        btnText.textContent = 'ورود';
+      }
+    }
+  </script>
+
 </body>
 </html>
