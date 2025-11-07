@@ -74,19 +74,12 @@
         
         .error-message { color: var(--error-color); font-size: 0.85em; margin-top: 5px; min-height: 1.2em; display: none; }
         
-        .profile-uploader { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 25px; cursor: pointer; border: 2px dashed var(--border-color); border-radius: 12px; padding: 20px; transition: border-color 0.3s, background-color 0.3s; }
-        .profile-uploader:hover { border-color: var(--primary-color); background-color: #f8f9fa; }
-        .profile-uploader .profile-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background-color: #e9ecef; }
-        .profile-uploader span { font-weight: 500; color: var(--primary-color); }
-        .profile-uploader input[type="file"] { display: none; }
-
         .form-row { display: flex; gap: 15px; }
         .form-row .input-group { flex: 1; }
         
         .terms-group { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
         .terms-group label { font-weight: 400; margin: 0; color: var(--text-secondary); }
         .terms-group a { color: var(--primary-color); text-decoration: none; }
-        .terms-group a:hover { text-decoration: underline; }
         
         #submit-btn {
             width: 100%; height: 50px; border: none; border-radius: 8px; background-color: var(--primary-color);
@@ -101,7 +94,7 @@
             border-radius: 50%; animation: spin 1s linear infinite; display: none;
         }
         #submit-btn.loading .spinner { display: block; }
-        #submit-btn.loading #btn-text { display: none; }
+        
         @keyframes spin { to { transform: rotate(360deg); } }
 
         #form-status { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; display: none; font-weight: 500; }
@@ -109,8 +102,6 @@
         #form-status.error { background-color: #f8d7da; color: #721c24; }
 
         .form-footer { margin-top: 25px; text-align: center; font-size: 0.9em; color: var(--text-secondary); border-top: 1px solid #eee; padding-top: 20px; }
-        .form-footer a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
-        .form-footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -121,11 +112,7 @@
             <p>به همیار بپیوندید و دوستان جدیدی پیدا کنید!</p>
         </header>
         <form id="register-form" novalidate>
-            <label for="profilePic" class="profile-uploader">
-                <img id="profile-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjZWQ0ZGEiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yMCAyMXYtMS4zNGExLjc1IDEuNzUgMCAwIDAtMS4yNC0xLjY5bC0xLjUxLS42YTEuNzUgMS43NSAwIDAgMS0xLjI0LTEuNjkgViAxMy41YTggOCAwIDEgMCAxNiAwdi44M2ExLjc1IDEuNzUgMCAwIDEtMS4yNCAxLjY5bC0xLjUxLjZhMS43NSAxLjc1IDAgMCAwLTEuMjQgMS42OVYyMWg0eiIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iNCIvPjwvc3ZnPg==" alt="Profile Preview" class="profile-preview">
-                <span>انتخاب تصویر پروفایل</span>
-                <input type="file" id="profilePic" accept="image/jpeg, image/png, image/webp">
-            </label>
+            <!-- بخش آپلود تصویر پروفایل حذف شد تا از خطای سرور جلوگیری شود -->
 
             <div class="input-group"><label for="displayName">نام نمایشی</label><div class="input-wrapper"><input type="text" id="displayName" placeholder="نامی که دیگران می‌بینند" required><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="8" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg></div><div class="error-message" id="displayName-error"></div></div>
             <div class="input-group"><label for="username">نام کاربری (انگلیسی)</label><div class="input-wrapper"><input type="text" id="username" placeholder="فقط حروف انگلیسی، اعداد و _" required><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 2H8.6c-1.7 0-3.1 1.4-3.1 3.1v13.8c0 1.7 1.4 3.1 3.1 3.1h6.8c1.7 0 3.1-1.4 3.1-3.1V6.5L15.5 2z"></path><path d="M15.5 2v4.5h4.5"></path><path d="M12 18h.01"></path><path d="M16 12h-4"></path></svg></div><div class="error-message" id="username-error"></div></div>
@@ -133,8 +120,6 @@
             <div class="form-row"><div class="input-group"><label for="age">سن</label><input type="number" id="age" required min="18" max="99"><div class="error-message" id="age-error"></div></div><div class="input-group"><label for="gender">جنسیت</label><select id="gender" required><option value="" disabled selected>انتخاب...</option><option value="male">مرد</option><option value="female">زن</option></select><div class="error-message" id="gender-error"></div></div></div>
             <div class="input-group"><label for="password">رمز عبور</label><div class="input-wrapper"><input type="password" id="password" required><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div><div class="error-message" id="password-error"></div></div>
             <div class="input-group"><label for="passwordConfirm">تکرار رمز عبور</label><div class="input-wrapper"><input type="password" id="passwordConfirm" required><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 5-5 4.9 4.9 0 0 1 3.3.8"></path></svg></div><div class="error-message" id="passwordConfirm-error"></div></div>
-            <div class="input-group"><label for="bio">درباره من (اختیاری)</label><textarea id="bio" placeholder="کمی درباره خودتان بنویسید..."></textarea></div>
-            <div class="input-group"><label for="interests">علاقه‌مندی‌ها (اختیاری)</label><div class="input-wrapper"><input type="text" id="interests" placeholder="با ویرگول (،) جدا کنید"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"></path></svg></div></div>
             <div class="input-group terms-group"><input type="checkbox" id="terms" required style="width: auto; height: auto;"><label for="terms">با <a href="#">قوانین و مقررات</a> موافقم.</label></div><div class="error-message" id="terms-error"></div>
             
             <button type="submit" id="submit-btn" disabled>
@@ -149,19 +134,14 @@
     </div>
 
     <script>
-        // برای مشاهده لاگ‌های بیشتر در کنسول، این مقدار را به true تغییر دهید
         const DEBUG = false;
-        
-        // --- ثابت‌های برنامه ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
-        const REQUEST_TIMEOUT_MS = 15000; // 15 ثانیه
+        const REQUEST_TIMEOUT_MS = 15000;
 
-        // --- دسترسی به عناصر DOM ---
         const form = document.getElementById('register-form');
         const submitBtn = document.getElementById('submit-btn');
         const btnText = document.getElementById('btn-text');
-        const spinner = document.querySelector('.spinner');
         const formStatus = document.getElementById('form-status');
         const allInputs = {
             displayName: document.getElementById('displayName'),
@@ -172,211 +152,78 @@
             password: document.getElementById('password'),
             passwordConfirm: document.getElementById('passwordConfirm'),
             terms: document.getElementById('terms'),
-            bio: document.getElementById('bio'),
-            interests: document.getElementById('interests'),
-            profilePic: document.getElementById('profilePic')
         };
-        const profilePreview = document.getElementById('profile-preview');
 
-        let debounceTimeout;
-
-        // --- توابع کمکی ---
-
-        // نمایش پیام خطا برای یک فیلد خاص
         function showError(fieldId, message) {
             const el = document.getElementById(`${fieldId}-error`);
             if (el) { el.textContent = message; el.style.display = 'block'; }
-            allInputs[fieldId]?.parentElement.classList.add('has-error');
         }
 
-        // پنهان کردن پیام خطا
         function hideError(fieldId) {
             const el = document.getElementById(`${fieldId}-error`);
             if (el) el.style.display = 'none';
-            allInputs[fieldId]?.parentElement.classList.remove('has-error');
         }
 
-        // نمایش پیام کلی فرم
         function showFormStatus(message, type = 'error') {
             formStatus.textContent = message;
             formStatus.className = type;
             formStatus.style.display = 'block';
-            if (DEBUG) console.log(`[Form Status - ${type}]: ${message}`);
         }
 
-        // تنظیم وضعیت لودینگ دکمه
         function setLoadingState(isLoading) {
             submitBtn.disabled = isLoading;
             submitBtn.classList.toggle('loading', isLoading);
             btnText.textContent = isLoading ? 'در حال ارسال...' : 'ثبت‌نام';
         }
 
-        // --- منطق اعتبارسنجی ---
-
-        // اعتبارسنجی یک فیلد خاص
-        async function validateField(fieldId) {
+        function validateField(fieldId) {
             const input = allInputs[fieldId];
             if (!input) return true; 
 
             hideError(fieldId);
-
             if (input.required && (input.type === 'checkbox' ? !input.checked : !input.value.trim())) {
                 showError(fieldId, input.type === 'checkbox' ? 'شما باید با قوانین موافقت کنید.' : 'این فیلد الزامی است.');
                 return false;
             }
 
-            let isValid = true;
             switch(fieldId) {
-                case 'username':
-                    if (input.value && !/^[a-zA-Z0-9_]{3,15}$/.test(input.value)) {
-                        showError(fieldId, 'نام کاربری باید 3 تا 15 کاراکتر انگلیسی، عدد یا _ باشد.');
-                        isValid = false;
-                    }
-                    break;
-                case 'mobile':
-                    if (input.value && !/^09\d{9}$/.test(input.value)) {
-                        showError(fieldId, 'فرمت شماره موبایل صحیح نیست (مثال: 09123456789).');
-                        isValid = false;
-                    }
-                    break;
-                case 'age':
-                    if (input.value && (+input.value < 18 || +input.value > 99)) {
-                        showError(fieldId, 'سن شما باید بین 18 تا 99 سال باشد.');
-                        isValid = false;
-                    }
-                    break;
-                case 'password':
-                    if (input.value && input.value.length < 8) {
-                        showError(fieldId, 'رمز عبور باید حداقل 8 کاراکتر باشد.');
-                        isValid = false;
-                    }
-                    break;
-                case 'passwordConfirm':
-                    if (input.value && input.value !== allInputs.password.value) {
-                        showError(fieldId, 'رمزهای عبور مطابقت ندارند.');
-                        isValid = false;
-                    }
-                    break;
-            }
-            return isValid;
-        }
-        
-        // بررسی نهایی اعتبار کل فرم
-        function isFormValid() {
-            const requiredFields = ['displayName', 'username', 'mobile', 'age', 'gender', 'password', 'passwordConfirm', 'terms'];
-            for (const key of requiredFields) {
-                if (!validateField(key)) return false;
+                case 'username': if (input.value && !/^[a-zA-Z0-9_]{3,15}$/.test(input.value)) { showError(fieldId, 'نام کاربری باید 3 تا 15 کاراکتر انگلیسی، عدد یا _ باشد.'); return false; } break;
+                case 'mobile': if (input.value && !/^09\d{9}$/.test(input.value)) { showError(fieldId, 'فرمت شماره موبایل صحیح نیست (مثال: 09123456789).'); return false; } break;
+                case 'age': if (input.value && (+input.value < 18 || +input.value > 99)) { showError(fieldId, 'سن شما باید بین 18 تا 99 سال باشد.'); return false; } break;
+                case 'password': if (input.value && input.value.length < 8) { showError(fieldId, 'رمز عبور باید حداقل 8 کاراکتر باشد.'); return false; } break;
+                case 'passwordConfirm': if (input.value && input.value !== allInputs.password.value) { showError(fieldId, 'رمزهای عبور مطابقت ندارند.'); return false; } break;
             }
             return true;
         }
-        
-        // فعال/غیرفعال کردن دکمه ثبت‌نام بر اساس اعتبار فرم
+
+        function isFormValid() {
+            return Object.keys(allInputs).every(key => validateField(key));
+        }
+
         function checkFormCompletion() {
-            const isComplete = ['displayName', 'username', 'mobile', 'age', 'gender', 'password', 'passwordConfirm']
-                .every(key => allInputs[key].value.trim() !== '') && allInputs.terms.checked;
+            const isComplete = Object.values(allInputs).every(input => (input.type === 'checkbox' ? input.checked : input.value.trim() !== ''));
             submitBtn.disabled = !isComplete;
         }
 
-        // --- توابع شبکه ---
-
-        // ارسال درخواست fetch با قابلیت timeout
         async function fetchWithTimeout(url, options = {}) {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
             try {
-                const response = await fetch(url, { ...options, signal: controller.signal });
-                return response;
+                return await fetch(url, { ...options, signal: controller.signal });
             } catch (error) {
                 if (error.name === 'AbortError') throw new Error('Timeout');
-                throw error;
+                throw new Error('NetworkError');
             } finally {
                 clearTimeout(timeoutId);
             }
         }
 
-        // دریافت توکن از سرور
         async function getClientToken() {
             const res = await fetchWithTimeout(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
             if (!res.ok) throw new Error('TokenError');
-            const data = await res.json();
-            return data.token;
+            return (await res.json()).token;
         }
 
-        // بررسی موجود بودن نام کاربری یا موبایل
-        async function checkAvailability(field, value, token) {
-             const path = field === 'username' ? `users/${value}` : `users?orderBy="mobile"&equalTo="${value}"`;
-             const res = await fetchWithTimeout(`${PROXY_URL}?path=${path}`, {
-                 headers: { 'Authorization': `Bearer ${token}` }
-             });
-             if (res.status === 404) return true; // موجود نیست
-             if (!res.ok) throw new Error('ServerError');
-             const data = await res.json();
-             return !data || Object.keys(data).length === 0;
-        }
-
-        // تبدیل عکس به Base64
-        function imageToBase64(file) {
-            return new Promise((resolve, reject) => {
-                if (!file) resolve(null);
-                // محدودیت حجم فایل به ۵ مگابایت
-                if (file.size > 5 * 1024 * 1024) {
-                    return reject(new Error('حجم تصویر نباید بیشتر از 5 مگابایت باشد.'));
-                }
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        // --- منطق اصلی و Event Listeners ---
-        
-        // هندلر برای بررسی آنی نام کاربری و موبایل
-        async function handleInstantValidation(e) {
-            const fieldId = e.target.id;
-            const value = e.target.value.trim();
-            if (!await validateField(fieldId)) return;
-
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(async () => {
-                if (!value) return;
-                try {
-                    const token = await getClientToken();
-                    const isAvailable = await checkAvailability(fieldId, value, token);
-                    if (!isAvailable) {
-                        showError(fieldId, `این ${fieldId === 'username' ? 'نام کاربری' : 'شماره موبایل'} قبلاً استفاده شده است.`);
-                    }
-                } catch (err) {
-                    if (DEBUG) console.error(`Availability check failed for ${fieldId}:`, err);
-                }
-            }, 500);
-        }
-
-        // ثبت Event Listeners
-        Object.values(allInputs).forEach(input => {
-            if(!input) return;
-            const eventType = ['checkbox', 'select-one', 'file'].includes(input.type) ? 'change' : 'input';
-            input.addEventListener(eventType, checkFormCompletion);
-            if (input.required) {
-                input.addEventListener('blur', () => validateField(input.id));
-            }
-        });
-
-        allInputs.username.addEventListener('input', handleInstantValidation);
-        allInputs.mobile.addEventListener('input', handleInstantValidation);
-
-        allInputs.profilePic.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = (event) => { profilePreview.src = event.target.result; }
-                reader.readAsDataURL(file);
-                hideError('profilePic'); // مخفی کردن خطا در صورت انتخاب عکس
-            }
-        });
-        
-        // ارسال فرم
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             formStatus.style.display = 'none';
@@ -391,42 +238,17 @@
             try {
                 const token = await getClientToken();
                 const username = allInputs.username.value.trim().toLowerCase();
-                const mobile = allInputs.mobile.value.trim();
-
-                // بررسی نهایی تکراری نبودن نام کاربری و موبایل
-                const [isUsernameAvailable, isMobileAvailable] = await Promise.all([
-                    checkAvailability('username', username, token),
-                    checkAvailability('mobile', mobile, token)
-                ]);
-
-                if (!isUsernameAvailable) {
-                    showError('username', 'این نام کاربری قبلاً استفاده شده است.');
-                    throw new Error('ValidationFailed');
-                }
-                if (!isMobileAvailable) {
-                    showError('mobile', 'این شماره موبایل قبلاً ثبت شده است.');
-                    throw new Error('ValidationFailed');
-                }
                 
-                // آپلود تصویر پروفایل
-                const profilePicFile = allInputs.profilePic.files[0];
-                const profilePicBase64 = await imageToBase64(profilePicFile);
-
-                // ساخت آبجکت کاربر
                 const userData = {
                     displayName: allInputs.displayName.value.trim(),
                     username: username,
-                    mobile: mobile,
+                    mobile: allInputs.mobile.value.trim(),
                     age: parseInt(allInputs.age.value),
                     gender: allInputs.gender.value,
-                    password: allInputs.password.value, // نکته: رمز عبور باید در سمت سرور هش شود
-                    bio: allInputs.bio.value.trim(),
-                    interests: allInputs.interests.value.trim().split('،').map(i => i.trim()).filter(Boolean),
-                    profilePicture: profilePicBase64, // ذخیره عکس به صورت Base64
+                    password: allInputs.password.value,
                     createdAt: new Date().toISOString()
                 };
 
-                // ارسال داده‌های کاربر به سرور
                 const registerResponse = await fetchWithTimeout(`${PROXY_URL}?path=users/${username}`, {
                     method: 'PUT',
                     headers: { 
@@ -438,25 +260,38 @@
                 });
                 
                 if (!registerResponse.ok) {
+                    // تلاش برای خواندن پیام خطا از سرور
                     const errorData = await registerResponse.json().catch(() => ({}));
-                    throw new Error(errorData.error || 'خطا در ثبت اطلاعات در سرور.');
+                    if (registerResponse.status >= 500) {
+                        throw new Error('Server Error');
+                    }
+                    throw new Error(errorData.error || `خطای ${registerResponse.status} هنگام ثبت‌نام.`);
                 }
                 
                 showFormStatus('ثبت‌نام موفق بود! در حال انتقال به صفحه اصلی...', 'success');
                 setTimeout(() => { window.location.href = 'safe_asli.html'; }, 2000);
 
             } catch (error) {
-                if (error.message === 'ValidationFailed') {
-                    showFormStatus('لطفاً خطاهای فرم را بررسی کنید.');
-                } else if (error.message === 'Timeout') {
-                    showFormStatus('پاسخی از سرور دریافت نشد. لطفاً اتصال اینترنت خود را بررسی کنید.');
-                } else {
-                    showFormStatus(error.message, 'error');
+                let message = 'یک خطای پیش‌بینی نشده رخ داد.';
+                switch (error.message) {
+                    case 'Timeout': message = 'پاسخی از سرور دریافت نشد. لطفاً اتصال اینترنت خود را بررسی کنید.'; break;
+                    case 'NetworkError': message = 'خطای شبکه. لطفاً اتصال اینترنت خود را بررسی کنید.'; break;
+                    case 'TokenError': message = 'خطا در برقراری ارتباط امن با سرور.'; break;
+                    case 'Server Error': message = 'سرور با خطا مواجه شد. لطفاً چند دقیقه دیگر دوباره تلاش کنید.'; break;
+                    default: message = error.message;
                 }
+                showFormStatus(message, 'error');
             } finally {
                 setLoadingState(false);
             }
         });
+        
+        Object.values(allInputs).forEach(input => {
+            const eventType = ['checkbox', 'select-one'].includes(input.type) ? 'change' : 'input';
+            input.addEventListener(eventType, checkFormCompletion);
+            input.addEventListener('blur', () => validateField(input.id));
+        });
+
     </script>
 </body>
 </html>
