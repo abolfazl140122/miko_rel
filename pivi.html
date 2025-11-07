@@ -79,7 +79,8 @@
             height: 100dvh; /* ارتفاع داینامیک برای موبایل */
             margin: 0 auto; background-color: transparent;
             display: flex; flex-direction: column;
-            opacity: 0; transition: opacity 0.5s ease, height 0.2s ease-in-out; /* افزودن انیمیشن برای ارتفاع */
+            opacity: 0;
+            transition: opacity 0.5s ease, padding-bottom 0.2s ease-in-out; /* [تغییر] انیمیشن برای فاصله کیبورد */
         }
         .app-container.visible { opacity: 1; }
 
@@ -99,7 +100,7 @@
         .options-btn { background: none; border: none; cursor: pointer; color: var(--text-secondary); }
         svg { vertical-align: middle; }
         
-        /* --- [جدید] نوار پیام سنجاق شده --- */
+        /* --- نوار پیام سنجاق شده --- */
         #pinned-message-bar {
             padding: 10px 15px; background-color: var(--secondary-color);
             border-bottom: 1px solid var(--border-color);
@@ -139,7 +140,6 @@
             background-color: var(--message-received-bg); align-self: flex-end; /* RTL: right */
             border-bottom-right-radius: 6px;
         }
-        /* --- دنباله حباب پیام --- */
         .message::after {
             content: ''; position: absolute; bottom: 0;
             width: 15px; height: 15px;
@@ -157,7 +157,6 @@
         .message .edited-indicator { font-size: 0.7em; color: rgba(255, 255, 255, 0.6); margin-right: 5px; font-style: italic;}
         .message.deleted .text { font-style: italic; color: var(--text-secondary); }
         
-        /* --- [جدید] استایل بخش ریپلای در پیام --- */
         .reply-context {
             padding: 8px; margin: -2px -7px 8px -7px;
             background-color: rgba(0,0,0,0.2);
@@ -180,7 +179,6 @@
         /* --- فرم ورودی پیام --- */
         #message-form-wrapper { flex-shrink: 0; position: relative; }
         
-        /* --- [جدید] نوار پیش‌نمایش ریپلای --- */
         #reply-preview-bar {
             padding: 10px 15px; background-color: var(--secondary-color);
             border-top: 1px solid var(--border-color);
@@ -261,16 +259,16 @@
             opacity: 1;
         }
 
-        /* --- مودال گزینه‌های پیام --- */
-        #message-options-menu .menu-option {
+        /* --- مودال گزینه‌های پیام و منوی اصلی --- */
+        .menu-option {
             display: flex; align-items: center; padding: 14px 10px;
             cursor: pointer; transition: background-color 0.2s; font-size: 1em;
             border-radius: 8px;
         }
-        #message-options-menu .menu-option:hover { background-color: rgba(255,255,255,0.1); }
-        #message-options-menu .menu-option.danger { color: var(--danger-color); }
-        #message-options-menu .menu-option svg { margin-left: 15px; }
-        #message-options-menu .menu-divider {
+        .menu-option:hover { background-color: rgba(255,255,255,0.1); }
+        .menu-option.danger { color: var(--danger-color); }
+        .menu-option svg { margin-left: 15px; }
+        .menu-divider {
             height: 1px; background-color: var(--border-color); margin: 8px 0;
         }
 
@@ -327,6 +325,23 @@
         .dialog-footer button:active { transform: scale(0.98); }
         .dialog-footer .btn-primary { background-color: var(--primary-color); color: white; }
         .dialog-footer .btn-secondary { background-color: var(--border-color); color: var(--text-primary); }
+        
+        /* --- [جدید] استایل‌های مودال تنظیمات --- */
+        .setting-item { margin-top: 15px; }
+        .setting-item label { font-weight: 500; display: block; margin-bottom: 5px; }
+        .setting-item p { font-size: 0.85em; color: var(--text-secondary); margin-bottom: 15px; }
+        .slider-container { display: flex; align-items: center; gap: 15px; }
+        #keyboard-offset-slider {
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 6px; background: var(--border-color);
+            border-radius: 3px; cursor: pointer;
+        }
+        #keyboard-offset-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 20px; height: 20px; background: var(--primary-color);
+            border-radius: 50%;
+        }
+        #keyboard-offset-value { font-weight: 500; min-width: 50px; text-align: left; }
 
     </style>
 </head>
@@ -339,7 +354,7 @@
     <div class="app-container" id="app-container">
         <header class="chat-header">
              <button class="back-btn" aria-label="بازگشت" onclick="history.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="2" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </button>
             <div class="partner-info" id="partner-info-header">
                 <img id="partner-avatar" src="" alt="آواتار">
@@ -353,7 +368,6 @@
             </button>
         </header>
         
-        <!-- [جدید] نوار پیام سنجاق شده -->
         <div id="pinned-message-bar">
             <svg class="pin-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
             <span class="pinned-text" id="pinned-message-text"></span>
@@ -367,7 +381,6 @@
         </main>
 
         <div id="message-form-wrapper">
-             <!-- [جدید] نوار پیش‌نمایش ریپلای -->
             <div id="reply-preview-bar">
                  <svg class="reply-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
                 <div class="reply-content">
@@ -393,38 +406,39 @@
         </div>
     </div>
 
+    <!-- [جدید] مودال گزینه‌های اصلی (هدر) -->
+    <div id="main-options-overlay" class="modal-overlay">
+        <div id="main-options-menu" class="modal-card">
+            <div class="menu-option" id="main-menu-profile-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>مشاهده پروفایل</span>
+            </div>
+            <div class="menu-option" id="main-menu-settings-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>تنظیمات</span>
+            </div>
+        </div>
+    </div>
+
     <!-- مودال گزینه‌های پیام (مخفی) -->
     <div id="message-options-overlay" class="modal-overlay">
         <div id="message-options-menu" class="modal-card">
-            <div id="menu-initial-options">
-                 <!-- [جدید] گزینه ریپلای -->
-                <div class="menu-option" id="reply-msg-btn">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
-                    <span>پاسخ</span>
-                </div>
-                <div class="menu-option" id="edit-msg-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    <span>ویرایش</span>
-                </div>
-                 <!-- [جدید] گزینه سنجاق کردن -->
-                 <div class="menu-option" id="pin-msg-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    <span id="pin-msg-btn-text">سنجاق کردن</span>
-                </div>
-                <div class="menu-divider"></div>
-                <div class="menu-option danger" id="delete-msg-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                    <span>حذف</span>
-                </div>
+             <div class="menu-option" id="reply-msg-btn">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+                <span>پاسخ</span>
             </div>
-            <div id="menu-delete-confirm" style="display: none;">
-                 <div class="menu-option danger" id="delete-for-all-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg>
-                    <span>حذف برای همه</span>
-                </div>
-                <div class="menu-option" id="cancel-delete-btn">
-                    <span>لغو</span>
-                </div>
+            <div class="menu-option" id="edit-msg-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>ویرایش</span>
+            </div>
+             <div class="menu-option" id="pin-msg-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span id="pin-msg-btn-text">سنجاق کردن</span>
+            </div>
+            <div class="menu-divider"></div>
+            <div class="menu-option danger" id="delete-msg-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                <span>حذف</span>
             </div>
         </div>
     </div>
@@ -438,6 +452,24 @@
             <div class="dialog-footer">
                 <button class="btn-secondary" id="dialog-cancel-btn">لغو</button>
                 <button class="btn-primary" id="dialog-confirm-btn">تایید</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- [جدید] مودال تنظیمات -->
+    <div id="settings-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <h4>تنظیمات</h4>
+            <div class="setting-item">
+                <label for="keyboard-offset-slider">تنظیم فاصله کیبورد</label>
+                <p>برای ایجاد فاصله مناسب هنگام تایپ، این مقدار را تنظیم کنید.</p>
+                <div class="slider-container">
+                    <input type="range" id="keyboard-offset-slider" min="0" max="400" step="5" value="80">
+                    <span id="keyboard-offset-value">80 px</span>
+                </div>
+            </div>
+             <div class="dialog-footer" style="margin-top: 20px;">
+                <button class="btn-primary" id="close-settings-btn" style="flex-grow: 1;">بستن</button>
             </div>
         </div>
     </div>
@@ -478,12 +510,18 @@
         const profileOverlay = document.getElementById('profile-overlay');
         const blockUserBtn = document.getElementById('block-user-btn');
         const blockedUserOverlay = document.getElementById('blocked-user-overlay');
-        // --- [جدید] ارجاع به عناصر ریپلای و پین ---
         const replyPreviewBar = document.getElementById('reply-preview-bar');
         const cancelReplyBtn = document.getElementById('cancel-reply-btn');
         const pinnedMessageBar = document.getElementById('pinned-message-bar');
         const unpinBtn = document.getElementById('unpin-btn');
+        const optionsBtn = document.getElementById('options-btn');
         
+        // --- [جدید] ارجاع به عناصر تنظیمات ---
+        const mainOptionsOverlay = document.getElementById('main-options-overlay');
+        const settingsOverlay = document.getElementById('settings-overlay');
+        const keyboardOffsetSlider = document.getElementById('keyboard-offset-slider');
+        const keyboardOffsetValue = document.getElementById('keyboard-offset-value');
+
         let activeMessageId = null, activeMessageElement = null;
         
         // --- وضعیت کلی اپلیکیشن ---
@@ -491,9 +529,9 @@
         let messagePollingInterval = null, presencePollingInterval = null;
         let lastMessagesHash = null, lastChatDataHash = null;
         let isPartnerBlocked = false;
-        // --- [جدید] متغیرهای وضعیت برای ریپلای و پین ---
         let activeReplyContext = null;
         let currentPinnedMessage = null;
+        let keyboardOffset = 80; // [جدید] متغیر برای فاصله کیبورد با مقدار پیش‌فرض
 
 
         // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
@@ -504,27 +542,19 @@
             if (document.hidden) pauseApp(); else resumeApp();
         });
         
-        // --- [اصلاح شده] حل مشکل کیبورد در موبایل و وب‌ویو ---
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', handleViewportResize);
-        }
-        
-        function handleViewportResize() {
-            // ارتفاع اپ را برابر ارتفاع ویوپورت قابل مشاهده قرار می‌دهد تا فضای خالی ایجاد نشود
-            appContainer.style.height = `${window.visualViewport.height}px`;
-            // برای اطمینان از دیده شدن کادر متن، آن را به نمایش درمی‌آورد
-            // این کار را در یک تاخیر کوتاه انجام می‌دهیم تا انیمیشن تغییر ارتفاع تمام شود
-            setTimeout(() => {
-                messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }, 100);
-        }
-
+        // --- [حذف] رفتار تغییر ارتفاع خودکار حذف شد ---
+        // کد مربوط به window.visualViewport.addEventListener('resize', handleViewportResize); حذف گردید.
 
         async function initializeApp() {
             if (window.piviAppInitialized) return;
             window.piviAppInitialized = true;
             showLoading();
             
+            // [جدید] بارگذاری تنظیم فاصله کیبورد از حافظه
+            keyboardOffset = parseInt(localStorage.getItem('keyboardOffset') || '80', 10);
+            keyboardOffsetSlider.value = keyboardOffset;
+            keyboardOffsetValue.textContent = `${keyboardOffset} px`;
+
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) { window.location.href = 'login.html'; return; }
             currentUser = JSON.parse(storedUser);
@@ -546,12 +576,11 @@
 
                 setupUI();
                 setupEventListeners();
-                await loadChatData(); // جایگزین loadMessages برای بارگذاری همزمان پین
+                await loadChatData();
                 
                 startPolling();
                 updatePresence(true);
                 showApp();
-                handleViewportResize(); // اجرای اولیه برای تنظیم ارتفاع صحیح
             } catch (error) {
                 console.error("خطا در مقداردهی اولیه:", error);
                 showError(`خطا در بارگذاری چت: ${error.message}`);
@@ -561,7 +590,7 @@
         // --- بخش ۳: توابع مدیریت وضعیت برنامه (Pause/Resume) ---
         function startPolling() {
             if (messagePollingInterval) clearInterval(messagePollingInterval);
-            messagePollingInterval = setInterval(loadChatData, 5000); // به روز رسانی چت و پیام ها
+            messagePollingInterval = setInterval(loadChatData, 5000);
             
             if (presencePollingInterval) clearInterval(presencePollingInterval);
             presencePollingInterval = setInterval(pollPartnerStatus, 10000);
@@ -603,13 +632,7 @@
         function setupEventListeners() {
             messageForm.addEventListener('submit', handleSendMessage);
             messageInput.addEventListener('input', toggleSendButton);
-
-            // --- [بهبود یافته] افزودن تریگر اضافی هنگام فوکوس روی کادر متن برای اطمینان از تغییر اندازه ---
-            messageInput.addEventListener('focus', () => {
-                // با یک تاخیر کوتاه تابع تغییر اندازه را فراخوانی می‌کنیم تا ویوپورت زمان لازم برای به‌روزرسانی را داشته باشد
-                setTimeout(handleViewportResize, 150);
-            });
-
+            optionsBtn.addEventListener('click', () => showModal(mainOptionsOverlay));
             document.getElementById('partner-info-header').addEventListener('click', () => showModal(profileOverlay));
             messagesArea.addEventListener('click', handleMessageClick);
             
@@ -626,6 +649,20 @@
             document.getElementById('edit-msg-btn').addEventListener('click', handleEditAction);
             document.getElementById('delete-msg-btn').addEventListener('click', handleDeleteAction);
             blockUserBtn.addEventListener('click', handleBlockToggle);
+
+            // --- [جدید] Event Listeners برای منوها و تنظیمات ---
+            document.getElementById('main-menu-profile-btn').addEventListener('click', () => {
+                hideModal(mainOptionsOverlay);
+                showModal(profileOverlay);
+            });
+            document.getElementById('main-menu-settings-btn').addEventListener('click', () => {
+                hideModal(mainOptionsOverlay);
+                showModal(settingsOverlay);
+            });
+            document.getElementById('close-settings-btn').addEventListener('click', () => hideModal(settingsOverlay));
+            keyboardOffsetSlider.addEventListener('input', handleKeyboardOffsetChange);
+            messageInput.addEventListener('focus', applyKeyboardOffset);
+            messageInput.addEventListener('blur', removeKeyboardOffset);
             
             // بستن مودال‌ها با کلیک روی پس‌زمینه
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -642,7 +679,27 @@
             attachmentButtons.classList.toggle('hidden', hasText);
         }
         
-        // --- بخش ۵: مدیریت وضعیت آنلاین/آفلاین (Presence) ---
+        // --- [جدید] بخش ۵: توابع مدیریت فاصله کیبورد ---
+        function handleKeyboardOffsetChange(e) {
+            keyboardOffset = parseInt(e.target.value, 10);
+            keyboardOffsetValue.textContent = `${keyboardOffset} px`;
+            localStorage.setItem('keyboardOffset', keyboardOffset);
+            // اگر کیبورد باز باشد، تغییر را همان لحظه اعمال کن
+            if (document.activeElement === messageInput) {
+                applyKeyboardOffset();
+            }
+        }
+        function applyKeyboardOffset() {
+            appContainer.style.paddingBottom = `${keyboardOffset}px`;
+            setTimeout(() => {
+                messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100); // تاخیر کوتاه برای اطمینان از اعمال شدن padding
+        }
+        function removeKeyboardOffset() {
+            appContainer.style.paddingBottom = '0px';
+        }
+
+        // --- بخش ۶: مدیریت وضعیت آنلاین/آفلاین (Presence) ---
         async function updatePresence(isOnline) {
             if (!currentUser || !clientToken) return;
             const presenceData = { isOnline, lastSeen: new Date().toISOString() };
@@ -674,7 +731,7 @@
             }
         }
 
-        // --- بخش ۶: مدیریت مسدودسازی کاربر ---
+        // --- بخش ۷: مدیریت مسدودسازی کاربر ---
         function checkBlockStatus() {
             isPartnerBlocked = !!(currentUser.blockedUsers && currentUser.blockedUsers[chatPartner.username]);
         }
@@ -712,7 +769,7 @@
             }
         }
         
-        // --- بخش ۷: ارتباط با سرور و واکشی اطلاعات ---
+        // --- بخش ۸: ارتباط با سرور و واکشی اطلاعات ---
         async function refreshClientToken() {
             try {
                 const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
@@ -728,20 +785,18 @@
              chatPartner = await apiRequest(`users/${username}`, 'GET');
         }
 
-        // --- بخش ۸: منطق اصلی چت (ارسال و دریافت پیام) ---
-        async function loadChatData() { // تابع جدید برای بارگذاری کل داده‌های چت
+        // --- بخش ۹: منطق اصلی چت (ارسال و دریافت پیام) ---
+        async function loadChatData() {
             if (!chatId || !clientToken) return;
             try {
                 const chatData = await apiRequest(`pivi_chats/${chatId}`, 'GET');
                 const newChatDataHash = JSON.stringify(chatData);
 
-                if (newChatDataHash === lastChatDataHash) return; // اگر چیزی تغییر نکرده، خارج شو
+                if (newChatDataHash === lastChatDataHash) return;
                 lastChatDataHash = newChatDataHash;
 
-                // به‌روزرسانی پیام سنجاق شده
                 updatePinnedMessageUI(chatData.pinnedMessage || null);
                 
-                // رندر کردن پیام‌ها
                 const messagesData = chatData.messages || {};
                 messagesArea.innerHTML = '';
                 if (Object.keys(messagesData).length === 0) {
@@ -768,7 +823,6 @@
             const timestamp = new Date(msg.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
             const editedIndicator = msg.edited ? `<span class="edited-indicator">(ویرایش شده)</span>` : '';
             
-            // --- [جدید] رندر کردن بخش ریپلای ---
             let replyHtml = '';
             if (msg.replyTo && !msg.deleted) {
                 replyHtml = `
@@ -793,17 +847,15 @@
             const message = { 
                 senderId: currentUser.username, receiverId: chatPartner.username, text, 
                 timestamp: new Date().toISOString(), deleted: false,
-                replyTo: activeReplyContext // [جدید] افزودن اطلاعات ریپلای
+                replyTo: activeReplyContext
             };
             const tempInputValue = text;
             messageInput.value = '';
             toggleSendButton();
-            cancelReply(); // [جدید] بستن نوار ریپلای پس از ارسال
+            cancelReply();
 
             try {
-                // ارسال پیام
                 await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
-                // به‌روزرسانی اطلاعات کلی چت (آخرین پیام)
                 await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
                     lastMessage: text, timestamp: message.timestamp,
                     members: { [currentUser.username]: true, [chatPartner.username]: true }
@@ -833,25 +885,22 @@
             } catch(error) { showCustomAlert({ title: 'خطا', message: 'خطا در ویرایش پیام.' }); }
         }
         
-        // --- بخش ۹: مدیریت منوها و قابلیت‌های جدید ---
+        // --- بخش ۱۰: مدیریت منوها و قابلیت‌های پیام ---
         function handleMessageClick(e) {
             activeMessageElement = e.target.closest('.message:not(.deleted)');
             if (activeMessageElement) {
-                // فقط برای پیام‌های ارسال شده توسط خود کاربر گزینه‌ها را نمایش بده
                 const isSentByUser = activeMessageElement.classList.contains('sent');
                 document.getElementById('edit-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
                 document.getElementById('delete-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
 
                 activeMessageId = activeMessageElement.dataset.id;
                 
-                // [جدید] تغییر متن دکمه پین
                 const pinBtnText = document.getElementById('pin-msg-btn-text');
                 if(currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) {
                     pinBtnText.textContent = "حذف سنجاق";
                 } else {
                     pinBtnText.textContent = "سنجاق کردن";
                 }
-
                 showModal(messageOptionsOverlay);
             }
         }
@@ -888,22 +937,15 @@
             activeMessageId = null;
         }
 
-        // --- [جدید] توابع مربوط به ریپلای ---
         function handleReplyAction() {
             if (!activeMessageElement) return;
             const text = activeMessageElement.dataset.text;
             const senderName = activeMessageElement.dataset.senderName;
-
-            activeReplyContext = {
-                msgId: activeMessageId,
-                text: text,
-                senderName: senderName
-            };
+            activeReplyContext = { msgId: activeMessageId, text: text, senderName: senderName };
             
             document.getElementById('reply-to-name').textContent = `پاسخ به ${senderName}`;
             document.getElementById('reply-preview-text').textContent = text;
             replyPreviewBar.style.display = 'flex';
-
             hideModal(messageOptionsOverlay);
             messageInput.focus();
         }
@@ -913,35 +955,28 @@
             replyPreviewBar.style.display = 'none';
         }
         
-        // --- [جدید] توابع مربوط به سنجاق کردن ---
         async function handlePinAction() {
             if (!activeMessageId) return;
             hideModal(messageOptionsOverlay);
             
-            // اگر پیام فعلی از قبل پین شده، آن را unpin کن
             if (currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) {
                 await handleUnpinAction();
-            } else { // در غیر اینصورت آن را پین کن
+            } else {
                 const textToPin = activeMessageElement.dataset.text;
                 const pinnedData = { msgId: activeMessageId, text: textToPin };
                 try {
                     await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { pinnedMessage: pinnedData });
                     await loadChatData();
-                } catch (error) {
-                    showCustomAlert({ title: 'خطا', message: 'خطا در سنجاق کردن پیام.' });
-                }
+                } catch (error) { showCustomAlert({ title: 'خطا', message: 'خطا در سنجاق کردن پیام.' }); }
             }
             activeMessageId = null;
         }
 
         async function handleUnpinAction() {
             try {
-                // برای حذف یک فیلد در فایربیس، مقدار null را برای آن ارسال می‌کنیم
                 await apiRequest(`pivi_chats/${chatId}/pinnedMessage`, 'DELETE');
                 await loadChatData();
-            } catch (error) {
-                showCustomAlert({ title: 'خطا', message: 'خطا در حذف سنجاق پیام.' });
-            }
+            } catch (error) { showCustomAlert({ title: 'خطا', message: 'خطا در حذف سنجاق پیام.' }); }
         }
         
         function updatePinnedMessageUI(pinnedData) {
@@ -960,16 +995,13 @@
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 element.style.transition = 'background-color 0.5s';
                 element.style.backgroundColor = 'rgba(0, 149, 255, 0.3)';
-                setTimeout(() => {
-                    element.style.backgroundColor = '';
-                }, 1500);
+                setTimeout(() => { element.style.backgroundColor = ''; }, 1500);
             }
         }
 
-        // --- بخش ۱۰: توابع کمکی برای مودال‌ها و دیالوگ‌ها ---
+        // --- بخش ۱۱: توابع کمکی برای مودال‌ها و دیالوگ‌ها ---
         function showModal(overlayElement) {
             if(overlayElement.id === 'profile-overlay' && chatPartner){
-                 // پر کردن اطلاعات پروفایل قبل از نمایش
                 document.getElementById('profile-card-avatar').src = `https://i.pravatar.cc/120?u=${chatPartner.username}`;
                 document.getElementById('profile-card-name').textContent = chatPartner.displayName;
                 document.getElementById('profile-card-username').textContent = `@${chatPartner.username}`;
@@ -1029,7 +1061,7 @@
         function showCustomPrompt(options) { return showCustomDialog({ ...options, prompt: true }); }
         function showCustomAlert(options) { return showCustomDialog({ ...options, alert: true }); }
 
-        // --- بخش ۱۱: تابع کمکی برای ارسال درخواست‌های API ---
+        // --- بخش ۱۲: تابع کمکی برای ارسال درخواست‌های API ---
         async function apiRequest(path, method, body, keepalive = false) {
             const options = {
                 method,
@@ -1041,7 +1073,6 @@
             };
             if (body !== undefined) options.body = JSON.stringify(body);
             
-            // [بهبود] برای متد DELETE، body را null در نظر می‌گیریم
              if (method === 'DELETE') {
                 options.body = JSON.stringify(null);
             }
