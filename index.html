@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>همیار - در حال بارگذاری آنلاین...</title>
+    <title>همیار - در حال بارگذاری...</title>
     <style>
-        /* --- وارد کردن فونت وزیرمتن از گوگل --- */
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
 
         body, html {
@@ -16,8 +15,8 @@
             font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             overflow: hidden;
             direction: rtl;
-            background-color: #f8f9fa; /* رنگ پس‌زمینه اصلی */
-            color: #343a40; /* رنگ متن اصلی */
+            background-color: #f8f9fa;
+            color: #343a40;
         }
 
         #loading-container {
@@ -27,13 +26,16 @@
             align-items: center;
             width: 100%;
             height: 100%;
+            background-color: #f8f9fa;
+            color: #343a40;
             text-align: center;
-            padding: 20px;
+            transition: opacity 0.5s ease;
+            padding: 18px;
             box-sizing: border-box;
         }
 
         #logo {
-            width: 130px;
+            width: 140px;
             height: auto;
             margin-bottom: 30px;
             animation: pulse 2.5s infinite ease-in-out;
@@ -57,17 +59,16 @@
         }
 
         #status-message {
-            font-size: 1.1em;
+            font-size: 1.2em;
             font-weight: 500;
             color: #495057;
-            min-height: 40px;
-            transition: color 0.3s ease;
+            min-height: 44px;
         }
-
+        
         .spinner {
             border: 4px solid #dee2e6;
             border-radius: 50%;
-            border-top: 4px solid #007bff; /* رنگ اصلی */
+            border-top: 4px solid #007bff;
             width: 35px;
             height: 35px;
             animation: spin 1s linear infinite;
@@ -78,11 +79,11 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         #retry-button {
-            display: none; /* در حالت عادی مخفی است */
-            margin-top: 25px;
-            padding: 10px 25px;
+            display: none;
+            margin-top: 22px;
+            padding: 9px 22px;
             font-size: 1em;
             font-family: 'Vazirmatn', sans-serif;
             font-weight: 500;
@@ -91,16 +92,9 @@
             border-radius: 8px;
             background-color: #007bff;
             color: white;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.15);
         }
 
-        #retry-button:hover {
-            background-color: #0056b3;
-            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
-        }
-
-        /* کلاس‌های وضعیت برای پیام */
         .status-success { color: #28a745 !important; }
         .status-error { color: #dc3545 !important; }
 
@@ -109,210 +103,112 @@
 <body>
 
     <div id="loading-container">
-        <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/main/logo.png" alt="لوگو همیار" id="logo">
-        <p id="status-message">در حال اتصال به سرور...</p>
+        <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/c767edd7cb23c2f1a0314b935c515aa6b43c1905/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85%20%D8%A8%D8%AF%D9%88%D9%86%20%D9%BE%D8%B3%20%D8%B2%D9%85%DB%8C%D9%86%D9%87.png" alt="لوگو اپلیکیشن همیار" id="logo" onerror="this.style.display='none'">
+        <p id="status-message">در حال بررسی وضعیت ورود...</p>
         <div id="spinner" class="spinner"></div>
         <button id="retry-button">تلاش مجدد</button>
     </div>
 
     <script>
         // --- CONFIG ---
-        // کانفیگ و تنظیمات اصلی
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
-        const TARGET_AFTER_SUCCESS = 'safe_asli.html';
-        const DEBUG = true; // برای نمایش لاگ‌های بیشتر در کنسول
-        const REQUEST_TIMEOUT = 12000; // ۱۲ ثانیه
-        const REDIRECT_DELAY = 1500; // ۱.۵ ثانیه
+        const REDIRECT_DELAY = 1500;
+        const REQUEST_TIMEOUT = 12000;
+        const DEBUG = true;
 
-        // --- DOM Elements ---
+        // --- DOM ---
         const statusMessageElement = document.getElementById('status-message');
         const spinnerElement = document.getElementById('spinner');
         const retryButton = document.getElementById('retry-button');
 
-        // --- Helper Functions ---
+        function log(...args) { if (DEBUG && typeof console !== 'undefined') console.log(...args); }
 
-        /**
-         * لاگ کردن پیام در کنسول فقط در حالت دیباگ
-         * @param {...any} args - پیام‌هایی برای لاگ
-         */
-        function log(...args) {
-            if (DEBUG) {
-                console.log(...args);
-            }
-        }
-
-        /**
-         * نمایش وضعیت در UI
-         * @param {string} message - پیام برای نمایش
-         * @param {object} options - گزینه‌ها
-         * @param {boolean} [options.isLoading=false] - آیا اسپینر نمایش داده شود؟
-         * @param {boolean} [options.isSuccess=false] - آیا پیام موفقیت‌آمیز است؟
-         * @param {boolean} [options.isError=false] - آیا پیام خطا است؟
-         */
-        function showStatus(message, { isLoading = false, isSuccess = false, isError = false } = {}) {
-            statusMessageElement.textContent = message;
-            statusMessageElement.className = ''; // حذف کلاس‌های قبلی
-            if (isSuccess) statusMessageElement.classList.add('status-success');
+        function showStatus(text, { isLoading=false, isError=false, isSuccess=false } = {}) {
+            statusMessageElement.textContent = text;
+            statusMessageElement.className = '';
             if (isError) statusMessageElement.classList.add('status-error');
-            
+            if (isSuccess) statusMessageElement.classList.add('status-success');
             spinnerElement.style.display = isLoading ? 'block' : 'none';
-            retryButton.style.display = isError ? 'block' : 'none';
+            retryButton.style.display = isError ? 'inline-block' : 'none';
         }
-        
-        /**
-         * اجرای یک درخواست fetch با قابلیت таймаут
-         * @param {string} resource - آدرس URL
-         * @param {object} options - تنظیمات fetch
-         * @returns {Promise<Response>}
-         */
-        function fetchWithTimeout(resource, options) {
+
+        function fetchWithTimeout(url, opts={}) {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-            
-            const fetchPromise = fetch(resource, {
-                ...options,
-                signal: controller.signal
-            });
-
-            return new Promise((resolve, reject) => {
-                fetchPromise
-                    .then(response => {
-                        clearTimeout(id);
-                        resolve(response);
-                    })
-                    .catch(error => {
-                        clearTimeout(id);
-                        if (error.name === 'AbortError') {
-                            reject(new Error('Request timed out'));
-                        } else {
-                            reject(error);
-                        }
-                    });
-            });
-        }
-        
-        /**
-         * مدیریت خطاها و نمایش پیام مناسب به کاربر
-         * @param {string} userMessage - پیام قابل فهم برای کاربر
-         * @param {Error|string} technicalError - خطای فنی برای لاگ کردن
-         */
-        function handleError(userMessage, technicalError) {
-            log('Error:', technicalError);
-            showStatus(userMessage, { isError: true });
-            
-            // نمایش alert در WebView برای خطاهای مهم
-            if (DEBUG && typeof window.alert === 'function') {
-                const errorMessage = technicalError instanceof Error ? technicalError.message : String(technicalError);
-                // alert(`DEBUG: ${userMessage}\nDetails: ${errorMessage}`);
-            }
+            return fetch(url, { ...opts, signal: controller.signal })
+                .then(res => { clearTimeout(id); return res; })
+                .catch(err => { clearTimeout(id); throw err; });
         }
 
-        // --- Main Logic ---
-        
-        /**
-         * مرحله اول: درخواست توکن از پروکسی
-         * @returns {Promise<string>} - توکن دریافتی
-         */
         async function requestToken() {
-            showStatus('در حال دریافت توکن احراز هویت...', { isLoading: true });
-            log('Requesting token...');
-            
+            showStatus('دریافت توکن از سرور...', { isLoading: true });
+            log('Requesting token from', PROXY_URL);
             try {
-                const response = await fetchWithTimeout(`${PROXY_URL}?auth=token`, {
+                const res = await fetchWithTimeout(`${PROXY_URL}?auth=token`, {
                     method: 'GET',
-                    headers: {
-                        'X-Proxy-Secret': SHARED_SECRET
-                    }
+                    headers: { 'X-Proxy-Secret': SHARED_SECRET }
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Server responded with status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.token) {
-                    log('Token received successfully.');
-                    return data.token;
-                } else {
-                    throw new Error('Token not found in response.');
-                }
-            } catch (error) {
-                if (error.message.includes('timed out')) {
-                    throw new Error('ارتباط کند یا ناموجود');
-                } else if (error instanceof TypeError) { // معمولاً خطای شبکه یا CORS
-                    throw new Error('عدم اتصال امن (SSL) یا شبکه — لطفاً اینترنت یا گواهی SSL را بررسی کنید.');
-                }
-                throw new Error(`خطا در دریافت توکن: ${error.message}`);
+                if (!res.ok) throw new Error('خطا در دریافت توکن: ' + res.status);
+                const j = await res.json();
+                if (!j || !j.token) throw new Error('توکن در پاسخ نبود');
+                log('Token:', j.token);
+                return j.token;
+            } catch (err) {
+                if (err.name === 'AbortError') throw new Error('ارتباط کند یا ناموجود');
+                if (err instanceof TypeError) throw new Error('عدم اتصال یا CORS/SSL');
+                throw err;
             }
         }
 
-        /**
-         * مرحله دوم: تست ارتباط با پروکسی با استفاده از توکن
-         * @param {string} token - توکن احراز هویت
-         * @returns {Promise<boolean>} - نتیجه تست
-         */
-        async function testProxy(token) {
-            showStatus('در حال تست ارتباط با سرور...', { isLoading: true });
-            log('Testing proxy connection with token...');
-            
+        async function testConnectionWithServer(token) {
+            showStatus('بررسی وضعیت ورود از سرور...', { isLoading: true });
+            log('Testing server with token...');
             try {
-                // نام کاربری می‌تواند از localStorage یا جای دیگری بیاید
-                const username = localStorage.getItem('username') || 'guest';
-
-                const response = await fetchWithTimeout(`${PROXY_URL}?path=test`, {
+                // سرور مشخص می‌کند آیا کاربر وارد است یا نه؛ ما فقط تست اتصال انجام می‌دهیم.
+                const res = await fetchWithTimeout(`${PROXY_URL}?path=test`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
-                        'X-User-Username': username
+                        'X-User-Username': 'guest'
                     }
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Server responded with status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.ok === true) {
-                    log('Proxy test successful.');
-                    return true;
-                } else {
-                    throw new Error('Proxy test returned a non-ok status.');
-                }
-            } catch (error) {
-                 if (error.message.includes('timed out')) {
-                    throw new Error('ارتباط کند یا ناموجود');
-                }
-                throw new Error(`ارتباط با سرور برقرار نشد: ${error.message}`);
+                if (!res.ok) throw new Error('Server responded: ' + res.status);
+                const j = await res.json();
+                log('Test response:', j);
+                // اگر سرور {ok:true} برگرداند، اتصال و اعتبارسنجی اولیه اوکی است.
+                if (j && j.ok === true) return true;
+                // بعضی پیاده‌سازی‌ها ممکن است اطلاعات حضور را برگردانند؛ در این صورت هر پاسخ آبجکت را قبول می‌کنیم.
+                if (j && typeof j === 'object') return true;
+                throw new Error('پاسخ نامعتبر از سرور');
+            } catch (err) {
+                if (err.name === 'AbortError') throw new Error('ارتباط کند یا ناموجود');
+                if (err instanceof TypeError) throw new Error('عدم اتصال یا CORS/SSL');
+                throw err;
             }
         }
 
-        /**
-         * شروع فرآیند اتصال و احراز هویت
-         */
         async function init() {
-            retryButton.style.display = 'none'; // مخفی کردن دکمه تلاش مجدد در شروع
+            retryButton.style.display = 'none';
             try {
                 const token = await requestToken();
-                const isConnectionOK = await testProxy(token);
-
-                if (isConnectionOK) {
-                    showStatus('اتصال موفقیت‌آمیز بود! در حال انتقال...', { isSuccess: true });
-                    log(`Redirecting to ${TARGET_AFTER_SUCCESS} in ${REDIRECT_DELAY}ms.`);
-                    setTimeout(() => {
-                        window.location.href = TARGET_AFTER_SUCCESS;
-                    }, REDIRECT_DELAY);
+                const ok = await testConnectionWithServer(token);
+                if (ok) {
+                    showStatus('اتصال برقرار شد؛ در حال ورود...', { isSuccess: true });
+                    setTimeout(() => { window.location.href = 'safe_asli.html'; }, REDIRECT_DELAY);
+                } else {
+                    throw new Error('تأیید سرویس ناموفق بود');
                 }
-            } catch (error) {
-                // handleError پیام خطا را به کاربر نمایش می‌دهد
-                handleError(error.message, error);
+            } catch (err) {
+                log('Init error:', err);
+                showStatus('خطا در اتصال: ' + (err.message || err), { isError: true });
+                // نمایش alert در WebView تا کاربر خطا را ببیند
+                try { if (typeof alert === 'function') alert('خطا در اتصال:\n' + (err.message || err)); } catch(e){}
             }
         }
 
-        // --- Event Listeners ---
         retryButton.addEventListener('click', init);
-        window.onload = init;
-
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
