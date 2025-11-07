@@ -1,96 +1,112 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ورود به حساب کاربری - همیار</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
     :root {
-      --primary-color: #007BFF;
+      --primary-color: #007bff;
       --primary-hover: #0056b3;
       --success-color: #28a745;
       --error-color: #dc3545;
-      --text-light: #f8f9fa;
-      --border-color: rgba(255, 255, 255, 0.4);
-      --input-bg: rgba(255, 255, 255, 0.2);
+      --bg-color: #f4f7f6;
+      --card-bg: #ffffff;
+      --text-color: #333;
+      --text-light: #777;
+      --border-color: #ddd;
+      --input-bg: #fdfdfd;
     }
     body {
       font-family: 'Vazirmatn', sans-serif;
       margin: 0;
-      background: linear-gradient(135deg, #74EBD5 0%, #9FACE6 100%);
+      background-color: var(--bg-color);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       padding: 20px;
+      box-sizing: border-box;
     }
-    .form-container {
+    .login-card {
       width: 100%;
-      max-width: 420px;
-      background-color: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
+      max-width: 400px;
+      background-color: var(--card-bg);
       padding: 40px;
-      border-radius: 20px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e7e7e7;
     }
-    .form-header { text-align: center; margin-bottom: 30px; }
-    .form-header h1 {
+    .card-header { text-align: center; margin-bottom: 30px; }
+    .card-header .logo {
+        height: 60px;
+        margin-bottom: 15px;
+        /* لوگو از هاست پراکسی به عنوان مثال */
+        content: url('https://miko.freehost.io/favicon.ico');
+    }
+    .card-header h1 {
       margin: 0;
-      font-size: 2.2em;
-      color: var(--text-light);
+      font-size: 1.8em;
+      color: var(--text-color);
       font-weight: 700;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
     }
-    .form-header p {
-      margin: 5px 0 0;
+    .card-header p {
+      margin: 8px 0 0;
       color: var(--text-light);
-      font-size: 1.1em;
+      font-size: 1em;
     }
     .input-group {
       position: relative;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
-    .input-group input {
-      width: 100%;
-      padding: 14px 45px 14px 15px;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      background-color: var(--input-bg);
-      color: var(--text-light);
-      font-size: 1em;
-      transition: all 0.3s ease;
-    }
-    .input-group input:focus {
-      outline: none;
-      border-color: white;
-      box-shadow: 0 0 0 4px rgba(255,255,255,0.3);
-    }
-    .input-group .input-icon {
+    .input-group .icon {
       position: absolute;
       right: 15px;
       top: 50%;
       transform: translateY(-50%);
-      color: rgba(255,255,255,0.7);
+      color: var(--text-light);
+      pointer-events: none;
+      width: 20px;
+      height: 20px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 15px 50px 15px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      font-size: 1em;
+      transition: all 0.3s ease;
+      height: 50px; /* Large touch target */
+      box-sizing: border-box;
+    }
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
     }
     #submit-btn {
       width: 100%;
-      padding: 15px;
+      padding: 0; /* padding is handled by height and flex */
+      height: 52px; /* Large touch target */
       border: none;
       border-radius: 10px;
       background-color: var(--primary-color);
       color: white;
       font-size: 1.1em;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       transition: 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
     }
-    #submit-btn:hover { background-color: var(--primary-hover); }
+    #submit-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
     #submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .spinner {
       width: 20px; height: 20px;
@@ -101,23 +117,43 @@
       display: none;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    #form-status {
-      text-align: center;
+    #status-container {
       margin-top: 20px;
+      text-align: center;
+    }
+    #status-message {
       padding: 12px;
       border-radius: 8px;
       font-weight: 500;
       display: none;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
-    #form-status.success { background-color: rgba(40,167,69,0.8); color: #fff; }
-    #form-status.error { background-color: rgba(220,53,69,0.8); color: #fff; }
-    .form-footer {
+    #status-message.show {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    #status-message.success { background-color: #e9f7ef; color: #1d6c42; }
+    #status-message.error { background-color: #fbebed; color: #a92936; }
+    #retry-btn {
+        margin-top: 10px;
+        background: none;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: none;
+    }
+    .card-footer {
       margin-top: 25px;
       text-align: center;
       color: var(--text-light);
     }
-    .form-footer a {
-      color: var(--text-light);
+    .card-footer a {
+      color: var(--primary-color);
       font-weight: bold;
       text-decoration: none;
     }
@@ -125,117 +161,268 @@
 </head>
 <body>
 
-  <div class="form-container">
-    <div class="form-header">
+  <!-- SVG آیکون‌ها برای استفاده در اینپوت‌ها -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <symbol id="icon-user" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </symbol>
+      <symbol id="icon-lock" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <main class="login-card">
+    <header class="card-header">
+      <img src="#" class="logo" alt="لوگوی شرکت همیار">
       <h1>ورود به حساب</h1>
       <p>خوشحالیم که دوباره شما را می‌بینیم!</p>
-    </div>
+    </header>
 
-    <form id="login-form">
+    <form id="login-form" novalidate>
       <div class="input-group">
-        <input type="text" id="identifier" placeholder="نام کاربری یا موبایل" required />
-        <span class="input-icon">👤</span>
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-user"></use></svg>
+        <input type="text" id="identifier" placeholder="نام کاربری یا موبایل" required aria-label="نام کاربری یا شماره موبایل" />
       </div>
 
       <div class="input-group">
-        <input type="password" id="password" placeholder="رمز عبور" required />
-        <span class="input-icon">🔒</span>
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-lock"></use></svg>
+        <input type="password" id="password" placeholder="رمز عبور" required aria-label="رمز عبور" />
       </div>
 
       <button type="submit" id="submit-btn" disabled>
         <span id="btn-text">ورود</span>
         <div class="spinner" id="btn-spinner"></div>
       </button>
-
-      <div id="form-status"></div>
     </form>
-
-    <div class="form-footer">
-      حساب کاربری ندارید؟ <a href="register.html">ثبت‌نام کنید</a>
+    
+    <div id="status-container">
+        <div id="status-message" role="alert"></div>
+        <button id="retry-btn">تلاش مجدد</button>
     </div>
-  </div>
+
+    <footer class="card-footer">
+      حساب کاربری ندارید؟ <a href="register.html">ثبت‌نام کنید</a>
+    </footer>
+  </main>
 
   <script>
+    // برای مشاهده لاگ‌های بیشتر در کنسول، این مقدار را به true تغییر دهید
+    const DEBUG = false;
+
+    // --- ثابت‌های برنامه ---
     const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
     const SHARED_SECRET = 'miko1234';
+    const REQUEST_TIMEOUT_MS = 12000; // 12 ثانیه
 
+    // --- دسترسی به عناصر DOM ---
     const form = document.getElementById('login-form');
     const submitBtn = document.getElementById('submit-btn');
     const btnText = document.getElementById('btn-text');
     const btnSpinner = document.getElementById('btn-spinner');
-    const formStatus = document.getElementById('form-status');
+    const statusMessage = document.getElementById('status-message');
+    const retryBtn = document.getElementById('retry-btn');
     const identifierInput = document.getElementById('identifier');
     const passwordInput = document.getElementById('password');
 
-    // فعال‌سازی دکمه فقط وقتی فیلدها پر هستند
-    [identifierInput, passwordInput].forEach(el => el.addEventListener('input', () => {
-      submitBtn.disabled = !(identifierInput.value.trim() && passwordInput.value);
-    }));
+    // --- توابع کمکی ---
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await handleLogin();
-    });
+    /**
+     * @param {string} message - پیام برای نمایش
+     * @param {'success' | 'error'} type - نوع پیام
+     */
+    function showMessage(message, type = 'error') {
+      statusMessage.textContent = message;
+      statusMessage.className = `${type} show`;
+      if (DEBUG) console.log(`Status [${type}]: ${message}`);
+    }
 
-    async function handleLogin() {
-      submitBtn.disabled = true;
-      btnSpinner.style.display = 'block';
-      btnText.textContent = 'در حال بررسی...';
-      formStatus.style.display = 'none';
+    function hideMessage() {
+      statusMessage.className = '';
+      statusMessage.textContent = '';
+    }
 
-      const usernameOrMobile = identifierInput.value.trim();
-      const password = passwordInput.value.trim();
-
-      try {
-        // دریافت توکن از سرور PHP
-        const tokenRes = await fetch(`${PROXY_URL}?auth=token`, {
-          headers: { 'X-Proxy-Secret': SHARED_SECRET }
-        });
-        if (!tokenRes.ok) throw new Error('عدم دریافت توکن از سرور.');
-        const tokenData = await tokenRes.json();
-        const token = tokenData.token;
-
-        // بررسی وجود کاربر در Firebase
-        const headers = {
-          'Authorization': `Bearer ${token}`,
-          'X-User-Username': usernameOrMobile
-        };
-
-        let userData = null;
-        const isMobile = /^09\d{9}$/.test(usernameOrMobile);
-
-        if (isMobile) {
-          const queryParams = new URLSearchParams({ orderBy: '"mobile"', equalTo: `"${usernameOrMobile}"` });
-          const response = await fetch(`${PROXY_URL}?path=users&${queryParams.toString()}`, { headers });
-          if (!response.ok) throw new Error('خطا در جستجوی کاربر.');
-          const result = await response.json();
-          if (result && Object.keys(result).length > 0) userData = Object.values(result)[0];
-        } else {
-          const response = await fetch(`${PROXY_URL}?path=users/${usernameOrMobile}`, { headers });
-          if (response.status === 200) userData = await response.json();
-        }
-
-        if (!userData || userData.password !== password) {
-          throw new Error('نام کاربری یا رمز عبور اشتباه است.');
-        }
-
-        // ✅ ورود موفق - هدایت به صفحه اصلی
-        formStatus.textContent = `خوش آمدید ${userData.displayName}!`;
-        formStatus.className = 'success';
-        formStatus.style.display = 'block';
-
-        setTimeout(() => { window.location.href = 'safe_asli.html'; }, 1500);
-
-      } catch (err) {
-        formStatus.textContent = err.message;
-        formStatus.className = 'error';
-        formStatus.style.display = 'block';
-        submitBtn.disabled = false;
+    /**
+     * @param {boolean} isLoading - وضعیت لودینگ
+     */
+    function setLoadingState(isLoading) {
+      if (isLoading) {
+        submitBtn.disabled = true;
+        btnSpinner.style.display = 'block';
+        btnText.textContent = 'در حال بررسی...';
+      } else {
+        submitBtn.disabled = !(identifierInput.value.trim() && passwordInput.value.trim());
         btnSpinner.style.display = 'none';
         btnText.textContent = 'ورود';
       }
     }
-  </script>
 
+    /**
+     * @param {boolean} show - نمایش یا عدم نمایش دکمه تلاش مجدد
+     */
+    function showRetryButton(show) {
+        retryBtn.style.display = show ? 'inline-block' : 'none';
+    }
+    
+    // --- منطق اصلی برنامه ---
+
+    /**
+     * یک درخواست fetch با قابلیت timeout ارسال می‌کند.
+     * @param {string} url - آدرس درخواست
+     * @param {object} options - تنظیمات fetch
+     * @returns {Promise<Response>}
+     */
+    async function fetchWithTimeout(url, options = {}) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+        try {
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+            return response;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Timeout');
+            }
+            throw error; // خطاهای دیگر مانند مشکلات شبکه را پرتاب می‌کند
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
+    /**
+     * توکن موقت برای ارتباط با سرور را دریافت می‌کند.
+     * @returns {Promise<string>} - توکن دریافت شده
+     */
+    async function getClientToken() {
+        if (DEBUG) console.log("Requesting client token...");
+        const response = await fetchWithTimeout(`${PROXY_URL}?auth=token`, {
+            headers: { 'X-Proxy-Secret': SHARED_SECRET }
+        });
+
+        if (!response.ok) {
+            throw new Error('TokenError');
+        }
+        const data = await response.json();
+        if (DEBUG) console.log("Token received:", data.token);
+        return data.token;
+    }
+
+    /**
+     * اطلاعات کاربر را بر اساس نام کاربری یا موبایل جستجو می‌کند.
+     * @param {string} identifier - نام کاربری یا موبایل
+     * @param {string} token - توکن احراز هویت
+     * @returns {Promise<object|null>} - داده‌های کاربر یا null
+     */
+    async function lookupUser(identifier, token) {
+        const isMobile = /^09\d{9}$/.test(identifier);
+        let url;
+        
+        if (isMobile) {
+            const queryParams = new URLSearchParams({ orderBy: '"mobile"', equalTo: `"${identifier}"` });
+            url = `${PROXY_URL}?path=users&${queryParams.toString()}`;
+            if (DEBUG) console.log(`Looking up by mobile: ${identifier}`);
+        } else {
+            url = `${PROXY_URL}?path=users/${identifier}`;
+            if (DEBUG) console.log(`Looking up by username: ${identifier}`);
+        }
+        
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'X-User-Username': identifier // ارسال شناسه برای لاگ‌های سمت سرور
+        };
+        
+        const response = await fetchWithTimeout(url, { headers });
+
+        if (response.status === 404) return null; // کاربر پیدا نشد
+        if (!response.ok) throw new Error('ServerError');
+
+        const result = await response.json();
+        
+        if (!result || Object.keys(result).length === 0) return null;
+
+        // اگر جستجو با موبایل بود، نتیجه یک آبجکت با کلید داینامیک است
+        return isMobile ? Object.values(result)[0] : result;
+    }
+    
+    /**
+     * جریان کامل ورود کاربر را مدیریت می‌کند.
+     */
+    async function handleLoginFlow() {
+      setLoadingState(true);
+      hideMessage();
+      showRetryButton(false);
+
+      const identifier = identifierInput.value.trim();
+      const password = passwordInput.value.trim();
+      
+      try {
+        const token = await getClientToken();
+        const userData = await lookupUser(identifier, token);
+
+        if (!userData) {
+            showMessage('کاربری با این مشخصات یافت نشد.', 'error');
+            setTimeout(() => { window.location.href = 'register.html'; }, 2000);
+            return; // توقف اجرا
+        }
+        
+        // این مقایسه باید در سمت سرور انجام شود اما طبق خواسته، اینجا پیاده‌سازی شده
+        if (userData.password !== password) {
+          throw new Error('InvalidCredentials');
+        }
+
+        // ✅ ورود موفق
+        showMessage(`خوش آمدید ${userData.displayName || userData.username}!`, 'success');
+        setTimeout(() => { window.location.href = 'safe_asli.html'; }, 1500);
+
+      } catch (err) {
+        if (DEBUG) console.error("Login Error:", err);
+        let userMessage = 'خطایی رخ داد. لطفاً دوباره تلاش کنید.';
+        let showRetry = true;
+
+        switch (err.message) {
+            case 'Timeout':
+                userMessage = 'پاسخی از سرور دریافت نشد. لطفاً از اتصال اینترنت خود مطمئن شوید.';
+                break;
+            case 'TokenError':
+                userMessage = 'خطا در برقراری ارتباط امن با سرور.';
+                break;
+            case 'ServerError':
+                userMessage = 'سرور با خطا مواجه شد. لطفاً بعداً تلاش کنید.';
+                break;
+            case 'InvalidCredentials':
+                userMessage = 'نام کاربری یا رمز عبور اشتباه است.';
+                showRetry = false; // نیازی به تلاش مجدد نیست، باید ورودی را اصلاح کند
+                break;
+            default: // خطاهای شبکه مانند CORS یا عدم اتصال
+                userMessage = 'مشکل در اتصال به شبکه. لطفاً اینترنت خود را بررسی کنید.';
+        }
+        
+        showMessage(userMessage, 'error');
+        setLoadingState(false);
+        if (showRetry) {
+            showRetryButton(true);
+        }
+      }
+    }
+
+    // --- ثبت Event Listener ها ---
+
+    // فعال‌سازی دکمه فقط وقتی هر دو فیلد پر هستند
+    [identifierInput, passwordInput].forEach(el => el.addEventListener('input', () => {
+      submitBtn.disabled = !(identifierInput.value.trim() && passwordInput.value.trim());
+    }));
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleLoginFlow();
+    });
+
+    retryBtn.addEventListener('click', handleLoginFlow);
+
+  </script>
 </body>
 </html>
