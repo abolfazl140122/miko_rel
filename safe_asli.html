@@ -17,6 +17,7 @@
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
             --online-indicator: #28a745;
+            --notification-badge: #28a745; /* Added variable for consistency */
         }
 
         *, *::before, *::after {
@@ -121,6 +122,7 @@
             object-fit: cover;
             background-color: var(--primary-color);
             position: relative;
+            flex-shrink: 0; /* Prevents the picture from shrinking */
         }
         .profile-picture img {
             width: 100%;
@@ -136,6 +138,24 @@
             position: absolute;
             bottom: 2px;
             right: 2px;
+        }
+        /* --- NEW: Unread Badge Style --- */
+        .unread-badge {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background-color: var(--notification-badge);
+            color: white;
+            border-radius: 50%;
+            min-width: 22px;
+            height: 22px;
+            font-size: 0.75em;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--background-color);
+            padding: 0 4px;
         }
         .chat-details {
             flex-grow: 1;
@@ -316,7 +336,6 @@
          #logout-btn svg {
             color: #ff4d4d;
         }
-
     </style>
 </head>
 <body>
@@ -408,7 +427,6 @@
         const profileDisplayName = document.getElementById('profile-display-name');
         const profileUsername = document.getElementById('profile-username');
 
-
         // --- SECTION: App State ---
         let currentUser = null;
         let clientToken = null;
@@ -450,12 +468,18 @@
                 
                 if (chatsResponse) {
                     recentChats = Object.values(chatsResponse)
+                        // --- MODIFIED: Added unreadCount simulation ---
+                        .map((chat, index) => {
+                            // This is for demonstration. A real backend would provide this.
+                            if (index === 0) chat.unreadCount = 3;
+                            if (index === 2) chat.unreadCount = 15;
+                            return chat;
+                        })
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 }
 
                 renderChatList();
                 
-                // ADDED: Start polling for live updates after initial load
                 startRealtimeUpdates();
 
             } catch (error) {
@@ -501,11 +525,11 @@
                     return ''; // Skip rendering this invalid item
                 }
                 const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
-
                 const partnerData = allUsers[partnerUsername];
                 if (!partnerData) return ''; 
 
-                return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp);
+                // --- MODIFIED: Pass unreadCount to the HTML generator ---
+                return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp, chat.unreadCount);
             }).join('');
             
             mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
@@ -536,14 +560,20 @@
 
         // --- SECTION: HTML Template Generators ---
 
-        function createChatItemHtml(partnerData, lastMessage, timestamp) {
+        // --- MODIFIED: Added unreadCount parameter and logic ---
+        function createChatItemHtml(partnerData, lastMessage, timestamp, unreadCount) {
             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=1E90FF&color=fff&size=100`;
             
+            // --- NEW: Conditionally create the unread badge HTML ---
+            const unreadBadgeHtml = (unreadCount && unreadCount > 0)
+                ? `<div class="unread-badge">${unreadCount}</div>`
+                : '';
+                
             return `
                 <div class="chat-item" data-uid="${partnerData.username}">
                     <div class="profile-picture">
                         <img src="${avatarUrl}" alt="${partnerData.displayName}">
-                        ${partnerData.isOnline ? '<div class="online-indicator"></div>' : ''}
+                        ${unreadBadgeHtml} 
                     </div>
                     <div class="chat-details">
                         <h3>${partnerData.displayName || partnerData.username}</h3>
@@ -571,53 +601,64 @@
                 </div>`;
         }
         
-        // --- SECTION: Real-time Updates (ADDED) ---
+        // --- SECTION: Real-time Updates ---
 
-        /**
-         * Fetches the latest chat data and updates the UI if there are changes.
-         */
         async function checkForUpdates() {
             try {
-                // We only need to refresh the chats, not all users every time.
                 const newChatsResponse = await fetchProxyData('pivi_chats');
 
                 if (newChatsResponse) {
                     const newRecentChats = Object.values(newChatsResponse)
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-                    // A simple check to see if data has changed by comparing stringified versions.
+                    // --- NEW: Check for new messages and trigger notification ---
+                    const oldChatsMap = new Map();
+                    recentChats.forEach(chat => {
+                        const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
+                        if (partnerUsername) oldChatsMap.set(partnerUsername, chat);
+                    });
+
+                    let notified = false; // Prevent multiple notifications in one poll
+                    newRecentChats.forEach(newChat => {
+                        const partnerUsername = Object.keys(newChat.members).find(m => m !== currentUser.username);
+                        if (!partnerUsername) return;
+
+                        const oldChat = oldChatsMap.get(partnerUsername);
+                        const oldUnreadCount = oldChat ? (oldChat.unreadCount || 0) : 0;
+                        const newUnreadCount = newChat.unreadCount || 0;
+
+                        if (newUnreadCount > oldUnreadCount && !notified) {
+                            if (typeof AndroidNotify !== 'undefined') {
+                                const partnerData = allUsers[partnerUsername];
+                                const senderName = partnerData ? partnerData.displayName : 'کاربر';
+                                AndroidNotify.showNotification('پیام جدید 💬', `${senderName} برای شما پیام فرستاد`);
+                            }
+                            notified = true;
+                        }
+                    });
+                    // --- END of notification logic ---
+
                     if (JSON.stringify(newRecentChats) !== JSON.stringify(recentChats)) {
                         console.log('New chat data detected. Updating list.');
                         recentChats = newRecentChats;
 
-                        // IMPORTANT: Only re-render if the user is not searching.
-                        // This prevents wiping out search results during a live update.
                         if (searchInput.value.trim() === '') {
                             renderChatList();
                         }
                     }
                 }
             } catch (error) {
-                // For a background poll, it's better to log the error silently 
-                // than to show a disruptive error message to the user.
                 console.error("Polling Error:", error.message);
             }
         }
 
-        /**
-         * Starts the periodic polling for new data.
-         * @param {number} interval - The interval in milliseconds (e.g., 3000 for 3 seconds).
-         */
-        function startRealtimeUpdates(interval = 3000) {
-            // Clear any existing interval to prevent duplicates
+        function startRealtimeUpdates(interval = 5000) { // Increased interval slightly
             if (pollingIntervalId) {
                 clearInterval(pollingIntervalId);
             }
-            
             console.log(`Starting real-time updates every ${interval / 1000} seconds.`);
             pollingIntervalId = setInterval(checkForUpdates, interval);
         }
-
 
         // --- SECTION: Event Handlers & Interactions ---
 
@@ -629,7 +670,7 @@
             }
             
             const filteredUsers = Object.values(allUsers).filter(user => {
-                if (!user) return false;
+                if (!user || user.username === currentUser.username) return false;
                 const usernameMatch = user.username && user.username.toLowerCase().includes(query);
                 const displayNameMatch = user.displayName && user.displayName.toLowerCase().includes(query);
                 return usernameMatch || displayNameMatch;
@@ -669,6 +710,7 @@
         function handleLogout() {
             if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
                 localStorage.removeItem('currentUser');
+                if (pollingIntervalId) clearInterval(pollingIntervalId); // Stop polling on logout
                 window.location.href = 'login.html'; 
             }
         }
