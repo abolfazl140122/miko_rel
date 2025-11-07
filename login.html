@@ -1,428 +1,354 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ورود به حساب کاربری - همیار</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #007bff;
-      --primary-hover: #0056b3;
-      --success-color: #28a745;
-      --error-color: #dc3545;
-      --bg-color: #f4f7f6;
-      --card-bg: #ffffff;
-      --text-color: #333;
-      --text-light: #777;
-      --border-color: #ddd;
-      --input-bg: #fdfdfd;
-    }
-    body {
-      font-family: 'Vazirmatn', sans-serif;
-      margin: 0;
-      background-color: var(--bg-color);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    .login-card {
-      width: 100%;
-      max-width: 400px;
-      background-color: var(--card-bg);
-      padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      border: 1px solid #e7e7e7;
-    }
-    .card-header { text-align: center; margin-bottom: 30px; }
-    .card-header .logo {
-        height: 60px;
-        margin-bottom: 15px;
-        /* لوگو از هاست پراکسی به عنوان مثال */
-        content: url('https://miko.freehost.io/favicon.ico');
-    }
-    .card-header h1 {
-      margin: 0;
-      font-size: 1.8em;
-      color: var(--text-color);
-      font-weight: 700;
-    }
-    .card-header p {
-      margin: 8px 0 0;
-      color: var(--text-light);
-      font-size: 1em;
-    }
-    .input-group {
-      position: relative;
-      margin-bottom: 20px;
-    }
-    .input-group .icon {
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-light);
-      pointer-events: none;
-      width: 20px;
-      height: 20px;
-    }
-    .input-group input {
-      width: 100%;
-      padding: 15px 50px 15px 15px;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      background-color: var(--input-bg);
-      color: var(--text-color);
-      font-size: 1em;
-      transition: all 0.3s ease;
-      height: 50px; /* Large touch target */
-      box-sizing: border-box;
-    }
-    .input-group input:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
-    }
-    #submit-btn {
-      width: 100%;
-      padding: 0; /* padding is handled by height and flex */
-      height: 52px; /* Large touch target */
-      border: none;
-      border-radius: 10px;
-      background-color: var(--primary-color);
-      color: white;
-      font-size: 1.1em;
-      font-weight: 500;
-      cursor: pointer;
-      transition: 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    #submit-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
-    #submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .spinner {
-      width: 20px; height: 20px;
-      border: 3px solid rgba(255,255,255,0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      display: none;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    #status-container {
-      margin-top: 20px;
-      text-align: center;
-    }
-    #status-message {
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 500;
-      display: none;
-      opacity: 0;
-      transform: translateY(-10px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-    #status-message.show {
-        display: block;
-        opacity: 1;
-        transform: translateY(0);
-    }
-    #status-message.success { background-color: #e9f7ef; color: #1d6c42; }
-    #status-message.error { background-color: #fbebed; color: #a92936; }
-    #retry-btn {
-        margin-top: 10px;
-        background: none;
-        border: 1px solid var(--primary-color);
-        color: var(--primary-color);
-        padding: 8px 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        display: none;
-    }
-    .card-footer {
-      margin-top: 25px;
-      text-align: center;
-      color: var(--text-light);
-    }
-    .card-footer a {
-      color: var(--primary-color);
-      font-weight: bold;
-      text-decoration: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود به حساب کاربری - همیار</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #007BFF;
+            --primary-hover: #0056b3;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --text-color: #333;
+            --text-light: #f8f9fa;
+            --border-color: rgba(255, 255, 255, 0.4);
+            --input-bg: rgba(255, 255, 255, 0.2);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #74EBD5 0%, #9FACE6 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.7s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-header h1 {
+            margin: 0 0 10px;
+            font-size: 2.2em;
+            color: var(--text-light);
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+        .form-header p {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 1.1em;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .input-group .input-icon {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            pointer-events: none;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 14px 45px 14px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--input-bg);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: white;
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .error-message {
+            color: #ffdddd;
+            background-color: rgba(220, 53, 69, 0.4);
+            font-size: 0.9em;
+            margin-top: 8px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            min-height: 1em;
+            display: none;
+        }
+        
+        #submit-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        #submit-btn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        #submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #form-status {
+            text-align: center;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+            font-weight: 500;
+        }
+        #form-status.success { background-color: rgba(40, 167, 69, 0.8); color: white; }
+        #form-status.error { background-color: rgba(220, 53, 69, 0.8); color: white; }
+        
+        .form-footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 0.95em;
+            color: var(--text-light);
+        }
+        .form-footer a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- SVG آیکون‌ها برای استفاده در اینپوت‌ها -->
-  <svg width="0" height="0" style="position:absolute">
-    <defs>
-      <symbol id="icon-user" viewBox="0 0 24 24">
-        <path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-      </symbol>
-      <symbol id="icon-lock" viewBox="0 0 24 24">
-        <path fill="currentColor" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-      </symbol>
-    </defs>
-  </svg>
+    <div class="form-container">
+        <div class="form-header">
+            <h1>ورود به حساب</h1>
+            <p>خوشحالیم که دوباره شما را می‌بینیم!</p>
+        </div>
 
-  <main class="login-card">
-    <header class="card-header">
-      <img src="#" class="logo" alt="لوگوی شرکت همیار">
-      <h1>ورود به حساب</h1>
-      <p>خوشحالیم که دوباره شما را می‌بینیم!</p>
-    </header>
+        <form id="login-form" novalidate>
+            <div class="input-group">
+                <input type="text" id="identifier" placeholder="نام کاربری یا موبایل" required>
+                <span class="input-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </span>
+                <div class="error-message" id="identifier-error"></div>
+            </div>
 
-    <form id="login-form" novalidate>
-      <div class="input-group">
-        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-user"></use></svg>
-        <input type="text" id="identifier" placeholder="نام کاربری یا موبایل" required aria-label="نام کاربری یا شماره موبایل" />
-      </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="رمز عبور" required>
+                <span class="input-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </span>
+                <span class="password-toggle" id="password-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </span>
+                <div class="error-message" id="password-error"></div>
+            </div>
+            
+            <button type="submit" id="submit-btn" disabled>
+                <span id="btn-text">ورود</span>
+                <div class="spinner" id="btn-spinner"></div>
+            </button>
 
-      <div class="input-group">
-        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-lock"></use></svg>
-        <input type="password" id="password" placeholder="رمز عبور" required aria-label="رمز عبور" />
-      </div>
+            <div id="form-status"></div>
+        </form>
 
-      <button type="submit" id="submit-btn" disabled>
-        <span id="btn-text">ورود</span>
-        <div class="spinner" id="btn-spinner"></div>
-      </button>
-    </form>
-    
-    <div id="status-container">
-        <div id="status-message" role="alert"></div>
-        <button id="retry-btn">تلاش مجدد</button>
+        <div class="form-footer">
+            حساب کاربری ندارید؟ <a href="register.html">ثبت‌نام کنید</a>
+        </div>
     </div>
 
-    <footer class="card-footer">
-      حساب کاربری ندارید؟ <a href="register.html">ثبت‌نام کنید</a>
-    </footer>
-  </main>
+    <script>
+        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        const SHARED_SECRET = 'miko1234';
 
-  <script>
-    // برای مشاهده لاگ‌های بیشتر در کنسول، این مقدار را به true تغییر دهید
-    const DEBUG = false;
+        const form = document.getElementById('login-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const formStatus = document.getElementById('form-status');
+        const identifierInput = document.getElementById('identifier');
+        const passwordInput = document.getElementById('password');
+        const passwordToggle = document.getElementById('password-toggle');
 
-    // --- ثابت‌های برنامه ---
-    const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-    const SHARED_SECRET = 'miko1234';
-    const REQUEST_TIMEOUT_MS = 12000; // 12 ثانیه
-
-    // --- دسترسی به عناصر DOM ---
-    const form = document.getElementById('login-form');
-    const submitBtn = document.getElementById('submit-btn');
-    const btnText = document.getElementById('btn-text');
-    const btnSpinner = document.getElementById('btn-spinner');
-    const statusMessage = document.getElementById('status-message');
-    const retryBtn = document.getElementById('retry-btn');
-    const identifierInput = document.getElementById('identifier');
-    const passwordInput = document.getElementById('password');
-
-    // --- توابع کمکی ---
-
-    /**
-     * @param {string} message - پیام برای نمایش
-     * @param {'success' | 'error'} type - نوع پیام
-     */
-    function showMessage(message, type = 'error') {
-      statusMessage.textContent = message;
-      statusMessage.className = `${type} show`;
-      if (DEBUG) console.log(`Status [${type}]: ${message}`);
-    }
-
-    function hideMessage() {
-      statusMessage.className = '';
-      statusMessage.textContent = '';
-    }
-
-    /**
-     * @param {boolean} isLoading - وضعیت لودینگ
-     */
-    function setLoadingState(isLoading) {
-      if (isLoading) {
-        submitBtn.disabled = true;
-        btnSpinner.style.display = 'block';
-        btnText.textContent = 'در حال بررسی...';
-      } else {
-        submitBtn.disabled = !(identifierInput.value.trim() && passwordInput.value.trim());
-        btnSpinner.style.display = 'none';
-        btnText.textContent = 'ورود';
-      }
-    }
-
-    /**
-     * @param {boolean} show - نمایش یا عدم نمایش دکمه تلاش مجدد
-     */
-    function showRetryButton(show) {
-        retryBtn.style.display = show ? 'inline-block' : 'none';
-    }
-    
-    // --- منطق اصلی برنامه ---
-
-    /**
-     * یک درخواست fetch با قابلیت timeout ارسال می‌کند.
-     * @param {string} url - آدرس درخواست
-     * @param {object} options - تنظیمات fetch
-     * @returns {Promise<Response>}
-     */
-    async function fetchWithTimeout(url, options = {}) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-        try {
-            const response = await fetch(url, {
-                ...options,
-                signal: controller.signal
-            });
-            return response;
-        } catch (error) {
-            if (error.name === 'AbortError') {
-                throw new Error('Timeout');
-            }
-            throw error; // خطاهای دیگر مانند مشکلات شبکه را پرتاب می‌کند
-        } finally {
-            clearTimeout(timeoutId);
+        function showError(fieldId, message) {
+            const el = document.getElementById(`${fieldId}-error`);
+            el.textContent = message;
+            el.style.display = 'block';
         }
-    }
 
-    /**
-     * توکن موقت برای ارتباط با سرور را دریافت می‌کند.
-     * @returns {Promise<string>} - توکن دریافت شده
-     */
-    async function getClientToken() {
-        if (DEBUG) console.log("Requesting client token...");
-        const response = await fetchWithTimeout(`${PROXY_URL}?auth=token`, {
-            headers: { 'X-Proxy-Secret': SHARED_SECRET }
+        function hideError(fieldId) {
+            document.getElementById(`${fieldId}-error`).style.display = 'none';
+        }
+
+        function validateForm() {
+            let isIdentifierValid = true;
+            const idValue = identifierInput.value.trim();
+            if (idValue.length === 0) {
+                isIdentifierValid = false;
+            } else {
+                hideError('identifier');
+            }
+            
+            const isPasswordValid = passwordInput.value.length > 0;
+            submitBtn.disabled = !(isIdentifierValid && isPasswordValid);
+        }
+
+        [identifierInput, passwordInput].forEach(input => input.addEventListener('input', validateForm));
+
+        passwordToggle.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            passwordToggle.innerHTML = isPassword 
+                ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+                : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
         });
 
-        if (!response.ok) {
-            throw new Error('TokenError');
-        }
-        const data = await response.json();
-        if (DEBUG) console.log("Token received:", data.token);
-        return data.token;
-    }
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            validateForm();
+            if (!submitBtn.disabled) {
+                await submitLogin();
+            }
+        });
 
-    /**
-     * اطلاعات کاربر را بر اساس نام کاربری یا موبایل جستجو می‌کند.
-     * @param {string} identifier - نام کاربری یا موبایل
-     * @param {string} token - توکن احراز هویت
-     * @returns {Promise<object|null>} - داده‌های کاربر یا null
-     */
-    async function lookupUser(identifier, token) {
-        const isMobile = /^09\d{9}$/.test(identifier);
-        let url;
-        
-        if (isMobile) {
-            const queryParams = new URLSearchParams({ orderBy: '"mobile"', equalTo: `"${identifier}"` });
-            url = `${PROXY_URL}?path=users&${queryParams.toString()}`;
-            if (DEBUG) console.log(`Looking up by mobile: ${identifier}`);
-        } else {
-            url = `${PROXY_URL}?path=users/${identifier}`;
-            if (DEBUG) console.log(`Looking up by username: ${identifier}`);
-        }
-        
-        const headers = {
-            'Authorization': `Bearer ${token}`,
-            'X-User-Username': identifier // ارسال شناسه برای لاگ‌های سمت سرور
-        };
-        
-        const response = await fetchWithTimeout(url, { headers });
+        async function submitLogin() {
+            submitBtn.disabled = true;
+            btnText.textContent = 'در حال بررسی...';
+            btnSpinner.style.display = 'block';
+            formStatus.style.display = 'none';
 
-        if (response.status === 404) return null; // کاربر پیدا نشد
-        if (!response.ok) throw new Error('ServerError');
+            const identifier = identifierInput.value.trim();
+            const password = passwordInput.value;
 
-        const result = await response.json();
-        
-        if (!result || Object.keys(result).length === 0) return null;
+            try {
+                const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+                if (!tokenResponse.ok) throw new Error('خطا در ارتباط با سرور.');
+                const tokenData = await tokenResponse.json();
+                const clientToken = tokenData.token;
 
-        // اگر جستجو با موبایل بود، نتیجه یک آبجکت با کلید داینامیک است
-        return isMobile ? Object.values(result)[0] : result;
-    }
-    
-    /**
-     * جریان کامل ورود کاربر را مدیریت می‌کند.
-     */
-    async function handleLoginFlow() {
-      setLoadingState(true);
-      hideMessage();
-      showRetryButton(false);
+                // --- ✅ FIX: ADDED 'X-User-Username' HEADER ---
+                const headers = {
+                    'Authorization': `Bearer ${clientToken}`,
+                    'X-User-Username': identifier 
+                };
 
-      const identifier = identifierInput.value.trim();
-      const password = passwordInput.value.trim();
-      
-      try {
-        const token = await getClientToken();
-        const userData = await lookupUser(identifier, token);
+                let userData = null;
+                const isMobile = /^09\d{9}$/.test(identifier);
 
-        if (!userData) {
-            showMessage('کاربری با این مشخصات یافت نشد.', 'error');
-            setTimeout(() => { window.location.href = 'register.html'; }, 2000);
-            return; // توقف اجرا
-        }
-        
-        // این مقایسه باید در سمت سرور انجام شود اما طبق خواسته، اینجا پیاده‌سازی شده
-        if (userData.password !== password) {
-          throw new Error('InvalidCredentials');
-        }
+                if (isMobile) {
+                    const queryParams = new URLSearchParams({ orderBy: '"mobile"', equalTo: `"${identifier}"` });
+                    const queryUrl = `${PROXY_URL}?path=users&${queryParams.toString()}`;
+                    const response = await fetch(queryUrl, { headers });
+                    if (!response.ok) throw new Error('خطا در جستجوی کاربر.');
+                    const result = await response.json();
+                    if (result && Object.keys(result).length > 0) {
+                        userData = Object.values(result)[0];
+                    }
+                } else {
+                    const response = await fetch(`${PROXY_URL}?path=users/${identifier}`, { headers });
+                    // Handle 404 as valid "not found", but other errors as server errors
+                    if (response.status === 404) {
+                       userData = null;
+                    } else if (!response.ok) {
+                        throw new Error('خطا در واکشی اطلاعات کاربر.');
+                    } else {
+                       userData = await response.json();
+                    }
+                }
 
-        // ✅ ورود موفق
-        showMessage(`خوش آمدید ${userData.displayName || userData.username}!`, 'success');
-        setTimeout(() => { window.location.href = 'safe_asli.html'; }, 1500);
+                if (userData === null || userData.password !== password) {
+                    throw new Error('نام کاربری یا رمز عبور اشتباه است.');
+                }
 
-      } catch (err) {
-        if (DEBUG) console.error("Login Error:", err);
-        let userMessage = 'خطایی رخ داد. لطفاً دوباره تلاش کنید.';
-        let showRetry = true;
+                localStorage.setItem('currentUser', JSON.stringify(userData));
 
-        switch (err.message) {
-            case 'Timeout':
-                userMessage = 'پاسخی از سرور دریافت نشد. لطفاً از اتصال اینترنت خود مطمئن شوید.';
-                break;
-            case 'TokenError':
-                userMessage = 'خطا در برقراری ارتباط امن با سرور.';
-                break;
-            case 'ServerError':
-                userMessage = 'سرور با خطا مواجه شد. لطفاً بعداً تلاش کنید.';
-                break;
-            case 'InvalidCredentials':
-                userMessage = 'نام کاربری یا رمز عبور اشتباه است.';
-                showRetry = false; // نیازی به تلاش مجدد نیست، باید ورودی را اصلاح کند
-                break;
-            default: // خطاهای شبکه مانند CORS یا عدم اتصال
-                userMessage = 'مشکل در اتصال به شبکه. لطفاً اینترنت خود را بررسی کنید.';
+                formStatus.textContent = `خوش آمدید، ${userData.displayName}! در حال انتقال...`;
+                formStatus.className = 'success';
+                formStatus.style.display = 'block';
+
+                setTimeout(() => {
+                    window.location.href = 'safe_asli.html';
+                }, 1500);
+
+            } catch (error) {
+                formStatus.textContent = error.message;
+                formStatus.className = 'error';
+                formStatus.style.display = 'block';
+                submitBtn.disabled = false;
+                btnText.textContent = 'ورود';
+                btnSpinner.style.display = 'none';
+            }
         }
         
-        showMessage(userMessage, 'error');
-        setLoadingState(false);
-        if (showRetry) {
-            showRetryButton(true);
-        }
-      }
-    }
-
-    // --- ثبت Event Listener ها ---
-
-    // فعال‌سازی دکمه فقط وقتی هر دو فیلد پر هستند
-    [identifierInput, passwordInput].forEach(el => el.addEventListener('input', () => {
-      submitBtn.disabled = !(identifierInput.value.trim() && passwordInput.value.trim());
-    }));
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      handleLoginFlow();
-    });
-
-    retryBtn.addEventListener('click', handleLoginFlow);
-
-  </script>
+        // Initial validation check on page load
+        validateForm();
+    </script>
 </body>
 </html>
