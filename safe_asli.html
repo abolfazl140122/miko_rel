@@ -120,7 +120,7 @@
             border-radius: 50%;
             margin-left: 15px;
             object-fit: cover;
-            background-color: var(--secondary-color); /* Fallback color */
+            background-color: var(--secondary-color);
             position: relative;
             flex-shrink: 0;
         }
@@ -128,7 +128,7 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            object-fit: cover; /* Ensures the image covers the circle area */
+            object-fit: cover;
         }
         .online-indicator {
             width: 12px;
@@ -354,7 +354,7 @@
         <header class="app-header">
             <h1>همیار</h1>
             <div class="search-container">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input type="text" id="search-input" placeholder="جستجوی کاربر...">
             </div>
         </header>
@@ -521,12 +521,12 @@
         // --- SECTION: UI Rendering ---
         
         function renderChatList() {
-            // --- MODIFIED: Using new simplified and reliable file names ---
             const supportChatData = {
                 username: 'hamyar_support',
                 displayName: 'پشتیبانی همیار',
                 isVerified: true,
-                avatarUrl: 'https://miko.freehost.io/support_logo.png', 
+                // --- MODIFIED: Using the new public URL for the logo ---
+                avatarUrl: 'https://up.20script.ir/file/1fb2-لوگو-پشتیبانی-همیار.png',
             };
             const supportChatHtml = createChatItemHtml(
                 supportChatData,
@@ -589,15 +589,15 @@
                 ? `<div class="unread-badge">${unreadCount}</div>`
                 : '';
                 
-            // --- MODIFIED: Using new simplified and reliable file name for the tick ---
+            // --- MODIFIED: Using the new public URL for the verified tick ---
             const verifiedTickHtml = partnerData.isVerified
-                ? `<img class="verified-tick" src="https://miko.freehost.io/verified_tick.png" alt="تیک تایید">`
+                ? `<img class="verified-tick" src="https://up.20script.ir/file/b97c-tickpng-parspng-com-4.png" alt="تیک تایید">`
                 : '';
 
             return `
                 <div class="chat-item" data-uid="${partnerData.username}">
                     <div class="profile-picture">
-                        <img src="${avatarUrl}" alt="${partnerData.displayName}" onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#1E90FF';">
+                        <img src="${avatarUrl}" alt="${partnerData.displayName}">
                         ${unreadBadgeHtml} 
                     </div>
                     <div class="chat-details">
@@ -689,8 +689,6 @@
                         window.location.href = `pivi.html?uid=${targetUid}`;
                     } else {
                         console.log(`Clicked on support chat (uid: ${targetUid})`);
-                        // For now, clicking the support chat does nothing.
-                        // You can add a link to a support page or a specific action here.
                     }
                 });
             });
