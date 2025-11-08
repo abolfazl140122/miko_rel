@@ -50,6 +50,7 @@
             display: flex;
             flex-direction: column;
             box-shadow: 0 0 25px rgba(0,0,0,0.2);
+            position: relative; /* Added for FAB positioning */
         }
 
         /* --- Header --- */
@@ -346,6 +347,105 @@
          #logout-btn svg {
             color: #ff4d4d;
         }
+
+        /* --- START: Floating Action Button Styles --- */
+        /* Description: Styles for the new chat FAB and its animated options. */
+        .fab-container {
+            position: absolute;
+            bottom: 80px; /* Above the main footer */
+            left: 20px;
+            z-index: 50;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+        }
+
+        .fab-main {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+        }
+
+        .fab-main:hover {
+            box-shadow: 0 6px 16px rgba(30, 144, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .fab-main svg {
+            width: 28px;
+            height: 28px;
+            transition: transform 0.3s ease;
+        }
+        
+        .fab-options {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            list-style: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+            pointer-events: none; /* Disallow interaction when hidden */
+        }
+
+        .fab-option {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--secondary-hover);
+            color: var(--text-primary);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            margin-bottom: 12px;
+            transform: scale(0) translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s, background-color 0.2s;
+        }
+
+        .fab-option:hover {
+            background-color: var(--primary-color);
+        }
+
+        .fab-option svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* Active state for animation */
+        .fab-container.active .fab-main svg {
+            transform: rotate(45deg);
+        }
+
+        .fab-container.active .fab-options {
+            pointer-events: auto; /* Allow interaction when visible */
+        }
+
+        .fab-container.active .fab-option {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Staggered animation for options */
+        .fab-container.active .fab-option:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+        .fab-container.active .fab-option:nth-child(2) {
+            transition-delay: 0.05s;
+        }
+        /* --- END: Floating Action Button Styles --- */
+
     </style>
 </head>
 <body>
@@ -384,6 +484,23 @@
                 <span>خانه</span>
             </button>
         </footer>
+
+        <!-- START: Floating Action Button HTML -->
+        <!-- Description: The main FAB and its hidden options for creating new chats. -->
+        <div class="fab-container" id="fab-container">
+            <div class="fab-options">
+                 <button class="fab-option" title="ایجاد گروه یا کانال">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </button>
+                <button class="fab-option" title="ایجاد چت خصوصی">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </button>
+            </div>
+            <button class="fab-main" id="fab-main-btn" aria-label="ایجاد چت جدید">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+        </div>
+        <!-- END: Floating Action Button HTML -->
     </div>
 
     <!-- Profile Overlay HTML Structure -->
@@ -438,6 +555,12 @@
         const profileDisplayName = document.getElementById('profile-display-name');
         const profileUsername = document.getElementById('profile-username');
 
+        // --- START: FAB Element References ---
+        // Description: References to the Floating Action Button elements.
+        const fabContainer = document.getElementById('fab-container');
+        const fabMainBtn = document.getElementById('fab-main-btn');
+        // --- END: FAB Element References ---
+
         // --- SECTION: App State ---
         let currentUser = null;
         let clientToken = null;
@@ -455,10 +578,20 @@
             }
             currentUser = JSON.parse(storedUser);
 
+            // --- Event Listeners ---
             searchInput.addEventListener('input', handleSearch);
             openProfileBtn.addEventListener('click', showProfile);
             closeProfileBtn.addEventListener('click', hideProfile);
             logoutBtn.addEventListener('click', handleLogout);
+
+            // --- START: FAB Event Listener ---
+            // Description: Toggles the 'active' class on the FAB container to trigger the CSS animation.
+            if (fabMainBtn && fabContainer) {
+                fabMainBtn.addEventListener('click', () => {
+                    fabContainer.classList.toggle('active');
+                });
+            }
+            // --- END: FAB Event Listener ---
 
             await loadInitialData();
         });
