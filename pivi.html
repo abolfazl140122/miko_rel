@@ -55,8 +55,15 @@
         #loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--background-color);
-            display: flex; justify-content: center; align-items: center;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 1000; transition: opacity 0.5s ease;
+            text-align: center; padding: 20px;
+        }
+        .loading-content p {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            margin-top: 20px;
+            line-height: 1.6;
         }
         .loading-dots { display: flex; align-items: center; }
         .loading-dots div {
@@ -326,7 +333,7 @@
         .dialog-footer .btn-primary { background-color: var(--primary-color); color: white; }
         .dialog-footer .btn-secondary { background-color: var(--border-color); color: var(--text-primary); }
         
-        /* --- [جدید] استایل‌های مودال تنظیمات --- */
+        /* --- استایل‌های مودال تنظیمات --- */
         .setting-item { margin-top: 15px; }
         .setting-item label { font-weight: 500; display: block; margin-bottom: 5px; }
         .setting-item p { font-size: 0.85em; color: var(--text-secondary); margin-bottom: 15px; }
@@ -348,7 +355,10 @@
 <body>
 
     <div id="loading-overlay">
-        <div class="loading-dots"><div></div><div></div><div></div></div>
+        <div class="loading-content">
+            <div class="loading-dots"><div></div><div></div><div></div></div>
+            <p id="loading-message"></p>
+        </div>
     </div>
 
     <div class="app-container" id="app-container">
@@ -406,7 +416,7 @@
         </div>
     </div>
 
-    <!-- [جدید] مودال گزینه‌های اصلی (هدر) -->
+    <!-- مودال گزینه‌های اصلی (هدر) -->
     <div id="main-options-overlay" class="modal-overlay">
         <div id="main-options-menu" class="modal-card">
             <div class="menu-option" id="main-menu-profile-btn">
@@ -456,7 +466,7 @@
         </div>
     </div>
     
-    <!-- [جدید] مودال تنظیمات -->
+    <!-- مودال تنظیمات -->
     <div id="settings-overlay" class="modal-overlay">
         <div class="modal-card">
             <h4>تنظیمات</h4>
@@ -496,6 +506,7 @@
 
         // --- ارجاع به عناصر DOM ---
         const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingMessage = document.getElementById('loading-message');
         const appContainer = document.getElementById('app-container');
         const partnerNameEl = document.getElementById('partner-name');
         const partnerAvatarEl = document.getElementById('partner-avatar');
@@ -515,8 +526,6 @@
         const pinnedMessageBar = document.getElementById('pinned-message-bar');
         const unpinBtn = document.getElementById('unpin-btn');
         const optionsBtn = document.getElementById('options-btn');
-        
-        // --- [جدید] ارجاع به عناصر تنظیمات ---
         const mainOptionsOverlay = document.getElementById('main-options-overlay');
         const settingsOverlay = document.getElementById('settings-overlay');
         const keyboardOffsetSlider = document.getElementById('keyboard-offset-slider');
@@ -527,45 +536,50 @@
         // --- وضعیت کلی اپلیکیشن ---
         let currentUser = null, clientToken = null, chatPartner = null, chatId = null;
         let messagePollingInterval = null, presencePollingInterval = null;
-        let lastMessagesHash = null, lastChatDataHash = null;
+        let lastChatDataHash = null;
         let isPartnerBlocked = false;
         let activeReplyContext = null;
         let currentPinnedMessage = null;
-        let keyboardOffset = 80; // [جدید] متغیر برای فاصله کیبورد با مقدار پیش‌فرض
+        let keyboardOffset = 80;
 
 
         // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
         window.addEventListener('load', initializeApp);
         window.addEventListener('beforeunload', () => updatePresence(false));
         document.addEventListener('visibilitychange', () => {
+            if (!currentUser) return; // Prevent actions if app not initialized
             updatePresence(!document.hidden);
             if (document.hidden) pauseApp(); else resumeApp();
         });
         
-        // --- [حذف] رفتار تغییر ارتفاع خودکار حذف شد ---
-        // کد مربوط به window.visualViewport.addEventListener('resize', handleViewportResize); حذف گردید.
-
         async function initializeApp() {
             if (window.piviAppInitialized) return;
             window.piviAppInitialized = true;
-            showLoading();
-            
-            // [جدید] بارگذاری تنظیم فاصله کیبورد از حافظه
-            keyboardOffset = parseInt(localStorage.getItem('keyboardOffset') || '80', 10);
-            keyboardOffsetSlider.value = keyboardOffset;
-            keyboardOffsetValue.textContent = `${keyboardOffset} px`;
+            showLoading("در حال بارگذاری...");
 
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) { window.location.href = 'login.html'; return; }
             currentUser = JSON.parse(storedUser);
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const partnerUsername = urlParams.get('uid') || urlParams.get('with');
-            if (!partnerUsername) { showError('کاربر مقصد مشخص نشده است.'); return; }
-
             try {
+                // **مرحله ۱: دریافت توکن و بررسی مسدودیت حساب**
                 await refreshClientToken();
+                const isBanned = await checkAccountBanStatus();
+                if (isBanned) return; // تابع checkAccountBanStatus خودش redirect می‌کند
+
+                // **مرحله ۲: ادامه بارگذاری برنامه**
+                keyboardOffset = parseInt(localStorage.getItem('keyboardOffset') || '80', 10);
+                keyboardOffsetSlider.value = keyboardOffset;
+                keyboardOffsetValue.textContent = `${keyboardOffset} px`;
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const partnerUsername = urlParams.get('uid') || urlParams.get('with');
+                if (!partnerUsername) { showError('کاربر مقصد مشخص نشده است.'); return; }
+
                 await fetchCurrentUserData();
+                // **مرحله ۳: اطمینان از وجود blockedUsers**
+                await ensureBlockedUsersCollection(); 
+
                 await fetchPartnerData(partnerUsername);
                 if (!chatPartner) { showError('کاربر مورد نظر پیدا نشد.'); return; }
                 
@@ -606,8 +620,10 @@
         }
         
         // --- بخش ۴: توابع مرتبط با UI ---
-        function showLoading() {
-            loadingOverlay.style.opacity = '1'; loadingOverlay.style.display = 'flex';
+        function showLoading(message = "") {
+            loadingMessage.textContent = message;
+            loadingOverlay.style.opacity = '1'; 
+            loadingOverlay.style.display = 'flex';
             appContainer.classList.remove('visible');
         }
         function showApp() {
@@ -623,16 +639,9 @@
             mainContent.scrollTop = 0; // به دلیل flex-direction: column-reverse
         }
 
-        /**
-         * [جدید] تابع کمکی برای ایجاد HTML نام کاربر به همراه تیک آبی در صورت تایید شدن
-         * @param {string} displayName - نام نمایشی کاربر
-         * @param {boolean} isVerified - وضعیت تایید کاربر
-         * @returns {string} - رشته HTML نهایی
-         */
         function createVerifiedNameHTML(displayName, isVerified) {
             if (isVerified) {
                 const badgeHTML = `<img src="https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png" style="width: 20px; height: 20px; margin-right: 6px;">`;
-                // استفاده از کانتینر برای تراز عمودی دقیق
                 return `<span style="display: inline-flex; align-items: center;">${displayName}${badgeHTML}</span>`;
             }
             return displayName;
@@ -651,7 +660,6 @@
             document.getElementById('partner-info-header').addEventListener('click', () => showModal(profileOverlay));
             messagesArea.addEventListener('click', handleMessageClick);
             
-            // --- Event Listeners برای قابلیت‌های جدید ---
             document.getElementById('reply-msg-btn').addEventListener('click', handleReplyAction);
             document.getElementById('pin-msg-btn').addEventListener('click', handlePinAction);
             cancelReplyBtn.addEventListener('click', cancelReply);
@@ -665,27 +673,19 @@
             document.getElementById('delete-msg-btn').addEventListener('click', handleDeleteAction);
             blockUserBtn.addEventListener('click', handleBlockToggle);
 
-            // --- [جدید] Event Listeners برای منوها و تنظیمات ---
-            document.getElementById('main-menu-profile-btn').addEventListener('click', () => {
-                hideModal(mainOptionsOverlay);
-                showModal(profileOverlay);
-            });
-            document.getElementById('main-menu-settings-btn').addEventListener('click', () => {
-                hideModal(mainOptionsOverlay);
-                showModal(settingsOverlay);
-            });
+            document.getElementById('main-menu-profile-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(profileOverlay); });
+            document.getElementById('main-menu-settings-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(settingsOverlay); });
             document.getElementById('close-settings-btn').addEventListener('click', () => hideModal(settingsOverlay));
             keyboardOffsetSlider.addEventListener('input', handleKeyboardOffsetChange);
             messageInput.addEventListener('focus', applyKeyboardOffset);
             messageInput.addEventListener('blur', removeKeyboardOffset);
             
-            // بستن مودال‌ها با کلیک روی پس‌زمینه
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 overlay.addEventListener('click', (e) => {
                     if (e.target === overlay) hideModal(overlay);
                 });
             });
-             document.querySelector('.profile-card .handle').addEventListener('click', () => hideModal(profileOverlay));
+            document.querySelector('.profile-card .handle').addEventListener('click', () => hideModal(profileOverlay));
         }
 
         function toggleSendButton() {
@@ -694,12 +694,11 @@
             attachmentButtons.classList.toggle('hidden', hasText);
         }
         
-        // --- [جدید] بخش ۵: توابع مدیریت فاصله کیبورد ---
+        // --- بخش ۵: توابع مدیریت فاصله کیبورد ---
         function handleKeyboardOffsetChange(e) {
             keyboardOffset = parseInt(e.target.value, 10);
             keyboardOffsetValue.textContent = `${keyboardOffset} px`;
             localStorage.setItem('keyboardOffset', keyboardOffset);
-            // اگر کیبورد باز باشد، تغییر را همان لحظه اعمال کن
             if (document.activeElement === messageInput) {
                 applyKeyboardOffset();
             }
@@ -708,13 +707,43 @@
             appContainer.style.paddingBottom = `${keyboardOffset}px`;
             setTimeout(() => {
                 messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }, 100); // تاخیر کوتاه برای اطمینان از اعمال شدن padding
+            }, 100);
         }
         function removeKeyboardOffset() {
             appContainer.style.paddingBottom = '0px';
         }
 
-        // --- بخش ۶: مدیریت وضعیت آنلاین/آفلاین (Presence) ---
+        // --- بخش ۶: مدیریت وضعیت (Presence & Ban) ---
+        async function checkAccountBanStatus() {
+            try {
+                const banData = await apiRequest(`users/${currentUser.username}/accountBlock`, 'GET');
+                if (banData && banData.active === true) {
+                    const expireDate = new Date(banData.expireAt);
+                    // پراکسی باید موارد منقضی شده را پاک کند، اما برای اطمینان اینجا هم چک می‌کنیم
+                    if (expireDate > new Date()) {
+                        const formattedDate = expireDate.toLocaleString('fa-IR', { dateStyle: 'full', timeStyle: 'short' });
+                        const reason = banData.reason ? `به دلیل: ${banData.reason}` : '';
+                        showLoading(`حساب شما مسدود شده است. ${reason}\nپایان مسدودیت: ${formattedDate}`);
+                        
+                        setTimeout(() => {
+                            window.location.replace('index.html');
+                        }, 4000); // 4 ثانیه نمایش پیام قبل از هدایت
+                        return true; // Ban is active
+                    }
+                }
+            } catch (error) {
+                // خطای 404 یعنی کاربر مسدود نیست که طبیعی است.
+                if (error.message.includes('404')) {
+                    return false;
+                }
+                // خطاهای دیگر را نمایش بده
+                console.error("خطا در بررسی وضعیت مسدودیت حساب:", error);
+                showError("خطا در بررسی وضعیت حساب. لطفا بعدا تلاش کنید.");
+                return true; // Stop execution
+            }
+            return false; // Not banned
+        }
+
         async function updatePresence(isOnline) {
             if (!currentUser || !clientToken) return;
             const presenceData = { isOnline, lastSeen: new Date().toISOString() };
@@ -729,9 +758,8 @@
                 if (partnerData) {
                     chatPartner.isOnline = partnerData.isOnline;
                     chatPartner.lastSeen = partnerData.lastSeen;
-                    chatPartner.verified = partnerData.verified; // [اضافه شده] به‌روزرسانی وضعیت تایید
+                    chatPartner.verified = partnerData.verified;
                     updateStatusUI(partnerData.isOnline, partnerData.lastSeen);
-                    // [اضافه شده] به‌روزرسانی نام در هدر برای نمایش تیک در صورت تغییر
                     partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
                 }
             } catch (error) { console.warn("خطا در بررسی وضعیت کاربر:", error); }
@@ -772,7 +800,7 @@
             try {
                 const path = `users/${currentUser.username}/blockedUsers/${chatPartner.username}`;
                 if (willBlock) {
-                    await apiRequest(path, 'PUT', true);
+                    await apiRequest(path, 'PUT', true); // مقدار true برای سادگی
                     if (!currentUser.blockedUsers) currentUser.blockedUsers = {};
                     currentUser.blockedUsers[chatPartner.username] = true;
                 } else {
@@ -799,6 +827,21 @@
              const data = await apiRequest(`users/${currentUser.username}`, 'GET');
              if(data) currentUser = { ...currentUser, ...data };
         }
+        
+        // **[جدید]** تابع برای اطمینان از وجود collection
+        async function ensureBlockedUsersCollection() {
+            if (currentUser && typeof currentUser.blockedUsers === 'undefined') {
+                try {
+                    // یک درخواست PUT با یک آبجکت خالی برای ایجاد collection
+                    await apiRequest(`users/${currentUser.username}/blockedUsers`, 'PUT', { '__init': true });
+                    currentUser.blockedUsers = { '__init': true }; // به‌روزرسانی محلی
+                    console.log('مجموعه blockedUsers با موفقیت ایجاد شد.');
+                } catch (error) {
+                    console.error('خطا در ایجاد مجموعه blockedUsers:', error);
+                }
+            }
+        }
+        
         async function fetchPartnerData(username) {
              chatPartner = await apiRequest(`users/${username}`, 'GET');
         }
@@ -910,31 +953,22 @@
                 const isSentByUser = activeMessageElement.classList.contains('sent');
                 document.getElementById('edit-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
                 document.getElementById('delete-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
-
                 activeMessageId = activeMessageElement.dataset.id;
-                
                 const pinBtnText = document.getElementById('pin-msg-btn-text');
-                if(currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) {
-                    pinBtnText.textContent = "حذف سنجاق";
-                } else {
-                    pinBtnText.textContent = "سنجاق کردن";
-                }
+                pinBtnText.textContent = (currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) ? "حذف سنجاق" : "سنجاق کردن";
                 showModal(messageOptionsOverlay);
             }
         }
         
         async function handleEditAction() {
             if (!activeMessageId) return;
-            const currentText = activeMessageElement.dataset.text || '';
             hideModal(messageOptionsOverlay);
-
             const newText = await showCustomPrompt({
                 title: 'ویرایش پیام',
                 message: 'پیام جدید را وارد کنید:',
-                initialValue: currentText
+                initialValue: activeMessageElement.dataset.text || ''
             });
-
-            if (newText && newText.trim() !== "" && newText.trim() !== currentText) {
+            if (newText && newText.trim() && newText.trim() !== activeMessageElement.dataset.text) {
                 await editMessage(activeMessageId, newText.trim());
             }
             activeMessageId = null;
@@ -943,26 +977,23 @@
         async function handleDeleteAction() {
             if (!activeMessageId) return;
             hideModal(messageOptionsOverlay);
-
             const confirmed = await showCustomConfirm({
                 title: 'حذف پیام',
                 message: 'آیا از حذف این پیام برای همه اطمینان دارید؟ این عمل قابل بازگشت نیست.'
             });
-
-            if (confirmed) {
-                await deleteMessage(activeMessageId);
-            }
+            if (confirmed) await deleteMessage(activeMessageId);
             activeMessageId = null;
         }
 
         function handleReplyAction() {
             if (!activeMessageElement) return;
-            const text = activeMessageElement.dataset.text;
-            const senderName = activeMessageElement.dataset.senderName;
-            activeReplyContext = { msgId: activeMessageId, text: text, senderName: senderName };
-            
-            document.getElementById('reply-to-name').textContent = `پاسخ به ${senderName}`;
-            document.getElementById('reply-preview-text').textContent = text;
+            activeReplyContext = { 
+                msgId: activeMessageId, 
+                text: activeMessageElement.dataset.text, 
+                senderName: activeMessageElement.dataset.senderName 
+            };
+            document.getElementById('reply-to-name').textContent = `پاسخ به ${activeReplyContext.senderName}`;
+            document.getElementById('reply-preview-text').textContent = activeReplyContext.text;
             replyPreviewBar.style.display = 'flex';
             hideModal(messageOptionsOverlay);
             messageInput.focus();
@@ -976,14 +1007,13 @@
         async function handlePinAction() {
             if (!activeMessageId) return;
             hideModal(messageOptionsOverlay);
-            
             if (currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) {
                 await handleUnpinAction();
             } else {
-                const textToPin = activeMessageElement.dataset.text;
-                const pinnedData = { msgId: activeMessageId, text: textToPin };
                 try {
-                    await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { pinnedMessage: pinnedData });
+                    await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { 
+                        pinnedMessage: { msgId: activeMessageId, text: activeMessageElement.dataset.text } 
+                    });
                     await loadChatData();
                 } catch (error) { showCustomAlert({ title: 'خطا', message: 'خطا در سنجاق کردن پیام.' }); }
             }
@@ -1096,9 +1126,15 @@
             }
             
             const response = await fetch(`${PROXY_URL}?path=${path}`, options);
-            const responseData = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(responseData.error || `یک خطای ${response.status} رخ داد.`);
-            return responseData;
+            if (!response.ok) {
+                 const responseData = await response.json().catch(() => ({}));
+                 throw new Error(responseData.error || `یک خطای ${response.status} رخ داد.`);
+            }
+            // برای متد DELETE یا پاسخ‌های بدون محتوا، null برگردان
+            if (response.status === 204 || method === 'DELETE') {
+                 return null;
+            }
+            return await response.json().catch(() => null);
         }
     </script>
 </body>
