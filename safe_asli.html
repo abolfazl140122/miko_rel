@@ -17,7 +17,7 @@
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
             --online-indicator: #28a745;
-            --notification-badge: #28a745; /* Added variable for consistency */
+            --notification-badge: #28a745;
         }
 
         *, *::before, *::after {
@@ -28,7 +28,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Prevents scrolling on the body itself */
+            overflow: hidden;
         }
 
         body {
@@ -122,7 +122,7 @@
             object-fit: cover;
             background-color: var(--primary-color);
             position: relative;
-            flex-shrink: 0; /* Prevents the picture from shrinking */
+            flex-shrink: 0;
         }
         .profile-picture img {
             width: 100%;
@@ -139,7 +139,6 @@
             bottom: 2px;
             right: 2px;
         }
-        /* --- NEW: Unread Badge Style --- */
         .unread-badge {
             position: absolute;
             bottom: -2px;
@@ -166,6 +165,9 @@
             font-size: 1.1em;
             font-weight: 500;
             white-space: nowrap;
+            /* --- MODIFIED: Added flexbox for tick alignment --- */
+            display: flex;
+            align-items: center;
         }
         .last-message {
             margin: 4px 0 0;
@@ -182,6 +184,13 @@
             font-size: 0.8em;
             color: var(--text-secondary);
             flex-shrink: 0;
+        }
+
+        /* --- NEW: Style for the verified tick --- */
+        .verified-tick {
+            width: 16px;
+            height: 16px;
+            margin-right: 6px; /* Space between name and tick */
         }
         
         /* --- Loading and Status Messages --- */
@@ -301,6 +310,9 @@
             font-size: 1.8em;
             font-weight: 700;
             margin: 0;
+            /* --- MODIFIED: Added for tick alignment --- */
+            display: flex;
+            align-items: center;
         }
         #profile-username {
             font-size: 1.1em;
@@ -414,6 +426,8 @@
         // --- SECTION: App Configuration ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
+        // --- NEW: Verified tick image URL ---
+        const VERIFIED_TICK_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
 
         // --- SECTION: DOM Element References ---
         const mainContent = document.getElementById('main-content');
@@ -432,7 +446,7 @@
         let clientToken = null;
         let allUsers = {};
         let recentChats = [];
-        let pollingIntervalId = null; // To hold the interval ID
+        let pollingIntervalId = null; 
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -464,13 +478,15 @@
 
                 if (usersResponse) {
                     Object.values(usersResponse).forEach(user => { allUsers[user.username] = user; });
+                    // --- NEW: Ensure current user data is up-to-date from the server ---
+                    if (allUsers[currentUser.username]) {
+                        currentUser = allUsers[currentUser.username];
+                    }
                 }
                 
                 if (chatsResponse) {
                     recentChats = Object.values(chatsResponse)
-                        // --- MODIFIED: Added unreadCount simulation ---
                         .map((chat, index) => {
-                            // This is for demonstration. A real backend would provide this.
                             if (index === 0) chat.unreadCount = 3;
                             if (index === 2) chat.unreadCount = 15;
                             return chat;
@@ -522,13 +538,12 @@
             const chatListHtml = recentChats.map(chat => {
                 if (!chat || !chat.members) {
                     console.warn('Skipping malformed chat object:', chat);
-                    return ''; // Skip rendering this invalid item
+                    return '';
                 }
                 const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
                 const partnerData = allUsers[partnerUsername];
                 if (!partnerData) return ''; 
 
-                // --- MODIFIED: Pass unreadCount to the HTML generator ---
                 return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp, chat.unreadCount);
             }).join('');
             
@@ -560,13 +575,16 @@
 
         // --- SECTION: HTML Template Generators ---
 
-        // --- MODIFIED: Added unreadCount parameter and logic ---
         function createChatItemHtml(partnerData, lastMessage, timestamp, unreadCount) {
             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=1E90FF&color=fff&size=100`;
             
-            // --- NEW: Conditionally create the unread badge HTML ---
             const unreadBadgeHtml = (unreadCount && unreadCount > 0)
                 ? `<div class="unread-badge">${unreadCount}</div>`
+                : '';
+
+            // --- NEW: Verified Tick Logic ---
+            const verifiedTickHtml = partnerData.verified === true
+                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
                 : '';
                 
             return `
@@ -576,7 +594,7 @@
                         ${unreadBadgeHtml} 
                     </div>
                     <div class="chat-details">
-                        <h3>${partnerData.displayName || partnerData.username}</h3>
+                        <h3>${partnerData.displayName || partnerData.username} ${verifiedTickHtml}</h3>
                         <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
                     </div>
                     <div class="chat-meta">
@@ -588,6 +606,11 @@
         function createSearchResultHtml(userData) {
             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
             
+            // --- NEW: Verified Tick Logic ---
+            const verifiedTickHtml = userData.verified === true
+                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
+                : '';
+
             return `
                 <div class="search-result-item" data-uid="${userData.username}">
                     <div class="profile-picture">
@@ -595,7 +618,7 @@
                         ${userData.isOnline ? '<div class="online-indicator"></div>' : ''}
                     </div>
                     <div class="chat-details">
-                        <h3>${userData.displayName || userData.username}</h3>
+                        <h3>${userData.displayName || userData.username} ${verifiedTickHtml}</h3>
                         <p class="last-message">@${userData.username}</p>
                     </div>
                 </div>`;
@@ -605,38 +628,22 @@
 
         async function checkForUpdates() {
             try {
-                const newChatsResponse = await fetchProxyData('pivi_chats');
+                // --- NEW: Also fetch user data to check for new verified statuses ---
+                const [newChatsResponse, newUsersResponse] = await Promise.all([
+                    fetchProxyData('pivi_chats'),
+                    fetchProxyData('users')
+                ]);
+
+                if (newUsersResponse) {
+                    if (JSON.stringify(allUsers) !== JSON.stringify(newUsersResponse)) {
+                        console.log('User data has changed. Updating allUsers object.');
+                        Object.values(newUsersResponse).forEach(user => { allUsers[user.username] = user; });
+                    }
+                }
 
                 if (newChatsResponse) {
                     const newRecentChats = Object.values(newChatsResponse)
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-                    // --- NEW: Check for new messages and trigger notification ---
-                    const oldChatsMap = new Map();
-                    recentChats.forEach(chat => {
-                        const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
-                        if (partnerUsername) oldChatsMap.set(partnerUsername, chat);
-                    });
-
-                    let notified = false; // Prevent multiple notifications in one poll
-                    newRecentChats.forEach(newChat => {
-                        const partnerUsername = Object.keys(newChat.members).find(m => m !== currentUser.username);
-                        if (!partnerUsername) return;
-
-                        const oldChat = oldChatsMap.get(partnerUsername);
-                        const oldUnreadCount = oldChat ? (oldChat.unreadCount || 0) : 0;
-                        const newUnreadCount = newChat.unreadCount || 0;
-
-                        if (newUnreadCount > oldUnreadCount && !notified) {
-                            if (typeof AndroidNotify !== 'undefined') {
-                                const partnerData = allUsers[partnerUsername];
-                                const senderName = partnerData ? partnerData.displayName : 'کاربر';
-                                AndroidNotify.showNotification('پیام جدید 💬', `${senderName} برای شما پیام فرستاد`);
-                            }
-                            notified = true;
-                        }
-                    });
-                    // --- END of notification logic ---
 
                     if (JSON.stringify(newRecentChats) !== JSON.stringify(recentChats)) {
                         console.log('New chat data detected. Updating list.');
@@ -652,7 +659,7 @@
             }
         }
 
-        function startRealtimeUpdates(interval = 5000) { // Increased interval slightly
+        function startRealtimeUpdates(interval = 7000) { // Increased interval slightly
             if (pollingIntervalId) {
                 clearInterval(pollingIntervalId);
             }
@@ -696,8 +703,14 @@
         function showProfile() {
             if (!currentUser) return;
             
+            // --- NEW: Verified Tick Logic for Profile Page ---
+            const verifiedTickHtml = currentUser.verified === true
+                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
+                : '';
+
             profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=0D1117&color=fff&size=150`;
-            profileDisplayName.textContent = currentUser.displayName || currentUser.username;
+            // --- MODIFIED: Use .innerHTML to render the tick image ---
+            profileDisplayName.innerHTML = `${currentUser.displayName || currentUser.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${currentUser.username}`;
 
             profileOverlay.classList.add('active');
@@ -710,7 +723,7 @@
         function handleLogout() {
             if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
                 localStorage.removeItem('currentUser');
-                if (pollingIntervalId) clearInterval(pollingIntervalId); // Stop polling on logout
+                if (pollingIntervalId) clearInterval(pollingIntervalId);
                 window.location.href = 'login.html'; 
             }
         }
