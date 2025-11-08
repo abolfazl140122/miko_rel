@@ -94,7 +94,7 @@
         .chat-header .back-btn { background: none; border: none; cursor: pointer; color: var(--text-primary); padding: 5px; }
         .chat-header .partner-info { display: flex; align-items: center; margin-right: 15px; flex-grow: 1; cursor: pointer; }
         .partner-info img { width: 45px; height: 45px; border-radius: 50%; margin-left: 12px; object-fit: cover; }
-        .partner-details h2 { font-size: 1.1em; font-weight: 500; display: flex; align-items: center; }
+        .partner-details h2 { font-size: 1.1em; font-weight: 500; }
         .partner-details .status { font-size: 0.8em; color: var(--online-indicator); transition: color 0.3s; }
         .partner-details .status.offline { color: var(--text-secondary); }
         .options-btn { background: none; border: none; cursor: pointer; color: var(--text-secondary); }
@@ -289,7 +289,7 @@
             width: 100px; height: 100px; border-radius: 50%;
             border: 3px solid var(--primary-color); margin-bottom: 15px;
         }
-        .profile-card h3 { font-size: 1.5em; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; }
+        .profile-card h3 { font-size: 1.5em; margin-bottom: 5px; }
         .profile-card p { font-size: 1em; color: var(--text-secondary); }
         .profile-info-list { list-style: none; margin-top: 20px; text-align: right; }
         .profile-info-list li { padding: 10px 0; border-bottom: 1px solid var(--border-color); }
@@ -622,15 +622,24 @@
         function scrollToBottom() {
             mainContent.scrollTop = 0; // به دلیل flex-direction: column-reverse
         }
+
+        /**
+         * [جدید] تابع کمکی برای ایجاد HTML نام کاربر به همراه تیک آبی در صورت تایید شدن
+         * @param {string} displayName - نام نمایشی کاربر
+         * @param {boolean} isVerified - وضعیت تایید کاربر
+         * @returns {string} - رشته HTML نهایی
+         */
+        function createVerifiedNameHTML(displayName, isVerified) {
+            if (isVerified) {
+                const badgeHTML = `<img src="https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png" style="width: 20px; height: 20px; margin-right: 6px;">`;
+                // استفاده از کانتینر برای تراز عمودی دقیق
+                return `<span style="display: inline-flex; align-items: center;">${displayName}${badgeHTML}</span>`;
+            }
+            return displayName;
+        }
         
         function setupUI() {
-            // [تغییر] افزودن تیک آبی در هدر
-            let partnerNameHTML = chatPartner.displayName;
-            if (chatPartner.verified === true) {
-                partnerNameHTML += `<img src='https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png' style='width:20px;height:20px;vertical-align:middle;margin-left:4px;'>`;
-            }
-            partnerNameEl.innerHTML = partnerNameHTML;
-            
+            partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
             partnerAvatarEl.src = `https://i.pravatar.cc/80?u=${chatPartner.username}`;
             updateStatusUI(chatPartner.isOnline, chatPartner.lastSeen);
         }
@@ -720,7 +729,10 @@
                 if (partnerData) {
                     chatPartner.isOnline = partnerData.isOnline;
                     chatPartner.lastSeen = partnerData.lastSeen;
+                    chatPartner.verified = partnerData.verified; // [اضافه شده] به‌روزرسانی وضعیت تایید
                     updateStatusUI(partnerData.isOnline, partnerData.lastSeen);
+                    // [اضافه شده] به‌روزرسانی نام در هدر برای نمایش تیک در صورت تغییر
+                    partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
                 }
             } catch (error) { console.warn("خطا در بررسی وضعیت کاربر:", error); }
         }
@@ -1009,15 +1021,7 @@
         function showModal(overlayElement) {
             if(overlayElement.id === 'profile-overlay' && chatPartner){
                 document.getElementById('profile-card-avatar').src = `https://i.pravatar.cc/120?u=${chatPartner.username}`;
-                
-                // [تغییر] افزودن تیک آبی در پروفایل
-                const profileCardNameEl = document.getElementById('profile-card-name');
-                let profileNameHTML = chatPartner.displayName;
-                if (chatPartner.verified === true) {
-                    profileNameHTML += `<img src='https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png' style='width:20px;height:20px;vertical-align:middle;margin-left:4px;'>`;
-                }
-                profileCardNameEl.innerHTML = profileNameHTML;
-
+                document.getElementById('profile-card-name').innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
                 document.getElementById('profile-card-username').textContent = `@${chatPartner.username}`;
                 document.getElementById('profile-card-uid').textContent = chatPartner.username;
                 const statusEl = document.getElementById('profile-card-status');
