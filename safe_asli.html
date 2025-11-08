@@ -91,6 +91,34 @@
             color: var(--text-secondary);
         }
         
+        /* --- NEW: Tabs Styling --- */
+        .tabs-container {
+            display: flex;
+            background-color: var(--secondary-color);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .tab-btn {
+            flex-grow: 1;
+            padding: 14px 10px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 1em;
+            font-weight: 500;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.3s, border-color 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        #channels-tab {
+            display: none; /* Hidden by default, shown via JS if channels exist */
+        }
+
         /* --- Main Content Area --- */
         main {
             flex-grow: 1;
@@ -99,10 +127,19 @@
         }
         main::-webkit-scrollbar { display: none; }
         main { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* --- Content Views --- */
+        .content-view {
+             padding: 10px 0;
+        }
+        /* Keep channels-view hidden until its tab is active */
+        #channels-view {
+            display: none;
+        }
 
         /* --- Chat List --- */
         .chat-list {
-            padding: 10px 0;
+            /* This class is now a generic container within a view */
         }
         .chat-item, .search-result-item {
             display: flex;
@@ -111,6 +148,9 @@
             cursor: pointer;
             transition: background-color 0.2s;
             border-bottom: 1px solid var(--border-color);
+        }
+        .chat-item:last-child, .search-result-item:last-child {
+            border-bottom: none;
         }
         .chat-item:hover, .search-result-item:hover {
             background-color: var(--secondary-hover);
@@ -197,9 +237,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100%;
+            padding: 50px 20px;
             flex-direction: column;
             color: var(--text-secondary);
+            text-align: center;
         }
         .spinner {
             width: 40px;
@@ -247,193 +288,70 @@
 
         /* --- Profile Overlay Styles --- */
         .profile-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%;
             background-color: var(--background-color);
             z-index: 100;
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            display: flex;
-            flex-direction: column;
-            max-width: 420px; 
-            margin: 0 auto;
+            display: flex; flex-direction: column;
+            max-width: 420px; margin: 0 auto;
         }
-        .profile-overlay.active {
-            transform: translateY(0);
-        }
+        .profile-overlay.active { transform: translateY(0); }
         .profile-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--secondary-color);
-            flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; border-bottom: 1px solid var(--border-color);
+            background-color: var(--secondary-color); flex-shrink: 0;
         }
-        .profile-header h2 {
-            margin: 0;
-            font-size: 1.4em;
-        }
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            cursor: pointer;
-        }
+        .profile-header h2 { margin: 0; font-size: 1.4em; }
+        .close-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; }
         .profile-content {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-grow: 1; overflow-y: auto; padding: 30px 20px;
+            display: flex; flex-direction: column; align-items: center;
         }
-        .profile-main-pic {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--primary-color);
-            margin-bottom: 20px;
-        }
-        .profile-main-pic img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        #profile-display-name {
-            font-size: 1.8em;
-            font-weight: 700;
-            margin: 0;
-            display: flex;
-            align-items: center;
-        }
-        #profile-username {
-            font-size: 1.1em;
-            color: var(--text-secondary);
-            margin: 5px 0 30px 0;
-        }
-        .profile-actions {
-            width: 100%;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+        .profile-main-pic { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary-color); margin-bottom: 20px; }
+        .profile-main-pic img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        #profile-display-name { font-size: 1.8em; font-weight: 700; margin: 0; display: flex; align-items: center; }
+        #profile-username { font-size: 1.1em; color: var(--text-secondary); margin: 5px 0 30px 0; }
+        .profile-actions { width: 100%; list-style: none; padding: 0; margin: 0; }
         .profile-actions li {
-            background-color: var(--secondary-color);
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            background-color: var(--secondary-color); padding: 15px 20px;
+            margin-bottom: 10px; border-radius: 10px; display: flex;
+            align-items: center; cursor: pointer; transition: background-color 0.2s;
         }
-        .profile-actions li:hover {
-            background-color: var(--secondary-hover);
-        }
-        .profile-actions li svg {
-            margin-left: 15px;
-            color: var(--text-secondary);
-        }
-        #logout-btn {
-            color: #ff4d4d;
-        }
-         #logout-btn svg {
-            color: #ff4d4d;
-        }
+        .profile-actions li:hover { background-color: var(--secondary-hover); }
+        .profile-actions li svg { margin-left: 15px; color: var(--text-secondary); }
+        #logout-btn, #logout-btn svg { color: #ff4d4d; }
 
-        /* --- MODIFIED: Floating Action Button (FAB) Styles --- */
+        /* --- Floating Action Button (FAB) Styles --- */
         .fab-container {
-            position: absolute;
-            bottom: 80px; /* MODIFIED: Lowered position */
-            right: 20px; /* MODIFIED: Moved to the right for RTL */
-            z-index: 99;
-            display: flex;
-            flex-direction: column; /* MODIFIED: Options will now appear on top */
-            align-items: center;
+            position: absolute; bottom: 80px; right: 20px;
+            z-index: 99; display: flex; flex-direction: column; align-items: center;
         }
-
         .fab-main {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            border: none;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            order: 2; /* MODIFIED: Ensures main button is at the bottom of the flex container */
+            width: 60px; height: 60px; border-radius: 50%; background-color: var(--primary-color);
+            border: none; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            order: 2;
         }
-        .fab-main:hover {
-            transform: scale(1.05);
-        }
-        .fab-main svg {
-            color: white;
-            width: 28px;
-            height: 28px;
-            transition: transform 0.3s ease;
-        }
-        
+        .fab-main:hover { transform: scale(1.05); }
+        .fab-main svg { color: white; width: 28px; height: 28px; transition: transform 0.3s ease; }
         .fab-options {
-            display: flex;
-            flex-direction: column-reverse; /* Keeps single user icon above group icon */
-            align-items: center;
-            list-style: none;
-            padding: 0;
-            margin: 0 0 20px 0; /* MODIFIED: Increased margin-bottom for more space */
-            order: 1; /* MODIFIED: Ensures options are at the top of the flex container */
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
-            transform: translateY(20px); /* Start position for animation */
+            display: flex; flex-direction: column-reverse; align-items: center;
+            list-style: none; padding: 0; margin: 0 0 20px 0; order: 1;
+            visibility: hidden; opacity: 0; transition: all 0.3s ease; transform: translateY(20px);
         }
-
         .fab-option {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background-color: var(--secondary-hover);
-            border: none;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            width: 48px; height: 48px; border-radius: 50%; background-color: var(--secondary-hover);
+            border: none; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .fab-option:last-child {
-            margin-bottom: 0; /* Removes margin from the top-most button */
-        }
-        .fab-option:hover {
-            background-color: var(--border-color);
-            opacity: 0.9;
-        }
-        .fab-option svg {
-            color: var(--text-primary);
-            width: 22px;
-            height: 22px;
-        }
-        
-        /* -- FAB Active State -- */
-        .fab-container.active .fab-main svg {
-            transform: rotate(45deg); /* Rotates '+' to 'x' */
-        }
-        .fab-container.active .fab-options {
-            visibility: visible;
-            opacity: 1;
-            transform: translateY(0); /* Buttons slide down to final position */
-        }
-
+        .fab-option:last-child { margin-bottom: 0; }
+        .fab-option:hover { background-color: var(--border-color); opacity: 0.9; }
+        .fab-option svg { color: var(--text-primary); width: 22px; height: 22px; }
+        .fab-container.active .fab-main svg { transform: rotate(45deg); }
+        .fab-container.active .fab-options { visibility: visible; opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body>
@@ -444,13 +362,25 @@
             <h1>همیار</h1>
             <div class="search-container">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="search-input" placeholder="جستجوی کاربر...">
+                <input type="text" id="search-input" placeholder="جستجو...">
             </div>
         </header>
 
-        <!-- MAIN CONTENT: Chat list or search results -->
+        <!-- NEW: TABS SECTION -->
+        <div class="tabs-container">
+            <button class="tab-btn active" id="pivi-tab">چت شخصی</button>
+            <button class="tab-btn" id="channels-tab">کانال‌ها</button>
+        </div>
+
+
+        <!-- MAIN CONTENT: Will contain views for each tab -->
         <main id="main-content">
-            <!-- Loading spinner will be shown here initially -->
+            <div id="pivi-chats-view" class="content-view">
+                <!-- Pivi chats will be rendered here -->
+            </div>
+            <div id="channels-view" class="content-view">
+                <!-- Channels will be rendered here -->
+            </div>
         </main>
 
         <!-- BOTTOM NAVIGATION BAR -->
@@ -473,10 +403,9 @@
             </button>
         </footer>
 
-        <!-- Floating Action Button (FAB) HTML Structure -->
+        <!-- Floating Action Button (FAB) -->
         <div class="fab-container" id="fab-container">
             <div class="fab-options">
-                 <!-- Note: The order here is reversed in the display due to flex-direction: column-reverse -->
                 <button class="fab-option" title="چت خصوصی جدید">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </button>
@@ -491,7 +420,7 @@
 
     </div>
 
-    <!-- Profile Overlay HTML Structure -->
+    <!-- Profile Overlay -->
     <div class="profile-overlay" id="profile-overlay">
         <header class="profile-header">
             <button class="close-btn" id="close-profile-btn">
@@ -506,7 +435,6 @@
             </div>
             <h3 id="profile-display-name"></h3>
             <p id="profile-username"></p>
-
             <ul class="profile-actions">
                 <li>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -533,7 +461,12 @@
 
         // --- SECTION: DOM Element References ---
         const mainContent = document.getElementById('main-content');
+        const piviChatsView = document.getElementById('pivi-chats-view');
+        const channelsView = document.getElementById('channels-view');
         const searchInput = document.getElementById('search-input');
+        
+        const piviTabBtn = document.getElementById('pivi-tab');
+        const channelsTabBtn = document.getElementById('channels-tab');
         
         const profileOverlay = document.getElementById('profile-overlay');
         const openProfileBtn = document.getElementById('nav-profile-btn');
@@ -550,62 +483,68 @@
         let currentUser = null;
         let clientToken = null;
         let allUsers = {};
-        let recentChats = [];
+        let recentPiviChats = [];
+        let userChannels = []; // NEW: State for user's channels
+        let activeTab = 'pivi'; // NEW: To track the active tab ('pivi' or 'channels')
         let pollingIntervalId = null; 
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
-                showErrorMessage('خطای احراز هویت. لطفاً ابتدا وارد شوید.');
+                showErrorMessage('خطای احراز هویت. لطفاً ابتدا وارد شوید.', piviChatsView);
                 return;
             }
             currentUser = JSON.parse(storedUser);
 
+            setupEventListeners();
+            await loadInitialData();
+        });
+        
+        function setupEventListeners() {
             searchInput.addEventListener('input', handleSearch);
+            piviTabBtn.addEventListener('click', () => switchTab('pivi'));
+            channelsTabBtn.addEventListener('click', () => switchTab('channels'));
             openProfileBtn.addEventListener('click', showProfile);
             closeProfileBtn.addEventListener('click', hideProfile);
             logoutBtn.addEventListener('click', handleLogout);
-
             fabMainBtn.addEventListener('click', toggleFabMenu);
-
-            await loadInitialData();
-        });
+        }
 
         async function loadInitialData() {
-            showLoadingSpinner();
+            showLoadingSpinner(piviChatsView);
             try {
                 await refreshClientToken();
 
-                const [usersResponse, chatsResponse] = await Promise.all([
+                const [usersResponse, piviChatsResponse, channelsResponse] = await Promise.all([
                     fetchProxyData('users'),
-                    fetchProxyData('pivi_chats')
+                    fetchProxyData('pivi_chats'),
+                    fetchProxyData('channels') // NEW: Fetch channels data
                 ]);
 
                 if (usersResponse) {
                     Object.values(usersResponse).forEach(user => { allUsers[user.username] = user; });
-                    if (allUsers[currentUser.username]) {
-                        currentUser = allUsers[currentUser.username];
-                    }
+                    if (allUsers[currentUser.username]) currentUser = allUsers[currentUser.username];
                 }
                 
-                if (chatsResponse) {
-                    recentChats = Object.values(chatsResponse)
-                        .map((chat, index) => {
-                            if (index === 0) chat.unreadCount = 3;
-                            if (index === 2) chat.unreadCount = 15;
-                            return chat;
-                        })
+                if (piviChatsResponse) {
+                    recentPiviChats = Object.values(piviChatsResponse)
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 }
+                
+                if (channelsResponse && Object.keys(channelsResponse).length > 0) {
+                    userChannels = Object.values(channelsResponse)
+                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    channelsTabBtn.style.display = 'block'; // Show channels tab if user is in any
+                }
 
-                renderChatList();
+                renderPiviChatList();
                 
                 startRealtimeUpdates();
 
             } catch (error) {
                 console.error("Initialization Error:", error);
-                showErrorMessage(`خطا در بارگذاری اطلاعات: ${error.message}`);
+                showErrorMessage(`خطا در بارگذاری اطلاعات: ${error.message}`, piviChatsView);
             }
         }
 
@@ -623,103 +562,115 @@
             if (!clientToken || !currentUser) throw new Error('کاربر احراز هویت نشده است.');
 
             const response = await fetch(`${PROXY_URL}?path=${path}`, {
-                headers: {
-                    'Authorization': `Bearer ${clientToken}`,
-                    'X-User-Username': currentUser.username
-                }
+                headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
             });
-            if (!response.ok) throw new Error(`خطا در واکشی اطلاعات از مسیر ${path}.`);
+            if (!response.ok) {
+                 console.warn(`Could not fetch from path '${path}'. This might be okay if the path doesn't exist yet.`);
+                 return null; // Return null instead of throwing error for non-critical paths
+            }
             return response.json();
         }
 
         // --- SECTION: UI Rendering ---
         
-        function renderChatList() {
-            if (recentChats.length === 0) {
-                mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
+        function renderPiviChatList() {
+            if (recentPiviChats.length === 0) {
+                showErrorMessage('هنوز هیچ گفتگوی شخصی وجود ندارد.', piviChatsView);
                 return;
             }
-
-            const chatListHtml = recentChats.map(chat => {
-                if (!chat || !chat.members) {
-                    console.warn('Skipping malformed chat object:', chat);
-                    return '';
-                }
+            const chatListHtml = recentPiviChats.map(chat => {
+                if (!chat || !chat.members) return '';
                 const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
                 const partnerData = allUsers[partnerUsername];
-                if (!partnerData) return ''; 
-
-                return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp, chat.unreadCount);
+                return partnerData ? createPiviChatItemHtml(partnerData, chat.lastMessage, chat.timestamp, chat.unreadCount) : '';
             }).join('');
             
-            mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
-            addClickListenersToItems();
+            piviChatsView.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
+            addClickListenersToPiviItems();
         }
 
-        function renderSearchResults(results) {
-             if (results.length === 0) {
-                mainContent.innerHTML = '<div class="status-container"><p>کاربری با این مشخصات یافت نشد.</p></div>';
+        function renderChannelList() {
+             if (userChannels.length === 0) {
+                showErrorMessage('شما در هیچ کانالی عضو نیستید.', channelsView);
                 return;
             }
-            const resultsHtml = results.map(user => createSearchResultHtml(user)).join('');
-            mainContent.innerHTML = `<div class="chat-list">${resultsHtml}</div>`;
-            addClickListenersToItems();
+            const channelsHtml = userChannels.map(channel => createChannelItemHtml(channel)).join('');
+            channelsView.innerHTML = `<div class="chat-list">${channelsHtml}</div>`;
+            addClickListenersToChannelItems();
+        }
+
+        function renderUserSearchResults(results) {
+             if (results.length === 0) {
+                showErrorMessage('کاربری با این مشخصات یافت نشد.', piviChatsView);
+                return;
+            }
+            const resultsHtml = results.map(user => createUserSearchResultHtml(user)).join('');
+            piviChatsView.innerHTML = `<div class="chat-list">${resultsHtml}</div>`;
+            addClickListenersToPiviItems();
+        }
+
+        function renderChannelSearchResults(results) {
+             if (results.length === 0) {
+                showErrorMessage('کانالی با این مشخصات یافت نشد.', channelsView);
+                return;
+            }
+            const resultsHtml = results.map(channel => createChannelItemHtml(channel)).join('');
+            channelsView.innerHTML = `<div class="chat-list">${resultsHtml}</div>`;
+            addClickListenersToChannelItems();
         }
         
-        function showLoadingSpinner() {
-            mainContent.innerHTML = `
+        function showLoadingSpinner(targetView) {
+            targetView.innerHTML = `
                 <div class="status-container">
                     <div class="spinner"></div>
                     <p>در حال بارگذاری اطلاعات...</p>
                 </div>`;
         }
         
-        function showErrorMessage(message) {
-            mainContent.innerHTML = `<div class="status-container"><p>${message}</p></div>`;
+        function showErrorMessage(message, targetView) {
+            targetView.innerHTML = `<div class="status-container"><p>${message}</p></div>`;
         }
 
         // --- SECTION: HTML Template Generators ---
 
-        function createChatItemHtml(partnerData, lastMessage, timestamp, unreadCount) {
+        function createPiviChatItemHtml(partnerData, lastMessage, timestamp, unreadCount) {
             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=1E90FF&color=fff&size=100`;
-            
-            const unreadBadgeHtml = (unreadCount && unreadCount > 0)
-                ? `<div class="unread-badge">${unreadCount}</div>`
-                : '';
-
-            const verifiedTickHtml = partnerData.verified === true
-                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
-                : '';
+            const unreadBadgeHtml = (unreadCount > 0) ? `<div class="unread-badge">${unreadCount}</div>` : '';
+            const verifiedTickHtml = partnerData.verified === true ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
                 
             return `
                 <div class="chat-item" data-uid="${partnerData.username}">
-                    <div class="profile-picture">
-                        <img src="${avatarUrl}" alt="${partnerData.displayName}">
-                        ${unreadBadgeHtml} 
-                    </div>
+                    <div class="profile-picture"><img src="${avatarUrl}" alt="${partnerData.displayName}">${unreadBadgeHtml}</div>
                     <div class="chat-details">
                         <h3>${partnerData.displayName || partnerData.username} ${verifiedTickHtml}</h3>
                         <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
                     </div>
-                    <div class="chat-meta">
-                        <span>${new Date(timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    <div class="chat-meta"><span>${new Date(timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span></div>
+                </div>`;
+        }
+        
+        function createChannelItemHtml(channelData) {
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(channelData.channelName)}&background=8A2BE2&color=fff&size=100`;
+            const unreadBadgeHtml = (channelData.unreadCount > 0) ? `<div class="unread-badge">${channelData.unreadCount}</div>` : '';
+            const verifiedTickHtml = channelData.verified === true ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
+
+            return `
+                 <div class="chat-item" data-channel-id="${channelData.id}">
+                    <div class="profile-picture"><img src="${avatarUrl}" alt="${channelData.channelName}">${unreadBadgeHtml}</div>
+                    <div class="chat-details">
+                        <h3>${channelData.channelName} ${verifiedTickHtml}</h3>
+                        <p class="last-message">${channelData.lastMessage || 'پستی ارسال نشده است'}</p>
                     </div>
+                    <div class="chat-meta"><span>${new Date(channelData.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span></div>
                 </div>`;
         }
 
-        function createSearchResultHtml(userData) {
+        function createUserSearchResultHtml(userData) {
             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
-            
-            const verifiedTickHtml = userData.verified === true
-                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
-                : '';
-
+            const verifiedTickHtml = userData.verified === true ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
             return `
                 <div class="search-result-item" data-uid="${userData.username}">
-                    <div class="profile-picture">
-                        <img src="${avatarUrl}" alt="${userData.displayName}">
-                        ${userData.isOnline ? '<div class="online-indicator"></div>' : ''}
-                    </div>
+                    <div class="profile-picture"><img src="${avatarUrl}" alt="${userData.displayName}">${userData.isOnline ? '<div class="online-indicator"></div>' : ''}</div>
                     <div class="chat-details">
                         <h3>${userData.displayName || userData.username} ${verifiedTickHtml}</h3>
                         <p class="last-message">@${userData.username}</p>
@@ -731,95 +682,118 @@
 
         async function checkForUpdates() {
             try {
-                const [newChatsResponse, newUsersResponse] = await Promise.all([
+                const [newUsersResponse, newPiviChatsResponse, newChannelsResponse] = await Promise.all([
+                    fetchProxyData('users'),
                     fetchProxyData('pivi_chats'),
-                    fetchProxyData('users')
+                    fetchProxyData('channels')
                 ]);
 
                 if (newUsersResponse) {
                     if (JSON.stringify(allUsers) !== JSON.stringify(newUsersResponse)) {
-                        console.log('User data has changed. Updating allUsers object.');
                         Object.values(newUsersResponse).forEach(user => { allUsers[user.username] = user; });
                     }
                 }
+                
+                const searchIsActive = searchInput.value.trim() !== '';
 
-                if (newChatsResponse) {
-                    const newRecentChats = Object.values(newChatsResponse)
-                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-                    if (JSON.stringify(newRecentChats) !== JSON.stringify(recentChats)) {
-                        console.log('New chat data detected. Updating list.');
-                        recentChats = newRecentChats;
-
-                        if (searchInput.value.trim() === '') {
-                            renderChatList();
-                        }
+                if (newPiviChatsResponse) {
+                    const newRecentPiviChats = Object.values(newPiviChatsResponse).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    if (JSON.stringify(newRecentPiviChats) !== JSON.stringify(recentPiviChats)) {
+                        recentPiviChats = newRecentPiviChats;
+                        if (activeTab === 'pivi' && !searchIsActive) renderPiviChatList();
                     }
                 }
-            } catch (error) {
-                console.error("Polling Error:", error.message);
-            }
+
+                if (newChannelsResponse) {
+                     const newChannels = Object.values(newChannelsResponse).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                     if (JSON.stringify(newChannels) !== JSON.stringify(userChannels)) {
+                         userChannels = newChannels;
+                         if (activeTab === 'channels' && !searchIsActive) renderChannelList();
+                     }
+                }
+
+            } catch (error) { console.error("Polling Error:", error.message); }
         }
 
         function startRealtimeUpdates(interval = 7000) {
-            if (pollingIntervalId) {
-                clearInterval(pollingIntervalId);
-            }
-            console.log(`Starting real-time updates every ${interval / 1000} seconds.`);
+            if (pollingIntervalId) clearInterval(pollingIntervalId);
             pollingIntervalId = setInterval(checkForUpdates, interval);
         }
 
         // --- SECTION: Event Handlers & Interactions ---
 
+        function switchTab(tabName) {
+            activeTab = tabName;
+            searchInput.value = ''; // Clear search on tab switch
+
+            if (tabName === 'pivi') {
+                piviTabBtn.classList.add('active');
+                channelsTabBtn.classList.remove('active');
+                piviChatsView.style.display = 'block';
+                channelsView.style.display = 'none';
+                searchInput.placeholder = "جستجوی کاربر...";
+                renderPiviChatList();
+            } else {
+                piviTabBtn.classList.remove('active');
+                channelsTabBtn.classList.add('active');
+                piviChatsView.style.display = 'none';
+                channelsView.style.display = 'block';
+                searchInput.placeholder = "جستجوی کانال...";
+                renderChannelList();
+            }
+        }
+
         function handleSearch() {
             const query = searchInput.value.toLowerCase().trim();
             if (!query) {
-                renderChatList(); 
+                if (activeTab === 'pivi') renderPiviChatList();
+                else renderChannelList();
                 return;
             }
             
-            const filteredUsers = Object.values(allUsers).filter(user => {
-                if (!user || user.username === currentUser.username) return false;
-                const usernameMatch = user.username && user.username.toLowerCase().includes(query);
-                const displayNameMatch = user.displayName && user.displayName.toLowerCase().includes(query);
-                return usernameMatch || displayNameMatch;
-            });
-
-            renderSearchResults(filteredUsers);
+            if (activeTab === 'pivi') {
+                const filteredUsers = Object.values(allUsers).filter(user => {
+                    if (!user || user.username === currentUser.username) return false;
+                    const usernameMatch = user.username?.toLowerCase().includes(query);
+                    const displayNameMatch = user.displayName?.toLowerCase().includes(query);
+                    return usernameMatch || displayNameMatch;
+                });
+                renderUserSearchResults(filteredUsers);
+            } else { // activeTab === 'channels'
+                 const filteredChannels = userChannels.filter(channel => {
+                    return channel.channelName?.toLowerCase().includes(query);
+                 });
+                 renderChannelSearchResults(filteredChannels);
+            }
         }
 
-        function addClickListenersToItems() {
-            mainContent.querySelectorAll('[data-uid]').forEach(item => {
+        function addClickListenersToPiviItems() {
+            piviChatsView.querySelectorAll('[data-uid]').forEach(item => {
                 item.addEventListener('click', () => {
-                    const targetUid = item.dataset.uid;
-                    if (targetUid) {
-                        console.log(`Navigating to chat with user: ${targetUid}`);
-                        window.location.href = `pivi.html?uid=${targetUid}`;
-                    }
+                    window.location.href = `pivi.html?uid=${item.dataset.uid}`;
+                });
+            });
+        }
+        
+        function addClickListenersToChannelItems() {
+            channelsView.querySelectorAll('[data-channel-id]').forEach(item => {
+                item.addEventListener('click', () => {
+                     // Assuming you have a page like channel.html
+                    window.location.href = `channel.html?id=${item.dataset.channelId}`;
                 });
             });
         }
         
         // --- Functions for Profile Page ---
-
         function showProfile() {
             if (!currentUser) return;
-            
-            const verifiedTickHtml = currentUser.verified === true
-                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
-                : '';
-
+            const verifiedTickHtml = currentUser.verified === true ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
             profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=0D1117&color=fff&size=150`;
             profileDisplayName.innerHTML = `${currentUser.displayName || currentUser.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${currentUser.username}`;
-
             profileOverlay.classList.add('active');
         }
-
-        function hideProfile() {
-            profileOverlay.classList.remove('active');
-        }
-
+        function hideProfile() { profileOverlay.classList.remove('active'); }
         function handleLogout() {
             if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
                 localStorage.removeItem('currentUser');
@@ -827,11 +801,7 @@
                 window.location.href = 'login.html'; 
             }
         }
-
-        // --- Function for Floating Action Button ---
-        function toggleFabMenu() {
-            fabContainer.classList.toggle('active');
-        }
+        function toggleFabMenu() { fabContainer.classList.toggle('active'); }
 
     </script>
 </body>
