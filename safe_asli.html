@@ -20,6 +20,7 @@
             --notification-badge: #FF4D4D; /* Alert Red */
             --shadow-light: rgba(45, 50, 56, 0.1);
             --shadow-dark: rgba(0, 0, 0, 0.6);
+            --profile-card-bg: #1B212A; /* Slightly lighter for the profile card */
         }
 
         *, *::before, *::after {
@@ -143,7 +144,7 @@
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.1s ease-out, box-shadow 0.3s ease;
             border-bottom: 1px solid var(--border-color);
-            position: relative; /* For the slide-in animation */
+            position: relative; 
             opacity: 0;
             animation: fadeInRight 0.5s forwards;
         }
@@ -164,7 +165,7 @@
             box-shadow: 0 0 15px rgba(0, 163, 255, 0.1);
         }
         .profile-picture {
-            width: 60px; /* Slightly larger */
+            width: 60px; 
             height: 60px;
             border-radius: 50%;
             margin-left: 15px;
@@ -173,7 +174,7 @@
             position: relative;
             flex-shrink: 0;
             overflow: hidden;
-            box-shadow: 0 0 0 3px rgba(0, 163, 255, 0.2); /* Soft primary ring */
+            box-shadow: 0 0 0 3px rgba(0, 163, 255, 0.2); 
             transition: box-shadow 0.3s ease;
         }
         .chat-item:hover .profile-picture {
@@ -191,7 +192,7 @@
 
         /* Online & Unread Indicator Improvements */
         .online-indicator {
-            width: 14px; /* Larger */
+            width: 14px; 
             height: 14px;
             background-color: var(--online-indicator);
             border: 3px solid var(--secondary-color);
@@ -204,12 +205,12 @@
         }
         .unread-badge {
             position: absolute;
-            top: 2px; /* Adjusted position */
+            top: 2px; 
             left: 2px;
             background-color: var(--notification-badge);
             color: white;
             border-radius: 12px;
-            min-width: 24px; /* Larger */
+            min-width: 24px; 
             height: 24px;
             font-size: 0.8em;
             font-weight: 700;
@@ -238,7 +239,7 @@
         }
         .chat-details h3 {
             margin: 0;
-            font-size: 1.2em; /* Slightly larger */
+            font-size: 1.2em; 
             font-weight: 700;
             white-space: nowrap;
             display: flex;
@@ -260,7 +261,7 @@
             font-size: 0.85em;
             color: var(--text-secondary);
             flex-shrink: 0;
-            margin-top: -15px; /* Adjust alignment with title */
+            margin-top: -15px; 
         }
         .chat-meta span {
             font-weight: 500;
@@ -285,12 +286,12 @@
             padding: 40px;
         }
         .spinner {
-            width: 50px; /* Larger spinner */
+            width: 50px; 
             height: 50px;
             border: 5px solid var(--secondary-hover);
             border-top-color: var(--primary-color);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite; /* Faster spin */
+            animation: spin 0.8s linear infinite; 
             box-shadow: 0 0 10px rgba(0, 163, 255, 0.5);
         }
         .status-container p {
@@ -341,7 +342,10 @@
             transform: none;
         }
         
-        /* --- Profile Overlay Styles --- */
+        /* ==============================================
+           --- Profile Overlay STYLES (Advanced) --- 
+           ==============================================
+        */
         .profile-overlay {
             position: fixed;
             top: 0;
@@ -350,55 +354,169 @@
             bottom: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--background-color);
+            background-color: rgba(0, 0, 0, 0.85); /* Deeper dark overlay */
             z-index: 100;
-            transform: translateY(100%);
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* Faster, smoother transition */
             display: flex;
-            flex-direction: column;
-            max-width: 420px; 
-            margin: 0 auto;
-            border-radius: 20px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            justify-content: center; /* Center the card horizontally */
+            align-items: center; /* Center the card vertically */
+            
+            /* Initial state: Hidden and scaled down */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
         .profile-overlay.active {
-            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
         }
-        .profile-header {
-            background-color: var(--secondary-color);
+
+        .profile-card {
+            width: 90%;
+            max-width: 380px; /* Constrained width for mobile card look */
+            background-color: var(--profile-card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px var(--shadow-dark);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            /* Animation for card pop-in */
+            transform: scale(0.9);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .profile-overlay.active .profile-card {
+             transform: scale(1);
+        }
+
+        /* --- Close Button --- */
         .close-btn {
-             transition: transform 0.3s ease;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 10;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(44, 47, 51, 0.8); /* Semi-transparent background */
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
         }
         .close-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
             transform: rotate(90deg) scale(1.1);
-            color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(0, 163, 255, 0.8); /* Glow effect on hover */
         }
-        .profile-content {
-            background-color: var(--background-color);
+        .close-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        /* --- Profile Header/Cover Section --- */
+        .profile-header {
+            position: relative;
+            background: linear-gradient(135deg, #161B22, #0D1117);
+            padding-bottom: 70px; /* Space for the profile picture to overlap */
+        }
+        .cover-image {
+            height: 100px;
+            background: linear-gradient(to right, #00A3FF, #663399); /* Example gradient cover */
+            /* Add more complex visual effects if needed, e.g., patterns or images */
+            filter: brightness(0.8);
+        }
+        .profile-main-pic-container {
+            position: absolute;
+            bottom: -70px;
+            right: 50%;
+            transform: translateX(50%);
+            z-index: 5;
+            background: var(--profile-card-bg);
+            border-radius: 50%;
+            padding: 5px; /* Border padding */
+            box-shadow: 0 0 0 5px var(--profile-card-bg), 0 0 30px rgba(0, 0, 0, 0.8);
         }
         .profile-main-pic {
-            width: 140px; /* Larger profile picture */
-            height: 140px;
-            border: 4px solid var(--primary-color);
-            box-shadow: 0 0 20px rgba(0, 163, 255, 0.5); /* Glowing effect */
+            width: 120px; 
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 163, 255, 0.8); 
+        }
+
+        /* --- Profile Content/Details --- */
+        .profile-content {
+            padding: 20px;
+            padding-top: 80px; /* Account for the overlapping profile picture */
+            background-color: var(--profile-card-bg);
+            text-align: center;
+        }
+        .profile-content h3 {
+            margin: 0;
+            font-size: 1.6em;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px rgba(0, 163, 255, 0.4);
+        }
+        .profile-content p {
+            margin-top: 5px;
+            font-size: 1em;
+            color: var(--text-secondary);
+        }
+
+        /* --- Profile Actions List --- */
+        .profile-actions {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0 0;
+            background-color: var(--secondary-color);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.5);
         }
         .profile-actions li {
-            box-shadow: 0 4px 8px var(--shadow-dark); /* Lifted appearance */
-            border-right: 5px solid transparent;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .profile-actions li:last-child {
+            border-bottom: none;
         }
         .profile-actions li:hover {
-            background-color: #1e242c;
-            border-right: 5px solid var(--primary-color);
-            transform: translateX(5px);
+            background-color: var(--secondary-hover);
+            transform: translateX(3px); /* Subtle shift right on hover */
         }
+        .profile-actions li svg {
+            width: 24px;
+            height: 24px;
+            margin-left: 15px;
+            color: var(--primary-color);
+        }
+        .profile-actions li span {
+            flex-grow: 1;
+            text-align: right;
+            font-weight: 500;
+        }
+        
         #logout-btn {
-            border-right: 5px solid transparent;
-            color: #ff4d4d;
+            color: var(--notification-badge);
+        }
+         #logout-btn svg {
+            color: var(--notification-badge);
         }
          #logout-btn:hover {
-            border-right: 5px solid #ff4d4d;
+            background-color: rgba(255, 77, 77, 0.1);
+            transform: translateX(3px);
         }
+
 
         /* --- Floating Action Button (FAB) Styles --- */
         .fab-container {
@@ -412,16 +530,16 @@
         }
 
         .fab-main {
-            width: 65px; /* Slightly larger */
+            width: 65px; 
             height: 65px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #00A3FF, #0077c2); /* Gradient fill */
+            background: linear-gradient(45deg, #00A3FF, #0077c2); 
             border: none;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 163, 255, 0.6); /* Deep shadow with glow */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 163, 255, 0.6); 
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             order: 2;
         }
@@ -450,7 +568,7 @@
             visibility: hidden;
             opacity: 0;
             transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
-            transform: translateY(10px); /* Slightly less starting transform */
+            transform: translateY(10px); 
         }
 
         .fab-option {
@@ -483,7 +601,7 @@
         
         /* -- FAB Active State -- */
         .fab-container.active .fab-main svg {
-            transform: rotate(45deg); /* Rotates '+' to 'x' */
+            transform: rotate(45deg); 
         }
         .fab-container.active .fab-options {
             visibility: visible;
@@ -548,37 +666,46 @@
 
     </div>
 
-    <!-- Profile Overlay HTML Structure -->
+    <!-- Profile Overlay HTML Structure (Updated) -->
     <div class="profile-overlay" id="profile-overlay">
-        <header class="profile-header">
+        
+        <div class="profile-card">
+             <!-- Close Button (Now within the card area for better context) -->
             <button class="close-btn" id="close-profile-btn">
                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-            <h2>پروفایل</h2>
-            <div style="width: 24px;"></div> <!-- Spacer -->
-        </header>
-        <main class="profile-content">
-            <div class="profile-main-pic">
-                <img id="profile-image" src="" alt="عکس پروفایل">
-            </div>
-            <h3 id="profile-display-name"></h3>
-            <p id="profile-username"></p>
 
-            <ul class="profile-actions">
-                <li>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    <span>ویرایش پروفایل</span>
-                </li>
-                <li>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    <span>تنظیمات</span>
-                </li>
-                 <li id="logout-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    <span>خروج از حساب</span>
-                </li>
-            </ul>
-        </main>
+            <!-- Header Section (Cover and Profile Picture) -->
+            <header class="profile-header">
+                <div class="cover-image">
+                    <!-- Placeholder for Cover Image/Gradient -->
+                </div>
+                <div class="profile-main-pic-container">
+                    <img class="profile-main-pic" id="profile-image" src="" alt="عکس پروفایل">
+                </div>
+            </header>
+
+            <!-- Main Content Section -->
+            <main class="profile-content">
+                <h3 id="profile-display-name"></h3>
+                <p id="profile-username"></p>
+
+                <ul class="profile-actions">
+                    <li>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <span>ویرایش پروفایل</span>
+                    </li>
+                    <li>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        <span>تنظیمات</span>
+                    </li>
+                     <li id="logout-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <span>خروج از حساب</span>
+                    </li>
+                </ul>
+            </main>
+        </div>
     </div>
 
 
@@ -598,7 +725,7 @@
             modal.id = 'custom-modal';
             modal.style.cssText = `
                 position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-                background: rgba(0, 0, 0, 0.8); z-index: 1000;
+                background: rgba(0, 0, 0, 0.9); z-index: 1000;
                 display: flex; justify-content: center; align-items: center;
                 backdrop-filter: blur(5px);
                 animation: fadeInModal 0.3s ease-out;
@@ -606,7 +733,7 @@
 
             const content = document.createElement('div');
             content.style.cssText = `
-                background: var(--secondary-color); color: var(--text-primary);
+                background: var(--profile-card-bg); color: var(--text-primary);
                 padding: 30px; border-radius: 15px; text-align: center;
                 max-width: 300px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
                 border: 1px solid var(--border-color);
@@ -627,6 +754,7 @@
                 background: var(--notification-badge); color: white; border: none;
                 padding: 10px 15px; border-radius: 8px; cursor: pointer; font-family: inherit;
                 transition: background-color 0.2s, transform 0.1s;
+                font-weight: 500;
             `;
             confirmBtn.onmouseover = () => confirmBtn.style.transform = 'scale(1.05)';
             confirmBtn.onmouseout = () => confirmBtn.style.transform = 'scale(1)';
@@ -641,6 +769,7 @@
                 background: var(--secondary-hover); color: var(--text-primary); border: none;
                 padding: 10px 15px; border-radius: 8px; cursor: pointer; font-family: inherit;
                 transition: background-color 0.2s, transform 0.1s;
+                font-weight: 500;
             `;
             cancelBtn.onmouseover = () => cancelBtn.style.transform = 'scale(1.05)';
             cancelBtn.onmouseout = () => cancelBtn.style.transform = 'scale(1)';
