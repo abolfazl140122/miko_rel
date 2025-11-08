@@ -165,7 +165,6 @@
             font-size: 1.1em;
             font-weight: 500;
             white-space: nowrap;
-            /* --- MODIFIED: Added flexbox for tick alignment --- */
             display: flex;
             align-items: center;
         }
@@ -186,10 +185,10 @@
             flex-shrink: 0;
         }
 
-        /* --- NEW: Style for the verified tick --- */
+        /* --- MODIFIED: Style for the verified tick --- */
         .verified-tick {
-            width: 16px;
-            height: 16px;
+            width: 20px; /* Size increased for better visibility */
+            height: 20px; /* Size increased for better visibility */
             margin-right: 6px; /* Space between name and tick */
         }
         
@@ -310,7 +309,6 @@
             font-size: 1.8em;
             font-weight: 700;
             margin: 0;
-            /* --- MODIFIED: Added for tick alignment --- */
             display: flex;
             align-items: center;
         }
@@ -426,7 +424,6 @@
         // --- SECTION: App Configuration ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
-        // --- NEW: Verified tick image URL ---
         const VERIFIED_TICK_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
 
         // --- SECTION: DOM Element References ---
@@ -478,7 +475,6 @@
 
                 if (usersResponse) {
                     Object.values(usersResponse).forEach(user => { allUsers[user.username] = user; });
-                    // --- NEW: Ensure current user data is up-to-date from the server ---
                     if (allUsers[currentUser.username]) {
                         currentUser = allUsers[currentUser.username];
                     }
@@ -582,7 +578,6 @@
                 ? `<div class="unread-badge">${unreadCount}</div>`
                 : '';
 
-            // --- NEW: Verified Tick Logic ---
             const verifiedTickHtml = partnerData.verified === true
                 ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
                 : '';
@@ -606,7 +601,6 @@
         function createSearchResultHtml(userData) {
             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
             
-            // --- NEW: Verified Tick Logic ---
             const verifiedTickHtml = userData.verified === true
                 ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
                 : '';
@@ -628,7 +622,6 @@
 
         async function checkForUpdates() {
             try {
-                // --- NEW: Also fetch user data to check for new verified statuses ---
                 const [newChatsResponse, newUsersResponse] = await Promise.all([
                     fetchProxyData('pivi_chats'),
                     fetchProxyData('users')
@@ -659,7 +652,7 @@
             }
         }
 
-        function startRealtimeUpdates(interval = 7000) { // Increased interval slightly
+        function startRealtimeUpdates(interval = 7000) {
             if (pollingIntervalId) {
                 clearInterval(pollingIntervalId);
             }
@@ -703,13 +696,11 @@
         function showProfile() {
             if (!currentUser) return;
             
-            // --- NEW: Verified Tick Logic for Profile Page ---
             const verifiedTickHtml = currentUser.verified === true
                 ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
                 : '';
 
             profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=0D1117&color=fff&size=150`;
-            // --- MODIFIED: Use .innerHTML to render the tick image ---
             profileDisplayName.innerHTML = `${currentUser.displayName || currentUser.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${currentUser.username}`;
 
