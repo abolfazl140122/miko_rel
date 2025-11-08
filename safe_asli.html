@@ -41,7 +41,6 @@
             -webkit-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            /* Added smooth background gradient */
             background: radial-gradient(circle at top left, #1a202c 0%, var(--background-color) 70%);
         }
 
@@ -51,12 +50,12 @@
             max-width: 420px;
             height: 100%;
             margin: 0 auto;
-            background-color: var(--secondary-color); /* Slightly lighter than background for depth */
+            background-color: var(--secondary-color);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 40px var(--shadow-dark); /* Deeper shadow */
+            box-shadow: 0 0 40px var(--shadow-dark);
             position: relative;
-            border-radius: 20px; /* Rounded corners for the entire app */
+            border-radius: 20px;
             overflow: hidden;
         }
 
@@ -77,16 +76,16 @@
             font-size: 1.8em;
             margin: 0;
             color: var(--primary-color);
-            text-shadow: 0 0 8px rgba(0, 163, 255, 0.4); /* Neon effect on title */
+            text-shadow: 0 0 8px rgba(0, 163, 255, 0.4);
             letter-spacing: 0.5px;
         }
         .search-container {
             display: flex;
             align-items: center;
             background-color: var(--secondary-hover);
-            border-radius: 25px; /* More rounded */
+            border-radius: 25px;
             padding: 8px 15px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); /* Inner shadow for depth */
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
             transition: all 0.3s ease;
         }
         .search-container:focus-within {
@@ -111,27 +110,47 @@
             margin-right: 5px;
         }
         
+        /* --- NEW: Search Tabs --- */
+        .search-tabs {
+            display: none; /* Hidden by default */
+            justify-content: space-around;
+            background-color: var(--secondary-color);
+            padding: 0 10px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        body.search-active .search-tabs {
+            display: flex; /* Shown when search is active */
+        }
+        .search-tab {
+            flex: 1;
+            padding: 12px 0;
+            text-align: center;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .search-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 500;
+        }
+
         /* --- Main Content Area & Custom Scrollbar --- */
         main {
             flex-grow: 1;
             position: relative;
             overflow-y: auto;
         }
-        /* Custom scrollbar for webkit browsers */
-        main::-webkit-scrollbar {
-            width: 8px;
-        }
-        main::-webkit-scrollbar-track {
-            background: var(--secondary-color);
-        }
-        main::-webkit-scrollbar-thumb {
-            background-color: var(--border-color);
-            border-radius: 10px;
-            border: 2px solid var(--secondary-color);
-        }
-        main::-webkit-scrollbar-thumb:hover {
-            background-color: var(--text-secondary);
-        }
+        main::-webkit-scrollbar { width: 8px; }
+        main::-webkit-scrollbar-track { background: var(--secondary-color); }
+        main::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 10px; border: 2px solid var(--secondary-color); }
+        main::-webkit-scrollbar-thumb:hover { background-color: var(--text-secondary); }
         
         /* --- Chat List --- */
         .chat-list {
@@ -152,7 +171,6 @@
             from { opacity: 0; transform: translateX(20px); }
             to { opacity: 1; transform: translateX(0); }
         }
-        /* Apply staggered delay for a smooth list entrance */
         .chat-item:nth-child(1) { animation-delay: 0.1s; }
         .chat-item:nth-child(2) { animation-delay: 0.15s; }
         .chat-item:nth-child(3) { animation-delay: 0.2s; }
@@ -189,8 +207,6 @@
         .chat-item:hover .profile-picture img {
              transform: scale(1.05);
         }
-
-        /* Online & Unread Indicator Improvements */
         .online-indicator {
             width: 14px; 
             height: 14px;
@@ -354,13 +370,11 @@
             bottom: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85); /* Deeper dark overlay */
+            background-color: rgba(0, 0, 0, 0.85);
             z-index: 100;
             display: flex;
-            justify-content: center; /* Center the card horizontally */
-            align-items: center; /* Center the card vertically */
-            
-            /* Initial state: Hidden and scaled down */
+            justify-content: center;
+            align-items: center;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.5s ease, visibility 0.5s ease;
@@ -369,25 +383,21 @@
             opacity: 1;
             visibility: visible;
         }
-
         .profile-card {
             width: 90%;
-            max-width: 380px; /* Constrained width for mobile card look */
+            max-width: 380px;
             background-color: var(--profile-card-bg);
             border-radius: 20px;
             box-shadow: 0 10px 40px var(--shadow-dark);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            /* Animation for card pop-in */
             transform: scale(0.9);
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .profile-overlay.active .profile-card {
              transform: scale(1);
         }
-
-        /* --- Close Button --- */
         .close-btn {
             position: absolute;
             top: 15px;
@@ -396,7 +406,7 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: rgba(44, 47, 51, 0.8); /* Semi-transparent background */
+            background-color: rgba(44, 47, 51, 0.8);
             border: none;
             cursor: pointer;
             color: var(--text-primary);
@@ -410,23 +420,20 @@
             background-color: var(--primary-color);
             color: white;
             transform: rotate(90deg) scale(1.1);
-            box-shadow: 0 0 15px rgba(0, 163, 255, 0.8); /* Glow effect on hover */
+            box-shadow: 0 0 15px rgba(0, 163, 255, 0.8);
         }
         .close-btn svg {
             width: 24px;
             height: 24px;
         }
-        
-        /* --- Profile Header/Cover Section --- */
         .profile-header {
             position: relative;
             background: linear-gradient(135deg, #161B22, #0D1117);
-            padding-bottom: 70px; /* Space for the profile picture to overlap */
+            padding-bottom: 70px;
         }
         .cover-image {
             height: 100px;
-            background: linear-gradient(to right, #00A3FF, #663399); /* Example gradient cover */
-            /* Add more complex visual effects if needed, e.g., patterns or images */
+            background: linear-gradient(to right, #00A3FF, #663399);
             filter: brightness(0.8);
         }
         .profile-main-pic-container {
@@ -437,7 +444,7 @@
             z-index: 5;
             background: var(--profile-card-bg);
             border-radius: 50%;
-            padding: 5px; /* Border padding */
+            padding: 5px;
             box-shadow: 0 0 0 5px var(--profile-card-bg), 0 0 30px rgba(0, 0, 0, 0.8);
         }
         .profile-main-pic {
@@ -448,11 +455,9 @@
             border: 3px solid var(--primary-color);
             box-shadow: 0 0 10px rgba(0, 163, 255, 0.8); 
         }
-
-        /* --- Profile Content/Details --- */
         .profile-content {
             padding: 20px;
-            padding-top: 80px; /* Account for the overlapping profile picture */
+            padding-top: 80px;
             background-color: var(--profile-card-bg);
             text-align: center;
         }
@@ -468,8 +473,6 @@
             font-size: 1em;
             color: var(--text-secondary);
         }
-
-        /* --- Profile Actions List --- */
         .profile-actions {
             list-style: none;
             padding: 0;
@@ -492,7 +495,7 @@
         }
         .profile-actions li:hover {
             background-color: var(--secondary-hover);
-            transform: translateX(3px); /* Subtle shift right on hover */
+            transform: translateX(3px);
         }
         .profile-actions li svg {
             width: 24px;
@@ -505,18 +508,9 @@
             text-align: right;
             font-weight: 500;
         }
-        
-        #logout-btn {
-            color: var(--notification-badge);
-        }
-         #logout-btn svg {
-            color: var(--notification-badge);
-        }
-         #logout-btn:hover {
-            background-color: rgba(255, 77, 77, 0.1);
-            transform: translateX(3px);
-        }
-
+        #logout-btn { color: var(--notification-badge); }
+        #logout-btn svg { color: var(--notification-badge); }
+        #logout-btn:hover { background-color: rgba(255, 77, 77, 0.1); transform: translateX(3px); }
 
         /* --- Floating Action Button (FAB) Styles --- */
         .fab-container {
@@ -528,7 +522,6 @@
             flex-direction: column;
             align-items: center;
         }
-
         .fab-main {
             width: 65px; 
             height: 65px;
@@ -556,7 +549,6 @@
             height: 30px;
             transition: transform 0.3s ease;
         }
-        
         .fab-options {
             display: flex;
             flex-direction: column-reverse;
@@ -570,7 +562,6 @@
             transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
             transform: translateY(10px); 
         }
-
         .fab-option {
             width: 50px;
             height: 50px;
@@ -598,20 +589,11 @@
             height: 24px;
             filter: drop-shadow(0 0 3px rgba(0, 163, 255, 0.5));
         }
-        
-        /* -- FAB Active State -- */
-        .fab-container.active .fab-main svg {
-            transform: rotate(45deg); 
-        }
-        .fab-container.active .fab-options {
-            visibility: visible;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
+        .fab-container.active .fab-main svg { transform: rotate(45deg); }
+        .fab-container.active .fab-options { visibility: visible; opacity: 1; transform: translateY(0); }
     </style>
 </head>
-<body>
+<body id="page-body">
 
     <div class="app-container">
         <!-- TOP BAR with search -->
@@ -619,9 +601,16 @@
             <h1>همیار</h1>
             <div class="search-container">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="search-input" placeholder="جستجوی کاربر...">
+                <input type="text" id="search-input" placeholder="جستجو...">
             </div>
         </header>
+
+        <!-- NEW: Search Tabs (Initially hidden) -->
+        <div class="search-tabs" id="search-tabs">
+            <button class="search-tab active" data-mode="accounts">اکانت‌ها</button>
+            <button class="search-tab" data-mode="channels">کانال‌ها</button>
+        </div>
+
 
         <!-- MAIN CONTENT: Chat list or search results -->
         <main id="main-content">
@@ -651,7 +640,6 @@
         <!-- Floating Action Button (FAB) HTML Structure -->
         <div class="fab-container" id="fab-container">
             <div class="fab-options">
-                 <!-- Note: The order here is reversed in the display due to flex-direction: column-reverse -->
                 <button class="fab-option" title="چت خصوصی جدید">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </button>
@@ -663,33 +651,23 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
         </div>
-
     </div>
 
     <!-- Profile Overlay HTML Structure (Updated) -->
     <div class="profile-overlay" id="profile-overlay">
-        
         <div class="profile-card">
-             <!-- Close Button (Now within the card area for better context) -->
             <button class="close-btn" id="close-profile-btn">
                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-
-            <!-- Header Section (Cover and Profile Picture) -->
             <header class="profile-header">
-                <div class="cover-image">
-                    <!-- Placeholder for Cover Image/Gradient -->
-                </div>
+                <div class="cover-image"></div>
                 <div class="profile-main-pic-container">
                     <img class="profile-main-pic" id="profile-image" src="" alt="عکس پروفایل">
                 </div>
             </header>
-
-            <!-- Main Content Section -->
             <main class="profile-content">
                 <h3 id="profile-display-name"></h3>
                 <p id="profile-username"></p>
-
                 <ul class="profile-actions">
                     <li>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -708,100 +686,17 @@
         </div>
     </div>
 
-
     <script>
         // --- SECTION: App Configuration ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
         const VERIFIED_TICK_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
         
-        // Custom Modal UI for Confirmation (replacing alert/confirm)
-        function showCustomConfirm(message, onConfirm) {
-            // Check if a modal already exists to prevent duplicates
-            if (document.getElementById('custom-modal')) return;
-
-            // Create Modal elements
-            const modal = document.createElement('div');
-            modal.id = 'custom-modal';
-            modal.style.cssText = `
-                position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-                background: rgba(0, 0, 0, 0.9); z-index: 1000;
-                display: flex; justify-content: center; align-items: center;
-                backdrop-filter: blur(5px);
-                animation: fadeInModal 0.3s ease-out;
-            `;
-
-            const content = document.createElement('div');
-            content.style.cssText = `
-                background: var(--profile-card-bg); color: var(--text-primary);
-                padding: 30px; border-radius: 15px; text-align: center;
-                max-width: 300px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-                border: 1px solid var(--border-color);
-                transform: scale(0.9);
-                animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            `;
-
-            const p = document.createElement('p');
-            p.textContent = message;
-            p.style.cssText = 'margin-bottom: 20px; font-size: 1.1em;';
-
-            const buttonContainer = document.createElement('div');
-            buttonContainer.style.cssText = 'display: flex; justify-content: space-around;';
-
-            const confirmBtn = document.createElement('button');
-            confirmBtn.textContent = 'بله، خروج';
-            confirmBtn.style.cssText = `
-                background: var(--notification-badge); color: white; border: none;
-                padding: 10px 15px; border-radius: 8px; cursor: pointer; font-family: inherit;
-                transition: background-color 0.2s, transform 0.1s;
-                font-weight: 500;
-            `;
-            confirmBtn.onmouseover = () => confirmBtn.style.transform = 'scale(1.05)';
-            confirmBtn.onmouseout = () => confirmBtn.style.transform = 'scale(1)';
-            confirmBtn.onclick = () => {
-                onConfirm();
-                modal.remove();
-            };
-
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = 'انصراف';
-            cancelBtn.style.cssText = `
-                background: var(--secondary-hover); color: var(--text-primary); border: none;
-                padding: 10px 15px; border-radius: 8px; cursor: pointer; font-family: inherit;
-                transition: background-color 0.2s, transform 0.1s;
-                font-weight: 500;
-            `;
-            cancelBtn.onmouseover = () => cancelBtn.style.transform = 'scale(1.05)';
-            cancelBtn.onmouseout = () => cancelBtn.style.transform = 'scale(1)';
-            cancelBtn.onclick = () => modal.remove();
-
-            buttonContainer.appendChild(cancelBtn);
-            buttonContainer.appendChild(confirmBtn);
-
-            content.appendChild(p);
-            content.appendChild(buttonContainer);
-            modal.appendChild(content);
-
-            document.body.appendChild(modal);
-        }
-        
-        // Define keyframe animations in JavaScript for injection
-        const styleSheet = document.createElement("style");
-        styleSheet.type = "text/css";
-        styleSheet.innerText += `
-            @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
-            @keyframes popIn { 
-                0% { transform: scale(0.3); opacity: 0; } 
-                80% { transform: scale(1.05); opacity: 1; }
-                100% { transform: scale(1); }
-            }
-        `;
-        document.head.appendChild(styleSheet);
-
-
         // --- SECTION: DOM Element References ---
+        const pageBody = document.getElementById('page-body');
         const mainContent = document.getElementById('main-content');
         const searchInput = document.getElementById('search-input');
+        const searchTabsContainer = document.getElementById('search-tabs');
         
         const profileOverlay = document.getElementById('profile-overlay');
         const openProfileBtn = document.getElementById('nav-profile-btn');
@@ -818,8 +713,10 @@
         let currentUser = null;
         let clientToken = null;
         let allUsers = {};
+        let allChannels = {}; // NEW: To store channel data
         let recentChats = [];
         let pollingIntervalId = null; 
+        let currentSearchMode = 'accounts'; // NEW: 'accounts' or 'channels'
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -830,14 +727,14 @@
             }
             currentUser = JSON.parse(storedUser);
 
+            // EVENT LISTENERS
             searchInput.addEventListener('input', handleSearch);
+            searchTabsContainer.addEventListener('click', handleTabSwitch);
             openProfileBtn.addEventListener('click', showProfile);
             closeProfileBtn.addEventListener('click', hideProfile);
-            // Modified to use custom confirmation dialog
             logoutBtn.addEventListener('click', () => {
                 showCustomConfirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟', handleLogoutConfirmed);
             });
-
             fabMainBtn.addEventListener('click', toggleFabMenu);
 
             await loadInitialData();
@@ -848,32 +745,29 @@
             try {
                 await refreshClientToken();
 
-                const [usersResponse, chatsResponse] = await Promise.all([
+                const [usersResponse, chatsResponse, channelsResponse] = await Promise.all([
                     fetchProxyData('users'),
-                    fetchProxyData('pivi_chats')
+                    fetchProxyData('pivi_chats'),
+                    fetchProxyData('channels') // NEW: Fetch channels data
                 ]);
 
                 if (usersResponse) {
-                    Object.values(usersResponse).forEach(user => { allUsers[user.username] = user; });
+                    allUsers = usersResponse;
                     if (allUsers[currentUser.username]) {
                         currentUser = allUsers[currentUser.username];
                     }
                 }
                 
+                if (channelsResponse) { // NEW: Store channels data
+                    allChannels = channelsResponse;
+                }
+
                 if (chatsResponse) {
-                    // Added more mock data for better visualization
                     recentChats = Object.values(chatsResponse)
-                        .map((chat, index) => {
-                            if (index === 0) chat.unreadCount = 3;
-                            if (index === 2) chat.unreadCount = 15;
-                            if (index === 4) chat.unreadCount = 1;
-                            return chat;
-                        })
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 }
 
                 renderChatList();
-                
                 startRealtimeUpdates();
 
             } catch (error) {
@@ -884,24 +778,23 @@
 
         // --- SECTION: Data Fetching ---
         async function refreshClientToken() {
-            const response = await fetch(`${PROXY_URL}?auth=token`, {
-                headers: { 'X-Proxy-Secret': SHARED_SECRET }
-            });
+            const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
             if (!response.ok) throw new Error('امکان دریافت توکن امنیتی وجود ندارد.');
-            const data = await response.json();
-            clientToken = data.token;
+            clientToken = (await response.json()).token;
         }
 
         async function fetchProxyData(path) {
             if (!clientToken || !currentUser) throw new Error('کاربر احراز هویت نشده است.');
-
             const response = await fetch(`${PROXY_URL}?path=${path}`, {
                 headers: {
                     'Authorization': `Bearer ${clientToken}`,
                     'X-User-Username': currentUser.username
                 }
             });
-            if (!response.ok) throw new Error(`خطا در واکشی اطلاعات از مسیر ${path}.`);
+            if (!response.ok) {
+                 if (response.status === 404) return null; // Handle not found gracefully
+                 throw new Error(`خطا در واکشی اطلاعات از مسیر ${path}.`);
+            }
             return response.json();
         }
 
@@ -912,39 +805,42 @@
                 mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
                 return;
             }
-
             const chatListHtml = recentChats.map(chat => {
-                if (!chat || !chat.members) {
-                    console.warn('Skipping malformed chat object:', chat);
-                    return '';
-                }
+                if (!chat || !chat.members) return '';
                 const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
                 const partnerData = allUsers[partnerUsername];
                 if (!partnerData) return ''; 
-
-                return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp, chat.unreadCount);
+                return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp);
             }).join('');
             
             mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
             addClickListenersToItems();
         }
 
-        function renderSearchResults(results) {
+        // MODIFIED: Renders search results for users
+        function renderUserResults(results) {
              if (results.length === 0) {
                 mainContent.innerHTML = '<div class="status-container"><p>کاربری با این مشخصات یافت نشد.</p></div>';
                 return;
             }
-            const resultsHtml = results.map(user => createSearchResultHtml(user)).join('');
+            const resultsHtml = results.map(user => createUserResultHtml(user)).join('');
+            mainContent.innerHTML = `<div class="chat-list">${resultsHtml}</div>`;
+            addClickListenersToItems();
+        }
+
+        // NEW: Renders search results for channels
+        function renderChannelResults(results) {
+             if (results.length === 0) {
+                mainContent.innerHTML = '<div class="status-container"><p>کانالی با این مشخصات یافت نشد.</p></div>';
+                return;
+            }
+            const resultsHtml = results.map(channel => createChannelResultHtml(channel)).join('');
             mainContent.innerHTML = `<div class="chat-list">${resultsHtml}</div>`;
             addClickListenersToItems();
         }
         
         function showLoadingSpinner() {
-            mainContent.innerHTML = `
-                <div class="status-container">
-                    <div class="spinner"></div>
-                    <p>در حال بارگذاری اطلاعات...</p>
-                </div>`;
+            mainContent.innerHTML = `<div class="status-container"><div class="spinner"></div><p>در حال بارگذاری اطلاعات...</p></div>`;
         }
         
         function showErrorMessage(message) {
@@ -952,24 +848,12 @@
         }
 
         // --- SECTION: HTML Template Generators ---
-
-        function createChatItemHtml(partnerData, lastMessage, timestamp, unreadCount) {
+        function createChatItemHtml(partnerData, lastMessage, timestamp) {
             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=00A3FF&color=fff&size=100`;
-            
-            const unreadBadgeHtml = (unreadCount && unreadCount > 0)
-                ? `<div class="unread-badge">${unreadCount > 99 ? '99+' : unreadCount}</div>` // Max 99+
-                : '';
-
-            const verifiedTickHtml = partnerData.verified === true
-                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
-                : '';
-                
+            const verifiedTickHtml = partnerData.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
             return `
                 <div class="chat-item" data-uid="${partnerData.username}">
-                    <div class="profile-picture">
-                        <img src="${avatarUrl}" alt="${partnerData.displayName}" onerror="this.onerror=null; this.src='https://placehold.co/100x100/161B22/E4E6EB?text=U'">
-                        ${unreadBadgeHtml} 
-                    </div>
+                    <div class="profile-picture"><img src="${avatarUrl}" alt="${partnerData.displayName}"></div>
                     <div class="chat-details">
                         <h3>${partnerData.displayName || partnerData.username} ${verifiedTickHtml}</h3>
                         <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
@@ -980,17 +864,13 @@
                 </div>`;
         }
 
-        function createSearchResultHtml(userData) {
+        function createUserResultHtml(userData) {
             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
-            
-            const verifiedTickHtml = userData.verified === true
-                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
-                : '';
-
+            const verifiedTickHtml = userData.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
             return `
                 <div class="search-result-item" data-uid="${userData.username}">
                     <div class="profile-picture">
-                        <img src="${avatarUrl}" alt="${userData.displayName}" onerror="this.onerror=null; this.src='https://placehold.co/100x100/161B22/E4E6EB?text=U'">
+                        <img src="${avatarUrl}" alt="${userData.displayName}">
                         ${userData.isOnline ? '<div class="online-indicator"></div>' : ''}
                     </div>
                     <div class="chat-details">
@@ -999,100 +879,94 @@
                     </div>
                 </div>`;
         }
-        
-        // --- SECTION: Real-time Updates ---
 
-        async function checkForUpdates() {
-            try {
-                const [newChatsResponse, newUsersResponse] = await Promise.all([
-                    fetchProxyData('pivi_chats'),
-                    fetchProxyData('users')
-                ]);
-
-                if (newUsersResponse) {
-                    if (JSON.stringify(allUsers) !== JSON.stringify(newUsersResponse)) {
-                        console.log('User data has changed. Updating allUsers object.');
-                        Object.values(newUsersResponse).forEach(user => { allUsers[user.username] = user; });
-                    }
-                }
-
-                if (newChatsResponse) {
-                    const newRecentChats = Object.values(newChatsResponse)
-                        .map((chat, index) => {
-                             // Re-apply mock data for persistent visualization of badge/status
-                            if (index === 0) chat.unreadCount = 3;
-                            if (index === 2) chat.unreadCount = 15;
-                            if (index === 4) chat.unreadCount = 1;
-                            return chat;
-                        })
-                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-                    if (JSON.stringify(newRecentChats) !== JSON.stringify(recentChats)) {
-                        console.log('New chat data detected. Updating list.');
-                        recentChats = newRecentChats;
-
-                        if (searchInput.value.trim() === '') {
-                            renderChatList();
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error("Polling Error:", error.message);
-            }
-        }
-
-        function startRealtimeUpdates(interval = 7000) {
-            if (pollingIntervalId) {
-                clearInterval(pollingIntervalId);
-            }
-            console.log(`Starting real-time updates every ${interval / 1000} seconds.`);
-            pollingIntervalId = setInterval(checkForUpdates, interval);
+        // NEW: HTML generator for channel search results
+        function createChannelResultHtml(channelData) {
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(channelData.channel_name)}&background=8A2BE2&color=fff&size=100&rounded=true`;
+            return `
+                <div class="search-result-item" data-channel-id="${channelData.channel_id}">
+                    <div class="profile-picture">
+                        <img src="${avatarUrl}" alt="${channelData.channel_name}">
+                    </div>
+                    <div class="chat-details">
+                        <h3>${channelData.channel_name}</h3>
+                        <p class="last-message">${channelData.description || 'کانال همیار'}</p>
+                    </div>
+                </div>`;
         }
 
         // --- SECTION: Event Handlers & Interactions ---
 
-        function handleSearch() {
+        function performSearch() {
             const query = searchInput.value.toLowerCase().trim();
+            if (currentSearchMode === 'accounts') {
+                const filteredUsers = Object.values(allUsers).filter(user => {
+                    if (!user || user.username === currentUser.username) return false;
+                    const usernameMatch = user.username && user.username.toLowerCase().includes(query);
+                    const displayNameMatch = user.displayName && user.displayName.toLowerCase().includes(query);
+                    return usernameMatch || displayNameMatch;
+                });
+                renderUserResults(filteredUsers);
+            } else if (currentSearchMode === 'channels') {
+                const filteredChannels = Object.values(allChannels).filter(channel => {
+                    if (!channel) return false;
+                    const nameMatch = channel.channel_name && channel.channel_name.toLowerCase().includes(query);
+                    const idMatch = channel.channel_id && channel.channel_id.toLowerCase().includes(query);
+                    return nameMatch || idMatch;
+                });
+                renderChannelResults(filteredChannels);
+            }
+        }
+
+        function handleSearch() {
+            const query = searchInput.value.trim();
             if (!query) {
+                pageBody.classList.remove('search-active');
                 renderChatList(); 
                 return;
             }
-            
-            const filteredUsers = Object.values(allUsers).filter(user => {
-                if (!user || user.username === currentUser.username) return false;
-                const usernameMatch = user.username && user.username.toLowerCase().includes(query);
-                const displayNameMatch = user.displayName && user.displayName.toLowerCase().includes(query);
-                return usernameMatch || displayNameMatch;
-            });
+            pageBody.classList.add('search-active');
+            performSearch();
+        }
+        
+        function handleTabSwitch(event) {
+            const clickedTab = event.target.closest('.search-tab');
+            if (!clickedTab) return;
 
-            renderSearchResults(filteredUsers);
+            // Update active class on tabs
+            searchTabsContainer.querySelector('.active').classList.remove('active');
+            clickedTab.classList.add('active');
+
+            // Update search mode and re-run search
+            currentSearchMode = clickedTab.dataset.mode;
+            performSearch();
         }
 
+        // MODIFIED: Handles clicks on both users and channels
         function addClickListenersToItems() {
-            mainContent.querySelectorAll('[data-uid]').forEach(item => {
+            mainContent.querySelectorAll('.chat-item, .search-result-item').forEach(item => {
                 item.addEventListener('click', () => {
                     const targetUid = item.dataset.uid;
+                    const targetChannelId = item.dataset.channelId;
+
                     if (targetUid) {
                         console.log(`Navigating to chat with user: ${targetUid}`);
                         window.location.href = `pivi.html?uid=${targetUid}`;
+                    } else if (targetChannelId) {
+                        console.log(`Navigating to channel: ${targetChannelId}`);
+                        window.location.href = `Channel.html?id=${targetChannelId}`;
                     }
                 });
             });
         }
         
-        // --- Functions for Profile Page ---
-
+        // --- Profile Page Functions ---
         function showProfile() {
             if (!currentUser) return;
-            
-            const verifiedTickHtml = currentUser.verified === true
-                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
-                : '';
-
+            const verifiedTickHtml = currentUser.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
             profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=0D1117&color=fff&size=150`;
             profileDisplayName.innerHTML = `${currentUser.displayName || currentUser.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${currentUser.username}`;
-
             profileOverlay.classList.add('active');
         }
 
@@ -1106,11 +980,90 @@
             window.location.href = 'login.html'; 
         }
 
-        // --- Function for Floating Action Button ---
+        // --- FAB Function ---
         function toggleFabMenu() {
             fabContainer.classList.toggle('active');
         }
 
+        // --- SECTION: Real-time Updates ---
+        async function checkForUpdates() {
+            try {
+                // In a real app, you might want more efficient updates, but for now, we refetch all
+                const [newUsers, newChats, newChannels] = await Promise.all([
+                    fetchProxyData('users'),
+                    fetchProxyData('pivi_chats'),
+                    fetchProxyData('channels')
+                ]);
+
+                let needsUIRefresh = false;
+                if (newUsers && JSON.stringify(allUsers) !== JSON.stringify(newUsers)) {
+                    allUsers = newUsers;
+                    needsUIRefresh = true;
+                }
+                if (newChannels && JSON.stringify(allChannels) !== JSON.stringify(newChannels)) {
+                    allChannels = newChannels;
+                    needsUIRefresh = true;
+                }
+                if (newChats) {
+                    const newRecent = Object.values(newChats).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    if (JSON.stringify(recentChats) !== JSON.stringify(newRecent)) {
+                        recentChats = newRecent;
+                        needsUIRefresh = true;
+                    }
+                }
+
+                // Only re-render if data has changed and user is not actively searching
+                if (needsUIRefresh && searchInput.value.trim() === '') {
+                    console.log('Data changed, re-rendering chat list.');
+                    renderChatList();
+                }
+
+            } catch (error) {
+                console.error("Polling Error:", error.message);
+            }
+        }
+
+        function startRealtimeUpdates(interval = 8000) {
+            if (pollingIntervalId) clearInterval(pollingIntervalId);
+            pollingIntervalId = setInterval(checkForUpdates, interval);
+        }
+
+        // --- SECTION: Custom Confirmation Modal ---
+        function showCustomConfirm(message, onConfirm) {
+            if (document.getElementById('custom-modal')) return;
+            const modal = document.createElement('div');
+            modal.id = 'custom-modal';
+            modal.style.cssText = `position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); animation: fadeInModal 0.3s ease-out;`;
+            const content = document.createElement('div');
+            content.style.cssText = `background: var(--profile-card-bg); color: var(--text-primary); padding: 30px; border-radius: 15px; text-align: center; max-width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); border: 1px solid var(--border-color); transform: scale(0.9); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;`;
+            const p = document.createElement('p');
+            p.textContent = message;
+            p.style.cssText = 'margin-bottom: 20px; font-size: 1.1em;';
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = 'display: flex; justify-content: space-around;';
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'بله، خروج';
+            confirmBtn.style.cssText = `background: var(--notification-badge); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-family: inherit; transition: background-color 0.2s, transform 0.1s; font-weight: 500;`;
+            confirmBtn.onmouseover = () => confirmBtn.style.transform = 'scale(1.05)';
+            confirmBtn.onmouseout = () => confirmBtn.style.transform = 'scale(1)';
+            confirmBtn.onclick = () => { onConfirm(); modal.remove(); };
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'انصراف';
+            cancelBtn.style.cssText = `background: var(--secondary-hover); color: var(--text-primary); border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-family: inherit; transition: background-color 0.2s, transform 0.1s; font-weight: 500;`;
+            cancelBtn.onmouseover = () => cancelBtn.style.transform = 'scale(1.05)';
+            cancelBtn.onmouseout = () => cancelBtn.style.transform = 'scale(1)';
+            cancelBtn.onclick = () => modal.remove();
+            buttonContainer.appendChild(cancelBtn);
+            buttonContainer.appendChild(confirmBtn);
+            content.appendChild(p);
+            content.appendChild(buttonContainer);
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+        }
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText += `@keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } } @keyframes popIn { 0% { transform: scale(0.3); opacity: 0; } 80% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); } }`;
+        document.head.appendChild(styleSheet);
     </script>
 </body>
 </html>
