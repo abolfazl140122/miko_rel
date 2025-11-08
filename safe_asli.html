@@ -3,9 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- NEW: Preloading support logo and verified tick for faster display -->
-    <link rel="preload" as="image" href="https://up.20script.ir/file/1fb2-لوگو-پشتیبانی-همیار.png">
-    <link rel="preload" as="image" href="https://up.20script.ir/file/b97c-tickpng-parspng-com-4.png">
     <title>پیام‌رسان همیار</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
@@ -20,7 +17,7 @@
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
             --online-indicator: #28a745;
-            --notification-badge: #28a745;
+            --notification-badge: #28a745; /* Added variable for consistency */
         }
 
         *, *::before, *::after {
@@ -31,7 +28,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            overflow: hidden; /* Prevents scrolling on the body itself */
         }
 
         body {
@@ -125,7 +122,7 @@
             object-fit: cover;
             background-color: var(--primary-color);
             position: relative;
-            flex-shrink: 0;
+            flex-shrink: 0; /* Prevents the picture from shrinking */
         }
         .profile-picture img {
             width: 100%;
@@ -142,6 +139,7 @@
             bottom: 2px;
             right: 2px;
         }
+        /* --- NEW: Unread Badge Style --- */
         .unread-badge {
             position: absolute;
             bottom: -2px;
@@ -163,21 +161,11 @@
             flex-grow: 1;
             overflow: hidden;
         }
-        .chat-name-container {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
         .chat-details h3 {
             margin: 0;
             font-size: 1.1em;
             font-weight: 500;
             white-space: nowrap;
-        }
-        /* --- MODIFIED: Increased tick size --- */
-        .verified-tick {
-            width: 18px;
-            height: 18px;
         }
         .last-message {
             margin: 4px 0 0;
@@ -444,13 +432,14 @@
         let clientToken = null;
         let allUsers = {};
         let recentChats = [];
-        let pollingIntervalId = null; 
+        let pollingIntervalId = null; // To hold the interval ID
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
                 showErrorMessage('خطای احراز هویت. لطفاً ابتدا وارد شوید.');
+                // In a real app, redirect: window.location.href = 'login.html';
                 return;
             }
             currentUser = JSON.parse(storedUser);
@@ -479,7 +468,9 @@
                 
                 if (chatsResponse) {
                     recentChats = Object.values(chatsResponse)
+                        // --- MODIFIED: Added unreadCount simulation ---
                         .map((chat, index) => {
+                            // This is for demonstration. A real backend would provide this.
                             if (index === 0) chat.unreadCount = 3;
                             if (index === 2) chat.unreadCount = 15;
                             return chat;
@@ -523,42 +514,27 @@
         // --- SECTION: UI Rendering ---
         
         function renderChatList() {
-            const supportChatData = {
-                username: 'hamyar_support',
-                displayName: 'پشتیبانی همیار',
-                isVerified: true,
-                // --- MODIFIED: Using new image URL ---
-                avatarUrl: 'https://up.20script.ir/file/1fb2-لوگو-پشتیبانی-همیار.png',
-            };
-            const supportChatHtml = createChatItemHtml(
-                supportChatData,
-                'پاسخگوی سوالات شما هستیم',
-                new Date().toISOString(),
-                0
-            );
+            if (recentChats.length === 0) {
+                mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
+                return;
+            }
 
-            const dynamicChatsHtml = recentChats.map(chat => {
+            const chatListHtml = recentChats.map(chat => {
                 if (!chat || !chat.members) {
                     console.warn('Skipping malformed chat object:', chat);
-                    return '';
+                    return ''; // Skip rendering this invalid item
                 }
                 const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
                 const partnerData = allUsers[partnerUsername];
                 if (!partnerData) return ''; 
 
+                // --- MODIFIED: Pass unreadCount to the HTML generator ---
                 return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp, chat.unreadCount);
             }).join('');
             
-            const finalHtml = supportChatHtml + dynamicChatsHtml;
-            if (finalHtml.trim() === '') {
-                 mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
-            } else {
-                 mainContent.innerHTML = `<div class="chat-list">${finalHtml}</div>`;
-            }
-            
+            mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
             addClickListenersToItems();
         }
-
 
         function renderSearchResults(results) {
              if (results.length === 0) {
@@ -584,18 +560,15 @@
 
         // --- SECTION: HTML Template Generators ---
 
+        // --- MODIFIED: Added unreadCount parameter and logic ---
         function createChatItemHtml(partnerData, lastMessage, timestamp, unreadCount) {
-            const avatarUrl = partnerData.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=1E90FF&color=fff&size=100`;
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=1E90FF&color=fff&size=100`;
             
+            // --- NEW: Conditionally create the unread badge HTML ---
             const unreadBadgeHtml = (unreadCount && unreadCount > 0)
                 ? `<div class="unread-badge">${unreadCount}</div>`
                 : '';
                 
-            // --- MODIFIED: Using new tick URL ---
-            const verifiedTickHtml = partnerData.isVerified
-                ? `<img class="verified-tick" src="https://up.20script.ir/file/b97c-tickpng-parspng-com-4.png" alt="تیک تایید">`
-                : '';
-
             return `
                 <div class="chat-item" data-uid="${partnerData.username}">
                     <div class="profile-picture">
@@ -603,10 +576,7 @@
                         ${unreadBadgeHtml} 
                     </div>
                     <div class="chat-details">
-                        <div class="chat-name-container">
-                            <h3>${partnerData.displayName || partnerData.username}</h3>
-                            ${verifiedTickHtml}
-                        </div>
+                        <h3>${partnerData.displayName || partnerData.username}</h3>
                         <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
                     </div>
                     <div class="chat-meta">
@@ -636,10 +606,38 @@
         async function checkForUpdates() {
             try {
                 const newChatsResponse = await fetchProxyData('pivi_chats');
+
                 if (newChatsResponse) {
                     const newRecentChats = Object.values(newChatsResponse)
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    
+
+                    // --- NEW: Check for new messages and trigger notification ---
+                    const oldChatsMap = new Map();
+                    recentChats.forEach(chat => {
+                        const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
+                        if (partnerUsername) oldChatsMap.set(partnerUsername, chat);
+                    });
+
+                    let notified = false; // Prevent multiple notifications in one poll
+                    newRecentChats.forEach(newChat => {
+                        const partnerUsername = Object.keys(newChat.members).find(m => m !== currentUser.username);
+                        if (!partnerUsername) return;
+
+                        const oldChat = oldChatsMap.get(partnerUsername);
+                        const oldUnreadCount = oldChat ? (oldChat.unreadCount || 0) : 0;
+                        const newUnreadCount = newChat.unreadCount || 0;
+
+                        if (newUnreadCount > oldUnreadCount && !notified) {
+                            if (typeof AndroidNotify !== 'undefined') {
+                                const partnerData = allUsers[partnerUsername];
+                                const senderName = partnerData ? partnerData.displayName : 'کاربر';
+                                AndroidNotify.showNotification('پیام جدید 💬', `${senderName} برای شما پیام فرستاد`);
+                            }
+                            notified = true;
+                        }
+                    });
+                    // --- END of notification logic ---
+
                     if (JSON.stringify(newRecentChats) !== JSON.stringify(recentChats)) {
                         console.log('New chat data detected. Updating list.');
                         recentChats = newRecentChats;
@@ -654,7 +652,7 @@
             }
         }
 
-        function startRealtimeUpdates(interval = 5000) {
+        function startRealtimeUpdates(interval = 5000) { // Increased interval slightly
             if (pollingIntervalId) {
                 clearInterval(pollingIntervalId);
             }
@@ -681,7 +679,6 @@
             renderSearchResults(filteredUsers);
         }
 
-        // --- MODIFIED: Simplified to make all items clickable ---
         function addClickListenersToItems() {
             mainContent.querySelectorAll('[data-uid]').forEach(item => {
                 item.addEventListener('click', () => {
@@ -713,7 +710,7 @@
         function handleLogout() {
             if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
                 localStorage.removeItem('currentUser');
-                if (pollingIntervalId) clearInterval(pollingIntervalId);
+                if (pollingIntervalId) clearInterval(pollingIntervalId); // Stop polling on logout
                 window.location.href = 'login.html'; 
             }
         }
