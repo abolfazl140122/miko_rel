@@ -17,7 +17,7 @@
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
             --online-indicator: #28a745;
-            --notification-badge: #28a745; /* Added variable for consistency */
+            --notification-badge: #28a745;
         }
 
         *, *::before, *::after {
@@ -28,7 +28,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Prevents scrolling on the body itself */
+            overflow: hidden;
         }
 
         body {
@@ -122,7 +122,7 @@
             object-fit: cover;
             background-color: var(--primary-color);
             position: relative;
-            flex-shrink: 0; /* Prevents the picture from shrinking */
+            flex-shrink: 0;
         }
         .profile-picture img {
             width: 100%;
@@ -139,7 +139,6 @@
             bottom: 2px;
             right: 2px;
         }
-        /* --- NEW: Unread Badge Style --- */
         .unread-badge {
             position: absolute;
             bottom: -2px;
@@ -161,11 +160,22 @@
             flex-grow: 1;
             overflow: hidden;
         }
+        /* --- NEW: Container for name and verified tick --- */
+        .chat-name-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
         .chat-details h3 {
             margin: 0;
             font-size: 1.1em;
             font-weight: 500;
             white-space: nowrap;
+        }
+        /* --- NEW: Style for the verified tick image --- */
+        .verified-tick {
+            width: 16px;
+            height: 16px;
         }
         .last-message {
             margin: 4px 0 0;
@@ -432,7 +442,7 @@
         let clientToken = null;
         let allUsers = {};
         let recentChats = [];
-        let pollingIntervalId = null; // To hold the interval ID
+        let pollingIntervalId = null; 
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -468,9 +478,7 @@
                 
                 if (chatsResponse) {
                     recentChats = Object.values(chatsResponse)
-                        // --- MODIFIED: Added unreadCount simulation ---
                         .map((chat, index) => {
-                            // This is for demonstration. A real backend would provide this.
                             if (index === 0) chat.unreadCount = 3;
                             if (index === 2) chat.unreadCount = 15;
                             return chat;
@@ -513,28 +521,47 @@
 
         // --- SECTION: UI Rendering ---
         
+        // --- MODIFIED: Added logic to prepend the default support chat ---
         function renderChatList() {
-            if (recentChats.length === 0) {
-                mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
-                return;
-            }
+            // 1. Define and create the static support chat
+            const supportChatData = {
+                username: 'hamyar_support',
+                displayName: 'پشتیبانی همیار',
+                isVerified: true, // Custom flag to show the tick
+                // --- IMPORTANT: Use the URL-encoded version of the image name ---
+                avatarUrl: 'https://miko.freehost.io/%D9%84%D9%88%DA%AF%D9%88%20%D9%BE%D8%B4%D8%AA%DB%8C%D8%A8%D8%A7%D9%86%DB%8C%20%D9%87%D9%85%DB%8C%D8%A7%D8%B1.png',
+            };
+            const supportChatHtml = createChatItemHtml(
+                supportChatData,
+                'پاسخگوی سوالات شما هستیم',
+                new Date().toISOString(),
+                0
+            );
 
-            const chatListHtml = recentChats.map(chat => {
+            // 2. Process and create dynamic chats from the server
+            const dynamicChatsHtml = recentChats.map(chat => {
                 if (!chat || !chat.members) {
                     console.warn('Skipping malformed chat object:', chat);
-                    return ''; // Skip rendering this invalid item
+                    return '';
                 }
                 const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
                 const partnerData = allUsers[partnerUsername];
                 if (!partnerData) return ''; 
 
-                // --- MODIFIED: Pass unreadCount to the HTML generator ---
                 return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp, chat.unreadCount);
             }).join('');
             
-            mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
+            // 3. Combine and render
+            const finalHtml = supportChatHtml + dynamicChatsHtml;
+            if (finalHtml.trim() === '') {
+                 mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
+            } else {
+                 mainContent.innerHTML = `<div class="chat-list">${finalHtml}</div>`;
+            }
+            
             addClickListenersToItems();
         }
+
 
         function renderSearchResults(results) {
              if (results.length === 0) {
@@ -560,15 +587,20 @@
 
         // --- SECTION: HTML Template Generators ---
 
-        // --- MODIFIED: Added unreadCount parameter and logic ---
+        // --- MODIFIED: Updated to handle custom avatars and verified ticks ---
         function createChatItemHtml(partnerData, lastMessage, timestamp, unreadCount) {
-            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=1E90FF&color=fff&size=100`;
+            // If a custom avatarUrl is provided (like for the support chat), use it. Otherwise, generate one.
+            const avatarUrl = partnerData.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=1E90FF&color=fff&size=100`;
             
-            // --- NEW: Conditionally create the unread badge HTML ---
             const unreadBadgeHtml = (unreadCount && unreadCount > 0)
                 ? `<div class="unread-badge">${unreadCount}</div>`
                 : '';
                 
+            // NEW: If the 'isVerified' flag is true, add the tick image
+            const verifiedTickHtml = partnerData.isVerified
+                ? `<img class="verified-tick" src="https://miko.freehost.io/tickpng.parspng.com-4.png" alt="تیک تایید">`
+                : '';
+
             return `
                 <div class="chat-item" data-uid="${partnerData.username}">
                     <div class="profile-picture">
@@ -576,7 +608,10 @@
                         ${unreadBadgeHtml} 
                     </div>
                     <div class="chat-details">
-                        <h3>${partnerData.displayName || partnerData.username}</h3>
+                        <div class="chat-name-container">
+                            <h3>${partnerData.displayName || partnerData.username}</h3>
+                            ${verifiedTickHtml}
+                        </div>
                         <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
                     </div>
                     <div class="chat-meta">
@@ -606,38 +641,10 @@
         async function checkForUpdates() {
             try {
                 const newChatsResponse = await fetchProxyData('pivi_chats');
-
                 if (newChatsResponse) {
                     const newRecentChats = Object.values(newChatsResponse)
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-                    // --- NEW: Check for new messages and trigger notification ---
-                    const oldChatsMap = new Map();
-                    recentChats.forEach(chat => {
-                        const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
-                        if (partnerUsername) oldChatsMap.set(partnerUsername, chat);
-                    });
-
-                    let notified = false; // Prevent multiple notifications in one poll
-                    newRecentChats.forEach(newChat => {
-                        const partnerUsername = Object.keys(newChat.members).find(m => m !== currentUser.username);
-                        if (!partnerUsername) return;
-
-                        const oldChat = oldChatsMap.get(partnerUsername);
-                        const oldUnreadCount = oldChat ? (oldChat.unreadCount || 0) : 0;
-                        const newUnreadCount = newChat.unreadCount || 0;
-
-                        if (newUnreadCount > oldUnreadCount && !notified) {
-                            if (typeof AndroidNotify !== 'undefined') {
-                                const partnerData = allUsers[partnerUsername];
-                                const senderName = partnerData ? partnerData.displayName : 'کاربر';
-                                AndroidNotify.showNotification('پیام جدید 💬', `${senderName} برای شما پیام فرستاد`);
-                            }
-                            notified = true;
-                        }
-                    });
-                    // --- END of notification logic ---
-
+                    
                     if (JSON.stringify(newRecentChats) !== JSON.stringify(recentChats)) {
                         console.log('New chat data detected. Updating list.');
                         recentChats = newRecentChats;
@@ -652,7 +659,7 @@
             }
         }
 
-        function startRealtimeUpdates(interval = 5000) { // Increased interval slightly
+        function startRealtimeUpdates(interval = 5000) {
             if (pollingIntervalId) {
                 clearInterval(pollingIntervalId);
             }
@@ -683,9 +690,14 @@
             mainContent.querySelectorAll('[data-uid]').forEach(item => {
                 item.addEventListener('click', () => {
                     const targetUid = item.dataset.uid;
-                    if (targetUid) {
+                    // Prevent navigation for the static support chat for now
+                    if (targetUid && targetUid !== 'hamyar_support') {
                         console.log(`Navigating to chat with user: ${targetUid}`);
                         window.location.href = `pivi.html?uid=${targetUid}`;
+                    } else {
+                        console.log(`Clicked on support chat (uid: ${targetUid})`);
+                        // Optionally, you can add a custom action for the support chat here
+                        // For example: alert('این صفحه چت پشتیبانی است.');
                     }
                 });
             });
@@ -710,7 +722,7 @@
         function handleLogout() {
             if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
                 localStorage.removeItem('currentUser');
-                if (pollingIntervalId) clearInterval(pollingIntervalId); // Stop polling on logout
+                if (pollingIntervalId) clearInterval(pollingIntervalId);
                 window.location.href = 'login.html'; 
             }
         }
