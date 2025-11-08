@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>پیام‌رسان همیار</title>
+    <title>پیام‌رسان همیار - پیشرفته</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
 
         /* --- Variables and Basic Setup --- */
         :root {
             --background-color: #0D1117;
-            --primary-color: #1E90FF;
+            --primary-color: #00A3FF; /* Brightened blue */
             --secondary-color: #161B22;
             --secondary-hover: #2C2F33;
             --border-color: #30363d;
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
-            --online-indicator: #28a745;
-            --notification-badge: #28a745;
+            --online-indicator: #00ff88; /* Neon green */
+            --notification-badge: #FF4D4D; /* Alert Red */
+            --shadow-light: rgba(45, 50, 56, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.6);
         }
 
         *, *::before, *::after {
@@ -38,6 +40,8 @@
             -webkit-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            /* Added smooth background gradient */
+            background: radial-gradient(circle at top left, #1a202c 0%, var(--background-color) 70%);
         }
 
         /* --- Main App Structure --- */
@@ -46,34 +50,46 @@
             max-width: 420px;
             height: 100%;
             margin: 0 auto;
-            background-color: var(--background-color);
+            background-color: var(--secondary-color); /* Slightly lighter than background for depth */
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 25px rgba(0,0,0,0.2);
-            position: relative; /* Added for positioning context */
+            box-shadow: 0 0 40px var(--shadow-dark); /* Deeper shadow */
+            position: relative;
+            border-radius: 20px; /* Rounded corners for the entire app */
+            overflow: hidden;
         }
 
         /* --- Header --- */
         .app-header {
-            padding: 15px 20px;
+            padding: 18px 20px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
             background-color: var(--secondary-color);
             flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
         .app-header h1 {
-            font-size: 1.6em;
+            font-size: 1.8em;
             margin: 0;
             color: var(--primary-color);
+            text-shadow: 0 0 8px rgba(0, 163, 255, 0.4); /* Neon effect on title */
+            letter-spacing: 0.5px;
         }
         .search-container {
             display: flex;
             align-items: center;
             background-color: var(--secondary-hover);
-            border-radius: 20px;
-            padding: 5px 10px;
+            border-radius: 25px; /* More rounded */
+            padding: 8px 15px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); /* Inner shadow for depth */
+            transition: all 0.3s ease;
+        }
+        .search-container:focus-within {
+             box-shadow: 0 0 0 2px var(--primary-color), inset 0 2px 4px rgba(0,0,0,0.6);
         }
         .search-container input {
             background: transparent;
@@ -82,114 +98,179 @@
             font-family: 'Vazirmatn', sans-serif;
             outline: none;
             width: 120px;
-            transition: width 0.3s ease;
+            transition: width 0.3s ease, padding 0.3s ease;
+            text-align: right;
+            padding-right: 5px;
         }
         .search-container input:focus {
-            width: 150px;
+            width: 180px;
         }
         .search-container svg {
             color: var(--text-secondary);
+            margin-right: 5px;
         }
         
-        /* --- Main Content Area --- */
+        /* --- Main Content Area & Custom Scrollbar --- */
         main {
             flex-grow: 1;
             position: relative;
             overflow-y: auto;
         }
-        main::-webkit-scrollbar { display: none; }
-        main { -ms-overflow-style: none; scrollbar-width: none; }
-
+        /* Custom scrollbar for webkit browsers */
+        main::-webkit-scrollbar {
+            width: 8px;
+        }
+        main::-webkit-scrollbar-track {
+            background: var(--secondary-color);
+        }
+        main::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 10px;
+            border: 2px solid var(--secondary-color);
+        }
+        main::-webkit-scrollbar-thumb:hover {
+            background-color: var(--text-secondary);
+        }
+        
         /* --- Chat List --- */
         .chat-list {
-            padding: 10px 0;
+            padding: 0;
         }
         .chat-item, .search-result-item {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
+            padding: 15px 20px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background-color 0.3s ease, transform 0.1s ease-out, box-shadow 0.3s ease;
             border-bottom: 1px solid var(--border-color);
+            position: relative; /* For the slide-in animation */
+            opacity: 0;
+            animation: fadeInRight 0.5s forwards;
         }
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        /* Apply staggered delay for a smooth list entrance */
+        .chat-item:nth-child(1) { animation-delay: 0.1s; }
+        .chat-item:nth-child(2) { animation-delay: 0.15s; }
+        .chat-item:nth-child(3) { animation-delay: 0.2s; }
+        .chat-item:nth-child(4) { animation-delay: 0.25s; }
+        .chat-item:nth-child(5) { animation-delay: 0.3s; }
+
         .chat-item:hover, .search-result-item:hover {
             background-color: var(--secondary-hover);
+            transform: scale(1.01);
+            box-shadow: 0 0 15px rgba(0, 163, 255, 0.1);
         }
         .profile-picture {
-            width: 55px;
-            height: 55px;
+            width: 60px; /* Slightly larger */
+            height: 60px;
             border-radius: 50%;
             margin-left: 15px;
             object-fit: cover;
             background-color: var(--primary-color);
             position: relative;
             flex-shrink: 0;
+            overflow: hidden;
+            box-shadow: 0 0 0 3px rgba(0, 163, 255, 0.2); /* Soft primary ring */
+            transition: box-shadow 0.3s ease;
+        }
+        .chat-item:hover .profile-picture {
+             box-shadow: 0 0 0 3px var(--primary-color);
         }
         .profile-picture img {
             width: 100%;
             height: 100%;
             border-radius: 50%;
+            transition: transform 0.3s ease;
         }
+        .chat-item:hover .profile-picture img {
+             transform: scale(1.05);
+        }
+
+        /* Online & Unread Indicator Improvements */
         .online-indicator {
-            width: 12px;
-            height: 12px;
+            width: 14px; /* Larger */
+            height: 14px;
             background-color: var(--online-indicator);
-            border: 2px solid var(--background-color);
+            border: 3px solid var(--secondary-color);
             border-radius: 50%;
             position: absolute;
-            bottom: 2px;
-            right: 2px;
+            bottom: 0px; 
+            right: 0px;
+            box-shadow: 0 0 8px var(--online-indicator);
+            animation: pulse 1.5s infinite;
         }
         .unread-badge {
             position: absolute;
-            bottom: -2px;
-            right: -2px;
+            top: 2px; /* Adjusted position */
+            left: 2px;
             background-color: var(--notification-badge);
             color: white;
-            border-radius: 50%;
-            min-width: 22px;
-            height: 22px;
-            font-size: 0.75em;
-            font-weight: 500;
+            border-radius: 12px;
+            min-width: 24px; /* Larger */
+            height: 24px;
+            font-size: 0.8em;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid var(--background-color);
-            padding: 0 4px;
+            border: 3px solid var(--secondary-color);
+            padding: 0 6px;
+            box-shadow: 0 2px 8px rgba(255, 77, 77, 0.6);
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
         .chat-details {
             flex-grow: 1;
             overflow: hidden;
         }
         .chat-details h3 {
             margin: 0;
-            font-size: 1.1em;
-            font-weight: 500;
+            font-size: 1.2em; /* Slightly larger */
+            font-weight: 700;
             white-space: nowrap;
             display: flex;
             align-items: center;
         }
         .last-message {
             margin: 4px 0 0;
-            font-size: 0.9em;
+            font-size: 0.95em;
             color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 100%;
         }
         .chat-meta {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            font-size: 0.8em;
+            font-size: 0.85em;
             color: var(--text-secondary);
             flex-shrink: 0;
+            margin-top: -15px; /* Adjust alignment with title */
+        }
+        .chat-meta span {
+            font-weight: 500;
         }
 
         .verified-tick {
-            width: 20px; 
-            height: 20px;
+            width: 18px; 
+            height: 18px;
             margin-right: 6px;
+            filter: drop-shadow(0 0 2px rgba(0, 163, 255, 0.5));
         }
         
         /* --- Loading and Status Messages --- */
@@ -200,17 +281,21 @@
             height: 100%;
             flex-direction: column;
             color: var(--text-secondary);
+            text-align: center;
+            padding: 40px;
         }
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--secondary-hover);
+            width: 50px; /* Larger spinner */
+            height: 50px;
+            border: 5px solid var(--secondary-hover);
             border-top-color: var(--primary-color);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite; /* Faster spin */
+            box-shadow: 0 0 10px rgba(0, 163, 255, 0.5);
         }
         .status-container p {
-            margin-top: 15px;
+            margin-top: 20px;
+            font-size: 1.1em;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -230,11 +315,18 @@
             border: none;
             cursor: pointer;
             color: var(--text-secondary);
-            transition: color 0.2s;
+            transition: color 0.3s ease, transform 0.2s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 0.7em;
+            font-size: 0.75em;
+            padding: 5px;
+            border-radius: 10px;
+        }
+        .nav-btn:hover {
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            background-color: var(--secondary-hover);
         }
         .nav-btn svg {
             width: 28px;
@@ -243,8 +335,12 @@
         }
         .nav-btn.active {
             color: var(--primary-color);
+            text-shadow: 0 0 5px rgba(0, 163, 255, 0.6);
         }
-
+        .nav-btn.active:hover {
+            transform: none;
+        }
+        
         /* --- Profile Overlay Styles --- */
         .profile-overlay {
             position: fixed;
@@ -257,149 +353,109 @@
             background-color: var(--background-color);
             z-index: 100;
             transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* Faster, smoother transition */
             display: flex;
             flex-direction: column;
             max-width: 420px; 
             margin: 0 auto;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
         .profile-overlay.active {
             transform: translateY(0);
         }
         .profile-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
             background-color: var(--secondary-color);
-            flex-shrink: 0;
-        }
-        .profile-header h2 {
-            margin: 0;
-            font-size: 1.4em;
         }
         .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            cursor: pointer;
+             transition: transform 0.3s ease;
+        }
+        .close-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            color: var(--primary-color);
         }
         .profile-content {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 30px 20px;
+            background-color: var(--background-color);
+        }
+        .profile-main-pic {
+            width: 140px; /* Larger profile picture */
+            height: 140px;
+            border: 4px solid var(--primary-color);
+            box-shadow: 0 0 20px rgba(0, 163, 255, 0.5); /* Glowing effect */
+        }
+        .profile-actions li {
+            box-shadow: 0 4px 8px var(--shadow-dark); /* Lifted appearance */
+            border-right: 5px solid transparent;
+        }
+        .profile-actions li:hover {
+            background-color: #1e242c;
+            border-right: 5px solid var(--primary-color);
+            transform: translateX(5px);
+        }
+        #logout-btn {
+            border-right: 5px solid transparent;
+            color: #ff4d4d;
+        }
+         #logout-btn:hover {
+            border-right: 5px solid #ff4d4d;
+        }
+
+        /* --- Floating Action Button (FAB) Styles --- */
+        .fab-container {
+            position: absolute;
+            bottom: 90px;
+            right: 25px;
+            z-index: 99;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        .profile-main-pic {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--primary-color);
-            margin-bottom: 20px;
-        }
-        .profile-main-pic img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        #profile-display-name {
-            font-size: 1.8em;
-            font-weight: 700;
-            margin: 0;
-            display: flex;
-            align-items: center;
-        }
-        #profile-username {
-            font-size: 1.1em;
-            color: var(--text-secondary);
-            margin: 5px 0 30px 0;
-        }
-        .profile-actions {
-            width: 100%;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .profile-actions li {
-            background-color: var(--secondary-color);
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .profile-actions li:hover {
-            background-color: var(--secondary-hover);
-        }
-        .profile-actions li svg {
-            margin-left: 15px;
-            color: var(--text-secondary);
-        }
-        #logout-btn {
-            color: #ff4d4d;
-        }
-         #logout-btn svg {
-            color: #ff4d4d;
-        }
-
-        /* --- MODIFIED: Floating Action Button (FAB) Styles --- */
-        .fab-container {
-            position: absolute;
-            bottom: 80px; /* MODIFIED: Lowered position */
-            right: 20px; /* MODIFIED: Moved to the right for RTL */
-            z-index: 99;
-            display: flex;
-            flex-direction: column; /* MODIFIED: Options will now appear on top */
-            align-items: center;
-        }
 
         .fab-main {
-            width: 60px;
-            height: 60px;
+            width: 65px; /* Slightly larger */
+            height: 65px;
             border-radius: 50%;
-            background-color: var(--primary-color);
+            background: linear-gradient(45deg, #00A3FF, #0077c2); /* Gradient fill */
             border: none;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            order: 2; /* MODIFIED: Ensures main button is at the bottom of the flex container */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 163, 255, 0.6); /* Deep shadow with glow */
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            order: 2;
         }
         .fab-main:hover {
-            transform: scale(1.05);
+            transform: scale(1.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 163, 255, 0.8);
+        }
+        .fab-main:active {
+            transform: scale(0.95);
         }
         .fab-main svg {
             color: white;
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             transition: transform 0.3s ease;
         }
         
         .fab-options {
             display: flex;
-            flex-direction: column-reverse; /* Keeps single user icon above group icon */
+            flex-direction: column-reverse;
             align-items: center;
             list-style: none;
             padding: 0;
-            margin: 0 0 20px 0; /* MODIFIED: Increased margin-bottom for more space */
-            order: 1; /* MODIFIED: Ensures options are at the top of the flex container */
+            margin: 0 0 20px 0;
+            order: 1;
             visibility: hidden;
             opacity: 0;
             transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
-            transform: translateY(20px); /* Start position for animation */
+            transform: translateY(10px); /* Slightly less starting transform */
         }
 
         .fab-option {
-            width: 48px;
-            height: 48px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background-color: var(--secondary-hover);
             border: none;
@@ -407,21 +463,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            margin-bottom: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .fab-option:last-child {
-            margin-bottom: 0; /* Removes margin from the top-most button */
+            margin-bottom: 0;
         }
         .fab-option:hover {
-            background-color: var(--border-color);
-            opacity: 0.9;
+            background-color: #3f454f;
+            transform: scale(1.05);
         }
         .fab-option svg {
-            color: var(--text-primary);
-            width: 22px;
-            height: 22px;
+            color: var(--primary-color);
+            width: 24px;
+            height: 24px;
+            filter: drop-shadow(0 0 3px rgba(0, 163, 255, 0.5));
         }
         
         /* -- FAB Active State -- */
@@ -431,7 +488,7 @@
         .fab-container.active .fab-options {
             visibility: visible;
             opacity: 1;
-            transform: translateY(0); /* Buttons slide down to final position */
+            transform: translateY(0);
         }
 
     </style>
@@ -530,6 +587,88 @@
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
         const VERIFIED_TICK_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
+        
+        // Custom Modal UI for Confirmation (replacing alert/confirm)
+        function showCustomConfirm(message, onConfirm) {
+            // Check if a modal already exists to prevent duplicates
+            if (document.getElementById('custom-modal')) return;
+
+            // Create Modal elements
+            const modal = document.createElement('div');
+            modal.id = 'custom-modal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                background: rgba(0, 0, 0, 0.8); z-index: 1000;
+                display: flex; justify-content: center; align-items: center;
+                backdrop-filter: blur(5px);
+                animation: fadeInModal 0.3s ease-out;
+            `;
+
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: var(--secondary-color); color: var(--text-primary);
+                padding: 30px; border-radius: 15px; text-align: center;
+                max-width: 300px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+                border: 1px solid var(--border-color);
+                transform: scale(0.9);
+                animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            `;
+
+            const p = document.createElement('p');
+            p.textContent = message;
+            p.style.cssText = 'margin-bottom: 20px; font-size: 1.1em;';
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = 'display: flex; justify-content: space-around;';
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'بله، خروج';
+            confirmBtn.style.cssText = `
+                background: var(--notification-badge); color: white; border: none;
+                padding: 10px 15px; border-radius: 8px; cursor: pointer; font-family: inherit;
+                transition: background-color 0.2s, transform 0.1s;
+            `;
+            confirmBtn.onmouseover = () => confirmBtn.style.transform = 'scale(1.05)';
+            confirmBtn.onmouseout = () => confirmBtn.style.transform = 'scale(1)';
+            confirmBtn.onclick = () => {
+                onConfirm();
+                modal.remove();
+            };
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'انصراف';
+            cancelBtn.style.cssText = `
+                background: var(--secondary-hover); color: var(--text-primary); border: none;
+                padding: 10px 15px; border-radius: 8px; cursor: pointer; font-family: inherit;
+                transition: background-color 0.2s, transform 0.1s;
+            `;
+            cancelBtn.onmouseover = () => cancelBtn.style.transform = 'scale(1.05)';
+            cancelBtn.onmouseout = () => cancelBtn.style.transform = 'scale(1)';
+            cancelBtn.onclick = () => modal.remove();
+
+            buttonContainer.appendChild(cancelBtn);
+            buttonContainer.appendChild(confirmBtn);
+
+            content.appendChild(p);
+            content.appendChild(buttonContainer);
+            modal.appendChild(content);
+
+            document.body.appendChild(modal);
+        }
+        
+        // Define keyframe animations in JavaScript for injection
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText += `
+            @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes popIn { 
+                0% { transform: scale(0.3); opacity: 0; } 
+                80% { transform: scale(1.05); opacity: 1; }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
 
         // --- SECTION: DOM Element References ---
         const mainContent = document.getElementById('main-content');
@@ -565,7 +704,10 @@
             searchInput.addEventListener('input', handleSearch);
             openProfileBtn.addEventListener('click', showProfile);
             closeProfileBtn.addEventListener('click', hideProfile);
-            logoutBtn.addEventListener('click', handleLogout);
+            // Modified to use custom confirmation dialog
+            logoutBtn.addEventListener('click', () => {
+                showCustomConfirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟', handleLogoutConfirmed);
+            });
 
             fabMainBtn.addEventListener('click', toggleFabMenu);
 
@@ -590,10 +732,12 @@
                 }
                 
                 if (chatsResponse) {
+                    // Added more mock data for better visualization
                     recentChats = Object.values(chatsResponse)
                         .map((chat, index) => {
                             if (index === 0) chat.unreadCount = 3;
                             if (index === 2) chat.unreadCount = 15;
+                            if (index === 4) chat.unreadCount = 1;
                             return chat;
                         })
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -681,10 +825,10 @@
         // --- SECTION: HTML Template Generators ---
 
         function createChatItemHtml(partnerData, lastMessage, timestamp, unreadCount) {
-            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=1E90FF&color=fff&size=100`;
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=00A3FF&color=fff&size=100`;
             
             const unreadBadgeHtml = (unreadCount && unreadCount > 0)
-                ? `<div class="unread-badge">${unreadCount}</div>`
+                ? `<div class="unread-badge">${unreadCount > 99 ? '99+' : unreadCount}</div>` // Max 99+
                 : '';
 
             const verifiedTickHtml = partnerData.verified === true
@@ -694,7 +838,7 @@
             return `
                 <div class="chat-item" data-uid="${partnerData.username}">
                     <div class="profile-picture">
-                        <img src="${avatarUrl}" alt="${partnerData.displayName}">
+                        <img src="${avatarUrl}" alt="${partnerData.displayName}" onerror="this.onerror=null; this.src='https://placehold.co/100x100/161B22/E4E6EB?text=U'">
                         ${unreadBadgeHtml} 
                     </div>
                     <div class="chat-details">
@@ -717,7 +861,7 @@
             return `
                 <div class="search-result-item" data-uid="${userData.username}">
                     <div class="profile-picture">
-                        <img src="${avatarUrl}" alt="${userData.displayName}">
+                        <img src="${avatarUrl}" alt="${userData.displayName}" onerror="this.onerror=null; this.src='https://placehold.co/100x100/161B22/E4E6EB?text=U'">
                         ${userData.isOnline ? '<div class="online-indicator"></div>' : ''}
                     </div>
                     <div class="chat-details">
@@ -745,6 +889,13 @@
 
                 if (newChatsResponse) {
                     const newRecentChats = Object.values(newChatsResponse)
+                        .map((chat, index) => {
+                             // Re-apply mock data for persistent visualization of badge/status
+                            if (index === 0) chat.unreadCount = 3;
+                            if (index === 2) chat.unreadCount = 15;
+                            if (index === 4) chat.unreadCount = 1;
+                            return chat;
+                        })
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
                     if (JSON.stringify(newRecentChats) !== JSON.stringify(recentChats)) {
@@ -820,12 +971,10 @@
             profileOverlay.classList.remove('active');
         }
 
-        function handleLogout() {
-            if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
-                localStorage.removeItem('currentUser');
-                if (pollingIntervalId) clearInterval(pollingIntervalId);
-                window.location.href = 'login.html'; 
-            }
+        function handleLogoutConfirmed() {
+            localStorage.removeItem('currentUser');
+            if (pollingIntervalId) clearInterval(pollingIntervalId);
+            window.location.href = 'login.html'; 
         }
 
         // --- Function for Floating Action Button ---
