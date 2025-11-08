@@ -114,7 +114,7 @@
         <!-- هدر صفحه -->
         <header class="app-header">
             <button class="header-btn" onclick="window.history.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </button>
             <h1 id="page-title">همیار</h1>
             <button class="header-btn" id="edit-channel-btn">
@@ -211,7 +211,6 @@
                 headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
             });
             if (!response.ok) {
-                // اگر سرور خطای 404 (Not Found) بدهد، به جای خطا، null برمی‌گردانیم
                 if (response.status === 404) return null;
                 throw new Error(`خطا در ارتباط با سرور (کد: ${response.status})`);
             }
@@ -230,23 +229,18 @@
         }
 
         // --- SECTION: منطق اصلی بارگذاری و نمایش ---
-
-        // تابع اصلی برای پیدا کردن کانال کاربر یا نمایش فرم ساخت
         async function findUserChannelAndLoad() {
             try {
                 const allChannels = await fetchProxyData('channels');
                 let userChannel = null;
-                // اگر کانالی وجود داشته باشد، آن را پیدا کن
                 if (allChannels) {
-                    userChannel = Object.values(allChannels).find(ch => ch.creator_username === currentUser.username);
+                    userChannel = Object.values(allChannels).find(ch => ch && ch.creator_username === currentUser.username);
                 }
 
                 if (userChannel) {
-                    // اگر کاربر کانال داشت، آن را بارگذاری کن
                     window.history.replaceState({}, '', `?id=${userChannel.channel_id}`);
                     await loadChannelData(userChannel.channel_id);
                 } else {
-                    // اگر کانالی نداشت، فرم ساخت را نمایش بده
                     renderCreationForm();
                 }
             } catch (error) {
@@ -254,7 +248,6 @@
             }
         }
 
-        // تابع برای بارگذاری اطلاعات یک کانال مشخص
         async function loadChannelData(channelId) {
             try {
                 const channelData = await fetchProxyData(`channels/${channelId}`);
@@ -274,7 +267,6 @@
         }
 
         // --- SECTION: توابع رندر کردن (نمایش) بخش‌های مختلف UI ---
-
         function renderLoadingSpinner() {
             mainContent.innerHTML = `<div class="status-container"><div class="spinner"></div><p>در حال بارگذاری...</p></div>`;
         }
@@ -291,22 +283,10 @@
                 <div id="creation-form-view">
                     <div class="creation-form-container">
                         <h2 class="form-title">مشخصات کانال</h2>
-                        <div class="input-group">
-                            <label for="channel-name">نام کانال</label>
-                            <input type="text" id="channel-name" placeholder="مثال: گروه برنامه‌نویسان">
-                        </div>
-                        <div class="input-group">
-                            <label for="channel-id">شناسه کانال (ID)</label>
-                            <input type="text" id="channel-id" placeholder="فقط حروف انگلیسی و خط تیره (-)">
-                        </div>
-                        <div class="input-group">
-                            <label for="channel-desc">توضیحات</label>
-                            <textarea id="channel-desc" placeholder="درباره کانال خود توضیح دهید..."></textarea>
-                        </div>
-                        <button class="create-btn" id="create-channel-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            <span>ایجاد کانال</span>
-                        </button>
+                        <div class="input-group"><label for="channel-name">نام کانال</label><input type="text" id="channel-name" placeholder="مثال: گروه برنامه‌نویسان"></div>
+                        <div class="input-group"><label for="channel-id">شناسه کانال (ID)</label><input type="text" id="channel-id" placeholder="فقط حروف انگلیسی و خط تیره (-)"></div>
+                        <div class="input-group"><label for="channel-desc">توضیحات</label><textarea id="channel-desc" placeholder="درباره کانال خود توضیح دهید..."></textarea></div>
+                        <button class="create-btn" id="create-channel-btn"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span>ایجاد کانال</span></button>
                     </div>
                 </div>`;
             document.getElementById('create-channel-btn').addEventListener('click', handleCreateChannel);
@@ -314,10 +294,10 @@
 
         function renderChannelView() {
             pageTitle.textContent = currentChannelData.channel_name;
-            editChannelBtn.style.display = isChannelCreator ? 'block' : 'none'; // نمایش دکمه ویرایش فقط برای سازنده
+            editChannelBtn.style.display = isChannelCreator ? 'block' : 'none';
             mainContent.innerHTML = `
                 <div class="channel-chat-container">
-                    <div class="channel-info-bar">${currentChannelData.description}</div>
+                    <div class="channel-info-bar">${currentChannelData.description || ''}</div>
                     <div class="message-feed" id="message-feed"></div>
                     ${isChannelCreator ? `
                     <div class="message-input-area">
@@ -327,15 +307,13 @@
                         </button>
                     </div>` : ''}
                 </div>`;
-
             if (isChannelCreator) {
                 document.getElementById('send-message-btn').addEventListener('click', handleSendMessage);
-                document.getElementById('message-input').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') handleSendMessage();
-                });
+                document.getElementById('message-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSendMessage(); });
             }
         }
 
+        // [ تابع اصلاح شده ]
         function renderMessages(messagesData) {
             const messageFeed = document.getElementById('message-feed');
             if (!messageFeed) return;
@@ -344,19 +322,32 @@
                 messageFeed.innerHTML = '<div class="status-container" style="height: auto;"><p>هنوز پیامی در این کانال نیست.</p></div>';
                 return;
             }
-            const messages = Object.values(messagesData).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // ۱. مرتب سازی امن بر اساس تاریخ (جدیدترین اول)
+            const messages = Object.values(messagesData).sort((a, b) => {
+                const timeA = a && a.timestamp ? new Date(a.timestamp).getTime() : 0;
+                const timeB = b && b.timestamp ? new Date(b.timestamp).getTime() : 0;
+                return timeB - timeA;
+            });
             
             let html = '';
             messages.forEach(msg => {
-                const messageClass = msg.sender_username === currentUser.username ? 'out' : 'in';
-                const senderName = msg.sender_username !== currentUser.username ? `<div class="message-sender">${msg.sender_username}</div>` : '';
-                html += `<div class="message-bubble ${messageClass}">${senderName}${msg.message_text}</div>`;
+                // ۲. بررسی اینکه آیا 'msg' یک آبجکت معتبر است
+                if (!msg || typeof msg !== 'object') return;
+
+                // ۳. دسترسی امن به مقادیر با مقادیر پیش فرض
+                const sender = msg.sender_username || 'کاربر';
+                const text = msg.message_text || '(پیام نامعتبر)';
+
+                const messageClass = sender === currentUser.username ? 'out' : 'in';
+                const senderNameHtml = sender !== currentUser.username ? `<div class="message-sender">${sender}</div>` : '';
+                
+                html += `<div class="message-bubble ${messageClass}">${senderNameHtml}${text}</div>`;
             });
             messageFeed.innerHTML = html;
         }
 
         // --- SECTION: مدیریت رویدادها (Event Handlers) ---
-        
         async function handleCreateChannel(event) {
             const createBtn = event.currentTarget;
             const name = document.getElementById('channel-name').value.trim();
@@ -380,15 +371,10 @@
                 await postProxyData(`channels/${id}`, newChannelData);
                 currentChannelData = newChannelData;
                 isChannelCreator = true;
-                
-                // بروزرسانی URL بدون رفرش صفحه
                 window.history.pushState({}, name, `?id=${id}`);
-                
-                // نمایش صفحه چت در همان صفحه
                 renderChannelView();
-                renderMessages(null); // نمایش پیام "هنوز پیامی نیست"
+                renderMessages(null);
                 startRealtimeUpdates();
-
             } catch (error) {
                 alert(`خطا در ساخت کانال: ${error.message}`);
                 createBtn.disabled = false;
@@ -406,17 +392,23 @@
                 timestamp: new Date().toISOString()
             };
 
+            const tempMessageId = `${currentUser.username}-${Date.now()}`;
             messageInput.value = '';
-            const messageId = `${currentUser.username}-${Date.now()}`;
 
             try {
-                await postProxyData(`channels/${currentChannelData.channel_id}/channel_messages/${messageId}`, messageData);
-                // پیام را به صورت موقت و فوری در UI نمایش می‌دهیم تا کاربر منتظر آپدیت بعدی نماند
-                const messages = await fetchProxyData(`channels/${currentChannelData.channel_id}/channel_messages`);
-                renderMessages(messages);
+                // آپدیت فوری UI برای تجربه کاربری بهتر
+                const currentMessages = await fetchProxyData(`channels/${currentChannelData.channel_id}/channel_messages`) || {};
+                currentMessages[tempMessageId] = messageData;
+                renderMessages(currentMessages);
+
+                // ارسال به سرور در پس زمینه
+                await postProxyData(`channels/${currentChannelData.channel_id}/channel_messages/${tempMessageId}`, messageData);
             } catch (error) {
                 alert('ارسال پیام با خطا مواجه شد.');
                 messageInput.value = messageText;
+                // در صورت خطا، پیام موقت را حذف کن (اختیاری)
+                const currentMessages = await fetchProxyData(`channels/${currentChannelData.channel_id}/channel_messages`);
+                renderMessages(currentMessages);
             }
         }
 
@@ -431,7 +423,6 @@
             saveEditBtn.textContent = 'در حال ذخیره...';
 
             try {
-                // برای ویرایش، فقط فیلد مورد نظر را ارسال می‌کنیم
                 await postProxyData(`channels/${currentChannelData.channel_id}/channel_name`, newName);
                 currentChannelData.channel_name = newName;
                 pageTitle.textContent = newName;
