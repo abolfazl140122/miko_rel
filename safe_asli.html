@@ -35,903 +35,803 @@
             font-family: 'Vazirmatn', sans-serif;
             background-color: var(--background-color);
             color: var(--text-primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .container {
+        /* --- Main App Structure --- */
+        .app-container {
             width: 100%;
             max-width: 420px;
             height: 100%;
+            margin: 0 auto;
+            background-color: var(--background-color);
             display: flex;
             flex-direction: column;
-            background-color: var(--secondary-color);
-            border-radius: 0;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 25px rgba(0,0,0,0.2);
+            position: relative; /* Added for positioning context */
         }
 
         /* --- Header --- */
-        .header {
+        .app-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid var(--border-color);
             background-color: var(--secondary-color);
-            z-index: 10;
+            flex-shrink: 0;
         }
-
-        .header h1 {
-            font-size: 1.2rem;
-            font-weight: 700;
+        .app-header h1 {
+            font-size: 1.6em;
             margin: 0;
-        }
-
-        .profile-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 2px solid var(--border-color);
-            transition: border-color 0.2s;
-        }
-
-        .profile-btn:hover {
-            border-color: var(--primary-color);
-        }
-
-        .profile-btn img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        /* --- Search Bar --- */
-        .search-container {
-            padding: 10px 15px;
-            background-color: var(--secondary-color);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .search-container input {
-            width: 100%;
-            padding: 10px 15px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            background-color: var(--background-color);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .search-container input:focus {
-            border-color: var(--primary-color);
-        }
-
-
-        /* --- Tab Bar --- */
-        .tab-bar {
-            display: flex;
-            justify-content: space-around;
-            background-color: var(--secondary-color);
-            border-bottom: 1px solid var(--border-color);
-            padding: 5px 0;
-        }
-
-        .tab-btn {
-            flex-grow: 1;
-            padding: 10px 0;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1rem;
-            cursor: pointer;
-            transition: color 0.2s, background-color 0.2s;
-            border-bottom: 2px solid transparent;
-            font-weight: 500;
-        }
-
-        .tab-btn.active {
             color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-            font-weight: 700;
         }
-
-        /* --- List Container --- */
-        .list-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Custom Scrollbar for Webkit */
-        .list-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .list-container::-webkit-scrollbar-track {
-            background: var(--secondary-color);
-        }
-        .list-container::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
-
-        .list-item {
+        .search-container {
             display: flex;
             align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid var(--border-color);
+            background-color: var(--secondary-hover);
+            border-radius: 20px;
+            padding: 5px 10px;
+        }
+        .search-container input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Vazirmatn', sans-serif;
+            outline: none;
+            width: 120px;
+            transition: width 0.3s ease;
+        }
+        .search-container input:focus {
+            width: 150px;
+        }
+        .search-container svg {
+            color: var(--text-secondary);
+        }
+        
+        /* --- Main Content Area --- */
+        main {
+            flex-grow: 1;
+            position: relative;
+            overflow-y: auto;
+        }
+        main::-webkit-scrollbar { display: none; }
+        main { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* --- Chat List --- */
+        .chat-list {
+            padding: 10px 0;
+        }
+        .chat-item, .search-result-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
             cursor: pointer;
             transition: background-color 0.2s;
+            border-bottom: 1px solid var(--border-color);
         }
-
-        .list-item:hover {
+        .chat-item:hover, .search-result-item:hover {
             background-color: var(--secondary-hover);
         }
-        
-        .list-item:last-child {
-             border-bottom: none;
-        }
-
-        .avatar {
-            width: 50px;
-            height: 50px;
-            min-width: 50px;
+        .profile-picture {
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
-            object-fit: cover;
-            position: relative;
             margin-left: 15px;
+            object-fit: cover;
+            background-color: var(--primary-color);
+            position: relative;
+            flex-shrink: 0;
         }
-
-        .item-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
         }
-
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .item-name {
-            font-weight: 700;
-            font-size: 1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .verified-tick {
-            width: 16px;
-            height: 16px;
-            margin-right: 5px;
-            vertical-align: middle;
-            display: inline-block;
-        }
-
-        .item-time {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-        }
-
-        .item-last-message {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-top: 2px;
-        }
-        
-        .online-dot {
-            position: absolute;
-            bottom: 0;
-            left: 0;
+        .online-indicator {
             width: 12px;
             height: 12px;
             background-color: var(--online-indicator);
+            border: 2px solid var(--background-color);
             border-radius: 50%;
-            border: 2px solid var(--secondary-color);
-        }
-        
-        /* --- Floating Action Button (FAB) --- */
-        .fab-container {
             position: absolute;
-            bottom: 25px;
-            right: 25px;
-            z-index: 20;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: flex-end;
+            bottom: 2px;
+            right: 2px;
         }
-
-        .fab-container.active .fab-action-btn {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        
-        .fab-container.active .fab-main-btn {
-            transform: rotate(45deg);
-            background-color: #e74c3c; /* Change color when active */
-        }
-        
-        .fab-main-btn {
-            background-color: var(--primary-color);
-            color: var(--text-primary);
-            width: 56px;
-            height: 56px;
+        .unread-badge {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background-color: var(--notification-badge);
+            color: white;
             border-radius: 50%;
-            border: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: transform 0.3s, background-color 0.3s;
-            margin-top: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .fab-action-btn {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: opacity 0.3s, transform 0.3s, background-color 0.2s;
-            padding: 8px 15px;
-            background-color: var(--secondary-hover);
-            color: var(--text-primary);
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            margin-top: 10px;
-            font-size: 0.9rem;
+            min-width: 22px;
+            height: 22px;
+            font-size: 0.75em;
             font-weight: 500;
             display: flex;
             align-items: center;
-            border: 1px solid var(--border-color);
+            justify-content: center;
+            border: 2px solid var(--background-color);
+            padding: 0 4px;
         }
-        
-        .fab-action-btn:hover {
-            background-color: var(--border-color);
+        .chat-details {
+            flex-grow: 1;
+            overflow: hidden;
         }
-        
-        .fab-action-btn svg {
-            width: 18px;
-            height: 18px;
-            margin-left: 8px;
+        .chat-details h3 {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 500;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+        }
+        .last-message {
+            margin: 4px 0 0;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chat-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            flex-shrink: 0;
         }
 
-        /* --- Profile Overlay --- */
+        .verified-tick {
+            width: 20px; 
+            height: 20px;
+            margin-right: 6px;
+        }
+        
+        /* --- Loading and Status Messages --- */
+        .status-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            flex-direction: column;
+            color: var(--text-secondary);
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--secondary-hover);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .status-container p {
+            margin-top: 15px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- Footer Navigation --- */
+        .main-footer {
+            padding: 10px 0;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: var(--secondary-color);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .nav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.7em;
+        }
+        .nav-btn svg {
+            width: 28px;
+            height: 28px;
+            margin-bottom: 4px;
+        }
+        .nav-btn.active {
+            color: var(--primary-color);
+        }
+
+        /* --- Profile Overlay Styles --- */
         .profile-overlay {
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
+            bottom: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
+            background-color: var(--background-color);
             z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s, visibility 0.3s;
-            padding-top: 10vh; /* Adjust position for better mobile view */
+            flex-direction: column;
+            max-width: 420px; 
+            margin: 0 auto;
         }
-
         .profile-overlay.active {
-            visibility: visible;
-            opacity: 1;
+            transform: translateY(0);
         }
-
-        .profile-card {
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
             background-color: var(--secondary-color);
-            border-radius: 12px;
-            padding: 30px;
-            width: 90%;
-            max-width: 350px;
+            flex-shrink: 0;
+        }
+        .profile-header h2 {
+            margin: 0;
+            font-size: 1.4em;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        .profile-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transform: scale(0.9);
-            transition: transform 0.3s;
         }
-        
-        .profile-overlay.active .profile-card {
-            transform: scale(1);
-        }
-
-        .profile-image-large {
-            width: 100px;
-            height: 100px;
+        .profile-main-pic {
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--primary-color);
-            margin-bottom: 15px;
-        }
-
-        .profile-display-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-            text-align: center;
-        }
-
-        .profile-username-text {
-            font-size: 1rem;
-            color: var(--text-secondary);
+            border: 3px solid var(--primary-color);
             margin-bottom: 20px;
         }
-
-        .logout-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-
-        .logout-btn:hover {
-            background-color: #c0392b;
-        }
-        
-        /* --- Modal for Confirmation (replacing alert/confirm) --- */
-        .custom-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .profile-main-pic img {
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(3px);
-            z-index: 200;
-            display: none; /* Default hidden */
-            justify-content: center;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        #profile-display-name {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
             align-items: center;
         }
-        
-        .custom-modal.active {
-            display: flex;
+        #profile-username {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            margin: 5px 0 30px 0;
         }
-        
-        .modal-content {
+        .profile-actions {
+            width: 100%;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .profile-actions li {
             background-color: var(--secondary-color);
-            padding: 25px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            width: 90%;
-            max-width: 300px;
-            text-align: center;
-        }
-        
-        .modal-message {
-            font-size: 1rem;
-            margin-bottom: 20px;
-        }
-        
-        .modal-actions {
             display: flex;
-            justify-content: space-around;
-        }
-        
-        .modal-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
+            align-items: center;
             cursor: pointer;
-            font-weight: 500;
             transition: background-color 0.2s;
         }
-        
-        .modal-btn.confirm {
-            background-color: #e74c3c;
+        .profile-actions li:hover {
+            background-color: var(--secondary-hover);
+        }
+        .profile-actions li svg {
+            margin-left: 15px;
+            color: var(--text-secondary);
+        }
+        #logout-btn {
+            color: #ff4d4d;
+        }
+         #logout-btn svg {
+            color: #ff4d4d;
+        }
+
+        /* --- MODIFIED: Floating Action Button (FAB) Styles --- */
+        .fab-container {
+            position: absolute;
+            bottom: 80px; /* MODIFIED: Lowered position */
+            right: 20px; /* MODIFIED: Moved to the right for RTL */
+            z-index: 99;
+            display: flex;
+            flex-direction: column; /* MODIFIED: Options will now appear on top */
+            align-items: center;
+        }
+
+        .fab-main {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            order: 2; /* MODIFIED: Ensures main button is at the bottom of the flex container */
+        }
+        .fab-main:hover {
+            transform: scale(1.05);
+        }
+        .fab-main svg {
             color: white;
-        }
-        .modal-btn.confirm:hover {
-            background-color: #c0392b;
+            width: 28px;
+            height: 28px;
+            transition: transform 0.3s ease;
         }
         
-        .modal-btn.cancel {
+        .fab-options {
+            display: flex;
+            flex-direction: column-reverse; /* Keeps single user icon above group icon */
+            align-items: center;
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0; /* MODIFIED: Increased margin-bottom for more space */
+            order: 1; /* MODIFIED: Ensures options are at the top of the flex container */
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+            transform: translateY(20px); /* Start position for animation */
+        }
+
+        .fab-option {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--secondary-hover);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .fab-option:last-child {
+            margin-bottom: 0; /* Removes margin from the top-most button */
+        }
+        .fab-option:hover {
             background-color: var(--border-color);
+            opacity: 0.9;
+        }
+        .fab-option svg {
             color: var(--text-primary);
+            width: 22px;
+            height: 22px;
         }
-        .modal-btn.cancel:hover {
-            background-color: var(--text-secondary);
+        
+        /* -- FAB Active State -- */
+        .fab-container.active .fab-main svg {
+            transform: rotate(45deg); /* Rotates '+' to 'x' */
         }
+        .fab-container.active .fab-options {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0); /* Buttons slide down to final position */
+        }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <h1>پیام‌رسان همیار</h1>
-            <button class="profile-btn" id="profileBtn">
-                <img id="headerProfileImage" src="https://ui-avatars.com/api/?name=User&background=0D1117&color=fff&size=50" alt="Profile">
-            </button>
+
+    <div class="app-container">
+        <!-- TOP BAR with search -->
+        <header class="app-header">
+            <h1>همیار</h1>
+            <div class="search-container">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="search-input" placeholder="جستجوی کاربر...">
+            </div>
         </header>
-        
-        <!-- Search -->
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="جستجو در چت‌ها و کانال‌ها...">
-        </div>
 
-        <!-- Tab Bar -->
-        <div class="tab-bar">
-            <button class="tab-btn active" data-tab="chats" id="chatsTab">چت‌ها</button>
-            <button class="tab-btn" data-tab="channels" id="channelsTab">کانال‌ها</button>
-        </div>
+        <!-- MAIN CONTENT: Chat list or search results -->
+        <main id="main-content">
+            <!-- Loading spinner will be shown here initially -->
+        </main>
 
-        <!-- Main List Container -->
-        <div class="list-container">
-            <div id="chatsList" class="tab-content active">
-                <!-- Chat list items will be injected here -->
-                <p style="text-align: center; color: var(--text-secondary); padding: 20px;" id="chatsPlaceholder">در حال بارگذاری چت‌ها...</p>
-            </div>
-            <div id="channelsList" class="tab-content" style="display: none;">
-                <!-- Channel list items will be injected here -->
-                <p style="text-align: center; color: var(--text-secondary); padding: 20px;" id="channelsPlaceholder">در حال بارگذاری کانال‌ها...</p>
-            </div>
-        </div>
-        
-        <!-- FAB Container -->
-        <div class="fab-container" id="fabContainer">
-            <button class="fab-main-btn" id="fabMainBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        <!-- BOTTOM NAVIGATION BAR -->
+        <footer class="main-footer">
+            <button class="nav-btn" id="nav-profile-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>پروفایل</span>
             </button>
-            <button class="fab-action-btn" id="newChatBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                شروع چت جدید
+            <button class="nav-btn">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>دوستان</span>
             </button>
-            <button class="fab-action-btn" id="newChannelBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-megaphone"><path d="m3 11 18-5v12l-18 5V11z"/><path d="M7 11v7"/></svg>
-                کانال جدید
+            <button class="nav-btn active" id="nav-chats-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>چت‌ها</span>
             </button>
-        </div>
-        
-        <!-- Profile Overlay -->
-        <div class="profile-overlay" id="profileOverlay">
-            <div class="profile-card">
-                <button class="close-btn" onclick="hideProfile()" style="position: absolute; top: 10px; left: 10px; background: none; border: none; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer;">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+             <button class="nav-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>خانه</span>
+            </button>
+        </footer>
+
+        <!-- Floating Action Button (FAB) HTML Structure -->
+        <div class="fab-container" id="fab-container">
+            <div class="fab-options">
+                 <!-- Note: The order here is reversed in the display due to flex-direction: column-reverse -->
+                <button class="fab-option" title="چت خصوصی جدید">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </button>
-                <img id="profileImage" class="profile-image-large" alt="Profile Image">
-                <h2 id="profileDisplayName" class="profile-display-name"></h2>
-                <p id="profileUsername" class="profile-username-text"></p>
-                <!-- User ID for debugging (Optional but useful) -->
-                <p style="font-size: 0.8rem; color: #5a626a;">ID: <span id="profileUserId"></span></p>
-                <button id="logoutBtn" class="logout-btn">خروج از حساب کاربری</button>
+                <button class="fab-option" title="ایجاد گروه/کانال">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </button>
             </div>
-        </div>
-        
-        <!-- Custom Modal for Confirmation -->
-        <div class="custom-modal" id="customModal">
-            <div class="modal-content">
-                <p class="modal-message" id="modalMessage">آیا مطمئن هستید که می‌خواهید خارج شوید؟</p>
-                <div class="modal-actions">
-                    <button class="modal-btn confirm" id="modalConfirmBtn">بله</button>
-                    <button class="modal-btn cancel" id="modalCancelBtn">خیر</button>
-                </div>
-            </div>
+            <button class="fab-main" id="fab-main-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
         </div>
 
     </div>
 
+    <!-- Profile Overlay HTML Structure -->
+    <div class="profile-overlay" id="profile-overlay">
+        <header class="profile-header">
+            <button class="close-btn" id="close-profile-btn">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2>پروفایل</h2>
+            <div style="width: 24px;"></div> <!-- Spacer -->
+        </header>
+        <main class="profile-content">
+            <div class="profile-main-pic">
+                <img id="profile-image" src="" alt="عکس پروفایل">
+            </div>
+            <h3 id="profile-display-name"></h3>
+            <p id="profile-username"></p>
+
+            <ul class="profile-actions">
+                <li>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    <span>ویرایش پروفایل</span>
+                </li>
+                <li>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>تنظیمات</span>
+                </li>
+                 <li id="logout-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    <span>خروج از حساب</span>
+                </li>
+            </ul>
+        </main>
+    </div>
+
+
     <script>
-        // ===================================================================
-        // 🛠️ تنظیمات امنیتی پراکسی
-        // ===================================================================
-        // آدرس فایل PHP پراکسی (لطفاً این آدرس را با آدرس واقعی خود جایگزین کنید!)
-        // 🚨 اصلاح شده: از مسیر نسبی استفاده شد تا 404 برطرف شود.
-        const PROXY_URL_BASE = './firebase_proxy.php'; 
-        // کلید امنیتی تعریف شده در فایل PHP (SHARED_SECRET)
-        const PROXY_SECRET = 'miko1234'; 
-        // آدرس دریافت توکن کلاینت
-        const PROXY_TOKEN_URL = `${PROXY_URL_BASE}?auth=token`;
+        // --- SECTION: App Configuration ---
+        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        const SHARED_SECRET = 'miko1234';
+        const VERIFIED_TICK_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
+
+        // --- SECTION: DOM Element References ---
+        const mainContent = document.getElementById('main-content');
+        const searchInput = document.getElementById('search-input');
         
-        // ===================================================================
-        // ⚙️ متغیرهای گلوبال و المان‌ها
-        // ===================================================================
+        const profileOverlay = document.getElementById('profile-overlay');
+        const openProfileBtn = document.getElementById('nav-profile-btn');
+        const closeProfileBtn = document.getElementById('close-profile-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const profileImage = document.getElementById('profile-image');
+        const profileDisplayName = document.getElementById('profile-display-name');
+        const profileUsername = document.getElementById('profile-username');
+        
+        const fabContainer = document.getElementById('fab-container');
+        const fabMainBtn = document.getElementById('fab-main-btn');
+
+        // --- SECTION: App State ---
         let currentUser = null;
-        let clientToken = localStorage.getItem('clientToken');
-        let pollingIntervalId = null;
-        
-        const CHAT_POLLING_INTERVAL = 5000; // 5 seconds interval for data refresh
-        const VERIFIED_TICK_URL = 'https://placehold.co/16x16/007bff/ffffff?text=%E2%9C%93';
+        let clientToken = null;
+        let allUsers = {};
+        let recentChats = [];
+        let pollingIntervalId = null; 
 
-        // DOM Elements
-        const profileBtn = document.getElementById('profileBtn');
-        const profileOverlay = document.getElementById('profileOverlay');
-        const profileImage = document.getElementById('profileImage');
-        const headerProfileImage = document.getElementById('headerProfileImage');
-        const profileDisplayName = document.getElementById('profileDisplayName');
-        const profileUsername = document.getElementById('profileUsername');
-        const profileUserId = document.getElementById('profileUserId');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const chatsList = document.getElementById('chatsList');
-        const channelsList = document.getElementById('channelsList');
-        const chatsPlaceholder = document.getElementById('chatsPlaceholder');
-        const channelsPlaceholder = document.getElementById('channelsPlaceholder');
-        const chatsTab = document.getElementById('chatsTab');
-        const channelsTab = document.getElementById('channelsTab');
-        const fabContainer = document.getElementById('fabContainer');
-        const fabMainBtn = document.getElementById('fabMainBtn');
-        const newChatBtn = document.getElementById('newChatBtn');
-        const newChannelBtn = document.getElementById('newChannelBtn');
-        
-        // Modal Elements
-        const customModal = document.getElementById('customModal');
-        const modalMessage = document.getElementById('modalMessage');
-        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
-        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        // --- SECTION: Initialization ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const storedUser = localStorage.getItem('currentUser');
+            if (!storedUser) {
+                showErrorMessage('خطای احراز هویت. لطفاً ابتدا وارد شوید.');
+                return;
+            }
+            currentUser = JSON.parse(storedUser);
 
-        // ===================================================================
-        // 🔑 مدیریت توکن کلاینت و Auth
-        // ===================================================================
+            searchInput.addEventListener('input', handleSearch);
+            openProfileBtn.addEventListener('click', showProfile);
+            closeProfileBtn.addEventListener('click', hideProfile);
+            logoutBtn.addEventListener('click', handleLogout);
 
-        // نمایش Modal به جای confirm/alert
-        function showCustomModal(message, onConfirm, onCancel) {
-            modalMessage.textContent = message;
-            customModal.classList.add('active');
+            fabMainBtn.addEventListener('click', toggleFabMenu);
 
-            const handleConfirm = () => {
-                customModal.classList.remove('active');
-                modalConfirmBtn.removeEventListener('click', handleConfirm);
-                modalCancelBtn.removeEventListener('click', handleCancel);
-                if (onConfirm) onConfirm();
-            };
+            await loadInitialData();
+        });
 
-            const handleCancel = () => {
-                customModal.classList.remove('active');
-                modalConfirmBtn.removeEventListener('click', handleConfirm);
-                modalCancelBtn.removeEventListener('click', handleCancel);
-                if (onCancel) onCancel();
-            };
-
-            modalConfirmBtn.addEventListener('click', handleConfirm);
-            modalCancelBtn.addEventListener('click', handleCancel);
-        }
-
-        /**
-         * Checks for client token and fetches one if expired or missing.
-         * @returns {Promise<boolean>} True if token is ready, false otherwise.
-         */
-        async function ensureClientToken() {
-            if (clientToken) return true;
-
+        async function loadInitialData() {
+            showLoadingSpinner();
             try {
-                console.log('Fetching new client token...');
-                const response = await fetch(PROXY_TOKEN_URL, {
-                    method: 'GET',
-                    headers: {
-                        'X-Proxy-Secret': PROXY_SECRET
-                    }
-                });
+                await refreshClientToken();
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.token) {
-                        clientToken = data.token;
-                        localStorage.setItem('clientToken', clientToken);
-                        console.log('✅ Client token successfully fetched and stored.');
-                        return true;
+                const [usersResponse, chatsResponse] = await Promise.all([
+                    fetchProxyData('users'),
+                    fetchProxyData('pivi_chats')
+                ]);
+
+                if (usersResponse) {
+                    Object.values(usersResponse).forEach(user => { allUsers[user.username] = user; });
+                    if (allUsers[currentUser.username]) {
+                        currentUser = allUsers[currentUser.username];
                     }
                 }
                 
-                // Fallback for failed token request
-                console.error('❌ Failed to fetch client token from proxy:', response.statusText);
-                return false;
+                if (chatsResponse) {
+                    recentChats = Object.values(chatsResponse)
+                        .map((chat, index) => {
+                            if (index === 0) chat.unreadCount = 3;
+                            if (index === 2) chat.unreadCount = 15;
+                            return chat;
+                        })
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                }
+
+                renderChatList();
+                
+                startRealtimeUpdates();
+
             } catch (error) {
-                console.error('❌ Network error during token fetch:', error);
-                return false;
+                console.error("Initialization Error:", error);
+                showErrorMessage(`خطا در بارگذاری اطلاعات: ${error.message}`);
             }
         }
-        
-        /**
-         * Wrapper around fetch to securely access the database via the PHP proxy.
-         * @param {string} path - The database path (e.g., 'users/alireza').
-         * @param {string} method - HTTP method (GET, POST, PUT, DELETE).
-         * @param {object} [data=null] - Data payload for POST/PUT/PATCH.
-         * @returns {Promise<object|null>} The JSON response data from the database.
-         */
-        async function fetchWithProxy(path, method, data = null) {
-            if (!currentUser || !clientToken) {
-                console.error('Authorization required: User or Client Token is missing.');
-                return null;
-            }
 
-            const isTokenReady = await ensureClientToken();
-            if (!isTokenReady) {
-                // If token refresh failed, force logout to re-auth
-                console.error('Proxy Token is not ready. Forcing logout.');
-                showCustomModal('مشکل در احراز هویت. لطفاً دوباره وارد شوید.', handleLogout);
-                return null;
-            }
-            
-            const url = `${PROXY_URL_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
-            const config = {
-                method: method,
+        // --- SECTION: Data Fetching ---
+        async function refreshClientToken() {
+            const response = await fetch(`${PROXY_URL}?auth=token`, {
+                headers: { 'X-Proxy-Secret': SHARED_SECRET }
+            });
+            if (!response.ok) throw new Error('امکان دریافت توکن امنیتی وجود ندارد.');
+            const data = await response.json();
+            clientToken = data.token;
+        }
+
+        async function fetchProxyData(path) {
+            if (!clientToken || !currentUser) throw new Error('کاربر احراز هویت نشده است.');
+
+            const response = await fetch(`${PROXY_URL}?path=${path}`, {
                 headers: {
-                    'Content-Type': 'application/json',
-                    // هدر اصلی احراز هویت
                     'Authorization': `Bearer ${clientToken}`,
-                    // نام کاربری جاری برای بررسی مجوزهای سمت سرور
-                    'X-User-Username': currentUser.username 
+                    'X-User-Username': currentUser.username
                 }
-            };
-
-            if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-                config.body = JSON.stringify(data);
-            }
-
-            try {
-                const response = await fetch(url, config);
-                const responseData = await response.json();
-                
-                if (!response.ok) {
-                    console.error(`❌ Proxy request failed for ${path} (${method}):`, responseData.error || response.statusText);
-                    // Handle specific errors like token expiry (if proxy returns specific error)
-                    if (responseData.error && responseData.error.includes('Token expired')) {
-                         // Clear the expired token and try again (or force logout)
-                         localStorage.removeItem('clientToken');
-                         clientToken = null;
-                         showCustomModal('نشست کاربری شما منقضی شده است. لطفاً دوباره وارد شوید.', handleLogout);
-                    }
-                    return null;
-                }
-
-                return responseData;
-            } catch (error) {
-                console.error(`❌ Network error during proxy request to ${path}:`, error);
-                return null;
-            }
+            });
+            if (!response.ok) throw new Error(`خطا در واکشی اطلاعات از مسیر ${path}.`);
+            return response.json();
         }
 
-        // ===================================================================
-        // 🔄 توابع اصلی داده و رندر
-        // ===================================================================
-
-        async function fetchChats() {
-            if (!currentUser) return;
-            chatsPlaceholder.textContent = 'در حال دریافت چت‌ها...';
-            
-            // 🛑 استفاده از fetchWithProxy به جای دسترسی مستقیم Firebase
-            const chatsData = await fetchWithProxy('pivi_chats', 'GET'); 
-
-            if (!chatsData) {
-                chatsPlaceholder.textContent = 'خطا در بارگذاری چت‌ها.';
-                chatsList.innerHTML = '';
-                return;
-            }
-            
-            const chatsArray = Object.entries(chatsData)
-                .map(([chatId, data]) => ({ chatId, ...data }))
-                .filter(chat => chat.members && Object.keys(chat.members).includes(currentUser.username));
-
-            renderChats(chatsArray);
-            if (chatsArray.length === 0) {
-                chatsPlaceholder.textContent = 'هنوز چتی ندارید. برای شروع، یک چت جدید بسازید.';
-            } else {
-                chatsPlaceholder.style.display = 'none';
-            }
-        }
-
-        async function fetchChannels() {
-            channelsPlaceholder.textContent = 'در حال دریافت کانال‌ها...';
-            
-            // 🛑 استفاده از fetchWithProxy به جای دسترسی مستقیم Firebase
-            const channelsData = await fetchWithProxy('channels', 'GET');
-
-            if (!channelsData) {
-                channelsPlaceholder.textContent = 'خطا در بارگذاری کانال‌ها.';
-                channelsList.innerHTML = '';
+        // --- SECTION: UI Rendering ---
+        
+        function renderChatList() {
+            if (recentChats.length === 0) {
+                mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
                 return;
             }
 
-            const channelsArray = Object.entries(channelsData)
-                .map(([id, data]) => ({ id, ...data }));
+            const chatListHtml = recentChats.map(chat => {
+                if (!chat || !chat.members) {
+                    console.warn('Skipping malformed chat object:', chat);
+                    return '';
+                }
+                const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
+                const partnerData = allUsers[partnerUsername];
+                if (!partnerData) return ''; 
+
+                return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp, chat.unreadCount);
+            }).join('');
             
-            renderChannels(channelsArray);
-            if (channelsArray.length === 0) {
-                channelsPlaceholder.textContent = 'هنوز کانالی برای نمایش وجود ندارد.';
-            } else {
-                channelsPlaceholder.style.display = 'none';
+            mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
+            addClickListenersToItems();
+        }
+
+        function renderSearchResults(results) {
+             if (results.length === 0) {
+                mainContent.innerHTML = '<div class="status-container"><p>کاربری با این مشخصات یافت نشد.</p></div>';
+                return;
             }
-        }
-
-        function renderChats(chats) {
-            chatsList.innerHTML = '';
-            chats.forEach(chat => {
-                const otherMemberUsername = Object.keys(chat.members).find(u => u !== currentUser.username);
-                if (!otherMemberUsername) return; // Should not happen
-
-                // Mock user data for the other member (in a real app, you would fetch this from 'users/otherMemberUsername' via proxy)
-                const otherMemberDisplayName = otherMemberUsername; 
-
-                const chatItem = document.createElement('div');
-                chatItem.className = 'list-item';
-                chatItem.dataset.chatId = chat.chatId;
-                
-                // Assuming lastMessage is available and is a string
-                const lastMessage = chat.lastMessage || 'شروع گفتگو...';
-
-                // Basic time formatting (can be improved)
-                const time = chat.timestamp ? new Date(chat.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }) : '';
-
-
-                chatItem.innerHTML = `
-                    <div class="avatar" style="background-color: var(--primary-color);">
-                         <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(otherMemberDisplayName)}&background=1E90FF&color=fff&size=50" alt="${otherMemberDisplayName}" class="avatar">
-                         <!-- Online status indicator would go here if fetched separately -->
-                    </div>
-                    <div class="item-content">
-                        <div class="item-header">
-                            <span class="item-name">${otherMemberDisplayName}</span>
-                            <span class="item-time">${time}</span>
-                        </div>
-                        <p class="item-last-message">${lastMessage}</p>
-                    </div>
-                `;
-                chatsList.appendChild(chatItem);
-            });
-            attachChatEventListeners();
-        }
-
-        function renderChannels(channels) {
-            channelsList.innerHTML = '';
-            channels.forEach(channel => {
-                const channelItem = document.createElement('div');
-                channelItem.className = 'list-item';
-                channelItem.dataset.channelId = channel.channel_id;
-                
-                const time = channel.created_at ? new Date(channel.created_at).toLocaleDateString('fa-IR') : '';
-                
-                channelItem.innerHTML = `
-                    <div class="avatar" style="background-color: #f39c12;">
-                         <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(channel.channel_name)}&background=f39c12&color=fff&size=50" alt="${channel.channel_name}" class="avatar">
-                    </div>
-                    <div class="item-content">
-                        <div class="item-header">
-                            <span class="item-name">${channel.channel_name}</span>
-                            <span class="item-time">${time}</span>
-                        </div>
-                        <p class="item-last-message">سازنده: @${channel.creator_username} - ${channel.description}</p>
-                    </div>
-                `;
-                channelsList.appendChild(channelItem);
-            });
-            attachChannelEventListeners();
-        }
-
-        function attachChatEventListeners() {
-            document.querySelectorAll('#chatsList .list-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    // Assuming you have a page like chat.html
-                    window.location.href = `chat.html?id=${item.dataset.chatId}`;
-                });
-            });
+            const resultsHtml = results.map(user => createSearchResultHtml(user)).join('');
+            mainContent.innerHTML = `<div class="chat-list">${resultsHtml}</div>`;
+            addClickListenersToItems();
         }
         
-        function attachChannelEventListeners() {
-            document.querySelectorAll('#channelsList .list-item').forEach(item => {
+        function showLoadingSpinner() {
+            mainContent.innerHTML = `
+                <div class="status-container">
+                    <div class="spinner"></div>
+                    <p>در حال بارگذاری اطلاعات...</p>
+                </div>`;
+        }
+        
+        function showErrorMessage(message) {
+            mainContent.innerHTML = `<div class="status-container"><p>${message}</p></div>`;
+        }
+
+        // --- SECTION: HTML Template Generators ---
+
+        function createChatItemHtml(partnerData, lastMessage, timestamp, unreadCount) {
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=1E90FF&color=fff&size=100`;
+            
+            const unreadBadgeHtml = (unreadCount && unreadCount > 0)
+                ? `<div class="unread-badge">${unreadCount}</div>`
+                : '';
+
+            const verifiedTickHtml = partnerData.verified === true
+                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
+                : '';
+                
+            return `
+                <div class="chat-item" data-uid="${partnerData.username}">
+                    <div class="profile-picture">
+                        <img src="${avatarUrl}" alt="${partnerData.displayName}">
+                        ${unreadBadgeHtml} 
+                    </div>
+                    <div class="chat-details">
+                        <h3>${partnerData.displayName || partnerData.username} ${verifiedTickHtml}</h3>
+                        <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
+                    </div>
+                    <div class="chat-meta">
+                        <span>${new Date(timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                </div>`;
+        }
+
+        function createSearchResultHtml(userData) {
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
+            
+            const verifiedTickHtml = userData.verified === true
+                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
+                : '';
+
+            return `
+                <div class="search-result-item" data-uid="${userData.username}">
+                    <div class="profile-picture">
+                        <img src="${avatarUrl}" alt="${userData.displayName}">
+                        ${userData.isOnline ? '<div class="online-indicator"></div>' : ''}
+                    </div>
+                    <div class="chat-details">
+                        <h3>${userData.displayName || userData.username} ${verifiedTickHtml}</h3>
+                        <p class="last-message">@${userData.username}</p>
+                    </div>
+                </div>`;
+        }
+        
+        // --- SECTION: Real-time Updates ---
+
+        async function checkForUpdates() {
+            try {
+                const [newChatsResponse, newUsersResponse] = await Promise.all([
+                    fetchProxyData('pivi_chats'),
+                    fetchProxyData('users')
+                ]);
+
+                if (newUsersResponse) {
+                    if (JSON.stringify(allUsers) !== JSON.stringify(newUsersResponse)) {
+                        console.log('User data has changed. Updating allUsers object.');
+                        Object.values(newUsersResponse).forEach(user => { allUsers[user.username] = user; });
+                    }
+                }
+
+                if (newChatsResponse) {
+                    const newRecentChats = Object.values(newChatsResponse)
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                    if (JSON.stringify(newRecentChats) !== JSON.stringify(recentChats)) {
+                        console.log('New chat data detected. Updating list.');
+                        recentChats = newRecentChats;
+
+                        if (searchInput.value.trim() === '') {
+                            renderChatList();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Polling Error:", error.message);
+            }
+        }
+
+        function startRealtimeUpdates(interval = 7000) {
+            if (pollingIntervalId) {
+                clearInterval(pollingIntervalId);
+            }
+            console.log(`Starting real-time updates every ${interval / 1000} seconds.`);
+            pollingIntervalId = setInterval(checkForUpdates, interval);
+        }
+
+        // --- SECTION: Event Handlers & Interactions ---
+
+        function handleSearch() {
+            const query = searchInput.value.toLowerCase().trim();
+            if (!query) {
+                renderChatList(); 
+                return;
+            }
+            
+            const filteredUsers = Object.values(allUsers).filter(user => {
+                if (!user || user.username === currentUser.username) return false;
+                const usernameMatch = user.username && user.username.toLowerCase().includes(query);
+                const displayNameMatch = user.displayName && user.displayName.toLowerCase().includes(query);
+                return usernameMatch || displayNameMatch;
+            });
+
+            renderSearchResults(filteredUsers);
+        }
+
+        function addClickListenersToItems() {
+            mainContent.querySelectorAll('[data-uid]').forEach(item => {
                 item.addEventListener('click', () => {
-                     // Assuming you have a page like channel.html
-                    window.location.href = `channel.html?id=${item.dataset.channelId}`;
+                    const targetUid = item.dataset.uid;
+                    if (targetUid) {
+                        console.log(`Navigating to chat with user: ${targetUid}`);
+                        window.location.href = `pivi.html?uid=${targetUid}`;
+                    }
                 });
             });
         }
         
         // --- Functions for Profile Page ---
+
         function showProfile() {
             if (!currentUser) return;
-            // Assuming currentUser object is correctly loaded from localStorage and has 'verified' property
-            const verifiedTickHtml = currentUser.verified === true ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
             
-            // Assuming currentUserId is available in currentUser object (e.g., from auth system)
-            profileUserId.textContent = currentUser.uid || 'N/A'; // Assuming 'uid' is the actual unique ID
-            
-            // Update profile image sources
-            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=0D1117&color=fff&size=150`;
-            profileImage.src = avatarUrl;
-            headerProfileImage.src = avatarUrl;
+            const verifiedTickHtml = currentUser.verified === true
+                ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">`
+                : '';
 
+            profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=0D1117&color=fff&size=150`;
             profileDisplayName.innerHTML = `${currentUser.displayName || currentUser.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${currentUser.username}`;
-            
+
             profileOverlay.classList.add('active');
         }
-        function hideProfile() { profileOverlay.classList.remove('active'); }
-        
+
+        function hideProfile() {
+            profileOverlay.classList.remove('active');
+        }
+
         function handleLogout() {
-            showCustomModal('آیا مطمئن هستید که می‌خواهید خارج شوید؟', () => {
+            if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
                 localStorage.removeItem('currentUser');
-                localStorage.removeItem('clientToken'); // ⚠️ توکن پراکسی را هم حذف می‌کنیم
-                clientToken = null;
                 if (pollingIntervalId) clearInterval(pollingIntervalId);
                 window.location.href = 'login.html'; 
-            });
-        }
-        
-        function toggleFabMenu() { fabContainer.classList.toggle('active'); }
-        
-        function setActiveTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
-
-            document.getElementById(`${tabId}Tab`).classList.add('active');
-            document.getElementById(`${tabId}List`).style.display = 'block';
-
-            if (tabId === 'chats') {
-                fetchChats();
-            } else if (tabId === 'channels') {
-                fetchChannels();
             }
         }
 
-
-        // ===================================================================
-        // 🚀 اجرای اولیه (Initializer)
-        // ===================================================================
-        
-        async function initialize() {
-            const storedUser = localStorage.getItem('currentUser');
-            currentUser = storedUser ? JSON.parse(storedUser) : null;
-
-            if (!currentUser || !currentUser.username) {
-                // Redirect if not logged in
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            // 1. Ensure proxy token is available
-            const tokenReady = await ensureClientToken();
-            if (!tokenReady) {
-                 // The ensureClientToken already handles forced logout on failure, but we guard here too.
-                 return;
-            }
-
-            // 2. Set up UI
-            showProfile(); // to display initial header image
-            profileBtn.addEventListener('click', showProfile);
-            logoutBtn.addEventListener('click', handleLogout);
-            fabMainBtn.addEventListener('click', toggleFabMenu);
-            
-            chatsTab.addEventListener('click', () => setActiveTab('chats'));
-            channelsTab.addEventListener('click', () => setActiveTab('channels'));
-            
-            // 3. Initial Data Load (default to chats)
-            setActiveTab('chats');
-            
-            // 4. Start polling for new data (adjust logic for real-time where possible)
-            // Note: Since this is an HTML app without Firebase SDK, polling is the simplest method.
-            pollingIntervalId = setInterval(() => {
-                const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-                if (activeTab === 'chats') {
-                    fetchChats();
-                } else {
-                    fetchChannels();
-                }
-            }, CHAT_POLLING_INTERVAL);
+        // --- Function for Floating Action Button ---
+        function toggleFabMenu() {
+            fabContainer.classList.toggle('active');
         }
-
-        window.onload = initialize;
 
     </script>
 </body>
