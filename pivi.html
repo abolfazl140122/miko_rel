@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>چت شخصی | پیام‌رسان همیار</title>
+
     <style>
-        /* --- تمامی استایل‌های CSS شما بدون تغییر در اینجا قرار می‌گیرند --- */
         /* --- وارد کردن فونت وزیرمتن --- */
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
 
@@ -55,7 +55,7 @@
         #loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--background-color);
-            display: flex; justify-content: center; align-items: center;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 1000; transition: opacity 0.5s ease;
         }
         .loading-dots { display: flex; align-items: center; }
@@ -66,6 +66,7 @@
         }
         .loading-dots div:nth-child(2) { animation-delay: 0.4s; }
         .loading-dots div:nth-child(3) { animation-delay: 0.8s; }
+        #loading-error { color: var(--danger-color); margin-top: 20px; text-align: center; display: none; }
 
         @keyframes dot-flashing {
             0% { opacity: 0.2; transform: scale(0.8); }
@@ -80,7 +81,7 @@
             margin: 0 auto; background-color: transparent;
             display: flex; flex-direction: column;
             opacity: 0;
-            transition: opacity 0.5s ease, padding-bottom 0.2s ease-in-out; /* [تغییر] انیمیشن برای فاصله کیبورد */
+            transition: opacity 0.5s ease, padding-bottom 0.2s ease-in-out;
         }
         .app-container.visible { opacity: 1; }
 
@@ -326,7 +327,7 @@
         .dialog-footer .btn-primary { background-color: var(--primary-color); color: white; }
         .dialog-footer .btn-secondary { background-color: var(--border-color); color: var(--text-primary); }
         
-        /* --- [جدید] استایل‌های مودال تنظیمات --- */
+        /* --- استایل‌های مودال تنظیمات --- */
         .setting-item { margin-top: 15px; }
         .setting-item label { font-weight: 500; display: block; margin-bottom: 5px; }
         .setting-item p { font-size: 0.85em; color: var(--text-secondary); margin-bottom: 15px; }
@@ -342,12 +343,14 @@
             border-radius: 50%;
         }
         #keyboard-offset-value { font-weight: 500; min-width: 50px; text-align: left; }
+
     </style>
 </head>
 <body>
 
     <div id="loading-overlay">
         <div class="loading-dots"><div></div><div></div><div></div></div>
+        <p id="loading-error"></p>
     </div>
 
     <div class="app-container" id="app-container">
@@ -406,7 +409,7 @@
         </div>
     </div>
 
-    <!-- [جدید] مودال گزینه‌های اصلی (هدر) -->
+    <!-- مودال گزینه‌های اصلی (هدر) -->
     <div id="main-options-overlay" class="modal-overlay">
         <div id="main-options-menu" class="modal-card">
             <div class="menu-option" id="main-menu-profile-btn">
@@ -456,7 +459,7 @@
         </div>
     </div>
     
-    <!-- [جدید] مودال تنظیمات -->
+    <!-- مودال تنظیمات -->
     <div id="settings-overlay" class="modal-overlay">
         <div class="modal-card">
             <h4>تنظیمات</h4>
@@ -490,16 +493,19 @@
     </div>
 
     <script>
-        // --- بخش ۱: تنظیمات و متغیرهای اصلی ---
-        
-        // [اصلاح کلیدی ۱] آدرس پراکسی را با آدرس دامنه واقعی خود جایگزین کنید
-        // این مهم‌ترین تغییری است که باید انجام دهید
-        const PROXY_URL = 'https://your-actual-domain.com/firebase_proxy.php';
-        
+        // ===============================================
+        //  !!!   مهم: این بخش را حتما ویرایش کنید   !!!
+        // ===============================================
+        // آدرس کامل فایل پراکسی PHP خود را در اینجا قرار دهید.
+        // مطمئن شوید که دامنه شما صحیح و فعال است.
+        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
+        // ===============================================
+
 
         // --- ارجاع به عناصر DOM ---
         const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingErrorEl = document.getElementById('loading-error');
         const appContainer = document.getElementById('app-container');
         const partnerNameEl = document.getElementById('partner-name');
         const partnerAvatarEl = document.getElementById('partner-avatar');
@@ -519,29 +525,26 @@
         const pinnedMessageBar = document.getElementById('pinned-message-bar');
         const unpinBtn = document.getElementById('unpin-btn');
         const optionsBtn = document.getElementById('options-btn');
-        
-        // --- [جدید] ارجاع به عناصر تنظیمات ---
         const mainOptionsOverlay = document.getElementById('main-options-overlay');
         const settingsOverlay = document.getElementById('settings-overlay');
         const keyboardOffsetSlider = document.getElementById('keyboard-offset-slider');
         const keyboardOffsetValue = document.getElementById('keyboard-offset-value');
-
-        let activeMessageId = null, activeMessageElement = null;
         
         // --- وضعیت کلی اپلیکیشن ---
         let currentUser = null, clientToken = null, chatPartner = null, chatId = null;
         let messagePollingInterval = null, presencePollingInterval = null;
-        let lastMessagesHash = null, lastChatDataHash = null;
         let isPartnerBlocked = false;
         let activeReplyContext = null;
         let currentPinnedMessage = null;
-        let keyboardOffset = 80; // [جدید] متغیر برای فاصله کیبورد با مقدار پیش‌فرض
+        let activeMessageId = null, activeMessageElement = null;
+        let keyboardOffset = 80;
 
 
         // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
         window.addEventListener('load', initializeApp);
         window.addEventListener('beforeunload', () => updatePresence(false));
         document.addEventListener('visibilitychange', () => {
+            if (!currentUser) return;
             updatePresence(!document.hidden);
             if (document.hidden) pauseApp(); else resumeApp();
         });
@@ -549,6 +552,7 @@
         async function initializeApp() {
             if (window.piviAppInitialized) return;
             window.piviAppInitialized = true;
+
             showLoading();
             
             keyboardOffset = parseInt(localStorage.getItem('keyboardOffset') || '80', 10);
@@ -556,18 +560,30 @@
             keyboardOffsetValue.textContent = `${keyboardOffset} px`;
 
             const storedUser = localStorage.getItem('currentUser');
-            if (!storedUser) { window.location.href = 'login.html'; return; }
+            if (!storedUser) {
+                window.location.href = 'login.html';
+                return;
+            }
             currentUser = JSON.parse(storedUser);
 
             const urlParams = new URLSearchParams(window.location.search);
             const partnerUsername = urlParams.get('uid') || urlParams.get('with');
-            if (!partnerUsername) { showError('کاربر مقصد مشخص نشده است.'); return; }
+            if (!partnerUsername) {
+                showError('کاربر مقصد مشخص نشده است.');
+                return;
+            }
 
             try {
+                if (PROXY_URL.includes('YOUR_CORRECT_DOMAIN')) {
+                     throw new Error('لطفاً آدرس دامنه صحیح خود را در متغیر PROXY_URL در کد جاوااسکریپت وارد کنید.');
+                }
                 await refreshClientToken();
                 await fetchCurrentUserData();
                 await fetchPartnerData(partnerUsername);
-                if (!chatPartner) { showError('کاربر مورد نظر پیدا نشد.'); return; }
+                if (!chatPartner) {
+                    showError('کاربر مورد نظر پیدا نشد.');
+                    return;
+                }
                 
                 chatId = [currentUser.username, chatPartner.username].sort().join('_');
                 
@@ -616,8 +632,9 @@
             appContainer.classList.add('visible');
         }
         function showError(message) {
-            messagesArea.innerHTML = `<div style="text-align:center; color: var(--text-secondary); padding: 20px;"><p>${message}</p></div>`;
-            showApp();
+            loadingErrorEl.textContent = message;
+            loadingErrorEl.style.display = 'block';
+            document.querySelector('#loading-overlay .loading-dots').style.display = 'none';
         }
         function scrollToBottom() {
             mainContent.scrollTop = 0; // به دلیل flex-direction: column-reverse
@@ -625,7 +642,7 @@
 
         function createVerifiedNameHTML(displayName, isVerified) {
             if (isVerified) {
-                const badgeHTML = `<img src="https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png" style="width: 20px; height: 20px; margin-right: 6px;">`;
+                const badgeHTML = `<img src="https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png" style="width: 20px; height: 20px; margin-right: 6px; vertical-align: middle;">`;
                 return `<span style="display: inline-flex; align-items: center;">${displayName}${badgeHTML}</span>`;
             }
             return displayName;
@@ -657,25 +674,17 @@
             document.getElementById('delete-msg-btn').addEventListener('click', handleDeleteAction);
             blockUserBtn.addEventListener('click', handleBlockToggle);
 
-            document.getElementById('main-menu-profile-btn').addEventListener('click', () => {
-                hideModal(mainOptionsOverlay);
-                showModal(profileOverlay);
-            });
-            document.getElementById('main-menu-settings-btn').addEventListener('click', () => {
-                hideModal(mainOptionsOverlay);
-                showModal(settingsOverlay);
-            });
+            document.getElementById('main-menu-profile-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(profileOverlay); });
+            document.getElementById('main-menu-settings-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(settingsOverlay); });
             document.getElementById('close-settings-btn').addEventListener('click', () => hideModal(settingsOverlay));
             keyboardOffsetSlider.addEventListener('input', handleKeyboardOffsetChange);
             messageInput.addEventListener('focus', applyKeyboardOffset);
             messageInput.addEventListener('blur', removeKeyboardOffset);
             
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
-                overlay.addEventListener('click', (e) => {
-                    if (e.target === overlay) hideModal(overlay);
-                });
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) hideModal(overlay); });
             });
-             document.querySelector('.profile-card .handle').addEventListener('click', () => hideModal(profileOverlay));
+            document.querySelector('.profile-card .handle').addEventListener('click', () => hideModal(profileOverlay));
         }
 
         function toggleSendButton() {
@@ -689,15 +698,11 @@
             keyboardOffset = parseInt(e.target.value, 10);
             keyboardOffsetValue.textContent = `${keyboardOffset} px`;
             localStorage.setItem('keyboardOffset', keyboardOffset);
-            if (document.activeElement === messageInput) {
-                applyKeyboardOffset();
-            }
+            if (document.activeElement === messageInput) { applyKeyboardOffset(); }
         }
         function applyKeyboardOffset() {
             appContainer.style.paddingBottom = `${keyboardOffset}px`;
-            setTimeout(() => {
-                messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }, 100);
+            setTimeout(() => { messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
         }
         function removeKeyboardOffset() {
             appContainer.style.paddingBottom = '0px';
@@ -760,25 +765,18 @@
             try {
                 const path = `users/${currentUser.username}/blockedUsers/${chatPartner.username}`;
                 if (willBlock) {
-                    // [اصلاح کلیدی ۲] ارسال داده با فرمت صحیح برای مسدود کردن
-                    // سرور انتظار یک آبجکت با تاریخ انقضا را دارد
-                    const expiryDate = new Date();
-                    expiryDate.setFullYear(expiryDate.getFullYear() + 5); // مسدودیت برای ۵ سال
-                    const blockData = {
-                        active: true,
-                        expireAt: expiryDate.toISOString()
-                    };
+                    // Note: The new proxy expects a specific JSON body for blocking
+                    const expiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(); // Block for 1 year
+                    const blockData = { active: true, expireAt: expiry };
                     await apiRequest(path, 'PUT', blockData);
                     if (!currentUser.blockedUsers) currentUser.blockedUsers = {};
                     currentUser.blockedUsers[chatPartner.username] = blockData;
-
                 } else {
                     await apiRequest(path, 'DELETE');
                     if (currentUser.blockedUsers) delete currentUser.blockedUsers[chatPartner.username];
                 }
                 isPartnerBlocked = willBlock;
                 updateBlockUI();
-
             } catch (error) {
                 showCustomAlert({ title: 'خطا', message: 'خطا در انجام عملیات مسدودسازی.' });
                 console.error(error);
@@ -789,13 +787,10 @@
         async function refreshClientToken() {
             try {
                 const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-                if (!response.ok) throw new Error(`خطای ${response.status} در دریافت توکن`);
+                if (!response.ok) throw new Error(`خطای ${response.status} در دریافت توکن از سرور`);
                 const data = await response.json();
                 clientToken = data.token;
-            } catch (error) { 
-                console.error('Fetch error for token:', error);
-                throw new Error(`خطای شبکه در دریافت توکن: ${error.message}`); 
-            }
+            } catch (error) { throw new Error(`خطای شبکه در دریافت توکن: ${error.message}. از صحت آدرس پراکسی و روشن بودن سرور مطمئن شوید.`); }
         }
         async function fetchCurrentUserData() {
              const data = await apiRequest(`users/${currentUser.username}`, 'GET');
@@ -810,14 +805,10 @@
             if (!chatId || !clientToken) return;
             try {
                 const chatData = await apiRequest(`pivi_chats/${chatId}`, 'GET');
-                const newChatDataHash = JSON.stringify(chatData);
-
-                if (newChatDataHash === lastChatDataHash) return;
-                lastChatDataHash = newChatDataHash;
-
-                updatePinnedMessageUI(chatData?.pinnedMessage || null);
                 
-                const messagesData = chatData?.messages || {};
+                updatePinnedMessageUI(chatData ? chatData.pinnedMessage : null);
+                
+                const messagesData = chatData ? chatData.messages : {};
                 messagesArea.innerHTML = '';
                 if (Object.keys(messagesData).length === 0) {
                     messagesArea.innerHTML = `<div style="text-align:center; color: var(--text-secondary);"><p>هنوز پیامی رد و بدل نشده است.</p></div>`;
@@ -831,19 +822,17 @@
             } catch(error) { console.error("خطا در بارگذاری داده‌های چت:", error); }
         }
         
+        // --- ضبط و ارسال ویس ---
         const voiceBtn = document.getElementById('voice-btn');
         let recorder, chunks = [];
         voiceBtn.addEventListener('click', async () => {
           if (!recorder || recorder.state === 'inactive') {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                recorder = new MediaRecorder(stream);
+                recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
                 chunks = [];
                 recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
                 recorder.onstop = async () => {
-                  voiceBtn.style.color = 'var(--text-secondary)';
-                  voiceBtn.textContent = '🎤';
-                  
                   const blob = new Blob(chunks, { type: 'audio/webm' });
                   const fd = new FormData();
                   fd.append('voice', blob, `voice_${currentUser.username}_${Date.now()}.webm`);
@@ -853,12 +842,6 @@
                       headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username },
                       body: fd
                     });
-                    
-                    if (!res.ok) { // بررسی وضعیت پاسخ سرور
-                        const errorData = await res.json().catch(() => ({error: `خطای سرور: ${res.status}`}));
-                        throw new Error(errorData.error);
-                    }
-
                     const data = await res.json();
                     if (data.success && data.url) {
                       const msg = { senderId: currentUser.username, receiverId: chatPartner.username, voiceUrl: data.url, timestamp: new Date().toISOString(), type: 'voice' };
@@ -867,23 +850,20 @@
                          lastMessage: 'پیام صوتی', timestamp: msg.timestamp
                        });
                       await loadChatData();
-                    } else { 
-                        throw new Error(data.error || 'پاسخ ناموفق از سرور برای آپلود صدا');
-                    }
-                  } catch (err) { 
-                      console.error(err); 
-                      showCustomAlert({title: 'خطا', message: `خطا در ارسال ویس: ${err.message}`}); 
-                  }
+                    } else { showCustomAlert({title: 'خطا', message: data.error || 'خطا در آپلود صدا'}); }
+                  } catch (err) { console.error(err); showCustomAlert({title: 'خطا', message: 'خطای شبکه در ارسال ویس'}); }
                 };
                 recorder.start();
                 voiceBtn.style.color = 'var(--danger-color)';
                 voiceBtn.textContent = '◼️';
             } catch(err) {
                 console.error("Failed to get media", err);
-                showCustomAlert({title: 'خطا', message: 'امکان دسترسی به میکروفن وجود ندارد.'});
+                showCustomAlert({title: 'خطا', message: 'امکان دسترسی به میکروفن وجود ندارد. لطفا مجوز لازم را بدهید.'});
             }
           } else if (recorder.state === 'recording') {
             recorder.stop();
+            voiceBtn.style.color = 'var(--text-secondary)';
+            voiceBtn.textContent = '🎤';
           }
         });
 
@@ -974,14 +954,11 @@
         function handleMessageClick(e) {
             activeMessageElement = e.target.closest('.message:not(.deleted)');
             if (activeMessageElement) {
-                const isVoiceMessage = !!activeMessageElement.querySelector('audio');
+                if (activeMessageElement.querySelector('audio')) return;
+
                 const isSentByUser = activeMessageElement.classList.contains('sent');
-                
-                // [اصلاح کلیدی ۳] منطق نمایش گزینه‌ها
-                // ویرایش و حذف برای ویس غیرفعال است، اما پاسخ فعال است
-                document.getElementById('edit-msg-btn').style.display = (isSentByUser && !isVoiceMessage) ? 'flex' : 'none';
+                document.getElementById('edit-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
                 document.getElementById('delete-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
-                document.getElementById('reply-msg-btn').style.display = 'flex'; // همیشه فعال
 
                 activeMessageId = activeMessageElement.dataset.id;
                 
@@ -1161,16 +1138,15 @@
                 },
                 keepalive
             };
-            if (body !== undefined && body !== null) {
+            if (body !== undefined && method !== 'GET') {
                 options.body = JSON.stringify(body);
             }
             
             const response = await fetch(`${PROXY_URL}?path=${path}`, options);
-            const responseText = await response.text();
-            const responseData = responseText ? JSON.parse(responseText) : {};
-
+            const responseData = await response.json().catch(() => ({}));
             if (!response.ok) {
-                throw new Error(responseData.error || `یک خطای ${response.status} رخ داد.`);
+                 console.error("API Error Response:", responseData);
+                 throw new Error(responseData.error || `یک خطای ${response.status} رخ داد.`);
             }
             return responseData;
         }
