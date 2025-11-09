@@ -154,6 +154,9 @@
         .message .timestamp {
             font-size: 0.7em; color: rgba(255, 255, 255, 0.6);
             margin-top: 5px; text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* NEW: Align items to the end */
         }
         .message .edited-indicator { font-size: 0.7em; color: rgba(255, 255, 255, 0.6); margin-right: 5px; font-style: italic;}
         .message.deleted .text { font-style: italic; color: var(--text-secondary); }
@@ -230,6 +233,28 @@
             text-align: center;
         }
         
+        /* --- NEW: استایل لودر ارسال ویس --- */
+        .sending-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sending-indicator .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .sending-indicator span {
+             font-size: 0.8em;
+             color: rgba(255,255,255,0.7);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
         /* --- فرم ورودی پیام --- */
         #message-form-wrapper { flex-shrink: 0; position: relative; }
         
@@ -255,7 +280,6 @@
         }
         @keyframes slide-up { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
 
-
         #blocked-user-overlay {
             position: absolute; bottom: 0; width: 100%; padding: 15px;
             background-color: rgba(30, 30, 30, 0.9); backdrop-filter: blur(4px);
@@ -273,6 +297,7 @@
             gap: 8px; /* ایجاد فاصله استاندارد بین آیتم‌ها */
             box-shadow: 0 -2px 10px var(--shadow-color);
             transition: opacity 0.3s, filter 0.3s;
+            position: relative; /* NEW: for cancel indicator */
         }
         #message-form.disabled { pointer-events: none; opacity: 0.5; filter: grayscale(80%); }
         
@@ -301,10 +326,44 @@
             font-family: 'Vazirmatn', sans-serif;
             background-color: var(--background-color);
             color: var(--text-primary);
-            transition: box-shadow 0.2s;
+            transition: box-shadow 0.2s, transform 0.3s, opacity 0.3s;
             min-width: 0; /* جلوگیری از سرریز شدن در فلکس */
         }
+        #message-input.recording {
+            transform: translateX(100%);
+            opacity: 0;
+            pointer-events: none;
+        }
         #message-input:focus { box-shadow: 0 0 0 2px var(--primary-color); }
+        
+        /* --- NEW: استایل نشانگر لغو ارسال ویس --- */
+        #voice-cancel-indicator {
+            position: absolute;
+            left: 15px; /* RTL */
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        #voice-cancel-indicator.visible { opacity: 1; }
+        #voice-cancel-indicator span { margin: 0 10px; }
+        #voice-record-timer {
+            position: absolute;
+            right: 15px; /* RTL */
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--danger-color);
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        #voice-record-timer.visible { opacity: 1; }
+
 
         #send-btn {
             background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 45px; height: 45px;
@@ -317,10 +376,19 @@
 
         #attachment-buttons {
             display: flex;
-            transition: transform 0.3s, opacity 0.3s;
+            transition: transform 0.3s, opacity 0.3s, visibility 0.3s; /* NEW: added visibility */
             flex-shrink: 0; /* جلوگیری از فشرده شدن دکمه‌ها */
         }
-        #attachment-buttons.hidden { transform: scale(0); opacity: 0; position: absolute; }
+        #attachment-buttons.hidden { 
+            transform: scale(0); 
+            opacity: 0; 
+            position: absolute;
+            visibility: hidden; /* NEW: Ensure it's fully hidden */
+        }
+        #attachment-buttons.recording {
+            opacity: 0;
+            pointer-events: none;
+        }
         
         /* --- مودال‌های مرکزی (برای پروفایل، گزینه‌ها و دیالوگ‌ها) --- */
         .modal-overlay {
@@ -485,6 +553,15 @@
                 <button type="submit" id="send-btn" aria-label="ارسال پیام">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </button>
+
+                <!-- NEW: نشانگرهای جدید برای ضبط ویس -->
+                <div id="voice-record-timer">00:00</div>
+                <div id="voice-cancel-indicator">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--danger-color);"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>برای لغو بکشید</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+                </div>
+                
                 <input type="text" id="message-input" placeholder="پیامت رو بنویس..." autocomplete="off">
                 <div id="attachment-buttons">
                     <button type="button" class="icon-btn" title="افزودن فایل"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg></button>
@@ -618,7 +695,10 @@
         const keyboardOffsetSlider = document.getElementById('keyboard-offset-slider');
         const keyboardOffsetValue = document.getElementById('keyboard-offset-value');
         const voiceBtn = document.getElementById('voice-btn');
-        
+        // --- NEW: ارجاع به عناصر جدید ویس ---
+        const voiceCancelIndicator = document.getElementById('voice-cancel-indicator');
+        const voiceRecordTimer = document.getElementById('voice-record-timer');
+
         // --- وضعیت کلی اپلیکیشن ---
         let currentUser = null, clientToken = null, chatPartner = null, chatId = null;
         let messagePollingInterval = null, presencePollingInterval = null;
@@ -628,6 +708,11 @@
         let activeMessageId = null, activeMessageElement = null;
         let keyboardOffset = 80;
         let lastMessagesSnapshot = {}; // برای مقایسه پیام‌های جدید و قدیم
+
+        // --- NEW: متغیرهای وضعیت ضبط ویس ---
+        let recorder, voiceChunks = [], mediaStream = null, isRecording = false;
+        let recordStartTime, recordTimerInterval;
+        let touchStartX, isCancelThresholdMet = false;
 
 
         // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
@@ -770,6 +855,16 @@
             keyboardOffsetSlider.addEventListener('input', handleKeyboardOffsetChange);
             messageInput.addEventListener('focus', applyKeyboardOffset);
             messageInput.addEventListener('blur', removeKeyboardOffset);
+
+            // --- NEW: رویدادهای جدید برای دکمه ویس (لمس و نگه داشتن) ---
+            voiceBtn.addEventListener('mousedown', startRecording);
+            voiceBtn.addEventListener('touchstart', startRecording);
+            // رویدادهای پایان ضبط به کل سند اضافه می‌شوند تا اگر کاربر خارج از دکمه انگشتش را برداشت، عمل کنند
+            document.addEventListener('mouseup', stopRecording);
+            document.addEventListener('touchend', stopRecording);
+            document.addEventListener('mousemove', handleRecordingMove);
+            document.addEventListener('touchmove', handleRecordingMove);
+
             
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 overlay.addEventListener('click', (e) => { if (e.target === overlay) hideModal(overlay); });
@@ -927,62 +1022,168 @@
             } catch(error) { console.error("خطا در بارگذاری داده‌های چت:", error); }
         }
         
-        // --- ضبط و ارسال ویس (اصلاح شده) ---
-        let recorder, chunks = [], mediaStream = null; // متغیر برای نگهداری استریم
-        voiceBtn.addEventListener('click', async () => {
-          if (!recorder || recorder.state === 'inactive') {
+        // ===================================================================
+        // --- NEW & REFACTORED: بخش جدید و بازنویسی شده ضبط و ارسال ویس ---
+        // ===================================================================
+
+        async function startRecording(e) {
+            // جلوگیری از انتخاب متن یا دیگر رفتارهای پیش‌فرض مرورگر
+            e.preventDefault();
+            if (isRecording) return;
+            isRecording = true;
+            isCancelThresholdMet = false;
+
+            // ذخیره نقطه شروع لمس برای محاسبه حرکت
+            touchStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+
+            // به‌روزرسانی UI برای حالت ضبط
+            updateRecordingUI(true);
+
             try {
-                // دریافت دسترسی به میکروفون و نگهداری استریم
                 mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 recorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
-                chunks = [];
-                recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
-                recorder.onstop = async () => {
-                  // قطع دسترسی به میکروفون بعد از توقف ضبط
-                  if (mediaStream) {
-                      mediaStream.getTracks().forEach(track => track.stop());
-                      mediaStream = null;
-                  }
-
-                  const blob = new Blob(chunks, { type: 'audio/webm' });
-                  const fd = new FormData();
-                  fd.append('voice', blob, `voice_${currentUser.username}_${Date.now()}.webm`);
-                  try {
-                    const res = await fetch(`${PROXY_URL}?path=upload_voice`, {
-                      method: 'POST',
-                      headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username },
-                      body: fd
-                    });
-                    const data = await res.json();
-                    if (data.success && data.url) {
-                      const msg = { senderId: currentUser.username, receiverId: chatPartner.username, voiceUrl: data.url, timestamp: new Date().toISOString(), type: 'voice' };
-                      const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', msg);
-                       await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
-                         lastMessage: 'پیام صوتی', timestamp: msg.timestamp
-                       });
-                      createMessageElement(newMsgRef.name, msg);
-                      lastMessagesSnapshot[newMsgRef.name] = msg;
-                      scrollToBottom();
-                    } else { showCustomAlert({title: 'خطا', message: data.error || 'خطا در آپلود صدا'}); }
-                  } catch (err) { console.error(err); showCustomAlert({title: 'خطا', message: 'خطای شبکه در ارسال ویس'}); }
+                voiceChunks = [];
+                recorder.ondataavailable = event => { if (event.data.size > 0) voiceChunks.push(event.data); };
+                
+                recorder.onstop = () => {
+                    // قطع دسترسی به میکروفون
+                    if (mediaStream) {
+                        mediaStream.getTracks().forEach(track => track.stop());
+                        mediaStream = null;
+                    }
+                    // اگر عملیات لغو نشده باشد، ویس را ارسال کن
+                    if (!isCancelThresholdMet) {
+                        const voiceBlob = new Blob(voiceChunks, { type: 'audio/webm' });
+                        if (voiceBlob.size > 1000) { // حداقل یک ثانیه ضبط
+                           sendVoiceMessage(voiceBlob);
+                        }
+                    }
+                    // پاک کردن داده‌های ضبط قبلی
+                    voiceChunks = [];
                 };
+
                 recorder.start();
-                voiceBtn.classList.add('recording');
-            } catch(err) {
-                console.error("Failed to get media", err);
-                showCustomAlert({title: 'خطا', message: 'امکان دسترسی به میکروفن وجود ندارد. لطفا مجوز لازم را بدهید.'});
+                startTimer(); // شروع تایمر نمایش زمان ضبط
+            } catch (err) {
+                console.error("خطا در دسترسی به میکروفون:", err);
+                showCustomAlert({ title: 'خطا', message: 'امکان دسترسی به میکروفون وجود ندارد. لطفاً مجوز لازم را بدهید.' });
+                updateRecordingUI(false); // بازگرداندن UI به حالت عادی
+                isRecording = false;
             }
-          } else if (recorder.state === 'recording') {
-            recorder.stop();
-            voiceBtn.classList.remove('recording');
-          }
-        });
+        }
+
+        function stopRecording() {
+            if (!isRecording) return;
+            isRecording = false;
+            
+            if (recorder && recorder.state === 'recording') {
+                recorder.stop();
+            }
+            // بازگرداندن UI به حالت عادی
+            updateRecordingUI(false);
+            stopTimer();
+        }
+
+        function handleRecordingMove(e) {
+            if (!isRecording) return;
+
+            const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const distance = touchStartX - currentX; // حرکت به سمت چپ (در حالت RTL)
+            
+            // اگر بیش از 100 پیکسل کشیده شد، حالت لغو را فعال کن
+            const cancelThreshold = 100;
+            if (distance > cancelThreshold) {
+                isCancelThresholdMet = true;
+                voiceCancelIndicator.style.color = 'var(--danger-color)';
+            } else {
+                isCancelThresholdMet = false;
+                voiceCancelIndicator.style.color = 'var(--text-secondary)';
+            }
+        }
+
+        function updateRecordingUI(isStarting) {
+            messageInput.classList.toggle('recording', isStarting);
+            attachmentButtons.classList.toggle('recording', isStarting);
+            voiceCancelIndicator.classList.toggle('visible', isStarting);
+            voiceRecordTimer.classList.toggle('visible', isStarting);
+            voiceBtn.classList.toggle('recording', isStarting);
+        }
+
+        function startTimer() {
+            recordStartTime = Date.now();
+            recordTimerInterval = setInterval(() => {
+                const elapsedTime = Math.floor((Date.now() - recordStartTime) / 1000);
+                const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+                const seconds = String(elapsedTime % 60).padStart(2, '0');
+                voiceRecordTimer.textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(recordTimerInterval);
+            voiceRecordTimer.textContent = "00:00";
+        }
+
+        async function sendVoiceMessage(blob) {
+            // 1. ایجاد یک حباب پیام موقت با لودینگ
+            const tempId = `temp_${Date.now()}`;
+            const tempMsgData = {
+                senderId: currentUser.username,
+                timestamp: new Date().toISOString(),
+                isSending: true // یک فلگ برای شناسایی پیام در حال ارسال
+            };
+            createMessageElement(tempId, tempMsgData);
+            scrollToBottom();
+
+            // 2. آماده‌سازی و ارسال درخواست آپلود
+            const formData = new FormData();
+            formData.append('voice', blob, `voice_${currentUser.username}_${Date.now()}.webm`);
+
+            try {
+                const response = await fetch(`${PROXY_URL}?path=upload_voice`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username },
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.success && result.url) {
+                    // 3. در صورت موفقیت، پیام اصلی را ساخته و با پیام موقت جایگزین می‌کنیم
+                    const finalMsg = {
+                        senderId: currentUser.username, receiverId: chatPartner.username,
+                        voiceUrl: result.url, timestamp: new Date().toISOString(), type: 'voice'
+                    };
+                    const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', finalMsg);
+                    await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
+                        lastMessage: 'پیام صوتی', timestamp: finalMsg.timestamp
+                    });
+                    
+                    // آپدیت حباب پیام موقت
+                    const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
+                    if (tempElement) {
+                        tempElement.dataset.id = newMsgRef.name; // آی‌دی اصلی را جایگزین می‌کنیم
+                        updateMessageElement(tempElement, finalMsg);
+                        lastMessagesSnapshot[newMsgRef.name] = finalMsg;
+                    }
+                } else {
+                    throw new Error(result.error || 'خطا در آپلود صدا');
+                }
+            } catch (err) {
+                console.error("خطا در ارسال ویس:", err);
+                // 4. در صورت خطا، پیام موقت را به حالت خطا تغییر می‌دهیم
+                const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
+                if (tempElement) {
+                   tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود.</div>`;
+                }
+            }
+        }
+        // ===================================================================
+        // --- پایان بخش جدید ویس ---
+        // ===================================================================
+
 
         function createMessageElement(msgId, msg) {
-            // اگر پیام "خالی" است، آن را نادیده بگیر
             if (!msg || !msg.timestamp) return;
-
-             // اگر پیام اول باشد، پیام "هنوز پیامی..." را پاک کن
             const placeholder = messagesArea.querySelector('div[style*="text-align:center"]');
             if(placeholder) placeholder.remove();
 
@@ -991,7 +1192,7 @@
             msgDiv.className = `message ${isSent ? 'sent' : 'received'}`;
             msgDiv.dataset.id = msgId;
             
-            updateMessageElement(msgDiv, msg); // از تابع آپدیت برای ساخت محتوای اولیه استفاده می‌کنیم
+            updateMessageElement(msgDiv, msg);
             messagesArea.appendChild(msgDiv);
         }
 
@@ -1017,8 +1218,16 @@
 
             if (msg.deleted) {
                 messageContentHTML = `<div class="text">این پیام حذف شده است</div>`;
-            } else if (msg.type === 'voice' && msg.voiceUrl) {
-                // ساختار جدید و زیبای پلیر ویس
+            } 
+            // --- NEW: حالت لودینگ برای ویس ---
+            else if (msg.isSending) {
+                messageContentHTML = `
+                    <div class="sending-indicator">
+                        <div class="spinner"></div>
+                        <span>در حال ارسال...</span>
+                    </div>`;
+            }
+            else if (msg.type === 'voice' && msg.voiceUrl) {
                 messageContentHTML = `
                     <div class="voice-player">
                         <button class="play-pause-btn" aria-label="پخش/توقف">
@@ -1041,7 +1250,7 @@
                 ${messageContentHTML}
                 <div class="timestamp">${editedIndicator}${timestamp}</div>`;
             
-            if (msg.type === 'voice' && !msg.deleted) {
+            if (msg.type === 'voice' && !msg.deleted && !msg.isSending) {
                 setupVoicePlayer(msgDiv); // راه‌اندازی منطق پلیر برای این پیام
             }
         }
@@ -1104,7 +1313,8 @@
         // --- بخش ۱۰: مدیریت منوها و قابلیت‌های پیام ---
         function handleMessageClick(e) {
             const messageElement = e.target.closest('.message:not(.deleted)');
-            // اگر روی پلیر ویس کلیک شد، منو را باز نکن
+            if (!messageElement || messageElement.dataset.id.startsWith('temp_')) return; // روی پیام در حال ارسال کلیک نشود
+
             if (e.target.closest('.voice-player')) {
                  activeMessageElement = null;
                  return;
