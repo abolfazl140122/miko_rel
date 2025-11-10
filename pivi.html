@@ -826,13 +826,21 @@
                         const blob = await response.blob();
                         const objectURL = URL.createObjectURL(blob);
 
+                        // 🟢 نگه‌داری blob تا از حافظه پاک نشود
+                        if (!this._blobUrls) this._blobUrls = new Map();
+                        this._blobUrls.set(url, { blob, objectURL });
+
                         // Update lastAccessed timestamp for LRU policy
                         const transaction = this.db.transaction(this.storeName, 'readwrite');
                         const store = transaction.objectStore(this.storeName);
-                        const metadata = await new Promise(r => store.get(url).onsuccess = e => r(e.target.result));
-                        if(metadata) {
-                             store.put({ ...metadata, lastAccessed: Date.now() });
+                        const metadata = await new Promise(r => {
+                            const req = store.get(url);
+                            req.onsuccess = e => r(e.target.result);
+                        });
+                        if (metadata) {
+                            store.put({ ...metadata, lastAccessed: Date.now() });
                         }
+
                         return objectURL;
                     }
                     return null;
@@ -841,6 +849,7 @@
                     return null;
                 }
             }
+
             
             async ensurePreloaded(urls, concurrency = 4, timeout = 5000) {
                 const queue = [...urls]; // A copy of URLs to process
