@@ -4,106 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>کانال همیار</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* --- استایل‌های پایه و متغیرها --- */
+        /* --- SECTION: متغیرها و استایل‌های پایه --- */
         :root {
-            --background-color: #0D1117;
-            --primary-color: #1E90FF;
-            --secondary-color: #161B22;
-            --secondary-hover: #2C2F33;
+            --background-primary: #101418;
+            --background-secondary: #181c20;
+            --background-tertiary: #22282e;
+            --primary-accent: #00AFFF;
+            --primary-accent-glow: rgba(0, 175, 255, 0.3);
+            --text-primary: #EAECEF;
+            --text-secondary: #8A939E;
             --border-color: #30363d;
-            --text-primary: #E4E6EB;
-            --text-secondary: #8b949e;
-            --message-out-bg: #1E90FF;
-            --message-in-bg: #2C2F33;
-            --danger-color: #ff4d4d;
+            --message-out-bg: linear-gradient(135deg, #007BFF, #00AFFF);
+            --message-in-bg: #2C3238;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --blur-effect: saturate(150%) blur(10px);
         }
 
         *, *::before, *::after { box-sizing: border-box; }
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background-color: var(--background-color);
+            background: #0D1117;
             color: var(--text-primary);
             user-select: none; -webkit-user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
         .app-container {
-            width: 100%; max-width: 420px; height: 100%; margin: 0 auto;
-            background-color: var(--background-color);
-            display: flex; flex-direction: column; box-shadow: 0 0 25px rgba(0,0,0,0.2);
+            width: 100%; max-width: 450px; height: 100vh;
+            background-color: var(--background-primary);
+            display: flex; flex-direction: column; 
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        
+        @media (min-width: 480px) {
+            .app-container {
+                max-height: 95vh;
+                border-radius: 20px;
+                border: 1px solid var(--border-color);
+            }
         }
 
-        /* --- هدر صفحه --- */
+        /* --- SECTION: هدر صفحه --- */
         .app-header {
-            padding: 15px; border-bottom: 1px solid var(--border-color);
+            padding: 12px 15px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
-            background-color: var(--secondary-color); flex-shrink: 0;
+            background-color: rgba(24, 28, 32, 0.8);
+            backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect);
+            flex-shrink: 0; z-index: 10;
         }
-        .app-header h1 { font-size: 1.3em; margin: 0; flex-grow: 1; text-align: center; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .header-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; }
-        .header-btn#edit-channel-btn { display: none; } /* دکمه ویرایش در ابتدا مخفی است */
+        .channel-info { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .channel-avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--primary-accent); display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 1.2em; color: white; flex-shrink: 0; }
+        .channel-details { display: flex; flex-direction: column; overflow: hidden; }
+        .channel-details h1 { font-size: 1.1em; margin: 0; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;}
+        .channel-meta { font-size: 0.8em; color: var(--text-secondary); }
+        .header-actions { display: flex; align-items: center; gap: 5px; }
+        .header-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.2s, color 0.2s; }
+        .header-btn:hover { background-color: var(--background-tertiary); color: var(--text-primary); }
 
-        /* --- بخش اصلی محتوا --- */
-        main { flex-grow: 1; position: relative; overflow-y: auto; }
-
-        /* --- فرم ساخت کانال --- */
-        .creation-form-container { padding: 30px 25px; display: flex; flex-direction: column; gap: 20px; }
-        .form-title { font-size: 1.8em; font-weight: 700; color: var(--primary-color); text-align: center; margin-bottom: 15px; }
-        .input-group { display: flex; flex-direction: column; }
-        .input-group label { font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px; }
-        .input-group input, .input-group textarea {
-            background-color: var(--secondary-color); border: 1px solid var(--border-color); border-radius: 10px;
-            padding: 12px 15px; color: var(--text-primary); font-family: 'Vazirmatn', sans-serif; font-size: 1em;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.2); }
-        .input-group textarea { resize: vertical; min-height: 100px; }
-        .create-btn {
-            background-color: var(--primary-color); color: white; border: none; border-radius: 12px; padding: 14px;
-            font-size: 1.1em; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            gap: 10px; margin-top: 20px; transition: background-color 0.3s, transform 0.2s;
-        }
-        .create-btn:hover { background-color: #1a7bde; transform: translateY(-2px); }
-        .create-btn:disabled { background-color: var(--secondary-hover); cursor: not-allowed; }
+        /* --- SECTION: بخش اصلی محتوا --- */
+        main { flex-grow: 1; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        .search-bar { display: none; padding: 10px 15px; background: var(--background-secondary); }
+        .search-bar.active { display: block; }
+        .search-bar input { width: 100%; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--background-tertiary); color: var(--text-primary); }
         
-        /* --- صفحه چت کانال --- */
-        .channel-chat-container { display: flex; flex-direction: column; height: 100%; }
+        /* --- SECTION: فید پیام‌ها --- */
         .message-feed { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column-reverse; }
-        .message-bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; margin-bottom: 10px; font-size: 0.95em; word-wrap: break-word; line-height: 1.5; }
-        .message-bubble.out { background-color: var(--message-out-bg); color: white; border-bottom-right-radius: 4px; align-self: flex-end; }
-        .message-bubble.in { background-color: var(--message-in-bg); border-bottom-left-radius: 4px; align-self: flex-start; }
-        .message-sender { font-size: 0.8em; font-weight: 500; color: var(--primary-color); margin-bottom: 4px; }
-        .channel-info-bar { padding: 10px 15px; text-align: center; color: var(--text-secondary); font-size: 0.9em; background-color: var(--secondary-color); flex-shrink: 0;}
-
-        /* --- بخش ورودی پیام --- */
-        .message-input-area { display: flex; align-items: center; padding: 10px 15px; border-top: 1px solid var(--border-color); background-color: var(--secondary-color); flex-shrink: 0; }
-        .message-input-area input { flex-grow: 1; background-color: var(--secondary-hover); border: none; border-radius: 20px; padding: 10px 18px; color: var(--text-primary); font-family: 'Vazirmatn', sans-serif; font-size: 1em; }
-        .message-input-area input:focus { outline: none; }
-        .send-btn { background: none; border: none; color: var(--primary-color); cursor: pointer; padding: 0 15px; display: flex; align-items: center; justify-content: center; }
+        .message-wrapper { display: flex; flex-direction: column; margin-bottom: 5px; transition: opacity 0.3s, transform 0.3s; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* --- وضعیت‌ها و لودینگ --- */
-        .status-container { display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; color: var(--text-secondary); padding: 20px; text-align: center; }
-        .spinner { width: 40px; height: 40px; border: 4px solid var(--secondary-hover); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .message-bubble { 
+            max-width: 85%; padding: 10px 15px; border-radius: 18px; font-size: 0.95em; 
+            word-wrap: break-word; line-height: 1.6; position: relative;
+        }
+        .message-bubble.out { background: var(--message-out-bg); color: white; border-bottom-right-radius: 5px; align-self: flex-end; }
+        .message-bubble.in { background-color: var(--message-in-bg); border-bottom-left-radius: 5px; align-self: flex-start; }
+        
+        .message-bubble img, .message-bubble video { max-width: 100%; border-radius: 10px; margin-top: 8px; }
+        .audio-player { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
 
-        /* --- مودال ویرایش کانال --- */
+        .message-reactions { position: absolute; bottom: -12px; left: 10px; display: flex; gap: 4px; }
+        .message-bubble.out .message-reactions { right: 10px; left: auto; }
+        .reaction-pill { 
+            font-size: 0.7em; padding: 2px 6px; background: var(--background-tertiary); 
+            border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .reaction-pill:hover { transform: scale(1.1); }
+        .reaction-pill.user-reacted { background: var(--primary-accent); color: white; }
+
+        .message-time { font-size: 0.7em; color: var(--text-secondary); margin: 4px 8px 10px 8px; align-self: flex-end; }
+        .message-bubble.in + .message-time { align-self: flex-start; }
+
+        .typing-indicator { display: none; align-items: center; gap: 5px; padding: 5px 15px; color: var(--text-secondary); font-style: italic; font-size: 0.9em; }
+        .typing-indicator.active { display: flex; }
+        .typing-dot { width: 5px; height: 5px; background: var(--text-secondary); border-radius: 50%; animation: typing-bounce 1.2s infinite ease-in-out; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing-bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+
+        /* --- SECTION: نوار ورودی پیام --- */
+        .message-input-area { 
+            display: flex; align-items: center; padding: 10px 15px; 
+            border-top: 1px solid var(--border-color); background-color: var(--background-secondary); flex-shrink: 0;
+        }
+        .message-input-wrapper { display: flex; align-items: center; background: var(--background-tertiary); border-radius: 25px; flex-grow: 1; padding: 0 5px; }
+        .message-input-wrapper input[type="text"] { 
+            flex-grow: 1; background: transparent; border: none; padding: 12px 15px; 
+            color: var(--text-primary); font-family: 'Vazirmatn', sans-serif; font-size: 1em; 
+        }
+        .message-input-wrapper input:focus { outline: none; }
+        .input-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 10px; transition: color 0.2s; }
+        .input-btn:hover { color: var(--primary-accent); }
+        .send-btn { 
+            background: var(--primary-accent); color: white; border: none; border-radius: 50%; 
+            width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; margin-left: 8px; flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .send-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--primary-accent-glow); }
+        .send-btn:disabled { background-color: var(--text-secondary); cursor: not-allowed; }
+
+        /* --- SECTION: وضعیت‌ها و مودال‌ها --- */
+        .status-container { display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; color: var(--text-secondary); padding: 20px; text-align: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--background-tertiary); border-top-color: var(--primary-accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .offline-indicator {
+            display: none; position: absolute; top: 0; left: 0; right: 0;
+            background-color: var(--danger-color); color: white; text-align: center;
+            padding: 5px; font-size: 0.8em; z-index: 100;
+        }
+        .offline-indicator.active { display: block; }
+        
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+            backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect);
             display: flex; align-items: center; justify-content: center; z-index: 1000;
             opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-content {
-            background: var(--secondary-color); padding: 25px; border-radius: 15px;
-            width: 90%; max-width: 350px; box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-            transform: scale(0.9); transition: transform 0.3s;
+            background: var(--background-secondary); padding: 25px; border-radius: 15px;
+            width: 90%; max-width: 380px; box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            transform: scale(0.9); transition: transform 0.3s; border: 1px solid var(--border-color);
         }
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-title { margin-top: 0; font-size: 1.5em; }
+        .input-group { display: flex; flex-direction: column; margin-bottom: 15px; }
+        .input-group label { font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px; }
+        .input-group input, .input-group textarea {
+            background-color: var(--background-tertiary); border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 12px 15px; color: var(--text-primary); font-family: 'Vazirmatn', sans-serif; font-size: 1em;
+        }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-btn { flex-grow: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; }
-        .save-btn { background-color: var(--primary-color); color: white; }
-        .cancel-btn { background-color: var(--secondary-hover); color: var(--text-primary); }
+        .modal-btn { flex-grow: 1; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; font-size: 1em; transition: opacity 0.2s; }
+        .modal-btn:hover { opacity: 0.9; }
+        .save-btn { background-color: var(--primary-accent); color: white; }
+        .cancel-btn { background-color: var(--background-tertiary); color: var(--text-primary); }
+        
+        #attachment-preview-img { max-width: 100%; max-height: 200px; border-radius: 10px; margin-bottom: 15px; }
+
     </style>
 </head>
 <body>
@@ -111,13 +181,23 @@
 <div class="app-container">
     <!-- هدر صفحه -->
     <header class="app-header">
-        <button class="header-btn" onclick="window.history.back()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        </button>
-        <h1 id="page-title">همیار</h1>
-        <button class="header-btn" id="edit-channel-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-        </button>
+        <div class="channel-info">
+            <div class="channel-avatar" id="channel-avatar">H</div>
+            <div class="channel-details">
+                <h1 id="page-title">همیار</h1>
+                <div class="channel-meta">
+                    <span id="member-count">0 عضو</span> - <span id="online-status">آفلاین</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" id="search-btn" title="جستجو">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+            <button class="header-btn" id="edit-channel-btn" title="ویرایش کانال">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h3"></path><path d="M18.37 3.63a2.12 2.12 0 1 1 3 3L12.5 15.5l-4 1 1-4Z"></path></svg>
+            </button>
+        </div>
     </header>
 
     <!-- محتوای اصلی -->
@@ -126,13 +206,17 @@
     </main>
 </div>
 
-<!-- مودال ویرایش نام کانال -->
+<!-- مودال ویرایش کانال -->
 <div class="modal-overlay" id="edit-modal">
     <div class="modal-content">
-        <h2 class="modal-title">ویرایش نام کانال</h2>
+        <h2 class="modal-title">ویرایش کانال</h2>
         <div class="input-group">
-            <label for="edit-channel-name">نام جدید کانال</label>
-            <input type="text" id="edit-channel-name" placeholder="نام جدید را وارد کنید">
+            <label for="edit-channel-name">نام کانال</label>
+            <input type="text" id="edit-channel-name">
+        </div>
+        <div class="input-group">
+            <label for="edit-channel-desc">توضیحات کانال</label>
+            <textarea id="edit-channel-desc" rows="3"></textarea>
         </div>
         <div class="modal-actions">
             <button class="modal-btn cancel-btn" id="cancel-edit-btn">انصراف</button>
@@ -141,334 +225,429 @@
     </div>
 </div>
 
+<!-- مودال پیش‌نمایش فایل -->
+<div class="modal-overlay" id="attachment-preview-modal">
+    <div class="modal-content">
+        <h2 class="modal-title">ارسال فایل</h2>
+        <img id="attachment-preview-img" src="" alt="پیش‌نمایش">
+        <div class="input-group">
+            <label for="attachment-caption">کپشن (اختیاری)</label>
+            <input type="text" id="attachment-caption" placeholder="یک توضیح برای فایل بنویسید...">
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn cancel-btn" id="cancel-attachment-btn">انصراف</button>
+            <button class="modal-btn save-btn" id="send-attachment-btn">ارسال</button>
+        </div>
+    </div>
+</div>
+
+<!-- فایل ورودی مخفی -->
+<input type="file" id="file-input" accept="image/*,video/*" style="display:none;">
+
 <script>
-    // --- SECTION: پیکربندی و متغیرهای اصلی ---
-    const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-    const SHARED_SECRET = 'miko1234';
+// --- SECTION: پیکربندی و متغیرهای اصلی ---
+const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+const SHARED_SECRET = 'miko1234';
 
-    // --- SECTION: ارجاع به المان‌های DOM ---
-    const mainContent = document.getElementById('main-content');
-    const pageTitle = document.getElementById('page-title');
-    const editChannelBtn = document.getElementById('edit-channel-btn');
-    const editModal = document.getElementById('edit-modal');
-    const editChannelNameInput = document.getElementById('edit-channel-name');
-    const saveEditBtn = document.getElementById('save-edit-btn');
-    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+// --- SECTION: ارجاع به المان‌های DOM ---
+const mainContent = document.getElementById('main-content');
+const pageTitle = document.getElementById('page-title');
+// ... (سایر ارجاعات در صورت نیاز در توابع مربوطه تعریف می‌شوند)
+
+// --- SECTION: وضعیت برنامه (State) ---
+let state = {
+    currentUser: null,
+    clientToken: null,
+    currentChannelData: null,
+    isChannelCreator: false,
+    messages: [],
+    pollingIntervalId: null,
+    originalTitle: document.title,
+    unreadMessages: 0,
+    isTabActive: true,
+    selectedFile: null
+};
+
+// --- SECTION: راه‌اندازی اولیه ---
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+async function initializeApp() {
+    renderLoadingSpinner();
     
-    // --- SECTION: وضعیت برنامه ---
-    let currentUser = null;
-    let clientToken = null;
-    let currentChannelData = null;
-    let isChannelCreator = false;
-    let pollingIntervalId = null;
-
-    // --- SECTION: راه‌اندازی اولیه ---
-    document.addEventListener('DOMContentLoaded', async () => {
-        renderLoadingSpinner();
-        
-        const storedUser = localStorage.getItem('currentUser');
-        if (!storedUser) {
-            renderErrorMessage('خطای احراز هویت. لطفاً ابتدا وارد شوید.');
-            return;
+    // مدیریت وضعیت فعال بودن تب
+    document.addEventListener('visibilitychange', () => {
+        state.isTabActive = document.visibilityState === 'visible';
+        if (state.isTabActive) {
+            state.unreadMessages = 0;
+            document.title = state.originalTitle;
         }
-        currentUser = JSON.parse(storedUser);
-
-        try {
-            await refreshClientToken();
-        } catch (error) {
-            renderErrorMessage(error.message);
-            return;
-        }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const channelIdFromUrl = urlParams.get('id');
-
-        if (channelIdFromUrl) {
-            await loadChannelData(channelIdFromUrl);
-        } else {
-            await findUserChannelAndLoad();
-        }
-
-        editChannelBtn.addEventListener('click', () => editModal.classList.add('active'));
-        cancelEditBtn.addEventListener('click', () => editModal.classList.remove('active'));
-        saveEditBtn.addEventListener('click', handleSaveChanges);
     });
-    
-    // --- SECTION: توابع ارتباط با سرور پراکسی ---
-    async function refreshClientToken() {
-        const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-        if (!response.ok) throw new Error('امکان دریافت توکن امنیتی وجود ندارد.');
-        const data = await response.json();
-        clientToken = data.token;
+
+    // مدیریت وضعیت آنلاین/آفلاین
+    window.addEventListener('online', () => handleConnectionChange(true));
+    window.addEventListener('offline', () => handleConnectionChange(false));
+    handleConnectionChange(navigator.onLine);
+
+    const storedUser = localStorage.getItem('currentUser');
+    if (!storedUser) {
+        return renderErrorMessage('خطای احراز هویت. لطفاً ابتدا وارد شوید.');
+    }
+    state.currentUser = JSON.parse(storedUser);
+
+    try {
+        await refreshClientToken();
+    } catch (error) {
+        return renderErrorMessage(error.message);
     }
 
-    async function proxyRequest(path, method = 'GET', data = null) {
-        if (!clientToken || !currentUser) throw new Error('کاربر احراز هویت نشده است.');
-        
-        const options = {
-            method: method,
-            headers: {
-                'Authorization': `Bearer ${clientToken}`,
-                'X-User-Username': currentUser.username
-            }
-        };
-
-        if (data) {
-            options.headers['Content-Type'] = 'application/json';
-            options.body = JSON.stringify(data);
-        }
-
-        const response = await fetch(`${PROXY_URL}?path=${path}`, options);
-        
-        if (!response.ok) {
-            if (response.status === 404) return null;
-            const errorData = await response.json().catch(() => ({ error: 'خطای ناشناخته' }));
-            throw new Error(errorData.error || `خطا در ارتباط با سرور (کد: ${response.status})`);
-        }
-        
-        // برای متد DELETE یا پاسخ‌های بدون محتوا، جیسان وجود ندارد
-        if (response.status === 204 || response.headers.get("content-length") === "0") {
-            return null;
-        }
-        
-        return response.json();
+    const channelIdFromUrl = new URLSearchParams(window.location.search).get('id');
+    if (channelIdFromUrl) {
+        await loadChannelData(channelIdFromUrl);
+    } else {
+        renderCreationForm(); // در این نسخه فرض بر این است که همیشه با ID وارد می‌شویم
     }
+}
 
+// --- SECTION: توابع ارتباط با سرور پراکسی ---
+async function refreshClientToken() {
+    const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+    if (!response.ok) throw new Error('امکان دریافت توکن امنیتی وجود ندارد.');
+    const data = await response.json();
+    state.clientToken = data.token;
+}
 
-    // --- SECTION: منطق اصلی بارگذاری و نمایش ---
-    async function findUserChannelAndLoad() {
-        try {
-            const allChannels = await proxyRequest('channels');
-            let userChannel = null;
-            if (allChannels) {
-                userChannel = Object.values(allChannels).find(ch => ch && ch.creator_username === currentUser.username);
-            }
-
-            if (userChannel) {
-                window.history.replaceState({}, '', `?id=${userChannel.channel_id}`);
-                await loadChannelData(userChannel.channel_id);
-            } else {
-                renderCreationForm();
-            }
-        } catch (error) {
-            renderErrorMessage(error.message);
-        }
+async function proxyRequest(path, method = 'GET', data = null) {
+    if (!state.clientToken || !state.currentUser) throw new Error('کاربر احراز هویت نشده است.');
+    const options = { method, headers: { 'Authorization': `Bearer ${state.clientToken}`, 'X-User-Username': state.currentUser.username } };
+    if (data) {
+        options.headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(data);
     }
-
-    async function loadChannelData(channelId) {
-        try {
-            const channelData = await proxyRequest(`channels/${channelId}`);
-            if (channelData) {
-                currentChannelData = channelData;
-                isChannelCreator = channelData.creator_username === currentUser.username;
-                renderChannelView();
-                // channel_messages ممکن است وجود نداشته باشد
-                const messages = channelData.channel_messages || null;
-                renderMessages(messages);
-                startRealtimeUpdates();
-            } else {
-                renderErrorMessage('کانال مورد نظر یافت نشد.', true);
-            }
-        } catch (error) {
-            renderErrorMessage(error.message);
-        }
+    const response = await fetch(`${PROXY_URL}?path=${path}`, options);
+    if (!response.ok) {
+        if (response.status === 404) return null;
+        const errorData = await response.json().catch(() => ({ error: 'خطای ناشناخته' }));
+        throw new Error(errorData.error || `خطا در ارتباط با سرور (کد: ${response.status})`);
     }
+    if (response.status === 204 || response.headers.get("content-length") === "0") return null;
+    return response.json();
+}
 
-    // --- SECTION: توابع رندر کردن (نمایش) بخش‌های مختلف UI ---
-    function renderLoadingSpinner() {
-        mainContent.innerHTML = `<div class="status-container"><div class="spinner"></div><p>در حال بارگذاری...</p></div>`;
-    }
-
-    function renderErrorMessage(message, showCreateButton = false) {
-        const buttonHtml = showCreateButton ? `<br><button class="create-btn" onclick="location.href='channel.html'">ساخت کانال جدید</button>` : '';
-        mainContent.innerHTML = `<div class="status-container"><p>${message}</p>${buttonHtml}</div>`;
-    }
-
-    function renderCreationForm() {
-        pageTitle.textContent = 'ایجاد کانال جدید';
-        editChannelBtn.style.display = 'none';
-        mainContent.innerHTML = `
-            <div id="creation-form-view">
-                <div class="creation-form-container">
-                    <h2 class="form-title">مشخصات کانال</h2>
-                    <div class="input-group"><label for="channel-name">نام کانال</label><input type="text" id="channel-name" placeholder="مثال: گروه برنامه‌نویسان"></div>
-                    <div class="input-group"><label for="channel-id">شناسه کانال (ID)</label><input type="text" id="channel-id" placeholder="فقط حروف انگلیسی و خط تیره (-)"></div>
-                    <div class="input-group"><label for="channel-desc">توضیحات</label><textarea id="channel-desc" placeholder="درباره کانال خود توضیح دهید..."></textarea></div>
-                    <button class="create-btn" id="create-channel-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>ایجاد کانال</span>
-                    </button>
-                </div>
-            </div>`;
-        document.getElementById('create-channel-btn').addEventListener('click', handleCreateChannel);
-    }
-
-    function renderChannelView() {
-        pageTitle.textContent = currentChannelData.channel_name;
-        editChannelBtn.style.display = isChannelCreator ? 'block' : 'none';
-        mainContent.innerHTML = `
-            <div class="channel-chat-container">
-                <div class="message-feed" id="message-feed"></div>
-                <div class="channel-info-bar">${currentChannelData.description || 'توضیحات کانال'}</div>
-                ${isChannelCreator ? `
-                <div class="message-input-area">
-                    <input type="text" id="message-input" placeholder="پیام خود را بنویسید...">
-                    <button class="send-btn" id="send-message-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
-                </div>` : ''}
-            </div>`;
-        if (isChannelCreator) {
-            document.getElementById('send-message-btn').addEventListener('click', handleSendMessage);
-            document.getElementById('message-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSendMessage(); });
-        }
-    }
-
-    function renderMessages(messagesData) {
-        const messageFeed = document.getElementById('message-feed');
-        if (!messageFeed) return;
-
-        if (!messagesData || Object.keys(messagesData).length === 0) {
-            messageFeed.innerHTML = '<div class="status-container" style="height: auto; padding: 50px 0;"><p>هنوز پیامی در این کانال نیست.</p></div>';
-            return;
-        }
-
-        const messages = Object.values(messagesData).sort((a, b) => {
-            const timeA = a && a.timestamp ? new Date(a.timestamp).getTime() : 0;
-            const timeB = b && b.timestamp ? new Date(b.timestamp).getTime() : 0;
-            return timeB - timeA;
-        });
-        
-        let html = '';
-        messages.forEach(msg => {
-            if (!msg || typeof msg !== 'object') return;
-
-            const sender = msg.sender_username || 'کاربر';
-            const text = msg.message_text || '(پیام نامعتبر)';
-
-            const messageClass = sender === currentUser.username ? 'out' : 'in';
-            const senderNameHtml = sender !== currentUser.username ? `<div class="message-sender">${sender}</div>` : '';
+// --- SECTION: منطق اصلی بارگذاری و نمایش ---
+async function loadChannelData(channelId) {
+    try {
+        const channelData = await proxyRequest(`channels/${channelId}?limitToLast=50`); // دریافت کانال با ۵۰ پیام آخر
+        if (channelData) {
+            state.currentChannelData = channelData;
+            state.isChannelCreator = channelData.creator_username === state.currentUser.username;
+            state.messages = channelData.channel_messages ? Object.entries(channelData.channel_messages).map(([key, value]) => ({...value, id: key})) : [];
             
-            html += `<div class="message-bubble ${messageClass}">${senderNameHtml}${text.replace(/\n/g, '<br>')}</div>`;
-        });
-        messageFeed.innerHTML = html;
-    }
-
-    // --- SECTION: مدیریت رویدادها (Event Handlers) ---
-    async function handleCreateChannel(event) {
-        const createBtn = event.currentTarget;
-        const name = document.getElementById('channel-name').value.trim();
-        const id = document.getElementById('channel-id').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-        const desc = document.getElementById('channel-desc').value.trim();
-
-        if (!name || !id) {
-            alert('نام کانال و شناسه الزامی هستند.');
-            return;
-        }
-
-        createBtn.disabled = true;
-        createBtn.innerHTML = `<span>در حال ایجاد...</span>`;
-
-        const newChannelData = {
-            channel_name: name, channel_id: id, description: desc,
-            creator_username: currentUser.username, created_at: new Date().toISOString()
-        };
-
-        try {
-            // برای ایجاد از متد PUT استفاده می‌کنیم چون شناسه را خودمان تعیین کرده‌ایم
-            await proxyRequest(`channels/${id}`, 'POST', newChannelData); // پراکسی این POST را به PUT تبدیل می‌کند
-            currentChannelData = newChannelData;
-            isChannelCreator = true;
-            window.history.pushState({}, name, `?id=${id}`);
             renderChannelView();
-            renderMessages(null);
             startRealtimeUpdates();
-        } catch (error) {
-            alert(`خطا در ساخت کانال: ${error.message}`);
-            createBtn.disabled = false;
-            createBtn.innerHTML = `<span>ایجاد کانال</span>`;
+        } else {
+            renderErrorMessage('کانال مورد نظر یافت نشد.', true);
         }
+    } catch (error) {
+        renderErrorMessage(error.message);
     }
+}
 
-    // [ تابع اصلاح شده اصلی ]
-    async function handleSendMessage() {
-        const messageInput = document.getElementById('message-input');
-        const sendBtn = document.getElementById('send-message-btn');
-        const messageText = messageInput.value.trim();
-        if (!messageText) return;
+// --- SECTION: توابع رندر کردن (UI Rendering) ---
+function renderLoadingSpinner() {
+    mainContent.innerHTML = `<div class="status-container"><div class="spinner"></div><p>در حال بارگذاری...</p></div>`;
+}
 
-        messageInput.disabled = true;
-        sendBtn.disabled = true;
+function renderErrorMessage(message) {
+    mainContent.innerHTML = `<div class="status-container"><p>${message}</p></div>`;
+    document.querySelector('.app-header').style.display = 'none'; // مخفی کردن هدر در زمان خطا
+}
+
+function renderCreationForm() {
+    // در این نسخه تمرکز بر صفحه چت است. این تابع برای کامل بودن آورده شده است.
+    pageTitle.textContent = 'ایجاد کانال جدید';
+    mainContent.innerHTML = `<div class="status-container"><p>برای ساخت کانال، لطفاً به صفحه اصلی مراجعه کنید.</p></div>`;
+}
+
+function renderChannelView() {
+    // رندر هدر
+    document.getElementById('page-title').textContent = state.currentChannelData.channel_name;
+    document.getElementById('channel-avatar').textContent = state.currentChannelData.channel_name.charAt(0).toUpperCase();
+    document.getElementById('member-count').textContent = `${state.currentChannelData.members_count || 1} عضو`;
+    document.getElementById('online-status').textContent = state.currentChannelData.is_online ? 'آنلاین' : 'آفلاین';
+    document.getElementById('edit-channel-btn').style.display = state.isChannelCreator ? 'block' : 'none';
+
+    // رندر بدنه اصلی چت
+    mainContent.innerHTML = `
+        <div class="search-bar" id="search-bar">
+            <input type="text" id="search-input" placeholder="جستجو در پیام‌ها...">
+        </div>
+        <div class="message-feed" id="message-feed"></div>
+        <div class="typing-indicator" id="typing-indicator">
+            <span>در حال تایپ</span>
+            <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+        </div>
+        <div id="offline-indicator" class="offline-indicator">در حال تلاش برای اتصال مجدد...</div>
+        ${state.isChannelCreator ? `
+        <div class="message-input-area">
+            <div class="message-input-wrapper">
+                <button class="input-btn" id="attach-file-btn" title="افزودن فایل">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                </button>
+                <input type="text" id="message-input" placeholder="پیام خود را بنویسید...">
+                <button class="input-btn" title="ایموجی">😊</button>
+            </div>
+            <button class="send-btn" id="send-message-btn" title="ارسال">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </div>` : ''}
+    `;
+    renderMessages(state.messages);
+    setupEventListeners();
+}
+
+function renderMessages(messages) {
+    const messageFeed = document.getElementById('message-feed');
+    if (!messageFeed) return;
+
+    // مرتب‌سازی پیام‌ها بر اساس زمان
+    messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    let html = '';
+    messages.forEach(msg => {
+        if (!msg || typeof msg !== 'object') return;
+        const messageClass = msg.sender_username === state.currentUser.username ? 'out' : 'in';
+        const time = new Date(msg.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
         
-        const messageData = {
-            sender_username: currentUser.username,
-            message_text: messageText,
-            timestamp: new Date().toISOString()
-        };
-
-        try {
-            // **تغییر اصلی:** به جای ارسال به یک شناسه موقت، به کلکسیون پیام‌ها POST می‌کنیم
-            // فایربیس خودش شناسه منحصر به فرد را ایجاد می‌کند.
-            const path = `channels/${currentChannelData.channel_id}/channel_messages`;
-            await proxyRequest(path, 'POST', messageData);
-            
-            messageInput.value = ''; // پاک کردن ورودی پس از ارسال موفق
-            
-            // برای نمایش فوری پیام، لیست پیام‌ها را مجددا دریافت می‌کنیم
-            const updatedMessages = await proxyRequest(path);
-            renderMessages(updatedMessages);
-
-        } catch (error) {
-            alert('ارسال پیام با خطا مواجه شد: ' + error.message);
-        } finally {
-            messageInput.disabled = false;
-            sendBtn.disabled = false;
-            messageInput.focus();
-        }
-    }
-
-    async function handleSaveChanges() {
-        const newName = editChannelNameInput.value.trim();
-        if (!newName || newName === currentChannelData.channel_name) {
-            editModal.classList.remove('active');
-            return;
+        let contentHtml = '';
+        if(msg.type === 'image' && msg.file_url) {
+            contentHtml = `<img src="${msg.file_url}" alt="${msg.caption || ''}" loading="lazy">`;
+            if (msg.caption) contentHtml += `<p>${msg.caption}</p>`;
+        } else {
+            contentHtml = (msg.message_text || '').replace(/\n/g, '<br>');
         }
 
-        saveEditBtn.disabled = true;
-        saveEditBtn.textContent = 'در حال ذخیره...';
+        let reactionsHtml = '<div class="message-reactions">';
+        const availableReactions = ['❤️', '👍', '😂'];
+        availableReactions.forEach(emoji => {
+            const count = msg.reactions?.[emoji]?.count || 0;
+            if (count > 0) {
+                 const userReacted = msg.reactions[emoji].users?.includes(state.currentUser.username) ? 'user-reacted' : '';
+                 reactionsHtml += `<div class="reaction-pill ${userReacted}" onclick="handleReactionClick('${msg.id}', '${emoji}')">${emoji} ${count}</div>`;
+            }
+        });
+        reactionsHtml += '</div>';
 
-        try {
-            // برای ویرایش یک فیلد خاص، از PUT استفاده می‌کنیم
-            await proxyRequest(`channels/${currentChannelData.channel_id}/channel_name`, 'POST', newName); // پراکسی POST را به PUT تبدیل می‌کند
-            currentChannelData.channel_name = newName;
-            pageTitle.textContent = newName;
-            editModal.classList.remove('active');
-        } catch (error)
-        {
-            alert(`خطا در ویرایش نام کانال: ${error.message}`);
-        } finally {
-            saveEditBtn.disabled = false;
-            saveEditBtn.textContent = 'ذخیره';
-        }
+        html += `
+            <div class="message-wrapper" data-message-id="${msg.id}">
+                <div class="message-bubble ${messageClass}">
+                    ${contentHtml}
+                    ${reactionsHtml}
+                </div>
+                <div class="message-time">${time}</div>
+            </div>`;
+    });
+    messageFeed.innerHTML = html;
+}
+
+// --- SECTION: مدیریت رویدادها (Event Handlers) ---
+function setupEventListeners() {
+    // دکمه‌های هدر
+    document.getElementById('search-btn').addEventListener('click', toggleSearchBar);
+    if(state.isChannelCreator) {
+        document.getElementById('edit-channel-btn').addEventListener('click', openEditModal);
     }
     
-    // --- SECTION: آپدیت‌های Real-time (با Polling) ---
-    function startRealtimeUpdates(interval = 4000) { // کاهش فاصله زمانی برای واکنش سریع‌تر
-        if (pollingIntervalId) clearInterval(pollingIntervalId);
+    // جستجو
+    document.getElementById('search-input').addEventListener('input', handleSearch);
 
-        pollingIntervalId = setInterval(async () => {
-            if (currentChannelData && document.visibilityState === 'visible') {
-                try {
-                    const messages = await proxyRequest(`channels/${currentChannelData.channel_id}/channel_messages`);
-                    renderMessages(messages);
-                } catch (error) {
-                    console.error("خطا در به‌روزرسانی خودکار:", error);
-                    // می‌توان در اینجا polling را متوقف کرد اگر خطای دائمی رخ دهد
-                    // clearInterval(pollingIntervalId);
-                }
-            }
-        }, interval);
+    // ارسال پیام
+    if (state.isChannelCreator) {
+        const messageInput = document.getElementById('message-input');
+        document.getElementById('send-message-btn').addEventListener('click', handleSendMessage);
+        messageInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSendMessage(); });
+        messageInput.addEventListener('input', debounce(handleTyping, 500));
+        document.getElementById('attach-file-btn').addEventListener('click', () => document.getElementById('file-input').click());
+        document.getElementById('file-input').addEventListener('change', handleFileSelect);
     }
+
+    // مودال‌ها
+    document.getElementById('cancel-edit-btn').addEventListener('click', closeEditModal);
+    document.getElementById('save-edit-btn').addEventListener('click', handleSaveChanges);
+    document.getElementById('cancel-attachment-btn').addEventListener('click', closeAttachmentModal);
+    document.getElementById('send-attachment-btn').addEventListener('click', handleSendAttachment);
+}
+
+function toggleSearchBar() {
+    document.getElementById('search-bar').classList.toggle('active');
+}
+
+function handleSearch(event) {
+    const query = event.target.value.toLowerCase();
+    const messages = document.querySelectorAll('.message-wrapper');
+    messages.forEach(msg => {
+        const text = msg.querySelector('.message-bubble').textContent.toLowerCase();
+        msg.style.display = text.includes(query) ? 'flex' : 'none';
+    });
+}
+
+async function handleSendMessage() {
+    const input = document.getElementById('message-input');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    const tempId = `temp_${Date.now()}`;
+    const messageData = {
+        sender_username: state.currentUser.username,
+        message_text: text,
+        timestamp: new Date().toISOString()
+    };
+    
+    input.value = '';
+    // به صورت خوشبینانه پیام را اضافه میکنیم
+    state.messages.push({...messageData, id: tempId});
+    renderMessages(state.messages);
+
+    try {
+        const path = `channels/${state.currentChannelData.channel_id}/channel_messages`;
+        await proxyRequest(path, 'POST', messageData);
+        await proxyRequest(`channels/${state.currentChannelData.channel_id}/is_typing`, 'POST', false); // توقف تایپینگ
+    } catch (error) {
+        alert('ارسال پیام با خطا مواجه شد: ' + error.message);
+        // پیام موقت را حذف میکنیم
+        state.messages = state.messages.filter(m => m.id !== tempId);
+        renderMessages(state.messages);
+    }
+}
+
+async function handleTyping() {
+    // این تابع باید به سرور اطلاع دهد که کاربر در حال تایپ است
+    await proxyRequest(`channels/${state.currentChannelData.channel_id}/is_typing`, 'POST', true);
+    // و یک تایمر برای توقف تایپینگ بعد از چند ثانیه عدم فعالیت
+    setTimeout(async () => {
+         await proxyRequest(`channels/${state.currentChannelData.channel_id}/is_typing`, 'POST', false);
+    }, 3000);
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    state.selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        document.getElementById('attachment-preview-img').src = e.target.result;
+        document.getElementById('attachment-preview-modal').classList.add('active');
+    };
+    reader.readAsDataURL(file);
+}
+
+async function handleSendAttachment() {
+    if (!state.selectedFile) return;
+    // **نکته:** منطق آپلود فایل به سرور پراکسی شما بستگی دارد.
+    // در اینجا، ما فرض می‌کنیم شما یک endpoint برای آپلود دارید و URL را برمی‌گرداند.
+    alert('قابلیت آپلود فایل نیازمند پیاده‌سازی در سمت سرور است. این یک شبیه‌سازی است.');
+    
+    const caption = document.getElementById('attachment-caption').value.trim();
+    const messageData = {
+        sender_username: state.currentUser.username,
+        type: 'image',
+        file_url: 'https://via.placeholder.com/300', // URL فرضی بعد از آپلود
+        caption: caption,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        const path = `channels/${state.currentChannelData.channel_id}/channel_messages`;
+        await proxyRequest(path, 'POST', messageData);
+        closeAttachmentModal();
+    } catch (error) {
+        alert('ارسال فایل با خطا مواجه شد: ' + error.message);
+    }
+}
+
+async function handleReactionClick(messageId, emoji) {
+    // این تابع پیچیده است و نیازمند منطق سمت سرور برای جلوگیری از ری‌اکشن تکراری است
+    const path = `channels/${state.currentChannelData.channel_id}/channel_messages/${messageId}/reactions/${emoji}`;
+    // در حالت واقعی باید یک transaction در سرور اجرا شود
+    alert(`ری‌اکشن ${emoji} برای پیام ${messageId} کلیک شد. منطق کامل نیازمند سرور است.`);
+}
+
+function openEditModal() {
+    document.getElementById('edit-channel-name').value = state.currentChannelData.channel_name;
+    document.getElementById('edit-channel-desc').value = state.currentChannelData.description || '';
+    document.getElementById('edit-modal').classList.add('active');
+}
+
+function closeEditModal() { document.getElementById('edit-modal').classList.remove('active'); }
+function closeAttachmentModal() { document.getElementById('attachment-preview-modal').classList.remove('active'); state.selectedFile = null; }
+
+async function handleSaveChanges() {
+    const newName = document.getElementById('edit-channel-name').value.trim();
+    const newDesc = document.getElementById('edit-channel-desc').value.trim();
+
+    const dataToUpdate = { channel_name: newName, description: newDesc };
+
+    try {
+        // برای ویرایش چند فیلد از PATCH (که پراکسی به آن تبدیل می‌کند) استفاده می‌کنیم
+        await proxyRequest(`channels/${state.currentChannelData.channel_id}`, 'PATCH', dataToUpdate);
+        state.currentChannelData.channel_name = newName;
+        state.currentChannelData.description = newDesc;
+        document.getElementById('page-title').textContent = newName;
+        closeEditModal();
+    } catch (error) {
+        alert(`خطا در ویرایش: ${error.message}`);
+    }
+}
+
+function handleConnectionChange(isOnline) {
+    const indicator = document.getElementById('offline-indicator');
+    if (indicator) indicator.classList.toggle('active', !isOnline);
+}
+
+
+// --- SECTION: آپدیت‌های Real-time و توابع کمکی ---
+function startRealtimeUpdates(interval = 3000) {
+    if (state.pollingIntervalId) clearInterval(state.pollingIntervalId);
+
+    state.pollingIntervalId = setInterval(async () => {
+        if (state.currentChannelData && state.isTabActive && navigator.onLine) {
+            try {
+                // دریافت کل آبجکت کانال برای آپدیت نام، اعضا، وضعیت تایپینگ و پیام‌های جدید
+                const updatedChannelData = await proxyRequest(`channels/${state.currentChannelData.channel_id}?limitToLast=50`);
+                if (updatedChannelData) {
+                    const newMessages = updatedChannelData.channel_messages ? Object.entries(updatedChannelData.channel_messages).map(([key, value]) => ({...value, id: key})) : [];
+                    
+                    // بررسی پیام جدید برای نوتیفیکیشن
+                    if (newMessages.length > state.messages.length) {
+                        state.unreadMessages++;
+                        document.title = `(${state.unreadMessages}) ${state.originalTitle}`;
+                    }
+                    
+                    state.messages = newMessages;
+                    state.currentChannelData = updatedChannelData; // آپدیت کل داده کانال
+                    
+                    renderMessages(state.messages);
+                    
+                    // آپدیت هدر و نشانگر تایپینگ
+                    document.getElementById('page-title').textContent = updatedChannelData.channel_name;
+                    document.getElementById('member-count').textContent = `${updatedChannelData.members_count || 1} عضو`;
+                    document.getElementById('typing-indicator').classList.toggle('active', updatedChannelData.is_typing === true);
+                }
+            } catch (error) {
+                console.error("خطا در به‌روزرسانی خودکار:", error);
+            }
+        }
+    }, interval);
+}
+
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}
 </script>
 
 </body>
