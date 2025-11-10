@@ -1159,10 +1159,18 @@
             document.addEventListener('mousemove', handleRecordingMove);
             document.addEventListener('touchmove', handleRecordingMove);
 
-            imageViewerCloseBtn.addEventListener('click', () => hideModal(imageViewerOverlay));
+            imageViewerCloseBtn.addEventListener('click', closeImageViewer);
             
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
-                overlay.addEventListener('click', (e) => { if (e.target === overlay) hideModal(overlay); });
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        if (overlay.id === 'image-viewer-overlay') {
+                            closeImageViewer();
+                        } else {
+                            hideModal(overlay);
+                        }
+                    }
+                });
             });
             document.querySelector('.profile-card .handle').addEventListener('click', () => hideModal(profileOverlay));
         }
@@ -1594,6 +1602,7 @@
             if (mediaUrl && !msg.isSending && !msg.deleted) {
                 const mediaElement = msgDiv.querySelector('img, video, audio');
                 if (mediaElement) {
+                    mediaElement.dataset.originalSrc = mediaUrl; // ذخیره آدرس اصلی
                     let temporaryUrl = null;
                     cacheManager.get(mediaUrl)
                         .then(localUrl => {
@@ -1683,10 +1692,14 @@
         // --- بخش ۱۰: مدیریت منوها و قابلیت‌های پیام ---
         function handleMessageClick(e) {
             if (e.target.tagName === 'IMG' && e.target.closest('.media-container')) {
-                // برای نمایش تمام صفحه، یک URL جدید و پایدار از کش می‌گیریم
-                cacheManager.get(e.target.src.split('/').pop()).then(stableUrl => {
-                     fullscreenImage.src = stableUrl || e.target.src; // اگر کش ناموفق بود از src اصلی استفاده کن
-                     showModal(imageViewerOverlay);
+                const originalUrl = e.target.dataset.originalSrc;
+                if (!originalUrl) return;
+
+                // یک URL جدید و پایدار از کش برای نمایش تمام‌صفحه دریافت می‌شود
+                cacheManager.get(originalUrl).then(stableUrl => {
+                    // اگر کش ناموفق بود از src اصلی استفاده کن
+                    fullscreenImage.src = stableUrl || originalUrl; 
+                    showModal(imageViewerOverlay);
                 });
                 return;
             }
@@ -1834,6 +1847,16 @@
         }
         function hideModal(overlayElement) {
             overlayElement.classList.remove('visible');
+        }
+
+        function closeImageViewer() {
+            const currentSrc = fullscreenImage.src;
+            // فقط در صورتی که blob URL باشد، آن را آزاد کن
+            if (currentSrc && currentSrc.startsWith('blob:')) {
+                URL.revokeObjectURL(currentSrc);
+            }
+            fullscreenImage.src = ''; // برای آزاد کردن حافظه
+            hideModal(imageViewerOverlay);
         }
         
         const dialogOverlay = document.getElementById('custom-dialog-overlay');
