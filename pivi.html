@@ -850,12 +850,27 @@
                         const existing = await cache.match(url);
                         if (existing) return; // Already cached
 
-                        // Fetch with timeout
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), timeout);
+                        // Fetch with adaptive timeout and soft handling
+                        const ctrl = new AbortController();
+                        const dynamicTimeout = url.match(/\.(mp4|mov|mkv)$/i) ? 20000 : 8000;
+                        const id = setTimeout(() => {
+                            console.warn('Preload timeout, continuing in background:', url);
+                        }, dynamicTimeout);
 
-                        const response = await fetch(url, { mode: 'cors', signal: controller.signal });
-                        clearTimeout(timeoutId);
+                        try {
+                            const response = await fetch(url, {
+                                mode: 'cors',
+                                cache: 'force-cache',
+                                signal: ctrl.signal
+                            });
+                            clearTimeout(id);
+                            if (response.ok) {
+                                await cache.put(url, response.clone());
+                            }
+                        } catch (err) {
+                            console.warn('Preload error:', url, err);
+                        }
+
 
                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                         
