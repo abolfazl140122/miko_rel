@@ -640,7 +640,8 @@
         <!-- Floating Action Button (FAB) HTML Structure -->
         <div class="fab-container" id="fab-container">
             <div class="fab-options">
-                <button class="fab-option" title="چت خصوصی جدید">
+                <!-- MODIFICATION: Added ID to this button -->
+                <button class="fab-option" id="fab-new-private-chat" title="چت خصوصی جدید">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </button>
                 <button class="fab-option" title="ایجاد گروه/کانال">
@@ -708,6 +709,8 @@
         
         const fabContainer = document.getElementById('fab-container');
         const fabMainBtn = document.getElementById('fab-main-btn');
+        // MODIFICATION: Added reference for new button
+        const newPrivateChatBtn = document.getElementById('fab-new-private-chat');
 
         // --- SECTION: App State ---
         let currentUser = null;
@@ -736,6 +739,11 @@
                 showCustomConfirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟', handleLogoutConfirmed);
             });
             fabMainBtn.addEventListener('click', toggleFabMenu);
+            
+            // MODIFICATION: Added event listener for the FAB option
+            newPrivateChatBtn.addEventListener('click', () => {
+                window.location.href = 'https://abolfazl140122.github.io/miko_rel/Channel.html';
+            });
 
             await loadInitialData();
         });
@@ -801,14 +809,18 @@
         // --- SECTION: UI Rendering ---
         
         function renderChatList() {
-            if (recentChats.length === 0) {
+            // BUG FIX: Filter chats to only include those where the current user is a member.
+            const userChats = recentChats.filter(chat => chat && chat.members && chat.members[currentUser.username]);
+
+            if (userChats.length === 0) {
                 mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
                 return;
             }
-            const chatListHtml = recentChats.map(chat => {
-                if (!chat || !chat.members) return '';
+            const chatListHtml = userChats.map(chat => {
+                // The partner is the other person in the chat
                 const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
                 const partnerData = allUsers[partnerUsername];
+                // If partner data doesn't exist for some reason, skip rendering this chat item
                 if (!partnerData) return ''; 
                 return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp);
             }).join('');
@@ -816,6 +828,7 @@
             mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
             addClickListenersToItems();
         }
+
 
         // MODIFIED: Renders search results for users
         function renderUserResults(results) {
