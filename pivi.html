@@ -764,9 +764,9 @@
         const SHARED_SECRET = 'miko1234';
         // ===============================================
 
-        // ===============================================
-        //  >>> START OF CacheManager IMPLEMENTATION <<<
-        // ===============================================
+        // ==============================================================
+        //  >>> START OF REVISED CacheManager IMPLEMENTATION <<<
+        // ==============================================================
         class CacheManager {
             constructor(dbName = 'PiviMediaCacheDB', storeName = 'media_metadata', cacheName = 'pivi-media-cache', maxSizeMB = 200) {
                 this.dbName = dbName;
@@ -774,6 +774,8 @@
                 this.cacheName = cacheName;
                 this.maxSizeBytes = maxSizeMB * 1024 * 1024;
                 this.db = null;
+                // برای نگه‌داری ارجاع به blobها در حافظه تا زمانی که صفحه باز است
+                this._blobReferences = new Map();
             }
 
             async init() {
@@ -802,7 +804,6 @@
                 if (!this.db || !(blob instanceof Blob)) return;
                 try {
                     const cache = await caches.open(this.cacheName);
-                    // Headers are important for CORS and correct content type handling by the Cache API
                     const headers = new Headers({ 'Content-Type': blob.type, 'Content-Length': blob.size, 'Access-Control-Allow-Origin': '*' });
                     const response = new Response(blob, { headers });
                     await cache.put(url, response);
@@ -811,7 +812,7 @@
                     const store = transaction.objectStore(this.storeName);
                     store.put({ url, lastAccessed: Date.now(), size: blob.size });
                     
-                    await this.evictIfNeeded(); // Clean up after adding
+                    await this.evictIfNeeded(); // پاک‌سازی در صورت نیاز
                 } catch (error) {
                     console.error(`Failed to cache ${url}:`, error);
                 }
@@ -819,18 +820,27 @@
 
             async get(url) {
                 if (!this.db) return null;
+
+                // مرحله ۱: ابتدا بررسی می‌کنیم که آیا blob از قبل در حافظه (Map) وجود دارد یا نه
+                if (this._blobReferences.has(url)) {
+                    const blob = this._blobReferences.get(url);
+                    // یک Object URL جدید و معتبر می‌سازیم تا از خطای "revoked" جلوگیری شود
+                    return URL.createObjectURL(blob);
+                }
+
+                // مرحله ۲: اگر در حافظه نبود، از Cache API می‌خوانیم
                 try {
                     const cache = await caches.open(this.cacheName);
                     const response = await cache.match(url);
                     if (response) {
                         const blob = await response.blob();
+                        
+                        // blob را در حافظه نگه می‌داریم تا در فراخوانی‌های بعدی سریعاً در دسترس باشد
+                        this._blobReferences.set(url, blob);
+                        
                         const objectURL = URL.createObjectURL(blob);
 
-                        // 🟢 نگه‌داری blob تا از حافظه پاک نشود
-                        if (!this._blobUrls) this._blobUrls = new Map();
-                        this._blobUrls.set(url, { blob, objectURL });
-
-                        // Update lastAccessed timestamp for LRU policy
+                        // به‌روزرسانی زمان آخرین دسترسی برای مدیریت حافظه (LRU)
                         const transaction = this.db.transaction(this.storeName, 'readwrite');
                         const store = transaction.objectStore(this.storeName);
                         const metadata = await new Promise(r => {
@@ -849,50 +859,44 @@
                     return null;
                 }
             }
-
             
-            async ensurePreloaded(urls, concurrency = 4, timeout = 5000) {
-                const queue = [...urls]; // A copy of URLs to process
+            async ensurePreloaded(urls, concurrency = 4) {
+                const queue = [...urls];
+                
                 const prefetch = async (url) => {
                     try {
+                        // ۱. بررسی اینکه آیا فایل از قبل در کش وجود دارد یا نه
                         const cache = await caches.open(this.cacheName);
                         const existing = await cache.match(url);
-                        if (existing) return; // Already cached
+                        if (existing) return; // اگر وجود داشت، نیازی به دانلود مجدد نیست
 
-                        // Fetch with adaptive timeout and soft handling
-                        const ctrl = new AbortController();
-                        const dynamicTimeout = url.match(/\.(mp4|mov|mkv)$/i) ? 20000 : 8000;
-                        const id = setTimeout(() => {
-                            console.warn('Preload timeout, continuing in background:', url);
+                        // ۲. تنظیم یک تایم‌اوت تطبیقی فقط برای نمایش هشدار (soft handling)
+                        // این تایمر عملیات fetch را متوقف نمی‌کند
+                        const dynamicTimeout = url.match(/\.(mp4|mov|webm)$/i) ? 20000 : 8000;
+                        const timeoutId = setTimeout(() => {
+                            console.warn(`Preloading is taking longer than expected for: ${url}`);
                         }, dynamicTimeout);
 
-                        try {
-                            const response = await fetch(url, {
-                                mode: 'cors',
-                                cache: 'force-cache',
-                                signal: ctrl.signal
-                            });
-                            clearTimeout(id);
-                            if (response.ok) {
-                                await cache.put(url, response.clone());
-                            }
-                        } catch (err) {
-                            console.warn('Preload error:', url, err);
+                        // ۳. دانلود فایل با استفاده از کش مرورگر
+                        const response = await fetch(url, {
+                            mode: 'cors',
+                            cache: 'force-cache',
+                        });
+
+                        // ۴. پاک کردن تایمر هشدار پس از اتمام دانلود
+                        clearTimeout(timeoutId);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
                         }
 
-
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                        
-                        const contentType = response.headers.get('content-type');
-                        if (!contentType || (!contentType.startsWith('image/') && !contentType.startsWith('video/') && !contentType.startsWith('audio/'))) {
-                            throw new Error(`Invalid content type: ${contentType}`);
-                        }
-
+                        // ۵. تبدیل پاسخ به blob و ذخیره‌سازی از طریق متد put
                         const blob = await response.blob();
                         await this.put(url, blob);
+
                     } catch (error) {
-                        // Silently fail so other preloads can continue
-                        console.warn(`Preloading failed for ${url}:`, error.name === 'AbortError' ? 'Timeout' : error.message);
+                        // نمایش خطا بدون متوقف کردن سایر دانلودها
+                        console.warn(`Preloading failed for ${url}:`, error.message);
                     }
                 };
 
@@ -903,7 +907,7 @@
                     }
                 };
                 
-                // Start concurrent workers
+                // اجرای همزمان چند دانلود برای افزایش سرعت
                 const workers = Array(concurrency).fill(null).map(() => run());
                 await Promise.all(workers);
             }
@@ -918,7 +922,6 @@
                 const totalSize = allMetadata.reduce((sum, item) => sum + item.size, 0);
 
                 if (totalSize > this.maxSizeBytes) {
-                    // Sort by last accessed (oldest first) to identify candidates for eviction
                     allMetadata.sort((a, b) => a.lastAccessed - b.lastAccessed);
                     let currentSize = totalSize;
                     const cache = await caches.open(this.cacheName);
@@ -928,15 +931,17 @@
                         
                         await cache.delete(item.url);
                         await new Promise(r => store.delete(item.url).onsuccess = r);
+                        // همچنین از حافظه موقت (Map) هم پاک می‌کنیم
+                        this._blobReferences.delete(item.url);
                         currentSize -= item.size;
                         console.log(`Evicted ${item.url} to free up space.`);
                     }
                 }
             }
         }
-        // ===============================================
-        //  <<< END OF CacheManager IMPLEMENTATION >>>
-        // ===============================================
+        // ============================================================
+        //  <<< END OF REVISED CacheManager IMPLEMENTATION >>>
+        // ============================================================
 
 
         // --- ارجاع به عناصر DOM ---
@@ -1007,7 +1012,6 @@
 
             showLoading();
             
-            // >>> CHANGE: Initialize CacheManager
             try {
                 await cacheManager.init();
                 console.log('Cache Manager initialized successfully.');
@@ -1291,14 +1295,13 @@
                     return;
                 }
 
-                // >>> CHANGE: Preload media on initial load
                 if (isInitialLoad) {
                     const mediaUrls = Object.values(messagesData)
                         .map(msg => msg.mediaUrl || msg.voiceUrl)
-                        .filter(Boolean); // Filter out null/undefined
+                        .filter(Boolean);
                     const uniqueUrls = [...new Set(mediaUrls)];
                     if (uniqueUrls.length > 0) {
-                        // Fire-and-forget, don't block UI rendering
+                        // این عملیات در پس‌زمینه انجام می‌شود و UI را مسدود نمی‌کند
                         cacheManager.ensurePreloaded(uniqueUrls).then(() => {
                            console.log('Preloading complete.');
                         });
@@ -1448,7 +1451,6 @@
                     if (xhr.status === 200) {
                         const result = JSON.parse(xhr.responseText);
                         if (result.success && result.url) {
-                            // >>> CHANGE: Put the uploaded file into cache immediately
                             await cacheManager.put(result.url, file);
 
                             const finalMsg = {
@@ -1507,7 +1509,6 @@
                 }
                 const result = await response.json();
                 if (result.success && result.url) {
-                    // >>> CHANGE: Put the uploaded voice blob into cache immediately
                     await cacheManager.put(result.url, blob);
 
                     const finalMsg = {
@@ -1551,7 +1552,6 @@
             messagesArea.appendChild(msgDiv);
         }
 
-        // >>> REFACTORED FUNCTION to handle async cache logic
         function updateMessageElement(msgDiv, msg) {
             const hasMedia = ['image', 'video'].includes(msg.type);
             msgDiv.classList.toggle('deleted', !!msg.deleted);
@@ -1589,26 +1589,36 @@
             
             msgDiv.innerHTML = `${replyHtml}${messageContentHTML}<div class="timestamp">${editedIndicator}${timestamp}</div>`;
             
-            // --- Asynchronous media loading logic ---
+            // --- منطق بارگذاری مدیا از کش ---
             const mediaUrl = msg.mediaUrl || msg.voiceUrl;
             if (mediaUrl && !msg.isSending && !msg.deleted) {
                 const mediaElement = msgDiv.querySelector('img, video, audio');
                 if (mediaElement) {
+                    let temporaryUrl = null;
                     cacheManager.get(mediaUrl)
                         .then(localUrl => {
                             if (localUrl) {
+                                temporaryUrl = localUrl;
                                 mediaElement.src = localUrl;
-                                // Clean up the object URL after it's loaded to prevent memory leaks
-                                mediaElement.addEventListener('load', () => URL.revokeObjectURL(mediaElement.src), { once: true });
-                                mediaElement.addEventListener('canplay', () => URL.revokeObjectURL(mediaElement.src), { once: true });
                             } else {
-                                // Fallback to network URL if not in cache
-                                mediaElement.src = mediaUrl;
+                                mediaElement.src = mediaUrl; // اگر در کش نبود، از شبکه بخوان
                             }
                         })
                         .catch(() => {
-                            // On error, still fallback to network URL
-                            mediaElement.src = mediaUrl;
+                            mediaElement.src = mediaUrl; // در صورت بروز خطا، از شبکه بخوان
+                        })
+                        .finally(() => {
+                            // مهم: آزاد کردن حافظه پس از استفاده
+                            // این کار از memory leak جلوگیری می‌کند
+                            const revoke = () => {
+                                if (temporaryUrl) {
+                                    URL.revokeObjectURL(temporaryUrl);
+                                }
+                                mediaElement.removeEventListener('load', revoke);
+                                mediaElement.removeEventListener('canplay', revoke);
+                            };
+                            mediaElement.addEventListener('load', revoke, { once: true });
+                            mediaElement.addEventListener('canplay', revoke, { once: true });
                         });
                 }
             }
@@ -1673,8 +1683,11 @@
         // --- بخش ۱۰: مدیریت منوها و قابلیت‌های پیام ---
         function handleMessageClick(e) {
             if (e.target.tagName === 'IMG' && e.target.closest('.media-container')) {
-                fullscreenImage.src = e.target.src;
-                showModal(imageViewerOverlay);
+                // برای نمایش تمام صفحه، یک URL جدید و پایدار از کش می‌گیریم
+                cacheManager.get(e.target.src.split('/').pop()).then(stableUrl => {
+                     fullscreenImage.src = stableUrl || e.target.src; // اگر کش ناموفق بود از src اصلی استفاده کن
+                     showModal(imageViewerOverlay);
+                });
                 return;
             }
             
