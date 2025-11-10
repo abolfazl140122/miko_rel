@@ -151,6 +151,7 @@
             border-radius: 15px;
             overflow: hidden;
             max-width: 100%;
+            background-color: var(--secondary-color); /* Placeholder color */
         }
         .message .media-container img, .message .media-container video {
             display: block;
@@ -763,6 +764,156 @@
         const SHARED_SECRET = 'miko1234';
         // ===============================================
 
+        // ===============================================
+        //  >>> START OF CacheManager IMPLEMENTATION <<<
+        // ===============================================
+        class CacheManager {
+            constructor(dbName = 'PiviMediaCacheDB', storeName = 'media_metadata', cacheName = 'pivi-media-cache', maxSizeMB = 200) {
+                this.dbName = dbName;
+                this.storeName = storeName;
+                this.cacheName = cacheName;
+                this.maxSizeBytes = maxSizeMB * 1024 * 1024;
+                this.db = null;
+            }
+
+            async init() {
+                return new Promise((resolve, reject) => {
+                    if (!('indexedDB' in window) || !('caches' in window)) {
+                        console.warn('Caching is not supported in this browser.');
+                        return reject(new Error('Caching not supported.'));
+                    }
+                    const request = indexedDB.open(this.dbName, 1);
+                    request.onerror = (event) => reject(new Error('IndexedDB error: ' + request.error));
+                    request.onsuccess = (event) => {
+                        this.db = event.target.result;
+                        resolve(this.db);
+                    };
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains(this.storeName)) {
+                            const store = db.createObjectStore(this.storeName, { keyPath: 'url' });
+                            store.createIndex('lastAccessed', 'lastAccessed', { unique: false });
+                        }
+                    };
+                });
+            }
+
+            async put(url, blob) {
+                if (!this.db || !(blob instanceof Blob)) return;
+                try {
+                    const cache = await caches.open(this.cacheName);
+                    // Headers are important for CORS and correct content type handling by the Cache API
+                    const headers = new Headers({ 'Content-Type': blob.type, 'Content-Length': blob.size, 'Access-Control-Allow-Origin': '*' });
+                    const response = new Response(blob, { headers });
+                    await cache.put(url, response);
+
+                    const transaction = this.db.transaction(this.storeName, 'readwrite');
+                    const store = transaction.objectStore(this.storeName);
+                    store.put({ url, lastAccessed: Date.now(), size: blob.size });
+                    
+                    await this.evictIfNeeded(); // Clean up after adding
+                } catch (error) {
+                    console.error(`Failed to cache ${url}:`, error);
+                }
+            }
+
+            async get(url) {
+                if (!this.db) return null;
+                try {
+                    const cache = await caches.open(this.cacheName);
+                    const response = await cache.match(url);
+                    if (response) {
+                        const blob = await response.blob();
+                        const objectURL = URL.createObjectURL(blob);
+
+                        // Update lastAccessed timestamp for LRU policy
+                        const transaction = this.db.transaction(this.storeName, 'readwrite');
+                        const store = transaction.objectStore(this.storeName);
+                        const metadata = await new Promise(r => store.get(url).onsuccess = e => r(e.target.result));
+                        if(metadata) {
+                             store.put({ ...metadata, lastAccessed: Date.now() });
+                        }
+                        return objectURL;
+                    }
+                    return null;
+                } catch (error) {
+                    console.error(`Failed to get ${url} from cache:`, error);
+                    return null;
+                }
+            }
+            
+            async ensurePreloaded(urls, concurrency = 4, timeout = 5000) {
+                const queue = [...urls]; // A copy of URLs to process
+                const prefetch = async (url) => {
+                    try {
+                        const cache = await caches.open(this.cacheName);
+                        const existing = await cache.match(url);
+                        if (existing) return; // Already cached
+
+                        // Fetch with timeout
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                        const response = await fetch(url, { mode: 'cors', signal: controller.signal });
+                        clearTimeout(timeoutId);
+
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || (!contentType.startsWith('image/') && !contentType.startsWith('video/') && !contentType.startsWith('audio/'))) {
+                            throw new Error(`Invalid content type: ${contentType}`);
+                        }
+
+                        const blob = await response.blob();
+                        await this.put(url, blob);
+                    } catch (error) {
+                        // Silently fail so other preloads can continue
+                        console.warn(`Preloading failed for ${url}:`, error.name === 'AbortError' ? 'Timeout' : error.message);
+                    }
+                };
+
+                const run = async () => {
+                    while (queue.length > 0) {
+                        const url = queue.shift();
+                        if (url) await prefetch(url);
+                    }
+                };
+                
+                // Start concurrent workers
+                const workers = Array(concurrency).fill(null).map(() => run());
+                await Promise.all(workers);
+            }
+
+            async evictIfNeeded() {
+                if (!this.db) return;
+
+                const transaction = this.db.transaction(this.storeName, 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                const allMetadata = await new Promise(r => store.getAll().onsuccess = e => r(e.target.result));
+
+                const totalSize = allMetadata.reduce((sum, item) => sum + item.size, 0);
+
+                if (totalSize > this.maxSizeBytes) {
+                    // Sort by last accessed (oldest first) to identify candidates for eviction
+                    allMetadata.sort((a, b) => a.lastAccessed - b.lastAccessed);
+                    let currentSize = totalSize;
+                    const cache = await caches.open(this.cacheName);
+
+                    for (const item of allMetadata) {
+                        if (currentSize <= this.maxSizeBytes) break;
+                        
+                        await cache.delete(item.url);
+                        await new Promise(r => store.delete(item.url).onsuccess = r);
+                        currentSize -= item.size;
+                        console.log(`Evicted ${item.url} to free up space.`);
+                    }
+                }
+            }
+        }
+        // ===============================================
+        //  <<< END OF CacheManager IMPLEMENTATION >>>
+        // ===============================================
+
 
         // --- ارجاع به عناصر DOM ---
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -791,17 +942,16 @@
         const keyboardOffsetSlider = document.getElementById('keyboard-offset-slider');
         const keyboardOffsetValue = document.getElementById('keyboard-offset-value');
         const voiceBtn = document.getElementById('voice-btn');
-        // --- NEW: ارجاع به عناصر جدید فایل ---
         const attachFileBtn = document.getElementById('attach-file-btn');
         const fileInput = document.getElementById('file-input');
-        // --- NEW: ارجاع به عناصر جدید ویس ---
         const voiceCancelIndicator = document.getElementById('voice-cancel-indicator');
         const voiceRecordTimer = document.getElementById('voice-record-timer');
-        // --- NEW: ارجاع به عناصر نمایشگر عکس ---
         const imageViewerOverlay = document.getElementById('image-viewer-overlay');
         const fullscreenImage = document.getElementById('fullscreen-image');
         const imageViewerCloseBtn = document.getElementById('image-viewer-close-btn');
 
+        // CACHE MANAGER INSTANCE
+        const cacheManager = new CacheManager();
 
         // --- وضعیت کلی اپلیکیشن ---
         let currentUser = null, clientToken = null, chatPartner = null, chatId = null;
@@ -813,7 +963,6 @@
         let keyboardOffset = 80;
         let lastMessagesSnapshot = {}; // برای مقایسه پیام‌های جدید و قدیم
 
-        // --- NEW: متغیرهای وضعیت ضبط ویس ---
         let recorder, voiceChunks = [], mediaStream = null, isRecording = false;
         let recordStartTime, recordTimerInterval;
         let touchStartX, isCancelThresholdMet = false;
@@ -834,6 +983,14 @@
 
             showLoading();
             
+            // >>> CHANGE: Initialize CacheManager
+            try {
+                await cacheManager.init();
+                console.log('Cache Manager initialized successfully.');
+            } catch (error) {
+                console.warn('Could not initialize Cache Manager. Media will not be cached.', error);
+            }
+
             keyboardOffset = parseInt(localStorage.getItem('keyboardOffset') || '80', 10);
             keyboardOffsetSlider.value = keyboardOffset;
             keyboardOffsetValue.textContent = `${keyboardOffset} px`;
@@ -940,12 +1097,11 @@
             document.getElementById('partner-info-header').addEventListener('click', () => showModal(profileOverlay));
             messagesArea.addEventListener('click', handleMessageClick);
             
-            // --- NEW: Event listeners for file attachment ---
             attachFileBtn.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) sendFileMessage(file);
-                e.target.value = ''; // Reset input for same file selection
+                e.target.value = ''; 
             });
 
             document.getElementById('reply-msg-btn').addEventListener('click', handleReplyAction);
@@ -968,18 +1124,14 @@
             messageInput.addEventListener('focus', applyKeyboardOffset);
             messageInput.addEventListener('blur', removeKeyboardOffset);
 
-            // --- NEW: رویدادهای جدید برای دکمه ویس (لمس و نگه داشتن) ---
             voiceBtn.addEventListener('mousedown', startRecording);
             voiceBtn.addEventListener('touchstart', startRecording);
-            // رویدادهای پایان ضبط به کل سند اضافه می‌شوند تا اگر کاربر خارج از دکمه انگشتش را برداشت، عمل کنند
             document.addEventListener('mouseup', stopRecording);
             document.addEventListener('touchend', stopRecording);
             document.addEventListener('mousemove', handleRecordingMove);
             document.addEventListener('touchmove', handleRecordingMove);
 
-            // --- NEW: رویدادهای نمایشگر عکس ---
             imageViewerCloseBtn.addEventListener('click', () => hideModal(imageViewerOverlay));
-
             
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 overlay.addEventListener('click', (e) => { if (e.target === overlay) hideModal(overlay); });
@@ -1115,43 +1267,49 @@
                     return;
                 }
 
+                // >>> CHANGE: Preload media on initial load
+                if (isInitialLoad) {
+                    const mediaUrls = Object.values(messagesData)
+                        .map(msg => msg.mediaUrl || msg.voiceUrl)
+                        .filter(Boolean); // Filter out null/undefined
+                    const uniqueUrls = [...new Set(mediaUrls)];
+                    if (uniqueUrls.length > 0) {
+                        // Fire-and-forget, don't block UI rendering
+                        cacheManager.ensurePreloaded(uniqueUrls).then(() => {
+                           console.log('Preloading complete.');
+                        });
+                    }
+                }
+
                 const sortedMessages = Object.entries(messagesData)
                     .sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
 
-                // مقایسه هوشمند برای جلوگیری از رندر مجدد غیر ضروری
                 sortedMessages.forEach(([msgId, msg]) => {
                     const existingMsg = lastMessagesSnapshot[msgId];
                     const existingElement = document.querySelector(`.message[data-id="${msgId}"]`);
 
-                    if (!existingElement) { // اگر پیام اصلا در DOM نیست، آن را بساز
+                    if (!existingElement) {
                         createMessageElement(msgId, msg);
-                    } else if (JSON.stringify(existingMsg) !== JSON.stringify(msg)) { // اگر پیام تغییر کرده، فقط آن را آپدیت کن
+                    } else if (JSON.stringify(existingMsg) !== JSON.stringify(msg)) {
                         updateMessageElement(existingElement, msg);
                     }
                 });
 
-                lastMessagesSnapshot = messagesData; // ذخیره وضعیت فعلی برای مقایسه بعدی
+                lastMessagesSnapshot = messagesData; 
                 
                 if(isInitialLoad) scrollToBottom();
 
             } catch(error) { console.error("خطا در بارگذاری داده‌های چت:", error); }
         }
         
-        // ===================================================================
-        // --- NEW & REFACTORED: بخش جدید و بازنویسی شده ضبط و ارسال ویس ---
-        // ===================================================================
-
         async function startRecording(e) {
-            // جلوگیری از انتخاب متن یا دیگر رفتارهای پیش‌فرض مرورگر
             e.preventDefault();
             if (isRecording) return;
             isRecording = true;
             isCancelThresholdMet = false;
 
-            // ذخیره نقطه شروع لمس برای محاسبه حرکت
             touchStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
 
-            // به‌روزرسانی UI برای حالت ضبط
             updateRecordingUI(true);
 
             try {
@@ -1161,28 +1319,25 @@
                 recorder.ondataavailable = event => { if (event.data.size > 0) voiceChunks.push(event.data); };
                 
                 recorder.onstop = () => {
-                    // قطع دسترسی به میکروفون
                     if (mediaStream) {
                         mediaStream.getTracks().forEach(track => track.stop());
                         mediaStream = null;
                     }
-                    // اگر عملیات لغو نشده باشد، ویس را ارسال کن
                     if (!isCancelThresholdMet) {
                         const voiceBlob = new Blob(voiceChunks, { type: 'audio/webm' });
-                        if (voiceBlob.size > 1000) { // حداقل یک ثانیه ضبط
+                        if (voiceBlob.size > 1000) { 
                            sendVoiceMessage(voiceBlob);
                         }
                     }
-                    // پاک کردن داده‌های ضبط قبلی
                     voiceChunks = [];
                 };
 
                 recorder.start();
-                startTimer(); // شروع تایمر نمایش زمان ضبط
+                startTimer();
             } catch (err) {
                 console.error("خطا در دسترسی به میکروفون:", err);
                 showCustomAlert({ title: 'خطا', message: 'امکان دسترسی به میکروفون وجود ندارد. لطفاً مجوز لازم را بدهید.' });
-                updateRecordingUI(false); // بازگرداندن UI به حالت عادی
+                updateRecordingUI(false); 
                 isRecording = false;
             }
         }
@@ -1194,26 +1349,17 @@
             if (recorder && recorder.state === 'recording') {
                 recorder.stop();
             }
-            // بازگرداندن UI به حالت عادی
             updateRecordingUI(false);
             stopTimer();
         }
 
         function handleRecordingMove(e) {
             if (!isRecording) return;
-
             const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-            const distance = touchStartX - currentX; // حرکت به سمت چپ (در حالت RTL)
-            
-            // اگر بیش از 100 پیکسل کشیده شد، حالت لغو را فعال کن
+            const distance = touchStartX - currentX;
             const cancelThreshold = 100;
-            if (distance > cancelThreshold) {
-                isCancelThresholdMet = true;
-                voiceCancelIndicator.style.color = 'var(--danger-color)';
-            } else {
-                isCancelThresholdMet = false;
-                voiceCancelIndicator.style.color = 'var(--text-secondary)';
-            }
+            isCancelThresholdMet = distance > cancelThreshold;
+            voiceCancelIndicator.style.color = isCancelThresholdMet ? 'var(--danger-color)' : 'var(--text-secondary)';
         }
 
         function updateRecordingUI(isStarting) {
@@ -1246,7 +1392,7 @@
                 return;
             }
 
-            const fileType = file.type.split('/')[0]; // 'image' or 'video'
+            const fileType = file.type.split('/')[0];
             const tempId = `temp_${Date.now()}`;
             const tempMsgData = {
                 senderId: currentUser.username,
@@ -1261,7 +1407,6 @@
             formData.append('file', file, file.name);
 
             try {
-                // MODIFIED: Use new upload endpoint and handle progress
                 const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
                 const progressIndicator = tempElement ? tempElement.querySelector('progress') : null;
 
@@ -1279,6 +1424,9 @@
                     if (xhr.status === 200) {
                         const result = JSON.parse(xhr.responseText);
                         if (result.success && result.url) {
+                            // >>> CHANGE: Put the uploaded file into cache immediately
+                            await cacheManager.put(result.url, file);
+
                             const finalMsg = {
                                 senderId: currentUser.username, receiverId: chatPartner.username,
                                 mediaUrl: result.url, timestamp: new Date().toISOString(), type: fileType
@@ -1300,11 +1448,7 @@
                         throw new Error(`خطای سرور: ${xhr.status}`);
                     }
                 };
-
-                xhr.onerror = () => {
-                    throw new Error('خطای شبکه در هنگام آپلود فایل.');
-                };
-
+                xhr.onerror = () => { throw new Error('خطای شبکه در هنگام آپلود فایل.'); };
                 xhr.send(formData);
 
             } catch (err) {
@@ -1332,20 +1476,16 @@
             formData.append('file', blob, `voice_${currentUser.username}_${Date.now()}.ogg`);
 
             try {
-                // MODIFIED: Use new upload endpoint and simple fetch
-                const response = await fetch(UPLOAD_PHP_ENDPOINT, {
-                    method: 'POST',
-                    body: formData
-                });
-                
+                const response = await fetch(UPLOAD_PHP_ENDPOINT, { method: 'POST', body: formData });
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.error || `خطای سرور: ${response.status}`);
                 }
-
                 const result = await response.json();
-
                 if (result.success && result.url) {
+                    // >>> CHANGE: Put the uploaded voice blob into cache immediately
+                    await cacheManager.put(result.url, blob);
+
                     const finalMsg = {
                         senderId: currentUser.username, receiverId: chatPartner.username,
                         voiceUrl: result.url, timestamp: new Date().toISOString(), type: 'voice'
@@ -1372,10 +1512,6 @@
                 }
             }
         }
-        // ===================================================================
-        // --- پایان بخش جدید ویس ---
-        // ===================================================================
-
 
         function createMessageElement(msgId, msg) {
             if (!msg || !msg.timestamp) return;
@@ -1391,89 +1527,70 @@
             messagesArea.appendChild(msgDiv);
         }
 
+        // >>> REFACTORED FUNCTION to handle async cache logic
         function updateMessageElement(msgDiv, msg) {
-            const hasMedia = msg.type === 'image' || msg.type === 'video';
+            const hasMedia = ['image', 'video'].includes(msg.type);
             msgDiv.classList.toggle('deleted', !!msg.deleted);
             msgDiv.classList.toggle('has-media', hasMedia && !msg.isSending);
 
-
             const isSent = msg.senderId === currentUser.username;
             msgDiv.dataset.senderName = isSent ? currentUser.displayName : chatPartner.displayName;
-            // MODIFIED: Handle media messages for reply context
-            let textForReply;
-            if (msg.text) textForReply = msg.text;
-            else if (msg.type === 'voice') textForReply = 'پیام صوتی';
-            else if (msg.type === 'image') textForReply = 'تصویر';
-            else if (msg.type === 'video') textForReply = 'ویدیو';
-            else textForReply = '';
+            let textForReply = msg.text || (msg.type === 'voice' ? 'پیام صوتی' : msg.type === 'image' ? 'تصویر' : msg.type === 'video' ? 'ویدیو' : '');
             msgDiv.dataset.text = textForReply;
 
-            let messageContentHTML;
             const timestamp = new Date(msg.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
             const editedIndicator = msg.edited ? `<span class="edited-indicator">(ویرایش شده)</span>` : '';
             
             let replyHtml = '';
             if (msg.replyTo && !msg.deleted) {
-                replyHtml = `
-                    <div class="reply-context">
-                        <div class="reply-sender">${msg.replyTo.senderName}</div>
-                        <span class="reply-text">${msg.replyTo.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>
-                    </div>`;
+                replyHtml = `<div class="reply-context"><div class="reply-sender">${msg.replyTo.senderName}</div><span class="reply-text">${msg.replyTo.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span></div>`;
             }
 
+            let messageContentHTML;
             if (msg.deleted) {
                 messageContentHTML = `<div class="text">این پیام حذف شده است</div>`;
-            } 
-            else if (msg.isSending) {
-                // MODIFIED: Show spinner for voice, progress for files
-                const progressHTML = (msg.type === 'image' || msg.type === 'video')
-                    ? '<progress value="0" max="100"></progress>'
-                    : '<div class="spinner"></div>';
-                messageContentHTML = `
-                    <div class="sending-indicator">
-                        ${progressHTML}
-                        <span>در حال ارسال...</span>
-                    </div>`;
-            }
-            else if (msg.type === 'voice' && msg.voiceUrl) {
-                messageContentHTML = `
-                    <div class="voice-player">
-                        <button class="play-pause-btn" aria-label="پخش/توقف">
-                           <svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
-                           <svg class="pause-icon" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
-                        </button>
-                        <div class="progress-container">
-                            <div class="waveform"><div class="progress-bar"></div></div>
-                        </div>
-                        <span class="duration">0:00</span>
-                        <audio class="voice-audio" src="${msg.voiceUrl}" preload="metadata"></audio>
-                    </div>`;
-            } 
-            // --- NEW: Render Image and Video messages ---
-            else if (msg.type === 'image' && msg.mediaUrl) {
-                messageContentHTML = `
-                    <div class="media-container">
-                        <img src="${msg.mediaUrl}" alt="تصویر ارسال شده" loading="lazy">
-                    </div>`;
-            }
-            else if (msg.type === 'video' && msg.mediaUrl) {
-                 messageContentHTML = `
-                    <div class="media-container">
-                       <video src="${msg.mediaUrl}" controls preload="metadata"></video>
-                    </div>`;
-            }
-            else {
+            } else if (msg.isSending) {
+                const progressHTML = (hasMedia) ? '<progress value="0" max="100"></progress>' : '<div class="spinner"></div>';
+                messageContentHTML = `<div class="sending-indicator">${progressHTML}<span>در حال ارسال...</span></div>`;
+            } else if (msg.type === 'voice' && msg.voiceUrl) {
+                messageContentHTML = `<div class="voice-player"><button class="play-pause-btn" aria-label="پخش/توقف"><svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><svg class="pause-icon" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg></button><div class="progress-container"><div class="waveform"><div class="progress-bar"></div></div></div><span class="duration">0:00</span><audio class="voice-audio" src="${msg.voiceUrl}" preload="metadata"></audio></div>`;
+            } else if (msg.type === 'image' && msg.mediaUrl) {
+                messageContentHTML = `<div class="media-container"><img alt="تصویر ارسال شده" loading="lazy"></div>`;
+            } else if (msg.type === 'video' && msg.mediaUrl) {
+                messageContentHTML = `<div class="media-container"><video controls preload="metadata"></video></div>`;
+            } else {
                 let textContent = msg.text || "";
                 messageContentHTML = `<div class="text">${textContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
             }
             
-            msgDiv.innerHTML = `
-                ${replyHtml}
-                ${messageContentHTML}
-                <div class="timestamp">${editedIndicator}${timestamp}</div>`;
+            msgDiv.innerHTML = `${replyHtml}${messageContentHTML}<div class="timestamp">${editedIndicator}${timestamp}</div>`;
             
+            // --- Asynchronous media loading logic ---
+            const mediaUrl = msg.mediaUrl || msg.voiceUrl;
+            if (mediaUrl && !msg.isSending && !msg.deleted) {
+                const mediaElement = msgDiv.querySelector('img, video, audio');
+                if (mediaElement) {
+                    cacheManager.get(mediaUrl)
+                        .then(localUrl => {
+                            if (localUrl) {
+                                mediaElement.src = localUrl;
+                                // Clean up the object URL after it's loaded to prevent memory leaks
+                                mediaElement.addEventListener('load', () => URL.revokeObjectURL(mediaElement.src), { once: true });
+                                mediaElement.addEventListener('canplay', () => URL.revokeObjectURL(mediaElement.src), { once: true });
+                            } else {
+                                // Fallback to network URL if not in cache
+                                mediaElement.src = mediaUrl;
+                            }
+                        })
+                        .catch(() => {
+                            // On error, still fallback to network URL
+                            mediaElement.src = mediaUrl;
+                        });
+                }
+            }
+
             if (msg.type === 'voice' && !msg.deleted && !msg.isSending) {
-                setupVoicePlayer(msgDiv); // راه‌اندازی منطق پلیر برای این پیام
+                setupVoicePlayer(msgDiv);
             }
         }
 
@@ -1498,7 +1615,6 @@
                     lastMessage: text, timestamp: message.timestamp,
                     members: { [currentUser.username]: true, [chatPartner.username]: true }
                 });
-                // اضافه کردن پیام جدید به صورت آنی
                 createMessageElement(newMsgRef.name, message);
                 lastMessagesSnapshot[newMsgRef.name] = message;
                 scrollToBottom();
@@ -1515,7 +1631,6 @@
         async function deleteMessage(messageId) {
             try {
                 await apiRequest(`pivi_chats/${chatId}/messages/${messageId}`, 'PATCH', { deleted: true, text: '', replyTo: null, type: null, voiceUrl: null, mediaUrl: null });
-                // آپدیت محلی بدون نیاز به poll
                 const deletedMsgData = { ...lastMessagesSnapshot[messageId], deleted: true };
                 updateMessageElement(document.querySelector(`.message[data-id="${messageId}"]`), deletedMsgData);
                 lastMessagesSnapshot[messageId] = deletedMsgData;
@@ -1525,7 +1640,6 @@
         async function editMessage(messageId, newText) {
             try {
                 await apiRequest(`pivi_chats/${chatId}/messages/${messageId}`, 'PATCH', { text: newText, edited: true });
-                // آپدیت محلی
                 const editedMsgData = { ...lastMessagesSnapshot[messageId], text: newText, edited: true };
                 updateMessageElement(document.querySelector(`.message[data-id="${messageId}"]`), editedMsgData);
                 lastMessagesSnapshot[messageId] = editedMsgData;
@@ -1534,7 +1648,6 @@
         
         // --- بخش ۱۰: مدیریت منوها و قابلیت‌های پیام ---
         function handleMessageClick(e) {
-            // --- NEW: Logic for image viewer ---
             if (e.target.tagName === 'IMG' && e.target.closest('.media-container')) {
                 fullscreenImage.src = e.target.src;
                 showModal(imageViewerOverlay);
@@ -1542,9 +1655,8 @@
             }
             
             const messageElement = e.target.closest('.message:not(.deleted)');
-            if (!messageElement || messageElement.dataset.id.startsWith('temp_')) return; // روی پیام در حال ارسال کلیک نشود
+            if (!messageElement || messageElement.dataset.id.startsWith('temp_')) return;
 
-            // Prevent menu on media clicks unless it's a text part of the bubble
             if (e.target.closest('.voice-player, .media-container')) {
                  activeMessageElement = null;
                  return;
@@ -1552,10 +1664,9 @@
 
             if (messageElement) {
                 activeMessageElement = messageElement;
-
                 const isSentByUser = activeMessageElement.classList.contains('sent');
-                // MODIFIED: Don't allow editing media messages
-                const isEditable = isSentByUser && (lastMessagesSnapshot[messageElement.dataset.id]?.type === undefined || lastMessagesSnapshot[messageElement.dataset.id]?.type === null);
+                const msgData = lastMessagesSnapshot[messageElement.dataset.id];
+                const isEditable = isSentByUser && (!msgData || !msgData.type); // only text messages
 
                 document.getElementById('edit-msg-btn').style.display = isEditable ? 'flex' : 'none';
                 document.getElementById('delete-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
@@ -1563,11 +1674,7 @@
                 activeMessageId = activeMessageElement.dataset.id;
                 
                 const pinBtnText = document.getElementById('pin-msg-btn-text');
-                if(currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) {
-                    pinBtnText.textContent = "حذف سنجاق";
-                } else {
-                    pinBtnText.textContent = "سنجاق کردن";
-                }
+                pinBtnText.textContent = (currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) ? "حذف سنجاق" : "سنجاق کردن";
                 showModal(messageOptionsOverlay);
             }
         }
