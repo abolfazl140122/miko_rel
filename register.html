@@ -121,7 +121,7 @@
         <form id="register-form" novalidate>
             <label for="profilePic" class="profile-uploader">
                 <img id="profile-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjZWQ0ZGEiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xOCAyMHYtMS4zNzJhNC45OSA0Ljk5IDAgMCAwLTIuNDgtNC4yOE02IDIwdi0xLjM3MmE0Ljk5IDQuOTkgMCAwIDEgMi40OC00LjI4TTQgMnYxM2E4IDggMCAwIDAgMTYgMFYyTTIgMjJoMjAiLz48Y2lyY2xlIGN4PSIxMiIgY3k9Ijgigcj0iNCIvPjwvc3ZnPg==" alt="Profile Preview" class="profile-preview">
-                <span>انتخاب تصویر پروفایل</span>
+                <span>انتخاب تصویر پروفایل (اختیاری)</span>
                 <input type="file" id="profilePic" accept="image/*">
             </label>
 
@@ -165,7 +165,8 @@
             profilePic: document.getElementById('profilePic')
         };
 
-        // --- Constants ---
+        // --- Configuration Constants ---
+        const UPLOAD_ENDPOINT = 'https://miko.freehost.io/uploads_proxy.php';
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
 
@@ -230,63 +231,99 @@
             }
         });
 
-        // --- Form Submission ---
+        // --- Form Submission Logic ---
         async function submitForm() {
             submitBtn.disabled = true;
             submitBtn.classList.add('loading');
             formStatus.style.display = 'none';
+            let profileImageUrl = null;
+
             try {
+                // بخش ۱: دریافت توکن احراز هویت از پروکسی
                 const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
                 if (!tokenResponse.ok) throw new Error('خطا در دریافت توکن احراز هویت.');
                 const tokenData = await tokenResponse.json();
+                const authToken = tokenData.token;
+                
+                const username = allInputs.username.value.trim().toLowerCase();
 
+                // بخش ۲: بررسی تکراری نبودن نام کاربری
+                const checkUserResponse = await fetch(`${PROXY_URL}?path=users/${username}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (!checkUserResponse.ok) throw new Error('خطا در هنگام بررسی نام کاربری.');
+                const existingUser = await checkUserResponse.json();
+                if (existingUser) {
+                    throw new Error('این نام کاربری قبلاً انتخاب شده است.');
+                }
+
+                // بخش ۳: آپلود تصویر پروفایل (در صورت انتخاب)
+                const profilePicFile = allInputs.profilePic.files[0];
+                if (profilePicFile) {
+                    const formData = new FormData();
+                    formData.append('profile_pic', profilePicFile);
+
+                    const uploadResponse = await fetch(UPLOAD_ENDPOINT, {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    
+                    const uploadData = await uploadResponse.json();
+                    if (!uploadResponse.ok || !uploadData.success || !uploadData.url) {
+                        throw new Error(uploadData.message || 'خطا در آپلود تصویر پروفایل.');
+                    }
+                    profileImageUrl = uploadData.url;
+                }
+
+                // بخش ۴: آماده‌سازی و ذخیره اطلاعات کاربر
                 const userData = {
                     displayName: allInputs.displayName.value.trim(),
-                    username: allInputs.username.value.trim().toLowerCase(),
+                    username: username,
                     mobile: allInputs.mobile.value.trim(),
                     age: parseInt(allInputs.age.value),
                     gender: allInputs.gender.value,
                     password: allInputs.password.value,
                     bio: allInputs.bio.value.trim(),
-                    interests: allInputs.interests.value.trim(),
+                    interests: allInputs.interests.value.trim().split('،').map(i => i.trim()).filter(Boolean),
+                    profileImageUrl: profileImageUrl,
                     createdAt: new Date().toISOString(),
                     isOnline: false,
                     lastSeen: new Date().toISOString()
                 };
 
-                // [FIXED] Sending the required 'X-User-Username' header
-                const registerResponse = await fetch(`${PROXY_URL}?path=users/${userData.username}`, {
+                const registerResponse = await fetch(`${PROXY_URL}?path=users/${username}`, {
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${tokenData.token}`,
-                        'X-User-Username': userData.username // این هدر برای پراکسی شما ضروری است
+                        'Authorization': `Bearer ${authToken}`,
+                        'X-User-Username': username
                     },
                     body: JSON.stringify(userData)
                 });
                 
-                const responseData = await registerResponse.json().catch(() => ({}));
                 if (!registerResponse.ok) {
-                    throw new Error(responseData.error || 'خطا در ثبت اطلاعات در سرور.');
+                    const errorData = await registerResponse.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'خطا در ثبت اطلاعات در سرور.');
                 }
                 
+                // بخش ۵: مدیریت ثبت‌نام موفق
                 localStorage.setItem('currentUser', JSON.stringify({
                     username: userData.username,
-                    displayName: userData.displayName
+                    displayName: userData.displayName,
+                    profileImageUrl: userData.profileImageUrl
                 }));
                 
                 formStatus.textContent = 'ثبت‌نام موفق بود! در حال انتقال به صفحه اصلی...';
                 formStatus.className = 'success';
                 formStatus.style.display = 'block';
                 
-                // [FIXED] Redirecting to the correct main page
                 setTimeout(() => { window.location.href = 'safe_asli.html'; }, 2000);
 
             } catch (error) {
+                // مدیریت خطا در هر یک از مراحل
                 formStatus.textContent = error.message;
                 formStatus.style.display = 'block';
                 formStatus.className = 'error';
-            } finally {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('loading');
             }
