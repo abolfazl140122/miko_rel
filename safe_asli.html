@@ -110,7 +110,7 @@
             margin-right: 5px;
         }
         
-        /* --- NEW: Search Tabs --- */
+        /* --- Search Tabs --- */
         .search-tabs {
             display: none; /* Hidden by default */
             justify-content: space-around;
@@ -219,36 +219,7 @@
             box-shadow: 0 0 8px var(--online-indicator);
             animation: pulse 1.5s infinite;
         }
-        .unread-badge {
-            position: absolute;
-            top: 2px; 
-            left: 2px;
-            background-color: var(--notification-badge);
-            color: white;
-            border-radius: 12px;
-            min-width: 24px; 
-            height: 24px;
-            font-size: 0.8em;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid var(--secondary-color);
-            padding: 0 6px;
-            box-shadow: 0 2px 8px rgba(255, 77, 77, 0.6);
-            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
-            70% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
-        }
-        @keyframes bounceIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
+        
         .chat-details {
             flex-grow: 1;
             overflow: hidden;
@@ -274,13 +245,44 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
+            justify-content: space-between; /* MODIFIED */
             font-size: 0.85em;
             color: var(--text-secondary);
             flex-shrink: 0;
-            margin-top: -15px; 
+            align-self: stretch; /* MODIFIED */
+            min-height: 42px; /* MODIFIED */
+            position: relative; /* ADDED */
         }
         .chat-meta span {
             font-weight: 500;
+        }
+
+        /* --- NEW: Unread Count Badge --- */
+        .unread-count-badge {
+            background-color: var(--notification-badge);
+            color: white;
+            border-radius: 12px;
+            min-width: 24px;
+            height: 24px;
+            font-size: 0.8em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            box-shadow: 0 2px 8px rgba(255, 77, 77, 0.6);
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .verified-tick {
@@ -605,12 +607,11 @@
             </div>
         </header>
 
-        <!-- NEW: Search Tabs (Initially hidden) -->
+        <!-- Search Tabs (Initially hidden) -->
         <div class="search-tabs" id="search-tabs">
             <button class="search-tab active" data-mode="accounts">اکانت‌ها</button>
             <button class="search-tab" data-mode="channels">کانال‌ها</button>
         </div>
-
 
         <!-- MAIN CONTENT: Chat list or search results -->
         <main id="main-content">
@@ -640,7 +641,6 @@
         <!-- Floating Action Button (FAB) HTML Structure -->
         <div class="fab-container" id="fab-container">
             <div class="fab-options">
-                <!-- MODIFICATION: Added ID to this button -->
                 <button class="fab-option" id="fab-new-private-chat" title="چت خصوصی جدید">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </button>
@@ -654,7 +654,7 @@
         </div>
     </div>
 
-    <!-- Profile Overlay HTML Structure (Updated) -->
+    <!-- Profile Overlay HTML Structure -->
     <div class="profile-overlay" id="profile-overlay">
         <div class="profile-card">
             <button class="close-btn" id="close-profile-btn">
@@ -769,8 +769,11 @@
                 }
 
                 if (chatsResponse) {
-                    recentChats = Object.values(chatsResponse)
-                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    // *** MODIFICATION: Map chat objects to include their IDs ***
+                    recentChats = Object.keys(chatsResponse).map(key => ({
+                        chatId: key,
+                        ...chatsResponse[key]
+                    })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 }
 
                 renderChatList();
@@ -803,6 +806,31 @@
             }
             return response.json();
         }
+        
+        // --- *** NEW FUNCTION ***: Mark a chat as read ---
+        async function markChatAsRead(chatId) {
+            console.log(`Marking chat ${chatId} as read for user ${currentUser.username}.`);
+            // TODO: Implement the backend call here.
+            // This function should send a request to your server/proxy to update
+            // the database and set `pivi_chats/${chatId}/unreadCount/${currentUser.username}` to 0.
+            // Example using fetch (you'll need to adapt it to your backend API):
+            /*
+            try {
+                await fetch(`${PROXY_URL}?path=pivi_chats/${chatId}/unreadCount/${currentUser.username}`, {
+                    method: 'PUT', // Or PATCH
+                    headers: {
+                        'Authorization': `Bearer ${clientToken}`,
+                        'X-User-Username': currentUser.username,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(0) 
+                });
+            } catch (error) {
+                console.error("Failed to mark chat as read:", error);
+            }
+            */
+        }
+
 
         // --- SECTION: UI Rendering ---
         
@@ -813,11 +841,13 @@
                 mainContent.innerHTML = '<div class="status-container"><p>هنوز هیچ گفتگویی وجود ندارد.</p></div>';
                 return;
             }
+            
+            // *** MODIFICATION: Pass the whole chat object to the template function ***
             const chatListHtml = userChats.map(chat => {
                 const partnerUsername = Object.keys(chat.members).find(m => m !== currentUser.username);
                 const partnerData = allUsers[partnerUsername];
                 if (!partnerData) return ''; 
-                return createChatItemHtml(partnerData, chat.lastMessage, chat.timestamp);
+                return createChatItemHtml(chat, partnerData);
             }).join('');
             
             mainContent.innerHTML = `<div class="chat-list">${chatListHtml}</div>`;
@@ -853,28 +883,32 @@
         }
 
         // --- SECTION: HTML Template Generators ---
-        function createChatItemHtml(partnerData, lastMessage, timestamp) {
-            // *** MODIFIED: Use profilePicUrl if available, otherwise use default avatar ***
+        function createChatItemHtml(chat, partnerData) { // *** MODIFIED: Now accepts the full 'chat' object
             const avatarUrl = partnerData.profilePicUrl 
                 ? partnerData.profilePicUrl 
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=00A3FF&color=fff&size=100`;
             
             const verifiedTickHtml = partnerData.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
+            
+            // *** NEW: Get the unread count for the current user ***
+            const unreadCount = chat.unreadCount ? (chat.unreadCount[currentUser.username] || 0) : 0;
+
             return `
-                <div class="chat-item" data-uid="${partnerData.username}">
+                <div class="chat-item" data-uid="${partnerData.username}" data-chat-id="${chat.chatId}">
                     <div class="profile-picture"><img src="${avatarUrl}" alt="${partnerData.displayName}"></div>
                     <div class="chat-details">
                         <h3>${partnerData.displayName || partnerData.username} ${verifiedTickHtml}</h3>
-                        <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
+                        <p class="last-message">${chat.lastMessage || 'هنوز پیامی ارسال نشده'}</p>
                     </div>
                     <div class="chat-meta">
-                        <span>${new Date(timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span>${new Date(chat.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        ${unreadCount > 0 ? `<div class="unread-count-badge">${unreadCount}</div>` : ''}
                     </div>
                 </div>`;
         }
 
+
         function createUserResultHtml(userData) {
-            // *** MODIFIED: Use profilePicUrl if available, otherwise use default avatar ***
             const avatarUrl = userData.profilePicUrl
                 ? userData.profilePicUrl
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
@@ -956,11 +990,17 @@
             mainContent.querySelectorAll('.chat-item, .search-result-item').forEach(item => {
                 item.addEventListener('click', () => {
                     const targetUid = item.dataset.uid;
+                    const targetChatId = item.dataset.chatId; // *** NEW: Get chatId
                     const targetChannelId = item.dataset.channelId;
 
                     if (targetUid) {
+                        // *** NEW: Mark chat as read before navigating ***
+                        if (targetChatId) {
+                            markChatAsRead(targetChatId);
+                        }
                         console.log(`Navigating to chat with user: ${targetUid}`);
                         window.location.href = `pivi.html?uid=${targetUid}`;
+
                     } else if (targetChannelId) {
                         console.log(`Navigating to channel: ${targetChannelId}`);
                         window.location.href = `Channel.html?id=${targetChannelId}`;
@@ -973,7 +1013,6 @@
         function showProfile() {
             if (!currentUser) return;
             
-            // *** MODIFIED: Check for currentUser.profilePicUrl ***
             const avatarUrl = currentUser.profilePicUrl 
                 ? currentUser.profilePicUrl 
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=0D1117&color=fff&size=150`;
@@ -1013,7 +1052,6 @@
                 let needsUIRefresh = false;
                 if (newUsers && JSON.stringify(allUsers) !== JSON.stringify(newUsers)) {
                     allUsers = newUsers;
-                    // *** MODIFIED: Update currentUser from new data and refresh profile if open ***
                     if (currentUser && allUsers[currentUser.username]) {
                         currentUser = allUsers[currentUser.username];
                         localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -1025,7 +1063,12 @@
                     needsUIRefresh = true;
                 }
                 if (newChats) {
-                    const newRecent = Object.values(newChats).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    // *** MODIFICATION: Same logic as initial load to include chat IDs ***
+                    const newRecent = Object.keys(newChats).map(key => ({
+                        chatId: key,
+                        ...newChats[key]
+                    })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    
                     if (JSON.stringify(recentChats) !== JSON.stringify(newRecent)) {
                         recentChats = newRecent;
                         needsUIRefresh = true;
@@ -1037,7 +1080,6 @@
                     renderChatList();
                 }
 
-                // *** MODIFIED: Refresh profile card if it's open and data has changed ***
                 if (needsUIRefresh && profileOverlay.classList.contains('active')) {
                     console.log('User data changed, refreshing profile card.');
                     showProfile();
@@ -1048,7 +1090,7 @@
             }
         }
 
-        function startRealtimeUpdates(interval = 8000) {
+        function startRealtimeUpdates(interval = 5000) { // Polling interval can be faster now if desired
             if (pollingIntervalId) clearInterval(pollingIntervalId);
             pollingIntervalId = setInterval(checkForUpdates, interval);
         }
