@@ -141,7 +141,6 @@
             background-color: var(--message-received-bg); align-self: flex-end; /* RTL: right */
             border-bottom-right-radius: 6px;
         }
-        /* NEW: No padding for image/video messages */
         .message.has-media {
             padding: 5px;
             background-color: transparent;
@@ -175,7 +174,7 @@
             margin-top: 5px; text-align: left;
             display: flex;
             align-items: center;
-            justify-content: flex-end; /* NEW: Align items to the end */
+            justify-content: flex-end;
         }
         .message.has-media .timestamp {
             position: absolute;
@@ -186,6 +185,26 @@
             border-radius: 10px;
             color: white;
         }
+        
+        /* --- NEW: استایل آیکون وضعیت پیام --- */
+        .message-status-icon {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 4px; /* فاصله از زمان */
+            line-height: 1;
+            width: 18px;
+            height: 18px;
+        }
+        .message-status-icon.sent {
+            color: rgba(255, 255, 255, 0.6); /* رنگ تیک ارسال شده */
+        }
+        .message-status-icon.read {
+            color: #4FC3F7; /* رنگ تیک خوانده شده (آبی روشن) */
+        }
+        .message-status-icon.sent svg path:nth-of-type(2) {
+            display: none; /* مخفی کردن تیک دوم برای وضعیت "ارسال شده" */
+        }
+
 
         .message .edited-indicator { font-size: 0.7em; color: rgba(255, 255, 255, 0.6); margin-right: 5px; font-style: italic;}
         .message.deleted .text { font-style: italic; color: var(--text-secondary); }
@@ -526,7 +545,6 @@
         .profile-card img {
             width: 100px; height: 100px; border-radius: 50%;
             border: 3px solid var(--primary-color); margin-bottom: 15px;
-            object-fit: cover;
         }
         .profile-card h3 { font-size: 1.5em; margin-bottom: 5px; }
         .profile-card p { font-size: 1em; color: var(--text-secondary); }
@@ -594,7 +612,7 @@
     <div class="app-container" id="app-container">
         <header class="chat-header">
              <button class="back-btn" aria-label="بازگشت" onclick="history.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </button>
             <div class="partner-info" id="partner-info-header">
                 <img id="partner-avatar" src="" alt="آواتار">
@@ -604,7 +622,7 @@
                 </div>
             </div>
             <button class="options-btn" aria-label="گزینه‌ها" id="options-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
             </button>
         </header>
         
@@ -757,17 +775,11 @@
         // ===============================================
         //  !!!   مهم: این بخش را حتما ویرایش کنید   !!!
         // ===============================================
-        // آدرس کامل فایل پراکسی PHP خود را در اینجا قرار دهید.
-        // مطمئن شوید که دامنه شما صحیح و فعال است.
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        // Endpoint جدید آپلود مستقیم به PHP در هاست رایگان (این فایل PHP را روی public_html بسازید)
         const UPLOAD_PHP_ENDPOINT = 'https://miko.freehost.io/upload_to_parspack.php';
         const SHARED_SECRET = 'miko1234';
         // ===============================================
 
-        // ==============================================================
-        //  >>> START OF REVISED CacheManager IMPLEMENTATION <<<
-        // ==============================================================
         class CacheManager {
             constructor(dbName = 'PiviMediaCacheDB', storeName = 'media_metadata', cacheName = 'pivi-media-cache', maxSizeMB = 200) {
                 this.dbName = dbName;
@@ -775,7 +787,6 @@
                 this.cacheName = cacheName;
                 this.maxSizeBytes = maxSizeMB * 1024 * 1024;
                 this.db = null;
-                // برای نگه‌داری ارجاع به blobها در حافظه تا زمانی که صفحه باز است
                 this._blobReferences = new Map();
             }
 
@@ -813,7 +824,7 @@
                     const store = transaction.objectStore(this.storeName);
                     store.put({ url, lastAccessed: Date.now(), size: blob.size });
                     
-                    await this.evictIfNeeded(); // پاک‌سازی در صورت نیاز
+                    await this.evictIfNeeded();
                 } catch (error) {
                     console.error(`Failed to cache ${url}:`, error);
                 }
@@ -821,27 +832,17 @@
 
             async get(url) {
                 if (!this.db) return null;
-
-                // مرحله ۱: ابتدا بررسی می‌کنیم که آیا blob از قبل در حافظه (Map) وجود دارد یا نه
                 if (this._blobReferences.has(url)) {
                     const blob = this._blobReferences.get(url);
-                    // یک Object URL جدید و معتبر می‌سازیم تا از خطای "revoked" جلوگیری شود
                     return URL.createObjectURL(blob);
                 }
-
-                // مرحله ۲: اگر در حافظه نبود، از Cache API می‌خوانیم
                 try {
                     const cache = await caches.open(this.cacheName);
                     const response = await cache.match(url);
                     if (response) {
                         const blob = await response.blob();
-                        
-                        // blob را در حافظه نگه می‌داریم تا در فراخوانی‌های بعدی سریعاً در دسترس باشد
                         this._blobReferences.set(url, blob);
-                        
                         const objectURL = URL.createObjectURL(blob);
-
-                        // به‌روزرسانی زمان آخرین دسترسی برای مدیریت حافظه (LRU)
                         const transaction = this.db.transaction(this.storeName, 'readwrite');
                         const store = transaction.objectStore(this.storeName);
                         const metadata = await new Promise(r => {
@@ -851,7 +852,6 @@
                         if (metadata) {
                             store.put({ ...metadata, lastAccessed: Date.now() });
                         }
-
                         return objectURL;
                     }
                     return null;
@@ -863,76 +863,53 @@
             
             async ensurePreloaded(urls, concurrency = 4) {
                 const queue = [...urls];
-                
                 const prefetch = async (url) => {
                     try {
-                        // ۱. بررسی اینکه آیا فایل از قبل در کش وجود دارد یا نه
                         const cache = await caches.open(this.cacheName);
                         const existing = await cache.match(url);
-                        if (existing) return; // اگر وجود داشت، نیازی به دانلود مجدد نیست
-
-                        // ۲. تنظیم یک تایم‌اوت تطبیقی فقط برای نمایش هشدار (soft handling)
-                        // این تایمر عملیات fetch را متوقف نمی‌کند
+                        if (existing) return;
                         const dynamicTimeout = url.match(/\.(mp4|mov|webm)$/i) ? 20000 : 8000;
                         const timeoutId = setTimeout(() => {
                             console.warn(`Preloading is taking longer than expected for: ${url}`);
                         }, dynamicTimeout);
-
-                        // ۳. دانلود فایل با استفاده از کش مرورگر
                         const response = await fetch(url, {
                             mode: 'cors',
                             cache: 'force-cache',
                         });
-
-                        // ۴. پاک کردن تایمر هشدار پس از اتمام دانلود
                         clearTimeout(timeoutId);
-
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
-
-                        // ۵. تبدیل پاسخ به blob و ذخیره‌سازی از طریق متد put
                         const blob = await response.blob();
                         await this.put(url, blob);
-
                     } catch (error) {
-                        // نمایش خطا بدون متوقف کردن سایر دانلودها
                         console.warn(`Preloading failed for ${url}:`, error.message);
                     }
                 };
-
                 const run = async () => {
                     while (queue.length > 0) {
                         const url = queue.shift();
                         if (url) await prefetch(url);
                     }
                 };
-                
-                // اجرای همزمان چند دانلود برای افزایش سرعت
                 const workers = Array(concurrency).fill(null).map(() => run());
                 await Promise.all(workers);
             }
 
             async evictIfNeeded() {
                 if (!this.db) return;
-
                 const transaction = this.db.transaction(this.storeName, 'readwrite');
                 const store = transaction.objectStore(this.storeName);
                 const allMetadata = await new Promise(r => store.getAll().onsuccess = e => r(e.target.result));
-
                 const totalSize = allMetadata.reduce((sum, item) => sum + item.size, 0);
-
                 if (totalSize > this.maxSizeBytes) {
                     allMetadata.sort((a, b) => a.lastAccessed - b.lastAccessed);
                     let currentSize = totalSize;
                     const cache = await caches.open(this.cacheName);
-
                     for (const item of allMetadata) {
                         if (currentSize <= this.maxSizeBytes) break;
-                        
                         await cache.delete(item.url);
                         await new Promise(r => store.delete(item.url).onsuccess = r);
-                        // همچنین از حافظه موقت (Map) هم پاک می‌کنیم
                         this._blobReferences.delete(item.url);
                         currentSize -= item.size;
                         console.log(`Evicted ${item.url} to free up space.`);
@@ -940,11 +917,7 @@
                 }
             }
         }
-        // ============================================================
-        //  <<< END OF REVISED CacheManager IMPLEMENTATION >>>
-        // ============================================================
-
-
+        
         // --- ارجاع به عناصر DOM ---
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingErrorEl = document.getElementById('loading-error');
@@ -991,12 +964,11 @@
         let currentPinnedMessage = null;
         let activeMessageId = null, activeMessageElement = null;
         let keyboardOffset = 80;
-        let lastMessagesSnapshot = {}; // برای مقایسه پیام‌های جدید و قدیم
-
+        let lastMessagesSnapshot = {};
         let recorder, voiceChunks = [], mediaStream = null, isRecording = false;
         let recordStartTime, recordTimerInterval;
         let touchStartX, isCancelThresholdMet = false;
-
+        let readReceiptObserver; // NEW: Observer for read receipts
 
         // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
         window.addEventListener('load', initializeApp);
@@ -1010,37 +982,30 @@
         async function initializeApp() {
             if (window.piviAppInitialized) return;
             window.piviAppInitialized = true;
-
             showLoading();
-            
             try {
                 await cacheManager.init();
-                console.log('Cache Manager initialized successfully.');
             } catch (error) {
-                console.warn('Could not initialize Cache Manager. Media will not be cached.', error);
+                console.warn('Could not initialize Cache Manager.', error);
             }
-
             keyboardOffset = parseInt(localStorage.getItem('keyboardOffset') || '80', 10);
             keyboardOffsetSlider.value = keyboardOffset;
             keyboardOffsetValue.textContent = `${keyboardOffset} px`;
-
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
                 window.location.href = 'login.html';
                 return;
             }
             currentUser = JSON.parse(storedUser);
-
             const urlParams = new URLSearchParams(window.location.search);
             const partnerUsername = urlParams.get('uid') || urlParams.get('with');
             if (!partnerUsername) {
                 showError('کاربر مقصد مشخص نشده است.');
                 return;
             }
-
             try {
                 if (PROXY_URL.includes('YOUR_CORRECT_DOMAIN') || UPLOAD_PHP_ENDPOINT.includes('YOUR_CORRECT_DOMAIN')) {
-                     throw new Error('لطفاً آدرس دامنه صحیح خود را در متغیرهای PROXY_URL و UPLOAD_PHP_ENDPOINT در کد جاوااسکریپت وارد کنید.');
+                     throw new Error('لطفاً آدرس دامنه صحیح خود را در متغیرهای PROXY_URL و UPLOAD_PHP_ENDPOINT وارد کنید.');
                 }
                 await refreshClientToken();
                 await fetchCurrentUserData();
@@ -1049,16 +1014,13 @@
                     showError('کاربر مورد نظر پیدا نشد.');
                     return;
                 }
-                
                 chatId = [currentUser.username, chatPartner.username].sort().join('_');
-                
                 checkBlockStatus();
                 updateBlockUI();
-
                 setupUI();
                 setupEventListeners();
-                await loadChatData(true); // بارگذاری اولیه
-                
+                setupReadReceiptObserver(); // NEW: Initialize the observer
+                await loadChatData(true);
                 startPolling();
                 updatePresence(true);
                 showApp();
@@ -1071,8 +1033,7 @@
         // --- بخش ۳: توابع مدیریت وضعیت برنامه (Pause/Resume) ---
         function startPolling() {
             if (messagePollingInterval) clearInterval(messagePollingInterval);
-            messagePollingInterval = setInterval(() => loadChatData(false), 5000); // به‌روزرسانی‌های بعدی
-            
+            messagePollingInterval = setInterval(() => loadChatData(false), 5000);
             if (presencePollingInterval) clearInterval(presencePollingInterval);
             presencePollingInterval = setInterval(pollPartnerStatus, 10000);
         }
@@ -1102,7 +1063,7 @@
             document.querySelector('#loading-overlay .loading-dots').style.display = 'none';
         }
         function scrollToBottom() {
-            mainContent.scrollTop = 0; // به دلیل flex-direction: column-reverse
+            mainContent.scrollTop = 0;
         }
 
         function createVerifiedNameHTML(displayName, isVerified) {
@@ -1113,23 +1074,9 @@
             return displayName;
         }
         
-        /**
-         *  تابع جدید برای دریافت URL آواتار بر اساس منطق خواسته شده
-         */
-        function getPartnerAvatarUrl(size = 100) {
-            // شرط: اگر فیلد profilePicUrl وجود داشت و خالی نبود
-            if (chatPartner && chatPartner.profilePicUrl) {
-                return chatPartner.profilePicUrl;
-            }
-            // در غیر این صورت، از آواتار پیش‌فرض استفاده کن
-            const name = encodeURIComponent(chatPartner.displayName || chatPartner.username);
-            return `https://ui-avatars.com/api/?name=${name}&background=0D1117&color=fff&size=${size}`;
-        }
-
         function setupUI() {
             partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
-            // <<< تغییر ۱: استفاده از تابع جدید برای تنظیم عکس پروفایل هدر >>>
-            partnerAvatarEl.src = getPartnerAvatarUrl(80);
+            partnerAvatarEl.src = `https://i.pravatar.cc/80?u=${chatPartner.username}`;
             updateStatusUI(chatPartner.isOnline, chatPartner.lastSeen);
         }
 
@@ -1139,14 +1086,12 @@
             optionsBtn.addEventListener('click', () => showModal(mainOptionsOverlay));
             document.getElementById('partner-info-header').addEventListener('click', () => showModal(profileOverlay));
             messagesArea.addEventListener('click', handleMessageClick);
-            
             attachFileBtn.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) sendFileMessage(file);
                 e.target.value = ''; 
             });
-
             document.getElementById('reply-msg-btn').addEventListener('click', handleReplyAction);
             document.getElementById('pin-msg-btn').addEventListener('click', handlePinAction);
             cancelReplyBtn.addEventListener('click', cancelReply);
@@ -1155,27 +1100,22 @@
                 scrollToMessage(currentPinnedMessage.msgId);
             });
             unpinBtn.addEventListener('click', handleUnpinAction);
-            
             document.getElementById('edit-msg-btn').addEventListener('click', handleEditAction);
             document.getElementById('delete-msg-btn').addEventListener('click', handleDeleteAction);
             blockUserBtn.addEventListener('click', handleBlockToggle);
-
             document.getElementById('main-menu-profile-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(profileOverlay); });
             document.getElementById('main-menu-settings-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(settingsOverlay); });
             document.getElementById('close-settings-btn').addEventListener('click', () => hideModal(settingsOverlay));
             keyboardOffsetSlider.addEventListener('input', handleKeyboardOffsetChange);
             messageInput.addEventListener('focus', applyKeyboardOffset);
             messageInput.addEventListener('blur', removeKeyboardOffset);
-
             voiceBtn.addEventListener('mousedown', startRecording);
             voiceBtn.addEventListener('touchstart', startRecording);
             document.addEventListener('mouseup', stopRecording);
             document.addEventListener('touchend', stopRecording);
             document.addEventListener('mousemove', handleRecordingMove);
             document.addEventListener('touchmove', handleRecordingMove);
-
             imageViewerCloseBtn.addEventListener('click', closeImageViewer);
-            
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 overlay.addEventListener('click', (e) => {
                     if (e.target === overlay) {
@@ -1224,8 +1164,9 @@
             try {
                 const partnerData = await apiRequest(`users/${chatPartner.username}`, 'GET');
                 if (partnerData) {
-                    // به‌روزرسانی کل آبجکت کاربر برای دسترسی به فیلد جدید در همه جا
-                    chatPartner = { ...chatPartner, ...partnerData };
+                    chatPartner.isOnline = partnerData.isOnline;
+                    chatPartner.lastSeen = partnerData.lastSeen;
+                    chatPartner.verified = partnerData.verified;
                     updateStatusUI(partnerData.isOnline, partnerData.lastSeen);
                     partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
                 }
@@ -1291,7 +1232,7 @@
                 if (!response.ok) throw new Error(`خطای ${response.status} در دریافت توکن از سرور`);
                 const data = await response.json();
                 clientToken = data.token;
-            } catch (error) { throw new Error(`خطای شبکه در دریافت توکن: ${error.message}. از صحت آدرس پراکسی و روشن بودن سرور مطمئن شوید.`); }
+            } catch (error) { throw new Error(`خطای شبکه در دریافت توکن: ${error.message}.`); }
         }
         async function fetchCurrentUserData() {
              const data = await apiRequest(`users/${currentUser.username}`, 'GET');
@@ -1306,9 +1247,7 @@
             if (!chatId || !clientToken) return;
             try {
                 const chatData = await apiRequest(`pivi_chats/${chatId}`, 'GET');
-                
                 updatePinnedMessageUI(chatData ? chatData.pinnedMessage : null);
-                
                 const messagesData = chatData ? chatData.messages : {};
                 
                 if (isInitialLoad && Object.keys(messagesData).length === 0) {
@@ -1318,20 +1257,11 @@
                 }
 
                 if (isInitialLoad) {
-                    const mediaUrls = Object.values(messagesData)
-                        .map(msg => msg.mediaUrl || msg.voiceUrl)
-                        .filter(Boolean);
-                    const uniqueUrls = [...new Set(mediaUrls)];
-                    if (uniqueUrls.length > 0) {
-                        // این عملیات در پس‌زمینه انجام می‌شود و UI را مسدود نمی‌کند
-                        cacheManager.ensurePreloaded(uniqueUrls).then(() => {
-                           console.log('Preloading complete.');
-                        });
-                    }
+                    const mediaUrls = Object.values(messagesData).map(msg => msg.mediaUrl || msg.voiceUrl).filter(Boolean);
+                    if (mediaUrls.length > 0) cacheManager.ensurePreloaded([...new Set(mediaUrls)]);
                 }
 
-                const sortedMessages = Object.entries(messagesData)
-                    .sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
+                const sortedMessages = Object.entries(messagesData).sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
 
                 sortedMessages.forEach(([msgId, msg]) => {
                     const existingMsg = lastMessagesSnapshot[msgId];
@@ -1343,11 +1273,8 @@
                         updateMessageElement(existingElement, msg);
                     }
                 });
-
                 lastMessagesSnapshot = messagesData; 
-                
                 if(isInitialLoad) scrollToBottom();
-
             } catch(error) { console.error("خطا در بارگذاری داده‌های چت:", error); }
         }
         
@@ -1356,17 +1283,13 @@
             if (isRecording) return;
             isRecording = true;
             isCancelThresholdMet = false;
-
             touchStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-
             updateRecordingUI(true);
-
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 recorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
                 voiceChunks = [];
                 recorder.ondataavailable = event => { if (event.data.size > 0) voiceChunks.push(event.data); };
-                
                 recorder.onstop = () => {
                     if (mediaStream) {
                         mediaStream.getTracks().forEach(track => track.stop());
@@ -1374,18 +1297,14 @@
                     }
                     if (!isCancelThresholdMet) {
                         const voiceBlob = new Blob(voiceChunks, { type: 'audio/webm' });
-                        if (voiceBlob.size > 1000) { 
-                           sendVoiceMessage(voiceBlob);
-                        }
+                        if (voiceBlob.size > 1000) sendVoiceMessage(voiceBlob);
                     }
                     voiceChunks = [];
                 };
-
                 recorder.start();
                 startTimer();
             } catch (err) {
-                console.error("خطا در دسترسی به میکروفون:", err);
-                showCustomAlert({ title: 'خطا', message: 'امکان دسترسی به میکروفون وجود ندارد. لطفاً مجوز لازم را بدهید.' });
+                showCustomAlert({ title: 'خطا', message: 'امکان دسترسی به میکروفون وجود ندارد.' });
                 updateRecordingUI(false); 
                 isRecording = false;
             }
@@ -1394,10 +1313,7 @@
         function stopRecording() {
             if (!isRecording) return;
             isRecording = false;
-            
-            if (recorder && recorder.state === 'recording') {
-                recorder.stop();
-            }
+            if (recorder && recorder.state === 'recording') recorder.stop();
             updateRecordingUI(false);
             stopTimer();
         }
@@ -1406,8 +1322,7 @@
             if (!isRecording) return;
             const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
             const distance = touchStartX - currentX;
-            const cancelThreshold = 100;
-            isCancelThresholdMet = distance > cancelThreshold;
+            isCancelThresholdMet = distance > 100;
             voiceCancelIndicator.style.color = isCancelThresholdMet ? 'var(--danger-color)' : 'var(--text-secondary)';
         }
 
@@ -1422,10 +1337,10 @@
         function startTimer() {
             recordStartTime = Date.now();
             recordTimerInterval = setInterval(() => {
-                const elapsedTime = Math.floor((Date.now() - recordStartTime) / 1000);
-                const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
-                const seconds = String(elapsedTime % 60).padStart(2, '0');
-                voiceRecordTimer.textContent = `${minutes}:${seconds}`;
+                const elapsed = Math.floor((Date.now() - recordStartTime) / 1000);
+                const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+                const secs = String(elapsed % 60).padStart(2, '0');
+                voiceRecordTimer.textContent = `${mins}:${secs}`;
             }, 1000);
         }
 
@@ -1435,128 +1350,78 @@
         }
         
         async function sendFileMessage(file) {
-            const MAX_SIZE_MB = 100;
-            if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-                showCustomAlert({ title: 'خطا', message: `حجم فایل نباید بیشتر از ${MAX_SIZE_MB} مگابایت باشد.` });
+            if (file.size > 100 * 1024 * 1024) {
+                showCustomAlert({ title: 'خطا', message: `حجم فایل نباید بیشتر از 100 مگابایت باشد.` });
                 return;
             }
-
             const fileType = file.type.split('/')[0];
             const tempId = `temp_${Date.now()}`;
-            const tempMsgData = {
-                senderId: currentUser.username,
-                timestamp: new Date().toISOString(),
-                isSending: true,
-                type: fileType
-            };
-            createMessageElement(tempId, tempMsgData);
+            createMessageElement(tempId, { senderId: currentUser.username, timestamp: new Date().toISOString(), isSending: true, type: fileType });
             scrollToBottom();
-
             const formData = new FormData();
             formData.append('file', file, file.name);
-
             try {
                 const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
                 const progressIndicator = tempElement ? tempElement.querySelector('progress') : null;
-
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', UPLOAD_PHP_ENDPOINT, true);
-
-                xhr.upload.onprogress = (event) => {
-                    if (event.lengthComputable && progressIndicator) {
-                        progressIndicator.value = event.loaded;
-                        progressIndicator.max = event.total;
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable && progressIndicator) {
+                        progressIndicator.value = e.loaded;
+                        progressIndicator.max = e.total;
                     }
                 };
-
                 xhr.onload = async () => {
                     if (xhr.status === 200) {
                         const result = JSON.parse(xhr.responseText);
                         if (result.success && result.url) {
                             await cacheManager.put(result.url, file);
-
-                            const finalMsg = {
-                                senderId: currentUser.username, receiverId: chatPartner.username,
-                                mediaUrl: result.url, timestamp: new Date().toISOString(), type: fileType
-                            };
+                            const finalMsg = { senderId: currentUser.username, receiverId: chatPartner.username, mediaUrl: result.url, timestamp: new Date().toISOString(), type: fileType };
                             const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', finalMsg);
-                            await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
-                                lastMessage: fileType === 'image' ? 'تصویر' : 'ویدیو', timestamp: finalMsg.timestamp
-                            });
-                            
+                            await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: fileType === 'image' ? 'تصویر' : 'ویدیو', timestamp: finalMsg.timestamp });
                             if (tempElement) {
                                 tempElement.dataset.id = newMsgRef.name;
                                 updateMessageElement(tempElement, finalMsg);
                                 lastMessagesSnapshot[newMsgRef.name] = finalMsg;
                             }
-                        } else {
-                           throw new Error(result.error || 'خطا در آپلود فایل');
-                        }
-                    } else {
-                        throw new Error(`خطای سرور: ${xhr.status}`);
-                    }
+                        } else { throw new Error(result.error || 'خطا در آپلود فایل'); }
+                    } else { throw new Error(`خطای سرور: ${xhr.status}`); }
                 };
                 xhr.onerror = () => { throw new Error('خطای شبکه در هنگام آپلود فایل.'); };
                 xhr.send(formData);
-
             } catch (err) {
                 console.error("خطا در ارسال فایل:", err);
-                const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
-                if (tempElement) {
-                   tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود. ${err.message}</div>`;
-                }
+                const tempEl = document.querySelector(`.message[data-id="${tempId}"]`);
+                if (tempEl) tempEl.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود.</div>`;
             }
         }
 
-
         async function sendVoiceMessage(blob) {
             const tempId = `temp_${Date.now()}`;
-            const tempMsgData = {
-                senderId: currentUser.username,
-                timestamp: new Date().toISOString(),
-                isSending: true,
-                type: 'voice'
-            };
-            createMessageElement(tempId, tempMsgData);
+            createMessageElement(tempId, { senderId: currentUser.username, timestamp: new Date().toISOString(), isSending: true, type: 'voice' });
             scrollToBottom();
-
             const formData = new FormData();
-            formData.append('file', blob, `voice_${currentUser.username}_${Date.now()}.ogg`);
-
+            formData.append('file', blob, `voice_${Date.now()}.ogg`);
             try {
                 const response = await fetch(UPLOAD_PHP_ENDPOINT, { method: 'POST', body: formData });
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `خطای سرور: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`خطای سرور: ${response.status}`);
                 const result = await response.json();
                 if (result.success && result.url) {
                     await cacheManager.put(result.url, blob);
-
-                    const finalMsg = {
-                        senderId: currentUser.username, receiverId: chatPartner.username,
-                        voiceUrl: result.url, timestamp: new Date().toISOString(), type: 'voice'
-                    };
+                    const finalMsg = { senderId: currentUser.username, receiverId: chatPartner.username, voiceUrl: result.url, timestamp: new Date().toISOString(), type: 'voice' };
                     const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', finalMsg);
-                    await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
-                        lastMessage: 'پیام صوتی', timestamp: finalMsg.timestamp
-                    });
-                    
-                    const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
-                    if (tempElement) {
-                        tempElement.dataset.id = newMsgRef.name;
-                        updateMessageElement(tempElement, finalMsg);
+                    await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: 'پیام صوتی', timestamp: finalMsg.timestamp });
+                    const tempEl = document.querySelector(`.message[data-id="${tempId}"]`);
+                    if (tempEl) {
+                        tempEl.dataset.id = newMsgRef.name;
+                        updateMessageElement(tempEl, finalMsg);
                         lastMessagesSnapshot[newMsgRef.name] = finalMsg;
                     }
-                } else {
-                    throw new Error(result.error || 'خطا در آپلود صدا');
-                }
+                } else { throw new Error(result.error || 'خطا در آپلود صدا'); }
             } catch (err) {
                 console.error("خطا در ارسال ویس:", err);
-                const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
-                if (tempElement) {
-                   tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود.</div>`;
-                }
+                const tempEl = document.querySelector(`.message[data-id="${tempId}"]`);
+                if (tempEl) tempEl.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود.</div>`;
             }
         }
 
@@ -1564,12 +1429,9 @@
             if (!msg || !msg.timestamp) return;
             const placeholder = messagesArea.querySelector('div[style*="text-align:center"]');
             if(placeholder) placeholder.remove();
-
             const msgDiv = document.createElement('div');
-            const isSent = msg.senderId === currentUser.username;
-            msgDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+            msgDiv.className = `message ${msg.senderId === currentUser.username ? 'sent' : 'received'}`;
             msgDiv.dataset.id = msgId;
-            
             updateMessageElement(msgDiv, msg);
             messagesArea.appendChild(msgDiv);
         }
@@ -1581,15 +1443,27 @@
 
             const isSent = msg.senderId === currentUser.username;
             msgDiv.dataset.senderName = isSent ? currentUser.displayName : chatPartner.displayName;
-            let textForReply = msg.text || (msg.type === 'voice' ? 'پیام صوتی' : msg.type === 'image' ? 'تصویر' : msg.type === 'video' ? 'ویدیو' : '');
-            msgDiv.dataset.text = textForReply;
+            msgDiv.dataset.text = msg.text || (msg.type === 'voice' ? 'پیام صوتی' : msg.type === 'image' ? 'تصویر' : 'ویدیو');
 
             const timestamp = new Date(msg.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
             const editedIndicator = msg.edited ? `<span class="edited-indicator">(ویرایش شده)</span>` : '';
             
+            // --- NEW: منطق نمایش آیکون وضعیت پیام ---
+            let statusIconHTML = '';
+            if (isSent && !msg.deleted && !msg.isSending) {
+                const isRead = msg.readBy && msg.readBy[chatPartner.username];
+                statusIconHTML = `
+                    <span class="message-status-icon ${isRead ? 'read' : 'sent'}" aria-label="${isRead ? 'خوانده شده' : 'ارسال شده'}">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                            <path d="M18,7L16.59,5.59L10.93,11.25L12.34,12.66L18,7Z" style="transform: translateX(-5px);" />
+                        </svg>
+                    </span>`;
+            }
+
             let replyHtml = '';
             if (msg.replyTo && !msg.deleted) {
-                replyHtml = `<div class="reply-context"><div class="reply-sender">${msg.replyTo.senderName}</div><span class="reply-text">${msg.replyTo.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span></div>`;
+                replyHtml = `<div class="reply-context"><div class="reply-sender">${msg.replyTo.senderName}</div><span class="reply-text">${msg.replyTo.text.replace(/</g, "&lt;")}</span></div>`;
             }
 
             let messageContentHTML;
@@ -1599,87 +1473,54 @@
                 const progressHTML = (hasMedia) ? '<progress value="0" max="100"></progress>' : '<div class="spinner"></div>';
                 messageContentHTML = `<div class="sending-indicator">${progressHTML}<span>در حال ارسال...</span></div>`;
             } else if (msg.type === 'voice' && msg.voiceUrl) {
-                messageContentHTML = `<div class="voice-player"><button class="play-pause-btn" aria-label="پخش/توقف"><svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><svg class="pause-icon" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg></button><div class="progress-container"><div class="waveform"><div class="progress-bar"></div></div></div><span class="duration">0:00</span><audio class="voice-audio" src="${msg.voiceUrl}" preload="metadata"></audio></div>`;
+                messageContentHTML = `<div class="voice-player"><button class="play-pause-btn" aria-label="پخش"><svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><svg class="pause-icon" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg></button><div class="progress-container"><div class="waveform"><div class="progress-bar"></div></div></div><span class="duration">0:00</span><audio class="voice-audio" src="${msg.voiceUrl}" preload="metadata"></audio></div>`;
             } else if (msg.type === 'image' && msg.mediaUrl) {
-                messageContentHTML = `<div class="media-container"><img alt="تصویر ارسال شده" loading="lazy"></div>`;
+                messageContentHTML = `<div class="media-container"><img alt="تصویر" loading="lazy"></div>`;
             } else if (msg.type === 'video' && msg.mediaUrl) {
                 messageContentHTML = `<div class="media-container"><video controls preload="metadata"></video></div>`;
             } else {
-                let textContent = msg.text || "";
-                messageContentHTML = `<div class="text">${textContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
+                messageContentHTML = `<div class="text">${(msg.text || "").replace(/</g, "&lt;")}</div>`;
             }
             
-            msgDiv.innerHTML = `${replyHtml}${messageContentHTML}<div class="timestamp">${editedIndicator}${timestamp}</div>`;
+            msgDiv.innerHTML = `${replyHtml}${messageContentHTML}<div class="timestamp">${editedIndicator}${timestamp}${statusIconHTML}</div>`;
             
-            // --- منطق بارگذاری مدیا از کش ---
             const mediaUrl = msg.mediaUrl || msg.voiceUrl;
             if (mediaUrl && !msg.isSending && !msg.deleted) {
                 const mediaElement = msgDiv.querySelector('img, video, audio');
                 if (mediaElement) {
-                    mediaElement.dataset.originalSrc = mediaUrl; // ذخیره آدرس اصلی
-                    let temporaryUrl = null;
-                    cacheManager.get(mediaUrl)
-                        .then(localUrl => {
-                            if (localUrl) {
-                                temporaryUrl = localUrl;
-                                mediaElement.src = localUrl;
-                            } else {
-                                mediaElement.src = mediaUrl; // اگر در کش نبود، از شبکه بخوان
-                            }
-                        })
-                        .catch(() => {
-                            mediaElement.src = mediaUrl; // در صورت بروز خطا، از شبکه بخوان
-                        })
-                        .finally(() => {
-                            // مهم: آزاد کردن حافظه پس از استفاده
-                            // این کار از memory leak جلوگیری می‌کند
-                            const revoke = () => {
-                                if (temporaryUrl) {
-                                    URL.revokeObjectURL(temporaryUrl);
-                                }
-                                mediaElement.removeEventListener('load', revoke);
-                                mediaElement.removeEventListener('canplay', revoke);
-                            };
-                            mediaElement.addEventListener('load', revoke, { once: true });
-                            mediaElement.addEventListener('canplay', revoke, { once: true });
-                        });
+                    mediaElement.dataset.originalSrc = mediaUrl;
+                    cacheManager.get(mediaUrl).then(localUrl => {
+                        mediaElement.src = localUrl || mediaUrl;
+                        if (localUrl) URL.revokeObjectURL(localUrl);
+                    }).catch(() => { mediaElement.src = mediaUrl; });
                 }
             }
+            if (msg.type === 'voice' && !msg.deleted && !msg.isSending) setupVoicePlayer(msgDiv);
 
-            if (msg.type === 'voice' && !msg.deleted && !msg.isSending) {
-                setupVoicePlayer(msgDiv);
+            // --- NEW: مشاهده پیام برای ثبت وضعیت خوانده شده ---
+            if (!isSent && !msg.deleted && !msg.isSending && !msg.readBy?.[currentUser.username] && !msgDiv.dataset.isObserved) {
+                readReceiptObserver.observe(msgDiv);
+                msgDiv.dataset.isObserved = 'true';
             }
         }
 
         async function handleSendMessage(e) {
             e.preventDefault();
             const text = messageInput.value.trim();
-            if (!text || !chatPartner || isPartnerBlocked) return;
-            
-            const message = { 
-                senderId: currentUser.username, receiverId: chatPartner.username, text, 
-                timestamp: new Date().toISOString(), deleted: false,
-                replyTo: activeReplyContext
-            };
+            if (!text) return;
+            const message = { senderId: currentUser.username, receiverId: chatPartner.username, text, timestamp: new Date().toISOString(), replyTo: activeReplyContext };
             const tempInputValue = text;
             messageInput.value = '';
             toggleSendButton();
             cancelReply();
-
             try {
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
-                await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
-                    lastMessage: text, timestamp: message.timestamp,
-                    members: { [currentUser.username]: true, [chatPartner.username]: true }
-                });
+                await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: text, timestamp: message.timestamp, members: { [currentUser.username]: true, [chatPartner.username]: true } });
                 createMessageElement(newMsgRef.name, message);
                 lastMessagesSnapshot[newMsgRef.name] = message;
                 scrollToBottom();
             } catch(error) {
-                const errorMsg = error.message.includes("blocked")
-                    ? 'ارسال پیام ممکن نیست. شما توسط این کاربر مسدود شده‌اید.'
-                    : 'خطا در ارسال پیام!';
-                showCustomAlert({ title: 'خطا', message: errorMsg });
+                showCustomAlert({ title: 'خطا', message: error.message.includes("blocked") ? 'ارسال پیام ممکن نیست. شما مسدود شده‌اید.' : 'خطا در ارسال پیام!' });
                 messageInput.value = tempInputValue;
                 toggleSendButton();
             }
@@ -1708,53 +1549,32 @@
             if (e.target.tagName === 'IMG' && e.target.closest('.media-container')) {
                 const originalUrl = e.target.dataset.originalSrc;
                 if (!originalUrl) return;
-
-                // یک URL جدید و پایدار از کش برای نمایش تمام‌صفحه دریافت می‌شود
                 cacheManager.get(originalUrl).then(stableUrl => {
-                    // اگر کش ناموفق بود از src اصلی استفاده کن
                     fullscreenImage.src = stableUrl || originalUrl; 
                     showModal(imageViewerOverlay);
                 });
                 return;
             }
-            
             const messageElement = e.target.closest('.message:not(.deleted)');
             if (!messageElement || messageElement.dataset.id.startsWith('temp_')) return;
+            if (e.target.closest('.voice-player, .media-container')) return;
 
-            if (e.target.closest('.voice-player, .media-container')) {
-                 activeMessageElement = null;
-                 return;
-            }
-
-            if (messageElement) {
-                activeMessageElement = messageElement;
-                const isSentByUser = activeMessageElement.classList.contains('sent');
-                const msgData = lastMessagesSnapshot[messageElement.dataset.id];
-                const isEditable = isSentByUser && (!msgData || !msgData.type); // only text messages
-
-                document.getElementById('edit-msg-btn').style.display = isEditable ? 'flex' : 'none';
-                document.getElementById('delete-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
-
-                activeMessageId = activeMessageElement.dataset.id;
-                
-                const pinBtnText = document.getElementById('pin-msg-btn-text');
-                pinBtnText.textContent = (currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) ? "حذف سنجاق" : "سنجاق کردن";
-                showModal(messageOptionsOverlay);
-            }
+            activeMessageElement = messageElement;
+            const isSentByUser = activeMessageElement.classList.contains('sent');
+            const isEditable = isSentByUser && (!lastMessagesSnapshot[messageElement.dataset.id]?.type);
+            document.getElementById('edit-msg-btn').style.display = isEditable ? 'flex' : 'none';
+            document.getElementById('delete-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
+            activeMessageId = activeMessageElement.dataset.id;
+            const pinBtnText = document.getElementById('pin-msg-btn-text');
+            pinBtnText.textContent = (currentPinnedMessage?.msgId === activeMessageId) ? "حذف سنجاق" : "سنجاق کردن";
+            showModal(messageOptionsOverlay);
         }
         
         async function handleEditAction() {
             if (!activeMessageId) return;
-            const currentText = activeMessageElement.dataset.text || '';
             hideModal(messageOptionsOverlay);
-
-            const newText = await showCustomPrompt({
-                title: 'ویرایش پیام',
-                message: 'پیام جدید را وارد کنید:',
-                initialValue: currentText
-            });
-
-            if (newText && newText.trim() !== "" && newText.trim() !== currentText) {
+            const newText = await showCustomPrompt({ title: 'ویرایش پیام', message: 'پیام جدید را وارد کنید:', initialValue: activeMessageElement.dataset.text || '' });
+            if (newText && newText.trim() && newText.trim() !== (activeMessageElement.dataset.text || '')) {
                 await editMessage(activeMessageId, newText.trim());
             }
             activeMessageId = null;
@@ -1763,26 +1583,16 @@
         async function handleDeleteAction() {
             if (!activeMessageId) return;
             hideModal(messageOptionsOverlay);
-
-            const confirmed = await showCustomConfirm({
-                title: 'حذف پیام',
-                message: 'آیا از حذف این پیام برای همه اطمینان دارید؟ این عمل قابل بازگشت نیست.'
-            });
-
-            if (confirmed) {
-                await deleteMessage(activeMessageId);
-            }
+            const confirmed = await showCustomConfirm({ title: 'حذف پیام', message: 'آیا از حذف این پیام برای همه اطمینان دارید؟' });
+            if (confirmed) await deleteMessage(activeMessageId);
             activeMessageId = null;
         }
 
         function handleReplyAction() {
             if (!activeMessageElement) return;
-            const text = activeMessageElement.dataset.text;
-            const senderName = activeMessageElement.dataset.senderName;
-            activeReplyContext = { msgId: activeMessageId, text: text, senderName: senderName };
-            
-            document.getElementById('reply-to-name').textContent = `پاسخ به ${senderName}`;
-            document.getElementById('reply-preview-text').textContent = text;
+            activeReplyContext = { msgId: activeMessageId, text: activeMessageElement.dataset.text, senderName: activeMessageElement.dataset.senderName };
+            document.getElementById('reply-to-name').textContent = `پاسخ به ${activeReplyContext.senderName}`;
+            document.getElementById('reply-preview-text').textContent = activeReplyContext.text;
             replyPreviewBar.style.display = 'flex';
             hideModal(messageOptionsOverlay);
             messageInput.focus();
@@ -1796,13 +1606,12 @@
         async function handlePinAction() {
             if (!activeMessageId) return;
             hideModal(messageOptionsOverlay);
-            
-            if (currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) {
+            if (currentPinnedMessage?.msgId === activeMessageId) {
                 await handleUnpinAction();
             } else {
                 const textToPin = activeMessageElement.dataset.text;
                 if (!textToPin) {
-                    showCustomAlert({ title: 'توجه', message: 'امکان سنجاق کردن پیام‌های بدون متن وجود ندارد.' });
+                    showCustomAlert({ title: 'توجه', message: 'امکان سنجاق پیام‌های بدون متن وجود ندارد.' });
                     activeMessageId = null;
                     return;
                 }
@@ -1824,12 +1633,8 @@
         
         function updatePinnedMessageUI(pinnedData) {
             currentPinnedMessage = pinnedData;
-            if (pinnedData && pinnedData.text) {
-                document.getElementById('pinned-message-text').textContent = pinnedData.text;
-                pinnedMessageBar.style.display = 'flex';
-            } else {
-                pinnedMessageBar.style.display = 'none';
-            }
+            pinnedMessageBar.style.display = (pinnedData && pinnedData.text) ? 'flex' : 'none';
+            if (pinnedData) document.getElementById('pinned-message-text').textContent = pinnedData.text;
         }
         
         function scrollToMessage(msgId) {
@@ -1842,156 +1647,111 @@
             }
         }
 
-        // --- بخش ۱۱: توابع کمکی برای مودال‌ها و دیالوگ‌ها ---
+        // --- NEW: بخش ۱۱: توابع مربوط به وضعیت خوانده شدن پیام ---
+        function setupReadReceiptObserver() {
+            readReceiptObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const messageElement = entry.target;
+                        observer.unobserve(messageElement);
+                        markMessageAsRead(messageElement.dataset.id);
+                    }
+                });
+            }, { root: mainContent, threshold: 0.8 });
+        }
+
+        async function markMessageAsRead(msgId) {
+            if (!msgId || msgId.startsWith('temp_')) return;
+            try {
+                const path = `pivi_chats/${chatId}/messages/${msgId}/readBy`;
+                const payload = { [currentUser.username]: new Date().toISOString() };
+                await apiRequest(path, 'PATCH', payload); // Fire-and-forget
+                if (lastMessagesSnapshot[msgId]) {
+                    if (!lastMessagesSnapshot[msgId].readBy) lastMessagesSnapshot[msgId].readBy = {};
+                    lastMessagesSnapshot[msgId].readBy[currentUser.username] = payload[currentUser.username];
+                }
+            } catch (error) {
+                console.warn(`Could not mark message ${msgId} as read:`, error);
+            }
+        }
+
+        // --- بخش ۱۲: توابع کمکی برای مودال‌ها و دیالوگ‌ها ---
         function showModal(overlayElement) {
             if(overlayElement.id === 'profile-overlay' && chatPartner){
-                // <<< تغییر ۲: استفاده از تابع جدید برای تنظیم عکس پروفایل مودال >>>
-                document.getElementById('profile-card-avatar').src = getPartnerAvatarUrl(120);
+                document.getElementById('profile-card-avatar').src = `https://i.pravatar.cc/120?u=${chatPartner.username}`;
                 document.getElementById('profile-card-name').innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
                 document.getElementById('profile-card-username').textContent = `@${chatPartner.username}`;
                 document.getElementById('profile-card-uid').textContent = chatPartner.username;
                 const statusEl = document.getElementById('profile-card-status');
-                if(chatPartner.isOnline) {
-                    statusEl.textContent = 'آنلاین'; statusEl.style.color = 'var(--online-indicator)';
-                } else {
-                    statusEl.textContent = 'آفلاین'; statusEl.style.color = 'var(--text-secondary)';
-                }
+                statusEl.textContent = chatPartner.isOnline ? 'آنلاین' : 'آفلاین';
+                statusEl.style.color = chatPartner.isOnline ? 'var(--online-indicator)' : 'var(--text-secondary)';
                 updateBlockUI();
             }
             overlayElement.classList.add('visible');
         }
-        function hideModal(overlayElement) {
-            overlayElement.classList.remove('visible');
-        }
-
+        function hideModal(overlayElement) { overlayElement.classList.remove('visible'); }
         function closeImageViewer() {
-            const currentSrc = fullscreenImage.src;
-            // فقط در صورتی که blob URL باشد، آن را آزاد کن
-            if (currentSrc && currentSrc.startsWith('blob:')) {
-                URL.revokeObjectURL(currentSrc);
-            }
-            fullscreenImage.src = ''; // برای آزاد کردن حافظه
+            if (fullscreenImage.src.startsWith('blob:')) URL.revokeObjectURL(fullscreenImage.src);
+            fullscreenImage.src = '';
             hideModal(imageViewerOverlay);
         }
         
         const dialogOverlay = document.getElementById('custom-dialog-overlay');
-        const dialogTitle = document.getElementById('dialog-title');
-        const dialogMessage = document.getElementById('dialog-message');
-        const dialogInput = document.getElementById('dialog-input');
-        const confirmBtn = document.getElementById('dialog-confirm-btn');
-        const cancelBtn = document.getElementById('dialog-cancel-btn');
         let dialogResolver = null;
-
         function showCustomDialog(options) {
-            dialogTitle.textContent = options.title || '';
-            dialogMessage.textContent = options.message || '';
-            dialogInput.style.display = options.prompt ? 'block' : 'none';
-            dialogInput.value = options.initialValue || '';
-            cancelBtn.style.display = options.alert ? 'none' : 'inline-flex';
-            confirmBtn.textContent = options.alert ? 'باشه' : 'تایید';
+            document.getElementById('dialog-title').textContent = options.title || '';
+            document.getElementById('dialog-message').textContent = options.message || '';
+            const input = document.getElementById('dialog-input');
+            input.style.display = options.prompt ? 'block' : 'none';
+            input.value = options.initialValue || '';
+            document.getElementById('dialog-cancel-btn').style.display = options.alert ? 'none' : 'inline-flex';
+            document.getElementById('dialog-confirm-btn').textContent = options.alert ? 'باشه' : 'تایید';
             showModal(dialogOverlay);
-            if(options.prompt) dialogInput.focus();
-
-            return new Promise(resolve => {
-                dialogResolver = resolve;
-            });
+            if (options.prompt) input.focus();
+            return new Promise(resolve => { dialogResolver = resolve; });
         }
-        confirmBtn.onclick = () => {
-            if (dialogResolver) {
-                dialogResolver(dialogInput.style.display === 'block' ? dialogInput.value : true);
-                dialogResolver = null;
-            }
+        document.getElementById('dialog-confirm-btn').onclick = () => {
+            if (dialogResolver) dialogResolver(document.getElementById('dialog-input').style.display === 'block' ? document.getElementById('dialog-input').value : true);
+            dialogResolver = null;
             hideModal(dialogOverlay);
         };
-        cancelBtn.onclick = () => {
-            if (dialogResolver) {
-                dialogResolver(dialogInput.style.display === 'block' ? null : false);
-                dialogResolver = null;
-            }
+        document.getElementById('dialog-cancel-btn').onclick = () => {
+            if (dialogResolver) dialogResolver(document.getElementById('dialog-input').style.display === 'block' ? null : false);
+            dialogResolver = null;
             hideModal(dialogOverlay);
         };
-
-        function showCustomConfirm(options) { return showCustomDialog({ ...options, prompt: false }); }
+        function showCustomConfirm(options) { return showCustomDialog({ ...options }); }
         function showCustomPrompt(options) { return showCustomDialog({ ...options, prompt: true }); }
         function showCustomAlert(options) { return showCustomDialog({ ...options, alert: true }); }
 
-        // --- بخش ۱۲: تابع کمکی برای ارسال درخواست‌های API ---
+        // --- بخش ۱۳: تابع کمکی برای ارسال درخواست‌های API ---
         async function apiRequest(path, method, body, keepalive = false) {
-            const options = {
-                method,
-                headers: { 
-                    'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}`,
-                    'X-User-Username': currentUser.username
-                },
-                keepalive
-            };
-            if (body !== undefined && method !== 'GET') {
-                options.body = JSON.stringify(body);
-            }
-            
+            const options = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }, keepalive };
+            if (body !== undefined && method !== 'GET') options.body = JSON.stringify(body);
             const response = await fetch(`${PROXY_URL}?path=${path}`, options);
             const responseData = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                 console.error("API Error Response:", responseData);
-                 throw new Error(responseData.error || `یک خطای ${response.status} رخ داد.`);
-            }
+            if (!response.ok) throw new Error(responseData.error || `یک خطای ${response.status} رخ داد.`);
             return responseData;
         }
 
-        // --- بخش ۱۳: منطق پلیر سفارشی پیام صوتی ---
+        // --- بخش ۱۴: منطق پلیر سفارشی پیام صوتی ---
         function setupVoicePlayer(messageElement) {
             const player = messageElement.querySelector('.voice-player');
             if (!player) return;
-
-            const audio = player.querySelector('.voice-audio');
-            const playPauseBtn = player.querySelector('.play-pause-btn');
-            const playIcon = player.querySelector('.play-icon');
-            const pauseIcon = player.querySelector('.pause-icon');
-            const progressContainer = player.querySelector('.progress-container');
-            const progressBar = player.querySelector('.progress-bar');
-            const durationEl = player.querySelector('.duration');
-
-            const formatTime = (seconds) => {
-                if (isNaN(seconds)) return '0:00';
-                const mins = Math.floor(seconds / 60);
-                const secs = Math.floor(seconds % 60);
-                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            };
-            
-            audio.addEventListener('loadedmetadata', () => {
-                durationEl.textContent = formatTime(audio.duration);
-            });
-
-            audio.addEventListener('timeupdate', () => {
-                const progress = (audio.currentTime / audio.duration) * 100;
-                progressBar.style.width = `${progress}%`;
-                durationEl.textContent = formatTime(audio.currentTime);
-            });
-
-            audio.addEventListener('ended', () => {
-                playIcon.style.display = 'inline';
-                pauseIcon.style.display = 'none';
-                progressBar.style.width = '0%';
-                durationEl.textContent = formatTime(audio.duration);
-            });
-
+            const audio = player.querySelector('.voice-audio'), playPauseBtn = player.querySelector('.play-pause-btn');
+            const playIcon = player.querySelector('.play-icon'), pauseIcon = player.querySelector('.pause-icon');
+            const progressBar = player.querySelector('.progress-bar'), durationEl = player.querySelector('.duration');
+            const formatTime = (s) => isNaN(s) ? '0:00' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+            audio.addEventListener('loadedmetadata', () => durationEl.textContent = formatTime(audio.duration));
+            audio.addEventListener('timeupdate', () => { progressBar.style.width = `${(audio.currentTime/audio.duration)*100}%`; durationEl.textContent = formatTime(audio.currentTime); });
+            audio.addEventListener('ended', () => { playIcon.style.display = 'inline'; pauseIcon.style.display = 'none'; progressBar.style.width = '0%'; durationEl.textContent = formatTime(audio.duration); });
             playPauseBtn.addEventListener('click', () => {
-                if (audio.paused) {
-                    audio.play();
-                    playIcon.style.display = 'none';
-                    pauseIcon.style.display = 'inline';
-                } else {
-                    audio.pause();
-                    playIcon.style.display = 'inline';
-                    pauseIcon.style.display = 'none';
-                }
+                if (audio.paused) { audio.play(); playIcon.style.display = 'none'; pauseIcon.style.display = 'inline'; }
+                else { audio.pause(); playIcon.style.display = 'inline'; pauseIcon.style.display = 'none'; }
             });
-
-            progressContainer.addEventListener('click', (e) => {
-                const rect = progressContainer.getBoundingClientRect();
-                const offsetX = e.clientX - rect.left;
-                const progress = offsetX / rect.width;
-                audio.currentTime = progress * audio.duration;
+            player.querySelector('.progress-container').addEventListener('click', (e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
             });
         }
     </script>
