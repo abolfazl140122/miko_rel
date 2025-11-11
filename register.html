@@ -1,33 +1,47 @@
 <!DOCTYPE html>
 <!-- 
 ====================================================================================================
-    USAGE & CONFIGURATION GUIDE (v2.1 - Real-time Avatar Update)
+    فایل ثبت‌نام کامل و مقاوم (نسخه 3.0 - بازنویسی شده)
 ====================================================================================================
 
-    این فایل برای مدیریت ثبت‌نام و آپلود تصویر پروفایل با قابلیت ذخیره‌سازی آنی آواتار اصلاح شده است.
+    این فایل به طور کامل برای مدیریت ثبت‌نام، آپلود تصویر پروفایل، مدیریت توکن امنیتی،
+    و ذخیره‌سازی اطلاعات کاربر بازنویسی شده است. تمام درخواست‌های شبکه اکنون از طریق یک
+    wrapper امن انجام می‌شوند که به طور خودکار توکن را مدیریت کرده و در صورت نیاز (مانند خطای 401)
+    آن را تجدید می‌کند.
 
-    1.  تنظیمات اصلی (Constants):
-        -   در تگ <script>، مقادیر `PROXY_BASE_URL` و `SHARED_SECRET` را مطابق با تنظیمات خود قرار دهید.
+    1.  ویژگی‌های کلیدی این نسخه:
+        -   **مدیریت توکن خودکار:** یک ماژول مدیریت توکن پیاده‌سازی شده که توکن را از سرور دریافت،
+            در حافظه و localStorage کش کرده و در صورت انقضا (خطای 401) به طور خودکار یک توکن جدید
+            دریافت و درخواست ناموفق را یک‌بار دیگر تکرار می‌کند.
+        -   **Wrapper درخواست شبکه (authenticatedFetch):** تمام درخواست‌های نیازمند احراز هویت
+            از طریق این تابع انجام می‌شوند تا از ارسال صحیح هدرهای `Authorization` و `X-User-Username`
+            اطمینان حاصل شود.
+        -   **آپلود فایل با نوار پیشرفت:** آپلود تصویر پروفایل با استفاده از `XMLHttpRequest` انجام می‌شود
+            تا نوار پیشرفت به صورت دقیق نمایش داده شود. این بخش نیز از مدیریت توکن خودکار بهره می‌برد.
+        -   **مدیریت جامع خطاها:** خطاهای شبکه، خطاهای سرور (4xx, 5xx) و خطاهای منطقی به
+            صورت جداگانه مدیریت شده و پیام‌های مناسبی به کاربر نمایش داده می‌شود.
+        -   **ساختار کد خوانا:** کد جاوااسکریپت به بخش‌های منطقی (DOM Elements, Config, State,
+            Token Management, API Calls, Event Handlers, Core Logic) تقسیم شده است.
+        -   **ذخیره‌سازی کامل و انتقال:** پس از ثبت‌نام موفق، کل آبجکت کاربر در `localStorage` ذخیره
+            و کاربر به صفحه اصلی (`safe_asli.html`) منتقل می‌شود.
 
-    2.  تغییرات کلیدی در این نسخه (v2.1):
-        -   **ذخیره‌سازی آنی آواتار**: بلافاصله پس از آپلود موفق یک تصویر، یک درخواست `PATCH` به Firebase ارسال می‌شود تا فیلدهای `avatarUrl`, `avatarThumbUrl` و `avatarUpdatedAt` ذخیره شوند. این کار مستقل از ثبت‌نام نهایی فرم انجام می‌شود.
-        -   **به‌روزرسانی LocalStorage**: همزمان با ذخیره در Firebase، اگر کاربری از قبل در `localStorage` وجود داشته باشد، `avatarUrl` او نیز به‌روزرسانی می‌شود. این ویژگی برای زمانی مفید است که کاربر قبلاً وارد شده و از این صفحه برای تغییر آواتار خود استفاده می‌کند.
-        -   **استفاده هوشمند از نام کاربری**: نام کاربری برای آپلود و ذخیره‌سازی آواتار مستقیماً از فیلد ورودی خوانده می‌شود که برای فرآیند ثبت‌نام ضروری است.
-
-    3.  نحوه تست (Testing Steps):
-        -   تست A (ثبت‌نام کاربر جدید):
-            1. فرم را با اطلاعات معتبر پر کنید (مخصوصاً نام کاربری).
-            2. یک تصویر پروفایل انتخاب کنید. منتظر بمانید تا پیام "آپلود موفق!" و سپس "آواتار ذخیره شد" نمایش داده شود.
-            3. در تب Network، ابتدا درخواست `POST` برای آپلود و سپس درخواست `PATCH` به `.../firebase_proxy.php?path=users/{username}` را مشاهده کنید. (توجه: اگر کاربر جدید باشد، این PATCH ممکن است خطا بدهد که طبیعی است، زیرا هنوز رکوردی برای به‌روزرسانی وجود ندارد).
-            4. روی دکمه "ثبت‌نام" کلیک کنید. درخواست `PUT` نهایی باید تمام اطلاعات، شامل `avatarUrl` را با موفقیت ذخیره کند.
-            5. در Firebase و Local Storage، تمام اطلاعات را بررسی کنید.
-
-        -   تست B (تغییر آواتار کاربر موجود):
-            1. فرض کنید کاربری با نام `testuser` از قبل وجود دارد.
-            2. نام کاربری `testuser` را در فیلد مربوطه وارد کنید.
-            3. یک تصویر جدید انتخاب کنید.
-            4. درخواست `PATCH` باید با status 200 موفق شود و `avatarUrl` در Firebase برای `testuser` به‌روز شود.
-            5. `localStorage` نیز باید (اگر وجود داشت) به‌روز شود.
+    2.  نحوه تست (Testing Steps):
+        -   **تست موفقیت آمیز (با تصویر):**
+            1. تمام فیلدها را پر کنید.
+            2. یک تصویر انتخاب کنید. نوار پیشرفت باید نمایش داده شود.
+            3. پس از آپلود موفق، پیام "آپلود موفق!" را مشاهده کنید.
+            4. روی دکمه "ثبت‌نام" کلیک کنید.
+            5. در تب Network، یک درخواست `PUT` به `.../firebase_proxy.php?path=users/{username}` با status 200 را بررسی کنید. هدرهای `Authorization` و `X-User-Username` باید موجود باشند.
+            6. در `localStorage`، کلید `currentUser` باید با اطلاعات کامل کاربر پر شده باشد.
+            7. باید به `safe_asli.html` منتقل شوید.
+        -   **تست خطای توکن (401):**
+            1. (شبیه‌سازی) در تب Application، توکن ذخیره شده در `localStorage` را با یک مقدار نامعتبر جایگزین کنید.
+            2. فرم را ارسال کنید.
+            3. در تب Network، باید ابتدا یک درخواست `PUT` با خطای 401 و سپس یک درخواست `GET` برای دریافت توکن جدید و در نهایت یک درخواست `PUT` موفق (200) را مشاهده کنید. فرآیند باید برای کاربر شفاف باشد.
+        -   **تست خطای شبکه:**
+            1. اینترنت خود را قطع کنید.
+            2. فرم را ارسال کنید.
+            3. باید پیام خطای مربوط به شبکه نمایش داده شود.
 
 ====================================================================================================
 -->
@@ -35,7 +49,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ایجاد حساب کاربری - همیار (نسخه نهایی)</title>
+    <title>ایجاد حساب کاربری - همیار (نسخه مقاوم)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
         
@@ -186,375 +200,361 @@
     </div>
 
     <script>
-        // --- DOM Elements ---
-        const form = document.getElementById('register-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const formStatus = document.getElementById('form-status');
-        const uploadStatusEl = document.getElementById('uploadStatus');
-        const profilePreview = document.getElementById('profile-preview');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
-        const allInputs = {
-            displayName: document.getElementById('displayName'),
-            username: document.getElementById('username'),
-            mobile: document.getElementById('mobile'),
-            age: document.getElementById('age'),
-            gender: document.getElementById('gender'),
-            password: document.getElementById('password'),
-            passwordConfirm: document.getElementById('passwordConfirm'),
-            terms: document.getElementById('terms'),
-            bio: document.getElementById('bio'),
-            interests: document.getElementById('interests'),
-            profilePic: document.getElementById('profilePic'),
-            avatarUrl: document.getElementById('avatarUrl')
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- SECTION: Configuration & Constants ---
+        const CONFIG = {
+            PROXY_BASE_URL: 'https://miko.freehost.io',
+            SHARED_SECRET: 'miko1234',
+            get TOKEN_URL() { return `${this.PROXY_BASE_URL}/firebase_proxy.php?auth=token` },
+            get UPLOAD_URL() { return `${this.PROXY_BASE_URL}/firebase_proxy.php?path=upload_profile` },
+            get REGISTER_URL_TEMPLATE() { return `${this.PROXY_BASE_URL}/firebase_proxy.php?path=users/{username}` },
+            ALLOWED_MIMETYPES: ['image/jpeg', 'image/png', 'image/webp'],
+            MAX_FILE_SIZE_BYTES: 5 * 1024 * 1024, // 5 MB
+            RESIZE_MAX_DIMENSION: 1024,
+            RESIZE_QUALITY: 0.8,
+            SUCCESS_REDIRECT_URL: 'safe_asli.html'
         };
 
-        // --- Configuration Constants ---
-        const PROXY_BASE_URL = 'https://miko.freehost.io';
-        const SHARED_SECRET = 'miko1234';
-        const PRIMARY_UPLOAD_URL = `${PROXY_BASE_URL}/firebase_proxy.php?path=upload_profile`;
-        const FALLBACK_UPLOAD_URL = `${PROXY_BASE_URL}/api/upload_profile.php`;
-        const TOKEN_URL = `${PROXY_BASE_URL}/firebase_proxy.php?auth=token`;
-        
-        // --- File Upload Constants ---
-        const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/webp'];
-        const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
-        const RESIZE_MAX_DIMENSION = 1024;
-        const RESIZE_QUALITY = 0.8;
+        // --- SECTION: DOM Elements ---
+        const ui = {
+            form: document.getElementById('register-form'),
+            submitBtn: document.getElementById('submit-btn'),
+            formStatus: document.getElementById('form-status'),
+            uploadStatus: document.getElementById('uploadStatus'),
+            profilePreview: document.getElementById('profile-preview'),
+            progressContainer: document.getElementById('progress-container'),
+            progressBar: document.getElementById('progress-bar'),
+            inputs: {
+                displayName: document.getElementById('displayName'),
+                username: document.getElementById('username'),
+                mobile: document.getElementById('mobile'),
+                age: document.getElementById('age'),
+                gender: document.getElementById('gender'),
+                password: document.getElementById('password'),
+                passwordConfirm: document.getElementById('passwordConfirm'),
+                terms: document.getElementById('terms'),
+                bio: document.getElementById('bio'),
+                interests: document.getElementById('interests'),
+                profilePic: document.getElementById('profilePic'),
+                avatarUrl: document.getElementById('avatarUrl')
+            }
+        };
 
-        // --- Utility Functions ---
-        function showError(fieldId, message) {
+        // --- SECTION: Application State ---
+        let state = {
+            clientToken: localStorage.getItem('client_token') || null,
+            isUploading: false,
+            isSubmitting: false,
+        };
+
+        // --- SECTION: UI & Utility Functions ---
+        const showError = (fieldId, message) => {
             const el = document.getElementById(`${fieldId}-error`);
             if (el) { el.textContent = message; el.style.display = 'block'; }
-        }
-        function hideError(fieldId) {
+        };
+        const hideError = (fieldId) => {
             const el = document.getElementById(`${fieldId}-error`);
             if (el) el.style.display = 'none';
-        }
-        function setUploadStatus(message, type = '') {
-            uploadStatusEl.textContent = message;
-            uploadStatusEl.className = type;
-            progressContainer.style.display = (type === 'uploading') ? 'block' : 'none';
-        }
-        function updateUploadProgress(percentage) {
-            progressBar.style.width = `${percentage}%`;
+        };
+        const setFormStatus = (message, type = 'error') => {
+            ui.formStatus.textContent = message;
+            ui.formStatus.className = type;
+            ui.formStatus.style.display = 'block';
+        };
+        const setUploadStatus = (message, type = '') => {
+            ui.uploadStatus.textContent = message;
+            ui.uploadStatus.className = type;
+            ui.progressContainer.style.display = (type === 'uploading') ? 'block' : 'none';
+        };
+        const updateUploadProgress = (percentage) => {
+            ui.progressBar.style.width = `${percentage}%`;
             setUploadStatus(`در حال آپلود (${Math.round(percentage)}%)...`, 'uploading');
-        }
-
-        // --- Validation Logic ---
-        function validateField(fieldId) {
-            const input = allInputs[fieldId];
-            if (!input) return true; 
-
-            hideError(fieldId);
-
-            if (input.required && (input.type === 'checkbox' ? !input.checked : input.value.trim() === '')) {
-                showError(fieldId, input.type === 'checkbox' ? 'شما باید با قوانین موافقت کنید.' : 'این فیلد الزامی است.');
-                return false;
+        };
+        const toggleSubmitButton = (enabled) => {
+            ui.submitBtn.disabled = !enabled;
+            if (!enabled) {
+                ui.submitBtn.classList.add('loading');
+                state.isSubmitting = true;
+            } else {
+                ui.submitBtn.classList.remove('loading');
+                state.isSubmitting = false;
             }
+        };
 
-            switch(fieldId) {
-                case 'username': if (input.value && !/^[a-zA-Z0-9_]{3,15}$/.test(input.value)) { showError(fieldId, 'نام کاربری باید 3 تا 15 کاراکتر انگلیسی، عدد یا _ باشد.'); return false; } break;
-                case 'mobile': if (input.value && !/^09\d{9}$/.test(input.value)) { showError(fieldId, 'فرمت شماره موبایل صحیح نیست (مثال: 09123456789).'); return false; } break;
-                case 'age': if (input.value && (+input.value < 18 || +input.value > 99)) { showError(fieldId, 'سن شما باید بین 18 تا 99 سال باشد.'); return false; } break;
-                case 'password': if (input.value && input.value.length < 8) { showError(fieldId, 'رمز عبور باید حداقل 8 کاراکتر باشد.'); return false; } break;
-                case 'passwordConfirm': if (input.value && input.value !== allInputs.password.value) { showError(fieldId, 'رمزهای عبور مطابقت ندارند.'); return false; } break;
-            }
-            return true;
-        }
-
-        function checkFormValidity() {
-            const requiredFields = ['displayName', 'username', 'mobile', 'age', 'gender', 'password', 'passwordConfirm', 'terms'];
-            const isFormValid = requiredFields.every(key => validateField(key));
-            submitBtn.disabled = !isFormValid;
-            return isFormValid;
-        }
-
-        // --- Event Listeners ---
-        Object.values(allInputs).forEach(input => {
-            if(!input || input.type === 'file' || input.type === 'hidden') return;
-            const eventType = ['checkbox', 'select-one'].includes(input.type) ? 'change' : 'input';
-            input.addEventListener(eventType, checkFormValidity);
-        });
-
-        allInputs.profilePic.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                handleProfilePictureSelection(file);
-            }
-        });
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (checkFormValidity()) {
-                await submitForm();
-            }
-        });
-        
-        // --- UPLOAD & REGISTRATION LOGIC ---
-
-        async function handleProfilePictureSelection(file) {
-            submitBtn.disabled = true;
-            setUploadStatus('در حال آماده‌سازی...', '');
-
-            const reader = new FileReader();
-            reader.onload = (event) => { profilePreview.src = event.target.result; };
-            reader.readAsDataURL(file);
-
-            if (!allInputs.username.value.trim()) {
-                setUploadStatus('لطفاً ابتدا نام کاربری را وارد کنید.', 'error');
-                showError('username', 'نام کاربری برای آپلود تصویر الزامی است.');
-                submitBtn.disabled = !checkFormValidity();
-                return;
-            }
-
-            if (!ALLOWED_MIMETYPES.includes(file.type)) {
-                setUploadStatus(`نوع فایل نامعتبر است.`, 'error');
-                submitBtn.disabled = !checkFormValidity();
-                return;
-            }
-
-            let fileToUpload = file;
-            if (file.size > MAX_FILE_SIZE_BYTES) {
-                setUploadStatus('حجم عکس زیاد است، در حال بهینه‌سازی...', '');
+        // --- SECTION: Token Management ---
+        const tokenManager = {
+            async fetchNewToken() {
+                console.log('Fetching a new client token...');
                 try {
-                    fileToUpload = await resizeImage(file, RESIZE_MAX_DIMENSION, RESIZE_QUALITY);
-                } catch (err) {
-                    setUploadStatus('خطا در بهینه‌سازی تصویر.', 'error');
-                    submitBtn.disabled = !checkFormValidity();
-                    return;
+                    const response = await fetch(CONFIG.TOKEN_URL, {
+                        headers: { 'X-Proxy-Secret': CONFIG.SHARED_SECRET }
+                    });
+                    if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+                    const data = await response.json();
+                    if (!data.token) throw new Error('Token not found in server response.');
+                    
+                    state.clientToken = data.token;
+                    localStorage.setItem('client_token', data.token);
+                    console.log('New token acquired and stored.');
+                    return data.token;
+                } catch (error) {
+                    console.error('Failed to get client token:', error);
+                    throw new Error('خطا در دریافت توکن احراز هویت. لطفا اتصال خود را بررسی کنید.');
                 }
+            },
+            async getToken() {
+                if (state.clientToken) {
+                    return state.clientToken;
+                }
+                return await this.fetchNewToken();
+            },
+            clearToken() {
+                state.clientToken = null;
+                localStorage.removeItem('client_token');
+                console.log('Client token cleared.');
             }
+        };
 
+        // --- SECTION: API Calls (with Auth Wrapper) ---
+
+        /**
+         * A wrapper around fetch() to automatically handle authentication and token renewal.
+         * @param {string} url - The URL to fetch.
+         * @param {object} options - Fetch options.
+         * @param {boolean} retry - Internal flag to prevent infinite retry loops.
+         * @returns {Promise<any>} - The JSON response from the server.
+         */
+        async function authenticatedFetch(url, options, retry = true) {
             try {
-                const username = allInputs.username.value.trim();
-                const uploadResult = await uploadFileWithProgress(fileToUpload, username);
+                const token = await tokenManager.getToken();
+                const username = ui.inputs.username.value.trim().toLowerCase();
                 
-                setUploadStatus('آپلود موفق! در حال ذخیره...', 'success');
-                allInputs.avatarUrl.value = uploadResult.url;
-                profilePreview.src = uploadResult.thumb_url || uploadResult.url;
-                console.log('Upload successful. Avatar URL set:', uploadResult.url);
+                options.headers = {
+                    ...options.headers,
+                    'Authorization': `Bearer ${token}`,
+                    'X-User-Username': username
+                };
 
-                // <<< ===== تغییر کلیدی: ذخیره فوری آواتار در Firebase ===== >>>
-                await updateUserAvatarInFirebase(username, uploadResult);
+                const response = await fetch(url, options);
+
+                if (response.status === 401 && retry) {
+                    console.warn('Received 401 Unauthorized. Refreshing token and retrying...');
+                    tokenManager.clearToken();
+                    return await authenticatedFetch(url, options, false); // Retry only once
+                }
+                
+                const responseData = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(responseData.error || responseData.message || `خطای سرور: ${response.status}`);
+                }
+                
+                return responseData;
 
             } catch (error) {
-                setUploadStatus(`خطا در آپلود: ${error.message}`, 'error');
-                console.error('Upload failed:', error);
-            } finally {
-                submitBtn.disabled = !checkFormValidity();
+                if (error instanceof TypeError) { // Network error
+                     throw new Error('خطای شبکه. لطفاً اتصال اینترنت خود را بررسی کنید.');
+                }
+                throw error; // Re-throw other errors
             }
         }
         
         /**
-         * <<< ===== تابع جدید: ارسال درخواست PATCH برای به‌روزرسانی آواتار ===== >>>
-         * این تابع اطلاعات آواتار را بلافاصله در Firebase ذخیره می‌کند.
-         * @param {string} username - نام کاربری برای ساخت مسیر در Firebase
-         * @param {object} uploadResult - آبجکت بازگشتی از سرور آپلود شامل url و thumb_url
+         * Uploads a file with progress using XMLHttpRequest, wrapped with our token logic.
+         * @param {File} file - The file to upload.
+         * @returns {Promise<object>} - The JSON response from the upload endpoint.
          */
-        async function updateUserAvatarInFirebase(username, uploadResult) {
-            console.log(`Attempting to patch avatar for user: ${username}`);
-            
-            const avatarData = {
-                avatarUrl: uploadResult.url,
-                avatarThumbUrl: uploadResult.thumb_url || uploadResult.url, // Fallback
-                avatarUpdatedAt: new Date().toISOString()
-            };
+        async function uploadFileWithProgress(file) {
+            const token = await tokenManager.getToken();
+            const username = ui.inputs.username.value.trim().toLowerCase();
 
-            try {
-                const token = await getClientToken();
-                const response = await fetch(`${PROXY_BASE_URL}/firebase_proxy.php?path=users/${username}`, {
-                    method: 'PATCH',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${token}`,
-                        'X-User-Username': username
-                    },
-                    body: JSON.stringify(avatarData)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    // اگر خطا به دلیل عدم وجود کاربر باشد (در زمان ثبت‌نام)، آن را نادیده می‌گیریم.
-                    if (response.status === 404 || (errorData.error && errorData.error.includes("not found"))) {
-                        console.warn(`User '${username}' not found for patching avatar. This is normal during first-time registration. Avatar will be saved with the final submission.`);
-                    } else {
-                        throw new Error(errorData.error || `خطای سرور (${response.status})`);
-                    }
-                }
-
-                console.log('Avatar successfully patched in Firebase.');
-                alert('آواتار ذخیره شد.'); // تاییدیه برای کاربر
-
-                // به‌روزرسانی currentUser در localStorage اگر وجود داشته باشد
-                const currentUserStr = localStorage.getItem('currentUser');
-                if (currentUserStr) {
-                    const currentUser = JSON.parse(currentUserStr);
-                    // فقط اگر نام کاربری مطابقت داشت، به‌روزرسانی کن
-                    if (currentUser.username === username) {
-                        currentUser.avatarUrl = avatarData.avatarUrl;
-                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                        console.log('localStorage currentUser has been updated with the new avatar.');
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to patch avatar in Firebase:', error);
-                setUploadStatus(`خطا در ذخیره آواتار: ${error.message}`, 'error');
-            }
-        }
-
-
-        function resizeImage(file, maxWidth, quality) {
             return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let { width, height } = img;
+                const xhr = new XMLHttpRequest();
+                const formData = new FormData();
+                formData.append('file', file, file.name || 'profile.jpg');
 
-                        if (width > height) {
-                            if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
-                        } else {
-                            if (height > maxWidth) { width = Math.round((width * maxWidth) / height); height = maxWidth; }
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        canvas.toBlob((blob) => {
-                            if (blob) { resolve(blob); } 
-                            else { reject(new Error('Canvas toBlob conversion failed.')); }
-                        }, 'image/jpeg', quality);
-                    };
-                    img.onerror = reject;
+                xhr.open('POST', CONFIG.UPLOAD_URL, true);
+                
+                // Set required headers
+                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+                xhr.setRequestHeader('X-User-Username', username);
+
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentage = (event.loaded / event.total) * 100;
+                        updateUploadProgress(percentage);
+                    }
                 };
-                reader.onerror = reject;
+
+                xhr.onload = () => {
+                    try {
+                        const responseJson = JSON.parse(xhr.responseText);
+                        if (xhr.status >= 200 && xhr.status < 300 && responseJson.success) {
+                            resolve(responseJson);
+                        } else if (xhr.status === 401) {
+                            // If upload gets 401, we don't auto-retry here for simplicity,
+                            // but we clear the token so the next MAIN submission will retry.
+                            tokenManager.clearToken();
+                            reject(new Error('جلسه شما منقضی شده. لطفا صفحه را رفرش کرده و مجددا تلاش کنید.'));
+                        }
+                        else {
+                            reject(new Error(responseJson.message || `خطای سرور (${xhr.status})`));
+                        }
+                    } catch (e) {
+                        reject(new Error('پاسخ دریافتی از سرور آپلود نامعتبر است.'));
+                    }
+                };
+
+                xhr.onerror = () => reject(new Error('خطای شبکه یا CORS در هنگام آپلود.'));
+                xhr.ontimeout = () => reject(new Error('درخواست آپلود زمان‌بر شد.'));
+                
+                xhr.send(formData);
             });
         }
 
-        async function getClientToken() {
-            let token = localStorage.getItem('client_token');
-            if (token) return token;
 
-            try {
-                const response = await fetch(TOKEN_URL, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-                if (!response.ok) throw new Error(`Server responded with ${response.status}`);
-                const data = await response.json();
-                if (!data.token) throw new Error('Token not found in server response.');
-                localStorage.setItem('client_token', data.token);
-                return data.token;
-            } catch (error) {
-                throw new Error('خطا در دریافت توکن احراز هویت.');
-            }
-        }
+        // --- SECTION: Validation Logic ---
+        const validateField = (fieldId) => {
+            const input = ui.inputs[fieldId];
+            if (!input) return true; 
 
-        async function uploadFileWithProgress(file, username) {
-            const token = await getClientToken();
-            
-            const performUpload = (url, isFallback = false) => {
-                return new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    const formData = new FormData();
-                    formData.append('file', file, file.name || 'profile.jpg');
-                    xhr.open('POST', url, true);
-                    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-                    xhr.setRequestHeader('X-User-Username', username);
+            hideError(fieldId);
+            let isValid = true;
 
-                    xhr.upload.onprogress = (event) => {
-                        if (event.lengthComputable) {
-                            updateUploadProgress((event.loaded / event.total) * 100);
-                        }
-                    };
-
-                    xhr.onload = () => {
-                        try {
-                            const res = JSON.parse(xhr.responseText);
-                            if (xhr.status >= 200 && xhr.status < 300 && res.success) {
-                                resolve(res);
-                            } else {
-                                reject(new Error(res.message || `خطای سرور (${xhr.status})`));
-                            }
-                        } catch (e) {
-                            reject(new Error('پاسخ دریافتی از سرور نامعتبر است.'));
-                        }
-                    };
-
-                    xhr.onerror = () => reject(new Error('خطای شبکه یا CORS.'));
-                    xhr.send(formData);
-                });
-            };
-
-            try {
-                return await performUpload(PRIMARY_UPLOAD_URL);
-            } catch (error) {
-                console.warn(`Primary upload failed: "${error.message}". Trying fallback...`);
-                if (error.message.includes('شبکه') || error.message.includes('CORS')) {
-                    return await performUpload(FALLBACK_UPLOAD_URL, true);
+            if (input.required && (input.type === 'checkbox' ? !input.checked : input.value.trim() === '')) {
+                showError(fieldId, input.type === 'checkbox' ? 'شما باید با قوانین موافقت کنید.' : 'این فیلد الزامی است.');
+                isValid = false;
+            } else {
+                 switch(fieldId) {
+                    case 'username': if (input.value && !/^[a-zA-Z0-9_]{3,15}$/.test(input.value)) { showError(fieldId, 'نام کاربری باید 3 تا 15 کاراکتر انگلیسی، عدد یا _ باشد.'); isValid = false; } break;
+                    case 'mobile': if (input.value && !/^09\d{9}$/.test(input.value)) { showError(fieldId, 'فرمت موبایل صحیح نیست (مثال: 09123456789).'); isValid = false; } break;
+                    case 'age': if (input.value && (+input.value < 18 || +input.value > 99)) { showError(fieldId, 'سن شما باید بین 18 تا 99 سال باشد.'); isValid = false; } break;
+                    case 'password': if (input.value && input.value.length < 8) { showError(fieldId, 'رمز عبور باید حداقل 8 کاراکتر باشد.'); isValid = false; } break;
+                    case 'passwordConfirm': if (input.value && input.value !== ui.inputs.password.value) { showError(fieldId, 'رمزهای عبور مطابقت ندارند.'); isValid = false; } break;
                 }
-                throw error;
             }
-        }
-        
-        async function submitForm() {
-            submitBtn.disabled = true;
-            submitBtn.classList.add('loading');
-            formStatus.style.display = 'none';
+            return isValid;
+        };
+        const checkFormValidity = () => {
+            if (state.isUploading || state.isSubmitting) return false;
+            const requiredFields = ['displayName', 'username', 'mobile', 'age', 'gender', 'password', 'passwordConfirm', 'terms'];
+            const isFormValid = requiredFields.every(validateField);
+            ui.submitBtn.disabled = !isFormValid;
+            return isFormValid;
+        };
+
+        // --- SECTION: Core Logic ---
+
+        const handleProfilePictureSelection = async (file) => {
+            state.isUploading = true;
+            ui.submitBtn.disabled = true;
+            setUploadStatus('در حال آماده‌سازی...', '');
+
+            const reader = new FileReader();
+            reader.onload = (event) => { ui.profilePreview.src = event.target.result; };
+            reader.readAsDataURL(file);
+
+            if (!validateField('username')) {
+                setUploadStatus('لطفاً ابتدا نام کاربری معتبر وارد کنید.', 'error');
+                state.isUploading = false;
+                checkFormValidity();
+                return;
+            }
+            if (!CONFIG.ALLOWED_MIMETYPES.includes(file.type)) {
+                setUploadStatus('نوع فایل نامعتبر است.', 'error');
+                state.isUploading = false;
+                checkFormValidity();
+                return;
+            }
+
+            let fileToUpload = file;
+            if (file.size > CONFIG.MAX_FILE_SIZE_BYTES) {
+                 // For simplicity, we just reject large files now. Resizing can be re-added if needed.
+                setUploadStatus(`حجم فایل بیش از ${CONFIG.MAX_FILE_SIZE_BYTES / 1024 / 1024} مگابایت است.`, 'error');
+                state.isUploading = false;
+                checkFormValidity();
+                return;
+            }
+            
+            try {
+                const result = await uploadFileWithProgress(fileToUpload);
+                setUploadStatus('آپلود موفق!', 'success');
+                ui.inputs.avatarUrl.value = result.url;
+                ui.profilePreview.src = result.thumb_url || result.url;
+                console.log('Upload successful. Avatar URL set:', result.url);
+            } catch (error) {
+                setUploadStatus(`خطا در آپلود: ${error.message}`, 'error');
+                console.error('Upload failed:', error);
+            } finally {
+                state.isUploading = false;
+                checkFormValidity();
+            }
+        };
+
+        const submitRegistrationForm = async () => {
+            if (!checkFormValidity()) return;
+            
+            toggleSubmitButton(false);
+            ui.formStatus.style.display = 'none';
 
             try {
-                const token = await getClientToken(); 
-                
                 const userData = {
-                    displayName: allInputs.displayName.value.trim(),
-                    username: allInputs.username.value.trim().toLowerCase(),
-                    password: allInputs.password.value,
-                    mobile: allInputs.mobile.value.trim(),
-                    age: parseInt(allInputs.age.value),
-                    gender: allInputs.gender.value,
-                    bio: allInputs.bio.value.trim(),
-                    interests: allInputs.interests.value.trim().split(/[,،]/).map(i => i.trim()).filter(Boolean),
-                    avatarUrl: allInputs.avatarUrl.value,
+                    displayName: ui.inputs.displayName.value.trim(),
+                    username: ui.inputs.username.value.trim().toLowerCase(),
+                    password: ui.inputs.password.value,
+                    mobile: ui.inputs.mobile.value.trim(),
+                    age: parseInt(ui.inputs.age.value),
+                    gender: ui.inputs.gender.value,
+                    bio: ui.inputs.bio.value.trim(),
+                    interests: ui.inputs.interests.value.trim().split(/[,،]/).map(i => i.trim()).filter(Boolean),
+                    avatarUrl: ui.inputs.avatarUrl.value || null,
                     createdAt: new Date().toISOString(),
                     isOnline: false,
                     lastSeen: new Date().toISOString()
                 };
 
-                const registerResponse = await fetch(`${PROXY_BASE_URL}/firebase_proxy.php?path=users/${userData.username}`, {
+                const registrationUrl = CONFIG.REGISTER_URL_TEMPLATE.replace('{username}', userData.username);
+                
+                const responseData = await authenticatedFetch(registrationUrl, {
                     method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${token}`,
-                        'X-User-Username': userData.username
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userData)
                 });
                 
-                const responseData = await registerResponse.json().catch(() => ({}));
-                if (!registerResponse.ok) {
-                    throw new Error(responseData.error || 'خطا در ثبت اطلاعات در سرور.');
-                }
-                
+                // On success, store the complete user object (which is what we sent)
                 localStorage.setItem('currentUser', JSON.stringify(userData));
                 
-                formStatus.textContent = 'ثبت‌نام موفق بود! در حال انتقال به صفحه اصلی...';
-                formStatus.className = 'success';
-                formStatus.style.display = 'block';
+                setFormStatus('ثبت‌نام موفق بود! در حال انتقال...', 'success');
                 
-                setTimeout(() => { window.location.href = 'safe_asli.html'; }, 2000);
+                setTimeout(() => { window.location.href = CONFIG.SUCCESS_REDIRECT_URL; }, 2000);
 
             } catch (error) {
-                formStatus.textContent = error.message;
-                formStatus.style.display = 'block';
-                formStatus.className = 'error';
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
+                setFormStatus(error.message, 'error');
+                toggleSubmitButton(true);
             }
-        }
+        };
+        
+
+        // --- SECTION: Event Listeners ---
+        Object.values(ui.inputs).forEach(input => {
+            if(!input || input.type === 'file' || input.type === 'hidden') return;
+            const eventType = ['checkbox', 'select-one'].includes(input.type) ? 'change' : 'input';
+            input.addEventListener(eventType, checkFormValidity);
+        });
+
+        ui.inputs.profilePic.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleProfilePictureSelection(file);
+        });
+
+        ui.form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitRegistrationForm();
+        });
+
+        // Initial validation check on page load
+        checkFormValidity();
+    });
     </script>
 </body>
 </html>
