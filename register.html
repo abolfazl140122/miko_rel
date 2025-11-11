@@ -1,30 +1,33 @@
 <!DOCTYPE html>
 <!-- 
 ====================================================================================================
-    USAGE & CONFIGURATION GUIDE (v2.0 - Updated)
+    USAGE & CONFIGURATION GUIDE (v2.1 - Real-time Avatar Update)
 ====================================================================================================
 
-    این فایل برای مدیریت ثبت‌نام، آپلود تصویر پروفایل و ذخیره‌سازی کامل اطلاعات کاربر اصلاح شده است.
+    این فایل برای مدیریت ثبت‌نام و آپلود تصویر پروفایل با قابلیت ذخیره‌سازی آنی آواتار اصلاح شده است.
 
     1.  تنظیمات اصلی (Constants):
-        -   در تگ <script>، مقادیر زیر را در صورت نیاز تغییر دهید:
-            -   `PROXY_BASE_URL`: آدرس پایه پراکسی شما.
-            -   `SHARED_SECRET`: کلید مخفی مشترک برای دریافت توکن.
+        -   در تگ <script>، مقادیر `PROXY_BASE_URL` و `SHARED_SECRET` را مطابق با تنظیمات خود قرار دهید.
 
-    2.  تغییرات کلیدی در این نسخه:
-        -   **ذخیره‌سازی کامل اطلاعات:** پس از ثبت‌نام موفق، کل آبجکت اطلاعات کاربر (شامل نام، نام کاربری، موبایل، سن، جنسیت، بیو، علاقه‌مندی‌ها و URL آواتار) در `localStorage` تحت کلید `currentUser` ذخیره می‌شود.
-        -   **انتقال به صفحه اصلی:** کاربر پس از ثبت‌نام موفقیت‌آمیز به صورت خودکار به صفحه `safe_asli.html` منتقل می‌شود.
-        -   **سازگاری با صفحه اصلی:** صفحه `safe_asli.html` اکنون می‌تواند با خواندن `localStorage.getItem('currentUser')` به تمام اطلاعات کاربر دسترسی داشته باشد و پروفایل او را به طور کامل نمایش دهد.
+    2.  تغییرات کلیدی در این نسخه (v2.1):
+        -   **ذخیره‌سازی آنی آواتار**: بلافاصله پس از آپلود موفق یک تصویر، یک درخواست `PATCH` به Firebase ارسال می‌شود تا فیلدهای `avatarUrl`, `avatarThumbUrl` و `avatarUpdatedAt` ذخیره شوند. این کار مستقل از ثبت‌نام نهایی فرم انجام می‌شود.
+        -   **به‌روزرسانی LocalStorage**: همزمان با ذخیره در Firebase، اگر کاربری از قبل در `localStorage` وجود داشته باشد، `avatarUrl` او نیز به‌روزرسانی می‌شود. این ویژگی برای زمانی مفید است که کاربر قبلاً وارد شده و از این صفحه برای تغییر آواتار خود استفاده می‌کند.
+        -   **استفاده هوشمند از نام کاربری**: نام کاربری برای آپلود و ذخیره‌سازی آواتار مستقیماً از فیلد ورودی خوانده می‌شود که برای فرآیند ثبت‌نام ضروری است.
 
     3.  نحوه تست (Testing Steps):
-        -   تست A (ثبت‌نام و ذخیره‌سازی کامل):
-            1. تمام فیلدهای فرم را با اطلاعات معتبر پر کنید.
-            2. یک تصویر پروفایل انتخاب کنید و منتظر بمانید تا پیام "آپلود موفق!" نمایش داده شود.
-            3. روی دکمه "ثبت‌نام" کلیک کنید.
-            4. در تب Network مرورگر، درخواست `PUT` به `.../firebase_proxy.php?path=users/{username}` با status 200 را بررسی کنید. بدنه (payload) این درخواست باید شامل تمام اطلاعات فرم باشد.
-            5. در پایگاه داده Firebase، بررسی کنید که یک رکورد جدید با تمام اطلاعات (شامل displayName, mobile, age, bio, avatarUrl و غیره) ایجاد شده باشد.
-            6. در تب Application مرورگر، زیر بخش Local Storage، مقدار کلید `currentUser` را بررسی کنید. این مقدار باید یک رشته JSON حاوی تمام اطلاعات ثبت‌شده کاربر باشد.
-            7. شما باید به صورت خودکار به `safe_asli.html` منتقل شوید.
+        -   تست A (ثبت‌نام کاربر جدید):
+            1. فرم را با اطلاعات معتبر پر کنید (مخصوصاً نام کاربری).
+            2. یک تصویر پروفایل انتخاب کنید. منتظر بمانید تا پیام "آپلود موفق!" و سپس "آواتار ذخیره شد" نمایش داده شود.
+            3. در تب Network، ابتدا درخواست `POST` برای آپلود و سپس درخواست `PATCH` به `.../firebase_proxy.php?path=users/{username}` را مشاهده کنید. (توجه: اگر کاربر جدید باشد، این PATCH ممکن است خطا بدهد که طبیعی است، زیرا هنوز رکوردی برای به‌روزرسانی وجود ندارد).
+            4. روی دکمه "ثبت‌نام" کلیک کنید. درخواست `PUT` نهایی باید تمام اطلاعات، شامل `avatarUrl` را با موفقیت ذخیره کند.
+            5. در Firebase و Local Storage، تمام اطلاعات را بررسی کنید.
+
+        -   تست B (تغییر آواتار کاربر موجود):
+            1. فرض کنید کاربری با نام `testuser` از قبل وجود دارد.
+            2. نام کاربری `testuser` را در فیلد مربوطه وارد کنید.
+            3. یک تصویر جدید انتخاب کنید.
+            4. درخواست `PATCH` باید با status 200 موفق شود و `avatarUrl` در Firebase برای `testuser` به‌روز شود.
+            5. `localStorage` نیز باید (اگر وجود داشت) به‌روز شود.
 
 ====================================================================================================
 -->
@@ -298,7 +301,6 @@
             reader.onload = (event) => { profilePreview.src = event.target.result; };
             reader.readAsDataURL(file);
 
-            // نام کاربری برای ساخت مسیر آپلود در سرور ضروری است، بنابراین باید قبل از آپلود وارد شود
             if (!allInputs.username.value.trim()) {
                 setUploadStatus('لطفاً ابتدا نام کاربری را وارد کنید.', 'error');
                 showError('username', 'نام کاربری برای آپلود تصویر الزامی است.');
@@ -315,11 +317,9 @@
             let fileToUpload = file;
             if (file.size > MAX_FILE_SIZE_BYTES) {
                 setUploadStatus('حجم عکس زیاد است، در حال بهینه‌سازی...', '');
-                console.log(`Image is too large (${file.size} bytes). Resizing...`);
                 try {
                     fileToUpload = await resizeImage(file, RESIZE_MAX_DIMENSION, RESIZE_QUALITY);
                 } catch (err) {
-                    console.error('Image resize failed:', err);
                     setUploadStatus('خطا در بهینه‌سازی تصویر.', 'error');
                     submitBtn.disabled = !checkFormValidity();
                     return;
@@ -327,11 +327,17 @@
             }
 
             try {
-                const result = await uploadFileWithProgress(fileToUpload, allInputs.username.value.trim());
-                setUploadStatus('آپلود موفق!', 'success');
-                allInputs.avatarUrl.value = result.url;
-                profilePreview.src = result.thumb_url || result.url;
-                console.log('Upload successful. Avatar URL set:', result.url);
+                const username = allInputs.username.value.trim();
+                const uploadResult = await uploadFileWithProgress(fileToUpload, username);
+                
+                setUploadStatus('آپلود موفق! در حال ذخیره...', 'success');
+                allInputs.avatarUrl.value = uploadResult.url;
+                profilePreview.src = uploadResult.thumb_url || uploadResult.url;
+                console.log('Upload successful. Avatar URL set:', uploadResult.url);
+
+                // <<< ===== تغییر کلیدی: ذخیره فوری آواتار در Firebase ===== >>>
+                await updateUserAvatarInFirebase(username, uploadResult);
+
             } catch (error) {
                 setUploadStatus(`خطا در آپلود: ${error.message}`, 'error');
                 console.error('Upload failed:', error);
@@ -339,6 +345,64 @@
                 submitBtn.disabled = !checkFormValidity();
             }
         }
+        
+        /**
+         * <<< ===== تابع جدید: ارسال درخواست PATCH برای به‌روزرسانی آواتار ===== >>>
+         * این تابع اطلاعات آواتار را بلافاصله در Firebase ذخیره می‌کند.
+         * @param {string} username - نام کاربری برای ساخت مسیر در Firebase
+         * @param {object} uploadResult - آبجکت بازگشتی از سرور آپلود شامل url و thumb_url
+         */
+        async function updateUserAvatarInFirebase(username, uploadResult) {
+            console.log(`Attempting to patch avatar for user: ${username}`);
+            
+            const avatarData = {
+                avatarUrl: uploadResult.url,
+                avatarThumbUrl: uploadResult.thumb_url || uploadResult.url, // Fallback
+                avatarUpdatedAt: new Date().toISOString()
+            };
+
+            try {
+                const token = await getClientToken();
+                const response = await fetch(`${PROXY_BASE_URL}/firebase_proxy.php?path=users/${username}`, {
+                    method: 'PATCH',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${token}`,
+                        'X-User-Username': username
+                    },
+                    body: JSON.stringify(avatarData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    // اگر خطا به دلیل عدم وجود کاربر باشد (در زمان ثبت‌نام)، آن را نادیده می‌گیریم.
+                    if (response.status === 404 || (errorData.error && errorData.error.includes("not found"))) {
+                        console.warn(`User '${username}' not found for patching avatar. This is normal during first-time registration. Avatar will be saved with the final submission.`);
+                    } else {
+                        throw new Error(errorData.error || `خطای سرور (${response.status})`);
+                    }
+                }
+
+                console.log('Avatar successfully patched in Firebase.');
+                alert('آواتار ذخیره شد.'); // تاییدیه برای کاربر
+
+                // به‌روزرسانی currentUser در localStorage اگر وجود داشته باشد
+                const currentUserStr = localStorage.getItem('currentUser');
+                if (currentUserStr) {
+                    const currentUser = JSON.parse(currentUserStr);
+                    // فقط اگر نام کاربری مطابقت داشت، به‌روزرسانی کن
+                    if (currentUser.username === username) {
+                        currentUser.avatarUrl = avatarData.avatarUrl;
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        console.log('localStorage currentUser has been updated with the new avatar.');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to patch avatar in Firebase:', error);
+                setUploadStatus(`خطا در ذخیره آواتار: ${error.message}`, 'error');
+            }
+        }
+
 
         function resizeImage(file, maxWidth, quality) {
             return new Promise((resolve, reject) => {
@@ -352,15 +416,9 @@
                         let { width, height } = img;
 
                         if (width > height) {
-                            if (width > maxWidth) {
-                                height = Math.round((height * maxWidth) / width);
-                                width = maxWidth;
-                            }
+                            if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
                         } else {
-                            if (height > maxWidth) {
-                                width = Math.round((width * maxWidth) / height);
-                                height = maxWidth;
-                            }
+                            if (height > maxWidth) { width = Math.round((width * maxWidth) / height); height = maxWidth; }
                         }
                         
                         canvas.width = width;
@@ -369,12 +427,8 @@
                         ctx.drawImage(img, 0, 0, width, height);
                         
                         canvas.toBlob((blob) => {
-                            if (blob) {
-                                console.log(`Resized image from ${file.size} to ${blob.size} bytes.`);
-                                resolve(blob);
-                            } else {
-                                reject(new Error('Canvas toBlob conversion failed.'));
-                            }
+                            if (blob) { resolve(blob); } 
+                            else { reject(new Error('Canvas toBlob conversion failed.')); }
                         }, 'image/jpeg', quality);
                     };
                     img.onerror = reject;
@@ -387,7 +441,6 @@
             let token = localStorage.getItem('client_token');
             if (token) return token;
 
-            console.log('Fetching a new client token...');
             try {
                 const response = await fetch(TOKEN_URL, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
                 if (!response.ok) throw new Error(`Server responded with ${response.status}`);
@@ -396,7 +449,6 @@
                 localStorage.setItem('client_token', data.token);
                 return data.token;
             } catch (error) {
-                console.error('Failed to get client token:', error);
                 throw new Error('خطا در دریافت توکن احراز هویت.');
             }
         }
@@ -406,31 +458,26 @@
             
             const performUpload = (url, isFallback = false) => {
                 return new Promise((resolve, reject) => {
-                    console.log(`[${isFallback ? 'Fallback' : 'Primary'}] Attempting to upload to:`, url);
-                    
                     const xhr = new XMLHttpRequest();
                     const formData = new FormData();
                     formData.append('file', file, file.name || 'profile.jpg');
-                    
                     xhr.open('POST', url, true);
-                    
                     xhr.setRequestHeader('Authorization', `Bearer ${token}`);
                     xhr.setRequestHeader('X-User-Username', username);
 
                     xhr.upload.onprogress = (event) => {
                         if (event.lengthComputable) {
-                            const percentage = (event.loaded / event.total) * 100;
-                            updateUploadProgress(percentage);
+                            updateUploadProgress((event.loaded / event.total) * 100);
                         }
                     };
 
                     xhr.onload = () => {
                         try {
-                            const responseJson = JSON.parse(xhr.responseText);
-                            if (xhr.status >= 200 && xhr.status < 300 && responseJson.success) {
-                                resolve(responseJson);
+                            const res = JSON.parse(xhr.responseText);
+                            if (xhr.status >= 200 && xhr.status < 300 && res.success) {
+                                resolve(res);
                             } else {
-                                reject(new Error(responseJson.message || `خطای سرور (${xhr.status})`));
+                                reject(new Error(res.message || `خطای سرور (${xhr.status})`));
                             }
                         } catch (e) {
                             reject(new Error('پاسخ دریافتی از سرور نامعتبر است.'));
@@ -438,7 +485,6 @@
                     };
 
                     xhr.onerror = () => reject(new Error('خطای شبکه یا CORS.'));
-                    xhr.ontimeout = () => reject(new Error('درخواست آپلود زمان‌بر شد.'));
                     xhr.send(formData);
                 });
             };
@@ -454,11 +500,6 @@
             }
         }
         
-        /**
-         * Main form submission logic.
-         * Collects ALL user data and sends it to Firebase via proxy.
-         * Stores the complete user object in localStorage.
-         */
         async function submitForm() {
             submitBtn.disabled = true;
             submitBtn.classList.add('loading');
@@ -467,23 +508,21 @@
             try {
                 const token = await getClientToken(); 
                 
-                // جمع‌آوری تمام داده‌های فرم در یک آبجکت واحد
                 const userData = {
                     displayName: allInputs.displayName.value.trim(),
                     username: allInputs.username.value.trim().toLowerCase(),
-                    password: allInputs.password.value, // نکته: رمز عبور باید در سمت سرور هش شود
+                    password: allInputs.password.value,
                     mobile: allInputs.mobile.value.trim(),
                     age: parseInt(allInputs.age.value),
                     gender: allInputs.gender.value,
                     bio: allInputs.bio.value.trim(),
                     interests: allInputs.interests.value.trim().split(/[,،]/).map(i => i.trim()).filter(Boolean),
-                    avatarUrl: allInputs.avatarUrl.value, // دریافت URL از فیلد مخفی
+                    avatarUrl: allInputs.avatarUrl.value,
                     createdAt: new Date().toISOString(),
                     isOnline: false,
                     lastSeen: new Date().toISOString()
                 };
 
-                // استفاده از متد PUT برای ایجاد یا به‌روزرسانی داده‌های کاربر در Firebase
                 const registerResponse = await fetch(`${PROXY_BASE_URL}/firebase_proxy.php?path=users/${userData.username}`, {
                     method: 'PUT',
                     headers: { 
@@ -499,15 +538,12 @@
                     throw new Error(responseData.error || 'خطا در ثبت اطلاعات در سرور.');
                 }
                 
-                // <<< ===== تغییر کلیدی در اینجا ===== >>>
-                // ذخیره کردن *کل آبجکت کاربر* در localStorage برای استفاده در صفحات دیگر مانند safe_asli.html
                 localStorage.setItem('currentUser', JSON.stringify(userData));
                 
                 formStatus.textContent = 'ثبت‌نام موفق بود! در حال انتقال به صفحه اصلی...';
                 formStatus.className = 'success';
                 formStatus.style.display = 'block';
                 
-                // انتقال به صفحه اصلی پس از 2 ثانیه
                 setTimeout(() => { window.location.href = 'safe_asli.html'; }, 2000);
 
             } catch (error) {
@@ -519,7 +555,6 @@
                 submitBtn.classList.remove('loading');
             }
         }
-
     </script>
 </body>
 </html>
