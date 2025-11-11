@@ -77,6 +77,17 @@
         .profile-uploader:hover .profile-preview { border-color: var(--primary-color); }
         .profile-uploader span { font-weight: 500; color: var(--primary-color); }
         .profile-uploader input[type="file"] { display: none; }
+        
+        /* --- CSS جدید برای وضعیت آپلود --- */
+        #uploadStatus {
+            font-size: 0.9em;
+            margin-top: -5px; /* کمی نزدیک‌تر به دکمه */
+            font-weight: 500;
+            min-height: 1.2em;
+        }
+        #uploadStatus.success { color: var(--success-color); }
+        #uploadStatus.error { color: var(--error-color); }
+        /* --- پایان CSS جدید --- */
 
         .form-row { display: flex; gap: 15px; }
         .form-row .input-group { flex: 1; }
@@ -119,12 +130,16 @@
             <p>به همیار بپیوندید و دوستان جدیدی پیدا کنید!</p>
         </div>
         <form id="register-form" novalidate>
+            <!-- بخش انتخاب تصویر پروفایل (بدون تغییر در ساختار اصلی) -->
             <label for="profilePic" class="profile-uploader">
                 <img id="profile-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjZWQ0ZGEiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xOCAyMHYtMS4zNzJhNC45OSA0Ljk5IDAgMCAwLTIuNDgtNC4yOE02IDIwdi0xLjM3MmE0Ljk5IDQuOTkgMCAwIDEgMi40OC00LjI4TTQgMnYxM2E4IDggMCAwIDAgMTYgMFYyTTIgMjJoMjAiLz48Y2lyY2xlIGN4PSIxMiIgY3k9Ijgigcj0iNCIvPjwvc3ZnPg==" alt="Profile Preview" class="profile-preview">
                 <span>انتخاب تصویر پروفایل</span>
                 <input type="file" id="profilePic" accept="image/*">
+                 <!-- المان جدید برای نمایش وضعیت آپلود -->
+                <div id="uploadStatus"></div>
             </label>
 
+            <!-- سایر فیلدهای فرم (بدون هیچ تغییری) -->
             <div class="input-group"><label for="displayName">نام نمایشی</label><div class="input-wrapper"><input type="text" id="displayName" placeholder="نامی که دیگران می‌بینند" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg></div><div class="error-message" id="displayName-error"></div></div>
             <div class="input-group"><label for="username">نام کاربری (انگلیسی)</label><div class="input-wrapper"><input type="text" id="username" placeholder="فقط حروف انگلیسی، اعداد و _" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M12 18h.01"></path><path d="M16 12h-4"></path></svg></div><div class="error-message" id="username-error"></div></div>
             <div class="input-group"><label for="mobile">شماره موبایل</label><div class="input-wrapper"><input type="tel" id="mobile" placeholder="مثال: 09123456789" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div><div class="error-message" id="mobile-error"></div></div>
@@ -151,6 +166,7 @@
         const form = document.getElementById('register-form');
         const submitBtn = document.getElementById('submit-btn');
         const formStatus = document.getElementById('form-status');
+        const uploadStatus = document.getElementById('uploadStatus'); // <-- جدید
         const allInputs = {
             displayName: document.getElementById('displayName'),
             username: document.getElementById('username'),
@@ -166,7 +182,9 @@
         };
 
         // --- Constants ---
+        // [توجه] پراکسی ثبت نام و آپلود از دو آدرس متفاوت استفاده می‌کنند
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        const UPLOAD_API_URL = 'https://miko.freehost.io/api/upload_profile.php'; // <-- جدید
         const SHARED_SECRET = 'miko1234';
 
         // --- Utility Functions ---
@@ -220,6 +238,7 @@
                 const reader = new FileReader();
                 reader.onload = (event) => { document.getElementById('profile-preview').src = event.target.result; }
                 reader.readAsDataURL(e.target.files[0]);
+                uploadStatus.textContent = ''; // پاک کردن وضعیت قبلی
             }
         });
 
@@ -230,15 +249,57 @@
             }
         });
 
-        // --- Form Submission ---
+        // --- تابع جدید برای آپلود عکس پروفایل ---
+        async function uploadProfilePicture(file, username, token) {
+            uploadStatus.textContent = 'در حال آپلود...';
+            uploadStatus.className = '';
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', 'avatar');
+
+            try {
+                const response = await fetch(UPLOAD_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-User-Username': username
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'خطا در آپلود تصویر.');
+                }
+                
+                console.log('Upload successful:', result);
+                uploadStatus.textContent = 'آپلود موفق بود!';
+                uploadStatus.className = 'success';
+                return true; // موفقیت
+
+            } catch (error) {
+                console.error('Upload failed:', error);
+                uploadStatus.textContent = `خطا: ${error.message}`;
+                uploadStatus.className = 'error';
+                return false; // شکست
+            }
+        }
+
+        // --- Form Submission (اصلاح شده) ---
         async function submitForm() {
             submitBtn.disabled = true;
             submitBtn.classList.add('loading');
             formStatus.style.display = 'none';
+            uploadStatus.textContent = '';
+
             try {
+                // 1. دریافت توکن
                 const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
                 if (!tokenResponse.ok) throw new Error('خطا در دریافت توکن احراز هویت.');
                 const tokenData = await tokenResponse.json();
+                const clientToken = tokenData.token; // توکن برای استفاده در آپلود و ثبت نام
 
                 const userData = {
                     displayName: allInputs.displayName.value.trim(),
@@ -254,13 +315,13 @@
                     lastSeen: new Date().toISOString()
                 };
 
-                // [FIXED] Sending the required 'X-User-Username' header
+                // 2. ثبت اطلاعات کاربر
                 const registerResponse = await fetch(`${PROXY_URL}?path=users/${userData.username}`, {
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${tokenData.token}`,
-                        'X-User-Username': userData.username // این هدر برای پراکسی شما ضروری است
+                        'Authorization': `Bearer ${clientToken}`,
+                        'X-User-Username': userData.username
                     },
                     body: JSON.stringify(userData)
                 });
@@ -270,6 +331,13 @@
                     throw new Error(responseData.error || 'خطا در ثبت اطلاعات در سرور.');
                 }
                 
+                // 3. آپلود عکس پروفایل (در صورت وجود)
+                const profileFile = allInputs.profilePic.files[0];
+                if (profileFile) {
+                    await uploadProfilePicture(profileFile, userData.username, clientToken);
+                }
+                
+                // 4. ذخیره کاربر در localStorage و نمایش پیام موفقیت نهایی
                 localStorage.setItem('currentUser', JSON.stringify({
                     username: userData.username,
                     displayName: userData.displayName
@@ -279,7 +347,7 @@
                 formStatus.className = 'success';
                 formStatus.style.display = 'block';
                 
-                // [FIXED] Redirecting to the correct main page
+                // 5. انتقال به صفحه بعد
                 setTimeout(() => { window.location.href = 'safe_asli.html'; }, 2000);
 
             } catch (error) {
