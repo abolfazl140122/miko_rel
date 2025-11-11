@@ -1,9 +1,49 @@
 <!DOCTYPE html>
+<!-- 
+    =============================================================================
+    USAGE & CONFIGURATION
+    =============================================================================
+    این فایل نسخه اصلاح شده فرم ثبت‌نام است که قابلیت آپلود پیشرفته آواتار را پیاده‌سازی می‌کند.
+
+    **تنظیمات اصلی (در بخش <script>):**
+    1.  `PROXY_BASE_URL`: آدرس پایه پراکسی PHP خود را در اینجا قرار دهید.
+        -   مقدار فعلی: 'https://miko.freehost.io/firebase_proxy.php'
+    2.  `SHARED_SECRET`: کلید مخفی مشترک بین کلاینت و سرور برای دریافت توکن.
+        -   مقدار فعلی: 'miko1234'
+    3.  `FALLBACK_UPLOAD_URL`: یک آدرس جایگزین برای آپلود در صورت بروز خطای CORS.
+        -   مقدار فعلی: 'https://miko.freehost.io/api/upload_profile.php'
+
+    **نحوه تست (Test Cases):**
+    -   **تست A (آپلود موفق):**
+        1. فرم را با اطلاعات معتبر پر کنید.
+        2. یک تصویر کوچک (کمتر از 5MB) با فرمت JPG یا PNG انتخاب کنید.
+        3. دکمه ثبت‌نام را بزنید.
+        4. در کنسول و تب Network، ابتدا درخواست ثبت‌نام (PUT) و سپس درخواست آپلود (POST) را بررسی کنید که با موفقیت (status 200) انجام شوند.
+        5. در نهایت، درخواست PATCH برای به‌روزرسانی پروفایل کاربر با URL آواتار را مشاهده کنید.
+        6. پیام موفقیت نمایش داده شده و به صفحه اصلی منتقل شوید.
+
+    -   **تست B (تغییر اندازه خودکار):**
+        1. یک تصویر بزرگ (بیشتر از 5MB) انتخاب کنید.
+        2. در کنسول باید لاگ "Resizing image..." را مشاهده کنید.
+        3. ادامه مراحل تست A را دنبال کنید. آپلود باید موفقیت‌آمیز باشد.
+
+    -   **تست C (دریافت خودکار توکن):**
+        1. در پنل توسعه‌دهنده (DevTools)، به تب Application -> Local Storage بروید و `client_token` را پاک کنید.
+        2. فرم را ارسال کنید.
+        3. در تب Network باید اولین درخواست برای `?auth=token` را ببینید که توکن جدید را دریافت می‌کند. سپس مراحل ثبت‌نام و آپلود انجام می‌شوند.
+
+    -   **تست D (خطای شبکه و Fallback):**
+        1. با استفاده از DevTools، تب Network را روی حالت "Offline" قرار دهید.
+        2. دکمه ثبت‌نام را بزنید.
+        3. باید پیام خطای مربوط به شبکه را در UI (`#form-status`) مشاهده کنید.
+        4. (برای تست Fallback) اگر سرور شما برای مسیر اصلی خطای CORS برمی‌گرداند، در کنسول باید لاگ "CORS/Network error, trying fallback URL..." را مشاهده کنید و درخواست به مسیر جایگزین ارسال شود.
+    =============================================================================
+-->
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ایجاد حساب کاربری - همیار</title>
+    <title>ایجاد حساب کاربری (نسخه اصلاح‌شده) - همیار</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
         
@@ -75,20 +115,35 @@
         .profile-uploader { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 25px; cursor: pointer; }
         .profile-uploader .profile-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid var(--border-color); background-color: #e9ecef; transition: border-color 0.3s; }
         .profile-uploader:hover .profile-preview { border-color: var(--primary-color); }
-        .profile-uploader span { font-weight: 500; color: var(--primary-color); }
         .profile-uploader input[type="file"] { display: none; }
         
-        /* --- CSS جدید برای وضعیت آپلود --- */
         #uploadStatus {
             font-size: 0.9em;
-            margin-top: -5px; /* کمی نزدیک‌تر به دکمه */
+            margin-top: -5px;
             font-weight: 500;
             min-height: 1.2em;
+            width: 100%;
+            text-align: center;
         }
         #uploadStatus.success { color: var(--success-color); }
         #uploadStatus.error { color: var(--error-color); }
-        /* --- پایان CSS جدید --- */
 
+        .progress-bar {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            height: 8px;
+            margin-top: 5px;
+            display: none; /* Hidden by default */
+        }
+        .progress-bar-inner {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+            transition: width 0.3s ease-in-out;
+        }
+        
         .form-row { display: flex; gap: 15px; }
         .form-row .input-group { flex: 1; }
         
@@ -130,16 +185,17 @@
             <p>به همیار بپیوندید و دوستان جدیدی پیدا کنید!</p>
         </div>
         <form id="register-form" novalidate>
-            <!-- بخش انتخاب تصویر پروفایل (بدون تغییر در ساختار اصلی) -->
             <label for="profilePic" class="profile-uploader">
                 <img id="profile-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjZWQ0ZGEiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xOCAyMHYtMS4zNzJhNC45OSA0Ljk5IDAgMCAwLTIuNDgtNC4yOE02IDIwdi0xLjM3MmE0Ljk5IDQuOTkgMCAwIDEgMi40OC00LjI4TTQgMnYxM2E4IDggMCAwIDAgMTYgMFYyTTIgMjJoMjAiLz48Y2lyY2xlIGN4PSIxMiIgY3k9Ijgigcj0iNCIvPjwvc3ZnPg==" alt="Profile Preview" class="profile-preview">
                 <span>انتخاب تصویر پروفایل</span>
-                <input type="file" id="profilePic" accept="image/*">
-                 <!-- المان جدید برای نمایش وضعیت آپلود -->
+                <input type="file" id="profilePic" accept="image/jpeg, image/png, image/webp">
                 <div id="uploadStatus"></div>
+                <div class="progress-bar" id="progressBar"><div class="progress-bar-inner" id="progressBarInner"></div></div>
             </label>
 
-            <!-- سایر فیلدهای فرم (بدون هیچ تغییری) -->
+            <!-- Input مخفی برای نگهداری URL آواتار آپلود شده -->
+            <input type="hidden" id="avatarUrl" name="avatarUrl">
+            
             <div class="input-group"><label for="displayName">نام نمایشی</label><div class="input-wrapper"><input type="text" id="displayName" placeholder="نامی که دیگران می‌بینند" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg></div><div class="error-message" id="displayName-error"></div></div>
             <div class="input-group"><label for="username">نام کاربری (انگلیسی)</label><div class="input-wrapper"><input type="text" id="username" placeholder="فقط حروف انگلیسی، اعداد و _" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M12 18h.01"></path><path d="M16 12h-4"></path></svg></div><div class="error-message" id="username-error"></div></div>
             <div class="input-group"><label for="mobile">شماره موبایل</label><div class="input-wrapper"><input type="tel" id="mobile" placeholder="مثال: 09123456789" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div><div class="error-message" id="mobile-error"></div></div>
@@ -162,11 +218,29 @@
     </div>
 
     <script>
+        // --- CONFIGURATION ---
+        const PROXY_BASE_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        const SHARED_SECRET = 'miko1234';
+        const FALLBACK_UPLOAD_URL = 'https://miko.freehost.io/api/upload_profile.php';
+
+        // --- API URLs ---
+        const TOKEN_API_URL = `${PROXY_BASE_URL}?auth=token`;
+        const UPLOAD_API_URL = `${PROXY_BASE_URL}?path=upload_profile`;
+        
+        // --- Image Validation & Resize Config ---
+        const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/webp'];
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+        const RESIZE_MAX_WIDTH = 1024;
+        const RESIZE_QUALITY = 0.8;
+
         // --- DOM Elements ---
         const form = document.getElementById('register-form');
         const submitBtn = document.getElementById('submit-btn');
         const formStatus = document.getElementById('form-status');
-        const uploadStatus = document.getElementById('uploadStatus'); // <-- جدید
+        const uploadStatus = document.getElementById('uploadStatus');
+        const progressBar = document.getElementById('progressBar');
+        const progressBarInner = document.getElementById('progressBarInner');
+        
         const allInputs = {
             displayName: document.getElementById('displayName'),
             username: document.getElementById('username'),
@@ -178,14 +252,11 @@
             terms: document.getElementById('terms'),
             bio: document.getElementById('bio'),
             interests: document.getElementById('interests'),
-            profilePic: document.getElementById('profilePic')
+            profilePic: document.getElementById('profilePic'),
+            avatarUrl: document.getElementById('avatarUrl'),
         };
 
-        // --- Constants ---
-        // [توجه] پراکسی ثبت نام و آپلود از دو آدرس متفاوت استفاده می‌کنند
-        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const UPLOAD_API_URL = 'https://miko.freehost.io/api/upload_profile.php'; // <-- جدید
-        const SHARED_SECRET = 'miko1234';
+        let selectedFile = null; // To hold the validated (and possibly resized) file
 
         // --- Utility Functions ---
         function showError(fieldId, message) {
@@ -196,8 +267,19 @@
             const el = document.getElementById(`${fieldId}-error`);
             if (el) el.style.display = 'none';
         }
+        
+        function setUploadStatus(message, type = '') {
+            uploadStatus.textContent = message;
+            uploadStatus.className = type;
+            progressBar.style.display = message && type !== 'error' && type !== 'success' ? 'block' : 'none';
+        }
+        
+        function updateUploadProgress(percentage) {
+            progressBarInner.style.width = `${percentage}%`;
+            setUploadStatus(`در حال آپلود... ${percentage}%`);
+        }
 
-        // --- Validation Logic ---
+        // --- Validation Logic (No Changes) ---
         function validateField(fieldId) {
             const input = allInputs[fieldId];
             if (!input) return true; 
@@ -226,6 +308,154 @@
             return isFormValid;
         }
 
+        // --- New Core Functions ---
+
+        /**
+         * Gets a client token from the proxy, using localStorage for caching.
+         * @returns {Promise<string>} The client token.
+         */
+        async function getClientToken() {
+            let token = localStorage.getItem('client_token');
+            if (token) {
+                console.log("Using cached client_token from localStorage.");
+                return token;
+            }
+
+            console.log("No cached token. Fetching a new one...");
+            try {
+                const response = await fetch(TOKEN_API_URL, {
+                    headers: { 'X-Proxy-Secret': SHARED_SECRET }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with ${response.status}`);
+                }
+                const data = await response.json();
+                if (!data.token) {
+                    throw new Error("Token not found in server response.");
+                }
+                
+                localStorage.setItem('client_token', data.token);
+                console.log("New token fetched and cached.");
+                return data.token;
+            } catch (error) {
+                console.error('Failed to get client token:', error);
+                throw new Error("خطا در دریافت توکن احراز هویت. لطفاً اتصال اینترنت خود را بررسی کنید.");
+            }
+        }
+
+        /**
+         * Resizes an image file if it's too large.
+         * @param {File} file The image file to resize.
+         * @returns {Promise<Blob>} A promise that resolves with the resized image as a Blob.
+         */
+        function resizeImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let { width, height } = img;
+                        if (width <= RESIZE_MAX_WIDTH && height <= RESIZE_MAX_WIDTH) {
+                            return resolve(file); // No resize needed
+                        }
+
+                        if (width > height) {
+                            height = Math.round((height * RESIZE_MAX_WIDTH) / width);
+                            width = RESIZE_MAX_WIDTH;
+                        } else {
+                            width = Math.round((width * RESIZE_MAX_WIDTH) / height);
+                            height = RESIZE_MAX_WIDTH;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            console.log(`Image resized from ${file.size} to ${blob.size} bytes.`);
+                            resolve(blob);
+                        }, 'image/jpeg', RESIZE_QUALITY);
+                    };
+                    img.onerror = reject;
+                };
+                reader.onerror = reject;
+            });
+        }
+
+        /**
+         * Uploads the profile picture using XMLHttpRequest for progress tracking.
+         * @param {Blob} fileBlob The file to upload (could be resized).
+         * @param {string} username The user's username for the X-User-Username header.
+         * @param {string} token The client token for authorization.
+         * @param {boolean} isFallback Whether this is a retry attempt with the fallback URL.
+         * @returns {Promise<object>} A promise that resolves with the server's JSON response.
+         */
+        function uploadProfilePicture(fileBlob, username, token, isFallback = false) {
+            return new Promise((resolve, reject) => {
+                const url = isFallback ? FALLBACK_UPLOAD_URL : UPLOAD_API_URL;
+                console.log(`Attempting to upload to: ${url}`);
+                if(isFallback) console.warn("Using fallback URL for upload.");
+
+                const formData = new FormData();
+                formData.append('file', fileBlob, 'profile.jpg'); // Filename is useful for server
+                formData.append('type', 'avatar');
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', url, true);
+                
+                // Set headers
+                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+                xhr.setRequestHeader('X-User-Username', username);
+
+                // Log headers for debugging (excluding the full token in production is better)
+                console.log("Uploading with headers:", {
+                    'Authorization': `Bearer ${token.substring(0, 10)}...`,
+                    'X-User-Username': username
+                });
+
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentage = Math.round((event.loaded * 100) / event.total);
+                        updateUploadProgress(percentage);
+                    }
+                };
+
+                xhr.onload = () => {
+                    console.log(`Upload response status: ${xhr.status}`);
+                    console.log(`Upload response text: ${xhr.responseText}`);
+                    
+                    try {
+                        const result = JSON.parse(xhr.responseText);
+                        if (xhr.status >= 200 && xhr.status < 300 && result.success) {
+                            resolve(result);
+                        } else {
+                            reject(new Error(result.message || 'خطای ناشناخته از سرور هنگام آپلود.'));
+                        }
+                    } catch (e) {
+                        reject(new Error('پاسخ سرور برای آپلود تصویر معتبر نبود.'));
+                    }
+                };
+
+                xhr.onerror = () => {
+                    console.error("XHR onerror triggered. This is likely a network or CORS error.");
+                    // If it's the first attempt, try the fallback URL
+                    if (!isFallback) {
+                        console.log("CORS/Network error detected, trying fallback URL...");
+                        uploadProfilePicture(fileBlob, username, token, true).then(resolve).catch(reject);
+                    } else {
+                        reject(new Error('خطای شبکه هنگام آپلود تصویر. اتصال اینترنت خود را بررسی کنید.'));
+                    }
+                };
+
+                xhr.send(formData);
+            });
+        }
+        
         // --- Event Listeners ---
         Object.values(allInputs).forEach(input => {
             if(!input) return;
@@ -233,12 +463,43 @@
             input.addEventListener(eventType, checkFormValidity);
         });
 
-        allInputs.profilePic.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (event) => { document.getElementById('profile-preview').src = event.target.result; }
-                reader.readAsDataURL(e.target.files[0]);
-                uploadStatus.textContent = ''; // پاک کردن وضعیت قبلی
+        allInputs.profilePic.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) {
+                selectedFile = null;
+                return;
+            }
+
+            // Reset status
+            setUploadStatus('', '');
+            updateUploadProgress(0);
+
+            // 1. Validate file type
+            if (!ALLOWED_MIMETYPES.includes(file.type)) {
+                setUploadStatus(`نوع فایل نامعتبر است. فقط ${ALLOWED_MIMETYPES.map(t => t.split('/')[1]).join(', ')} مجاز است.`, 'error');
+                selectedFile = null;
+                return;
+            }
+
+            // 2. Show preview immediately
+            const reader = new FileReader();
+            reader.onload = (event) => { document.getElementById('profile-preview').src = event.target.result; }
+            reader.readAsDataURL(file);
+
+            // 3. Check file size and resize if necessary
+            setUploadStatus('در حال آماده‌سازی تصویر...', '');
+            try {
+                if (file.size > MAX_FILE_SIZE) {
+                    console.log("File is too large, resizing...");
+                    selectedFile = await resizeImage(file);
+                } else {
+                    selectedFile = file;
+                }
+                setUploadStatus('تصویر آماده آپلود است.', 'success');
+            } catch (error) {
+                console.error("Error processing image:", error);
+                setUploadStatus('خطا در پردازش تصویر.', 'error');
+                selectedFile = null;
             }
         });
 
@@ -249,58 +510,16 @@
             }
         });
 
-        // --- تابع جدید برای آپلود عکس پروفایل ---
-        async function uploadProfilePicture(file, username, token) {
-            uploadStatus.textContent = 'در حال آپلود...';
-            uploadStatus.className = '';
-
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('type', 'avatar');
-
-            try {
-                const response = await fetch(UPLOAD_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'X-User-Username': username
-                    },
-                    body: formData
-                });
-                
-                const result = await response.json();
-
-                if (!response.ok || !result.success) {
-                    throw new Error(result.message || 'خطا در آپلود تصویر.');
-                }
-                
-                console.log('Upload successful:', result);
-                uploadStatus.textContent = 'آپلود موفق بود!';
-                uploadStatus.className = 'success';
-                return true; // موفقیت
-
-            } catch (error) {
-                console.error('Upload failed:', error);
-                uploadStatus.textContent = `خطا: ${error.message}`;
-                uploadStatus.className = 'error';
-                return false; // شکست
-            }
-        }
-
-        // --- Form Submission (اصلاح شده) ---
+        // --- Form Submission (Heavily Modified) ---
         async function submitForm() {
             submitBtn.disabled = true;
             submitBtn.classList.add('loading');
             formStatus.style.display = 'none';
-            uploadStatus.textContent = '';
 
             try {
-                // 1. دریافت توکن
-                const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-                if (!tokenResponse.ok) throw new Error('خطا در دریافت توکن احراز هویت.');
-                const tokenData = await tokenResponse.json();
-                const clientToken = tokenData.token; // توکن برای استفاده در آپلود و ثبت نام
-
+                // 1. Get client token (critical first step)
+                const clientToken = await getClientToken();
+                
                 const userData = {
                     displayName: allInputs.displayName.value.trim(),
                     username: allInputs.username.value.trim().toLowerCase(),
@@ -309,48 +528,70 @@
                     gender: allInputs.gender.value,
                     password: allInputs.password.value,
                     bio: allInputs.bio.value.trim(),
-                    interests: allInputs.interests.value.trim(),
+                    interests: allInputs.interests.value.trim().split('،').map(s => s.trim()).filter(Boolean),
                     createdAt: new Date().toISOString(),
                     isOnline: false,
                     lastSeen: new Date().toISOString()
+                    // avatarUrl will be added later via PATCH
                 };
 
-                // 2. ثبت اطلاعات کاربر
-                const registerResponse = await fetch(`${PROXY_URL}?path=users/${userData.username}`, {
+                // 2. Register user data first
+                console.log("Registering user data...");
+                const registerResponse = await fetch(`${PROXY_BASE_URL}?path=users/${userData.username}`, {
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${clientToken}`,
-                        'X-User-Username': userData.username
+                        'Authorization': `Bearer ${clientToken}`
                     },
                     body: JSON.stringify(userData)
                 });
                 
-                const responseData = await registerResponse.json().catch(() => ({}));
                 if (!registerResponse.ok) {
-                    throw new Error(responseData.error || 'خطا در ثبت اطلاعات در سرور.');
+                    const errorData = await registerResponse.json().catch(() => ({}));
+                    throw new Error(errorData.error?.message || 'خطا در ثبت اطلاعات کاربر.');
+                }
+                console.log("User registration successful.");
+
+                // 3. If registration is successful, upload profile picture (if selected)
+                if (selectedFile) {
+                    const uploadResult = await uploadProfilePicture(selectedFile, userData.username, clientToken);
+                    console.log('Upload successful:', uploadResult);
+
+                    setUploadStatus('آپلود موفق بود!', 'success');
+                    
+                    // Set hidden input and update preview with final thumb URL
+                    allInputs.avatarUrl.value = uploadResult.data.url;
+                    document.getElementById('profile-preview').src = uploadResult.data.thumb_url;
+
+                    // 4. (Optional but recommended) Patch user data with avatar URLs
+                    await fetch(`${PROXY_BASE_URL}?path=users/${userData.username}`, {
+                        method: 'PATCH',
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'Authorization': `Bearer ${clientToken}`
+                        },
+                        body: JSON.stringify({
+                            avatarUrl: uploadResult.data.url,
+                            thumbUrl: uploadResult.data.thumb_url
+                        })
+                    });
+                    console.log("User profile patched with avatar URLs.");
                 }
                 
-                // 3. آپلود عکس پروفایل (در صورت وجود)
-                const profileFile = allInputs.profilePic.files[0];
-                if (profileFile) {
-                    await uploadProfilePicture(profileFile, userData.username, clientToken);
-                }
-                
-                // 4. ذخیره کاربر در localStorage و نمایش پیام موفقیت نهایی
+                // 5. Final success step
                 localStorage.setItem('currentUser', JSON.stringify({
                     username: userData.username,
                     displayName: userData.displayName
                 }));
                 
-                formStatus.textContent = 'ثبت‌نام موفق بود! در حال انتقال به صفحه اصلی...';
+                formStatus.textContent = 'ثبت‌نام موفق بود! در حال انتقال...';
                 formStatus.className = 'success';
                 formStatus.style.display = 'block';
                 
-                // 5. انتقال به صفحه بعد
                 setTimeout(() => { window.location.href = 'safe_asli.html'; }, 2000);
 
             } catch (error) {
+                console.error("Full registration error:", error);
                 formStatus.textContent = error.message;
                 formStatus.style.display = 'block';
                 formStatus.className = 'error';
