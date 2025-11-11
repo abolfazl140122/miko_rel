@@ -715,7 +715,7 @@
         let currentUser = null;
         let clientToken = null;
         let allUsers = {};
-        let allChannels = {}; 
+        let allChannels = {};
         let recentChats = [];
         let pollingIntervalId = null; 
         let currentSearchMode = 'accounts';
@@ -754,14 +754,13 @@
                 const [usersResponse, chatsResponse, channelsResponse] = await Promise.all([
                     fetchProxyData('users'),
                     fetchProxyData('pivi_chats'),
-                    fetchProxyData('channels') 
+                    fetchProxyData('channels')
                 ]);
 
                 if (usersResponse) {
                     allUsers = usersResponse;
                     if (allUsers[currentUser.username]) {
-                        // به‌روزرسانی اطلاعات کاربر فعلی با آخرین داده‌های سرور
-                        currentUser = { ...currentUser, ...allUsers[currentUser.username] };
+                        currentUser = allUsers[currentUser.username];
                     }
                 }
                 
@@ -799,7 +798,7 @@
                 }
             });
             if (!response.ok) {
-                 if (response.status === 404) return null; 
+                 if (response.status === 404) return null;
                  throw new Error(`خطا در واکشی اطلاعات از مسیر ${path}.`);
             }
             return response.json();
@@ -855,16 +854,15 @@
 
         // --- SECTION: HTML Template Generators ---
         function createChatItemHtml(partnerData, lastMessage, timestamp) {
-            // ✅ CHANGE: Check for Firebase image URL, otherwise use ui-avatars
-            const profilePicUrl = partnerData.profileImage || partnerData.imageUrl;
-            const avatarUrl = profilePicUrl 
-                ? profilePicUrl 
+            // *** MODIFIED: Use profilePicUrl if available, otherwise use default avatar ***
+            const avatarUrl = partnerData.profilePicUrl 
+                ? partnerData.profilePicUrl 
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=00A3FF&color=fff&size=100`;
-
+            
             const verifiedTickHtml = partnerData.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
             return `
                 <div class="chat-item" data-uid="${partnerData.username}">
-                    <div class="profile-picture"><img src="${avatarUrl}" alt="${partnerData.displayName}" loading="lazy"></div>
+                    <div class="profile-picture"><img src="${avatarUrl}" alt="${partnerData.displayName}"></div>
                     <div class="chat-details">
                         <h3>${partnerData.displayName || partnerData.username} ${verifiedTickHtml}</h3>
                         <p class="last-message">${lastMessage || 'هنوز پیامی ارسال نشده'}</p>
@@ -876,17 +874,16 @@
         }
 
         function createUserResultHtml(userData) {
-            // ✅ CHANGE: Check for Firebase image URL, otherwise use ui-avatars
-            const profilePicUrl = userData.profileImage || userData.imageUrl;
-            const avatarUrl = profilePicUrl
-                ? profilePicUrl
+            // *** MODIFIED: Use profilePicUrl if available, otherwise use default avatar ***
+            const avatarUrl = userData.profilePicUrl
+                ? userData.profilePicUrl
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
 
             const verifiedTickHtml = userData.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
             return `
                 <div class="search-result-item" data-uid="${userData.username}">
                     <div class="profile-picture">
-                        <img src="${avatarUrl}" alt="${userData.displayName}" loading="lazy">
+                        <img src="${avatarUrl}" alt="${userData.displayName}">
                         ${userData.isOnline ? '<div class="online-indicator"></div>' : ''}
                     </div>
                     <div class="chat-details">
@@ -901,7 +898,7 @@
             return `
                 <div class="search-result-item" data-channel-id="${channelData.channel_id}">
                     <div class="profile-picture">
-                        <img src="${avatarUrl}" alt="${channelData.channel_name}" loading="lazy">
+                        <img src="${avatarUrl}" alt="${channelData.channel_name}">
                     </div>
                     <div class="chat-details">
                         <h3>${channelData.channel_name}</h3>
@@ -976,12 +973,13 @@
         function showProfile() {
             if (!currentUser) return;
             
-            // ✅ CHANGE: Check for Firebase image URL, otherwise use ui-avatars
-            const profilePicUrl = currentUser.profileImage || currentUser.imageUrl;
-            profileImage.src = profilePicUrl 
-                ? profilePicUrl
+            // *** MODIFIED: Check for currentUser.profilePicUrl ***
+            const avatarUrl = currentUser.profilePicUrl 
+                ? currentUser.profilePicUrl 
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=0D1117&color=fff&size=150`;
-
+            
+            profileImage.src = avatarUrl;
+            
             const verifiedTickHtml = currentUser.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
             profileDisplayName.innerHTML = `${currentUser.displayName || currentUser.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${currentUser.username}`;
@@ -1015,9 +1013,10 @@
                 let needsUIRefresh = false;
                 if (newUsers && JSON.stringify(allUsers) !== JSON.stringify(newUsers)) {
                     allUsers = newUsers;
-                    // اگر اطلاعات کاربر فعلی تغییر کرده باشد (مثلا عکس پروفایل)، آن را به‌روزرسانی کن
-                    if (allUsers[currentUser.username]) {
-                        currentUser = { ...currentUser, ...allUsers[currentUser.username] };
+                    // *** MODIFIED: Update currentUser from new data and refresh profile if open ***
+                    if (currentUser && allUsers[currentUser.username]) {
+                        currentUser = allUsers[currentUser.username];
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     }
                     needsUIRefresh = true;
                 }
@@ -1036,6 +1035,12 @@
                 if (needsUIRefresh && searchInput.value.trim() === '') {
                     console.log('Data changed, re-rendering chat list.');
                     renderChatList();
+                }
+
+                // *** MODIFIED: Refresh profile card if it's open and data has changed ***
+                if (needsUIRefresh && profileOverlay.classList.contains('active')) {
+                    console.log('User data changed, refreshing profile card.');
+                    showProfile();
                 }
 
             } catch (error) {
