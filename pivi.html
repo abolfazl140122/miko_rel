@@ -526,6 +526,7 @@
         .profile-card img {
             width: 100px; height: 100px; border-radius: 50%;
             border: 3px solid var(--primary-color); margin-bottom: 15px;
+            object-fit: cover;
         }
         .profile-card h3 { font-size: 1.5em; margin-bottom: 5px; }
         .profile-card p { font-size: 1em; color: var(--text-secondary); }
@@ -593,7 +594,7 @@
     <div class="app-container" id="app-container">
         <header class="chat-header">
              <button class="back-btn" aria-label="بازگشت" onclick="history.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </button>
             <div class="partner-info" id="partner-info-header">
                 <img id="partner-avatar" src="" alt="آواتار">
@@ -603,7 +604,7 @@
                 </div>
             </div>
             <button class="options-btn" aria-label="گزینه‌ها" id="options-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
             </button>
         </header>
         
@@ -1112,9 +1113,23 @@
             return displayName;
         }
         
+        /**
+         *  تابع جدید برای دریافت URL آواتار بر اساس منطق خواسته شده
+         */
+        function getPartnerAvatarUrl(size = 100) {
+            // شرط: اگر فیلد profilePicUrl وجود داشت و خالی نبود
+            if (chatPartner && chatPartner.profilePicUrl) {
+                return chatPartner.profilePicUrl;
+            }
+            // در غیر این صورت، از آواتار پیش‌فرض استفاده کن
+            const name = encodeURIComponent(chatPartner.displayName || chatPartner.username);
+            return `https://ui-avatars.com/api/?name=${name}&background=0D1117&color=fff&size=${size}`;
+        }
+
         function setupUI() {
             partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
-            partnerAvatarEl.src = `https://i.pravatar.cc/80?u=${chatPartner.username}`;
+            // <<< تغییر ۱: استفاده از تابع جدید برای تنظیم عکس پروفایل هدر >>>
+            partnerAvatarEl.src = getPartnerAvatarUrl(80);
             updateStatusUI(chatPartner.isOnline, chatPartner.lastSeen);
         }
 
@@ -1209,9 +1224,8 @@
             try {
                 const partnerData = await apiRequest(`users/${chatPartner.username}`, 'GET');
                 if (partnerData) {
-                    chatPartner.isOnline = partnerData.isOnline;
-                    chatPartner.lastSeen = partnerData.lastSeen;
-                    chatPartner.verified = partnerData.verified;
+                    // به‌روزرسانی کل آبجکت کاربر برای دسترسی به فیلد جدید در همه جا
+                    chatPartner = { ...chatPartner, ...partnerData };
                     updateStatusUI(partnerData.isOnline, partnerData.lastSeen);
                     partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
                 }
@@ -1831,7 +1845,8 @@
         // --- بخش ۱۱: توابع کمکی برای مودال‌ها و دیالوگ‌ها ---
         function showModal(overlayElement) {
             if(overlayElement.id === 'profile-overlay' && chatPartner){
-                document.getElementById('profile-card-avatar').src = `https://i.pravatar.cc/120?u=${chatPartner.username}`;
+                // <<< تغییر ۲: استفاده از تابع جدید برای تنظیم عکس پروفایل مودال >>>
+                document.getElementById('profile-card-avatar').src = getPartnerAvatarUrl(120);
                 document.getElementById('profile-card-name').innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
                 document.getElementById('profile-card-username').textContent = `@${chatPartner.username}`;
                 document.getElementById('profile-card-uid').textContent = chatPartner.username;
