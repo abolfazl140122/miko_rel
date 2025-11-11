@@ -1,38 +1,30 @@
 <!DOCTYPE html>
 <!-- 
 ====================================================================================================
-    USAGE & CONFIGURATION GUIDE
+    USAGE & CONFIGURATION GUIDE (v2.0 - Updated)
 ====================================================================================================
 
-    این فایل برای مدیریت ثبت‌نام و آپلود تصویر پروفایل اصلاح شده است.
+    این فایل برای مدیریت ثبت‌نام، آپلود تصویر پروفایل و ذخیره‌سازی کامل اطلاعات کاربر اصلاح شده است.
 
     1.  تنظیمات اصلی (Constants):
         -   در تگ <script>، مقادیر زیر را در صورت نیاز تغییر دهید:
-            -   `PROXY_BASE_URL`: آدرس پایه پراکسی شما (مثال: 'https://miko.freehost.io').
-            -   `SHARED_SECRET`: کلید مخفی مشترک برای دریافت توکن (مثال: 'miko1234').
-            -   `MAX_FILE_SIZE_BYTES`: حداکثر حجم مجاز فایل قبل از تغییر اندازه (پیش‌فرض: 5MB).
-            -   `RESIZE_MAX_DIMENSION`: حداکثر طول یا عرض تصویر پس از تغییر اندازه (پیش‌فرض: 1024px).
+            -   `PROXY_BASE_URL`: آدرس پایه پراکسی شما.
+            -   `SHARED_SECRET`: کلید مخفی مشترک برای دریافت توکن.
 
-    2.  نحوه تست (Testing Steps):
-        -   تست A (ثبت‌نام و آپلود موفق):
-            1. فرم را با اطلاعات معتبر پر کنید.
-            2. یک تصویر انتخاب کنید و منتظر بمانید تا پیام "آپلود موفق!" نمایش داده شود.
+    2.  تغییرات کلیدی در این نسخه:
+        -   **ذخیره‌سازی کامل اطلاعات:** پس از ثبت‌نام موفق، کل آبجکت اطلاعات کاربر (شامل نام، نام کاربری، موبایل، سن، جنسیت، بیو، علاقه‌مندی‌ها و URL آواتار) در `localStorage` تحت کلید `currentUser` ذخیره می‌شود.
+        -   **انتقال به صفحه اصلی:** کاربر پس از ثبت‌نام موفقیت‌آمیز به صورت خودکار به صفحه `safe_asli.html` منتقل می‌شود.
+        -   **سازگاری با صفحه اصلی:** صفحه `safe_asli.html` اکنون می‌تواند با خواندن `localStorage.getItem('currentUser')` به تمام اطلاعات کاربر دسترسی داشته باشد و پروفایل او را به طور کامل نمایش دهد.
+
+    3.  نحوه تست (Testing Steps):
+        -   تست A (ثبت‌نام و ذخیره‌سازی کامل):
+            1. تمام فیلدهای فرم را با اطلاعات معتبر پر کنید.
+            2. یک تصویر پروفایل انتخاب کنید و منتظر بمانید تا پیام "آپلود موفق!" نمایش داده شود.
             3. روی دکمه "ثبت‌نام" کلیک کنید.
-            4. در تب Network مرورگر، درخواست PUT به `.../firebase_proxy.php?path=users/{username}` با status 200 را بررسی کنید.
-            5. در پایگاه داده Firebase خود، بررسی کنید که یک رکورد جدید با تمام اطلاعات (شامل avatarUrl) ایجاد شده باشد.
-
-        -   تست B (تغییر اندازه خودکار):
-            1. یک تصویر بزرگ (بیشتر از 5MB) انتخاب کنید.
-            2. در کنسول باید لاگ "Image is too large. Resizing..." را مشاهده کنید.
-            3. فرآیند آپلود و سپس ثبت‌نام باید با موفقیت انجام شود.
-
-        -   تست C (دریافت توکن خودکار):
-            1. در تب Application مرورگر، `localStorage` را پاک کنید تا `client_token` حذف شود.
-            2. ابتدا یک تصویر انتخاب کنید (باید توکن گرفته شود) و سپس فرم را ثبت کنید.
-            3. در تب Network، باید ابتدا یک درخواست به `.../firebase_proxy.php?auth=token` و سپس درخواست آپلود و در نهایت درخواست PUT ثبت‌نام را ببینید.
-
-    3.  نکات امنیتی:
-        -   لاگ‌های مربوط به توکن در کنسول برای دیباگ است. قبل از انتشار نسخه نهایی، آن‌ها را حذف کنید.
+            4. در تب Network مرورگر، درخواست `PUT` به `.../firebase_proxy.php?path=users/{username}` با status 200 را بررسی کنید. بدنه (payload) این درخواست باید شامل تمام اطلاعات فرم باشد.
+            5. در پایگاه داده Firebase، بررسی کنید که یک رکورد جدید با تمام اطلاعات (شامل displayName, mobile, age, bio, avatarUrl و غیره) ایجاد شده باشد.
+            6. در تب Application مرورگر، زیر بخش Local Storage، مقدار کلید `currentUser` را بررسی کنید. این مقدار باید یک رشته JSON حاوی تمام اطلاعات ثبت‌شده کاربر باشد.
+            7. شما باید به صورت خودکار به `safe_asli.html` منتقل شوید.
 
 ====================================================================================================
 -->
@@ -167,10 +159,8 @@
                 </div>
             </label>
             
-            <!-- فیلد مخفی برای نگهداری URL آواتار آپلود شده -->
             <input type="hidden" id="avatarUrl" name="avatarUrl" value="">
 
-            <!-- سایر فیلدهای فرم (بدون هیچ تغییری) -->
             <div class="input-group"><label for="displayName">نام نمایشی</label><div class="input-wrapper"><input type="text" id="displayName" placeholder="نامی که دیگران می‌بینند" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg></div><div class="error-message" id="displayName-error"></div></div>
             <div class="input-group"><label for="username">نام کاربری (انگلیسی)</label><div class="input-wrapper"><input type="text" id="username" placeholder="فقط حروف انگلیسی، اعداد و _" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M12 18h.01"></path><path d="M16 12h-4"></path></svg></div><div class="error-message" id="username-error"></div></div>
             <div class="input-group"><label for="mobile">شماره موبایل</label><div class="input-wrapper"><input type="tel" id="mobile" placeholder="مثال: 09123456789" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div><div class="error-message" id="mobile-error"></div></div>
@@ -248,7 +238,7 @@
             setUploadStatus(`در حال آپلود (${Math.round(percentage)}%)...`, 'uploading');
         }
 
-        // --- Validation Logic (Unchanged) ---
+        // --- Validation Logic ---
         function validateField(fieldId) {
             const input = allInputs[fieldId];
             if (!input) return true; 
@@ -308,6 +298,7 @@
             reader.onload = (event) => { profilePreview.src = event.target.result; };
             reader.readAsDataURL(file);
 
+            // نام کاربری برای ساخت مسیر آپلود در سرور ضروری است، بنابراین باید قبل از آپلود وارد شود
             if (!allInputs.username.value.trim()) {
                 setUploadStatus('لطفاً ابتدا نام کاربری را وارد کنید.', 'error');
                 showError('username', 'نام کاربری برای آپلود تصویر الزامی است.');
@@ -466,6 +457,7 @@
         /**
          * Main form submission logic.
          * Collects ALL user data and sends it to Firebase via proxy.
+         * Stores the complete user object in localStorage.
          */
         async function submitForm() {
             submitBtn.disabled = true;
@@ -473,28 +465,27 @@
             formStatus.style.display = 'none';
 
             try {
-                // Get token for registration request
                 const token = await getClientToken(); 
                 
-                // Collect all data from the form into a single object
+                // جمع‌آوری تمام داده‌های فرم در یک آبجکت واحد
                 const userData = {
                     displayName: allInputs.displayName.value.trim(),
                     username: allInputs.username.value.trim().toLowerCase(),
-                    password: allInputs.password.value, // Note: Password should be hashed on the server-side.
+                    password: allInputs.password.value, // نکته: رمز عبور باید در سمت سرور هش شود
                     mobile: allInputs.mobile.value.trim(),
                     age: parseInt(allInputs.age.value),
                     gender: allInputs.gender.value,
                     bio: allInputs.bio.value.trim(),
                     interests: allInputs.interests.value.trim().split(/[,،]/).map(i => i.trim()).filter(Boolean),
-                    avatarUrl: allInputs.avatarUrl.value, // Get URL from the hidden input populated by the uploader
+                    avatarUrl: allInputs.avatarUrl.value, // دریافت URL از فیلد مخفی
                     createdAt: new Date().toISOString(),
                     isOnline: false,
                     lastSeen: new Date().toISOString()
                 };
 
-                // Use PUT method to create or update the user data
+                // استفاده از متد PUT برای ایجاد یا به‌روزرسانی داده‌های کاربر در Firebase
                 const registerResponse = await fetch(`${PROXY_BASE_URL}/firebase_proxy.php?path=users/${userData.username}`, {
-                    method: 'PUT', // <<< CORRECTED: Using PUT to create/update the user record.
+                    method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json', 
                         'Authorization': `Bearer ${token}`,
@@ -508,17 +499,15 @@
                     throw new Error(responseData.error || 'خطا در ثبت اطلاعات در سرور.');
                 }
                 
-                // On success, save current user to local storage for the next session
-                localStorage.setItem('currentUser', JSON.stringify({
-                    username: userData.username,
-                    displayName: userData.displayName
-                }));
+                // <<< ===== تغییر کلیدی در اینجا ===== >>>
+                // ذخیره کردن *کل آبجکت کاربر* در localStorage برای استفاده در صفحات دیگر مانند safe_asli.html
+                localStorage.setItem('currentUser', JSON.stringify(userData));
                 
-                // Show success message and redirect
                 formStatus.textContent = 'ثبت‌نام موفق بود! در حال انتقال به صفحه اصلی...';
                 formStatus.className = 'success';
                 formStatus.style.display = 'block';
                 
+                // انتقال به صفحه اصلی پس از 2 ثانیه
                 setTimeout(() => { window.location.href = 'safe_asli.html'; }, 2000);
 
             } catch (error) {
