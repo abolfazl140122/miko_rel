@@ -1105,25 +1105,22 @@
             mainContent.scrollTop = 0; // به دلیل flex-direction: column-reverse
         }
 
-        // *** CHANGE START ***
-        function createVerifiedNameHTML(displayName, isVerified, size = 20) {
+        function createVerifiedNameHTML(displayName, isVerified) {
             if (isVerified) {
-                // افزایش فاصله برای آیکون‌های بزرگتر
-                const marginRight = size > 24 ? 8 : 6;
-                const badgeHTML = `<img src="https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png" style="width: ${size}px; height: ${size}px; margin-right: ${marginRight}px; vertical-align: middle;">`;
-                // اضافه کردن justify-content برای تراز بهتر در مرکز
-                return `<span style="display: inline-flex; align-items: center; justify-content: center;">${displayName}${badgeHTML}</span>`;
+                const badgeHTML = `<img src="https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png" style="width: 20px; height: 20px; margin-right: 6px; vertical-align: middle;">`;
+                return `<span style="display: inline-flex; align-items: center;">${displayName}${badgeHTML}</span>`;
             }
             return displayName;
         }
-        // *** CHANGE END ***
         
         function setupUI() {
-            partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified); // Default size is 20px
+            partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
+            // *** CHANGE START ***
             const partnerAvatarUrl = chatPartner.profilePicUrl
                 ? chatPartner.profilePicUrl
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=0095FF&color=fff&size=80`;
             partnerAvatarEl.src = partnerAvatarUrl;
+            // *** CHANGE END ***
             updateStatusUI(chatPartner.isOnline, chatPartner.lastSeen);
         }
 
@@ -1221,9 +1218,10 @@
                     chatPartner.isOnline = partnerData.isOnline;
                     chatPartner.lastSeen = partnerData.lastSeen;
                     chatPartner.verified = partnerData.verified;
-                    chatPartner.profilePicUrl = partnerData.profilePicUrl; 
+                    chatPartner.profilePicUrl = partnerData.profilePicUrl; // ** NEW: Update profile pic URL on poll
                     updateStatusUI(partnerData.isOnline, partnerData.lastSeen);
                     partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
+                    // ** NEW: Update avatar in header if it changed
                     const newAvatarUrl = partnerData.profilePicUrl ? partnerData.profilePicUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=0095FF&color=fff&size=80`;
                     if (partnerAvatarEl.src !== newAvatarUrl) {
                         partnerAvatarEl.src = newAvatarUrl;
@@ -1845,14 +1843,13 @@
         // --- بخش ۱۱: توابع کمکی برای مودال‌ها و دیالوگ‌ها ---
         function showModal(overlayElement) {
             if(overlayElement.id === 'profile-overlay' && chatPartner){
+                // *** CHANGE START ***
                 const profileCardAvatarUrl = chatPartner.profilePicUrl
                     ? chatPartner.profilePicUrl
                     : `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=2C2C2E&color=fff&size=120`;
                 document.getElementById('profile-card-avatar').src = profileCardAvatarUrl;
-                // *** CHANGE START ***
-                // از سایز بزرگتر برای تیک در پروفایل استفاده می‌شود
-                document.getElementById('profile-card-name').innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified, 28);
                 // *** CHANGE END ***
+                document.getElementById('profile-card-name').innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
                 document.getElementById('profile-card-username').textContent = `@${chatPartner.username}`;
                 document.getElementById('profile-card-uid').textContent = chatPartner.username;
                 const statusEl = document.getElementById('profile-card-status');
