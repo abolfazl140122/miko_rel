@@ -19,6 +19,7 @@
             --online-indicator: #00ff88; /* Neon green */
             --notification-badge: #FF4D4D; /* Alert Red */
             --success-color: #28a745;
+            --error-color: #dc3545;
             --shadow-light: rgba(45, 50, 56, 0.1);
             --shadow-dark: rgba(0, 0, 0, 0.6);
             --profile-card-bg: #1B212A; /* Slightly lighter for the profile card */
@@ -514,7 +515,7 @@
         #logout-btn:hover { background-color: rgba(255, 77, 77, 0.1); transform: translateX(3px); }
 
         /* ==============================================
-           --- NEW: Edit Profile Modal STYLES --- 
+           --- Edit Profile Modal STYLES --- 
            ==============================================
         */
         .edit-profile-modal {
@@ -627,6 +628,11 @@
             color: var(--text-secondary);
             opacity: 0.7;
         }
+        .form-group input:disabled {
+            background-color: var(--secondary-hover);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
         .modal-actions {
             display: flex;
             justify-content: space-between;
@@ -653,6 +659,13 @@
             background-color: #00baff;
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 163, 255, 0.4);
+        }
+        #save-edit-btn:disabled {
+            background-color: var(--secondary-hover);
+            cursor: wait;
+            opacity: 0.7;
+            transform: none;
+            box-shadow: none;
         }
         #cancel-edit-btn {
             background-color: var(--secondary-hover);
@@ -836,7 +849,7 @@
         </div>
     </div>
 
-    <!-- NEW: Edit Profile Modal HTML Structure -->
+    <!-- Edit Profile Modal HTML Structure -->
     <div class="edit-profile-modal" id="edit-profile-modal">
         <div class="modal-content">
             <h2>ویرایش پروفایل</h2>
@@ -856,7 +869,7 @@
 
                 <div class="form-group">
                     <label for="edit-username">آیدی (Username)</label>
-                    <input type="text" id="edit-username" placeholder="آیدی خود را وارد کنید" required pattern="^[a-zA-Z0-9_]{4,20}$" title="آیدی باید بین ۴ تا ۲۰ کاراکتر و شامل حروف انگلیسی، اعداد و _ باشد.">
+                    <input type="text" id="edit-username" placeholder="آیدی شما" title="آیدی قابل تغییر نیست" readonly disabled>
                 </div>
 
                 <div class="modal-actions">
@@ -892,7 +905,7 @@
         const fabMainBtn = document.getElementById('fab-main-btn');
         const newPrivateChatBtn = document.getElementById('fab-new-private-chat');
         
-        // NEW: Edit Profile Modal Elements
+        // Edit Profile Modal Elements
         const editProfileBtn = document.getElementById('edit-profile-btn');
         const editProfileModal = document.getElementById('edit-profile-modal');
         const editProfileForm = document.getElementById('edit-profile-form');
@@ -935,7 +948,7 @@
                 window.location.href = 'https://abolfazl140122.github.io/miko_rel/Channel.html';
             });
             
-            // NEW: Edit Profile Event Listeners
+            // Edit Profile Event Listeners
             editProfileBtn.addEventListener('click', showEditProfileModal);
             cancelEditBtn.addEventListener('click', hideEditProfileModal);
             editProfileModal.addEventListener('click', (e) => {
@@ -968,6 +981,11 @@
                         const serverUser = allUsers[currentUser.username];
                         currentUser = {...currentUser, ...serverUser};
                         localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    } else {
+                        // This case can happen if user was deleted on server
+                        showErrorMessage('کاربر فعلی در سرور یافت نشد. لطفاً دوباره وارد شوید.');
+                        handleLogoutConfirmed();
+                        return;
                     }
                 }
                 
@@ -989,11 +1007,12 @@
             }
         }
 
-        // --- SECTION: Data Fetching ---
+        // --- SECTION: Data Fetching & Updating ---
         async function refreshClientToken() {
             const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
             if (!response.ok) throw new Error('امکان دریافت توکن امنیتی وجود ندارد.');
-            clientToken = (await response.json()).token;
+            const data = await response.json();
+            clientToken = data.token;
         }
 
         async function fetchProxyData(path) {
@@ -1006,7 +1025,26 @@
             });
             if (!response.ok) {
                  if (response.status === 404) return null;
-                 throw new Error(`خطا در واکشی اطلاعات از مسیر ${path}.`);
+                 const errorData = await response.json().catch(() => ({error: 'پاسخ نامعتبر از سرور'}));
+                 throw new Error(errorData.error || `خطا در واکشی اطلاعات از مسیر ${path}.`);
+            }
+            return response.json();
+        }
+
+        async function updateUserDataOnServer(path, data) {
+            if (!clientToken || !currentUser) throw new Error('کاربر احراز هویت نشده است.');
+            const response = await fetch(`${PROXY_URL}?path=${path}`, {
+                method: 'PATCH', // Use PATCH to update specific fields
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${clientToken}`,
+                    'X-User-Username': currentUser.username
+                },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({error: 'پاسخ نامعتبر از سرور'}));
+                throw new Error(errorData.error || `خطا در به‌روزرسانی اطلاعات. کد وضعیت: ${response.status}`);
             }
             return response.json();
         }
@@ -1203,7 +1241,7 @@
             fabContainer.classList.toggle('active');
         }
 
-        // --- NEW: Edit Profile Modal Functions ---
+        // --- Edit Profile Modal Functions ---
         function showEditProfileModal() {
             if (!currentUser) return;
             
@@ -1225,6 +1263,11 @@
         function handleImagePreview(event) {
             const file = event.target.files[0];
             if (file) {
+                // Limit file size to avoid overly large data URLs
+                if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                    showToast('حجم عکس پروفایل باید کمتر از ۲ مگابایت باشد.', 'error');
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     editPfpPreview.src = e.target.result;
@@ -1233,47 +1276,69 @@
             }
         }
 
-        function handleProfileUpdate(event) {
+        async function handleProfileUpdate(event) {
             event.preventDefault();
             if (!editProfileForm.checkValidity()) {
                 editProfileForm.reportValidity();
                 return;
             }
 
-            // SIMULATED SAVE: In a real app, this would be an API call.
-            // Here, we just update the local data.
-            const newDisplayName = editDisplayNameInput.value.trim();
-            const newUsername = editUsernameInput.value.trim();
-            const newProfilePicUrl = editPfpPreview.src;
+            const saveBtn = document.getElementById('save-edit-btn');
+            const originalBtnText = saveBtn.textContent;
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'در حال ذخیره...';
 
-            // Basic check for changes
-            if (newUsername !== currentUser.username) {
-                // In a real app, you'd need to check if the new username is available.
-                // For this simulation, we'll just show a warning.
-                console.warn("Username changed. In a real app, this requires a backend check for uniqueness.");
+            try {
+                const newDisplayName = editDisplayNameInput.value.trim();
+                const newProfilePicUrl = editPfpPreview.src;
+
+                // Create a payload with only the fields that have changed
+                const payload = {};
+                if (newDisplayName !== (currentUser.displayName || '')) {
+                    payload.displayName = newDisplayName;
+                }
+                // Check if the profile picture source is a data URL (newly uploaded)
+                if (newProfilePicUrl.startsWith('data:image') && newProfilePicUrl !== currentUser.profilePicUrl) {
+                    payload.profilePicUrl = newProfilePicUrl;
+                }
+                
+                // If there's nothing to update, just close the modal
+                if (Object.keys(payload).length === 0) {
+                     hideEditProfileModal();
+                     return;
+                }
+
+                // Send update to the server
+                const path = `users/${currentUser.username}`;
+                await updateUserDataOnServer(path, payload);
+
+                // Update local state on success
+                if (payload.displayName) currentUser.displayName = payload.displayName;
+                if (payload.profilePicUrl) currentUser.profilePicUrl = payload.profilePicUrl;
+                
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                // Update UI
+                showProfile();
+                hideEditProfileModal();
+                showToast('پروفایل با موفقیت به‌روزرسانی شد.', 'success');
+
+            } catch (error) {
+                console.error('Profile Update Failed:', error);
+                showToast(`خطا در ذخیره تغییرات: ${error.message}`, 'error');
+            } finally {
+                // Restore button state
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalBtnText;
             }
-
-            currentUser.displayName = newDisplayName;
-            currentUser.username = newUsername; // Be careful with this in a real app.
-            currentUser.profilePicUrl = newProfilePicUrl;
-
-            // Save to localStorage
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-            // Update the main profile view
-            showProfile();
-
-            // Close the modal
-            hideEditProfileModal();
-            
-            // Show success feedback
-            showToast('پروفایل با موفقیت به‌روزرسانی شد.');
         }
-
 
         // --- SECTION: Real-time Updates ---
         async function checkForUpdates() {
             try {
+                // Before fetching, ensure we have a valid token
+                if (!clientToken) await refreshClientToken();
+
                 const [newUsers, newChats, newChannels] = await Promise.all([
                     fetchProxyData('users'),
                     fetchProxyData('pivi_chats'),
@@ -1284,10 +1349,15 @@
                 if (newUsers && JSON.stringify(allUsers) !== JSON.stringify(newUsers)) {
                     allUsers = newUsers;
                     if (currentUser && allUsers[currentUser.username]) {
-                        // Merge server data with local data, prioritizing local changes
+                        // Update local user object with latest data from server
+                        // but keep the local version of displayName and profilePicUrl if they are different
+                        // to prevent overwriting a just-submitted change before it appears on the server.
                         const serverUser = allUsers[currentUser.username];
-                        currentUser = {...serverUser, ...currentUser};
-                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        const mergedUser = { ...serverUser, ...currentUser };
+                        if (JSON.stringify(currentUser) !== JSON.stringify(mergedUser)) {
+                            currentUser = mergedUser;
+                            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        }
                     }
                     needsUIRefresh = true;
                 }
@@ -1312,6 +1382,11 @@
 
             } catch (error) {
                 console.error("Polling Error:", error.message);
+                // Stop polling on auth errors to prevent spamming the server
+                if (error.message.includes('Token') || error.message.includes('احراز هویت')) {
+                    if(pollingIntervalId) clearInterval(pollingIntervalId);
+                    console.warn("Polling stopped due to authentication error.");
+                }
             }
         }
 
@@ -1353,16 +1428,16 @@
             document.body.appendChild(modal);
         }
         
-        // NEW: Toast Notification Function
-        function showToast(message, duration = 3000) {
+        function showToast(message, type = 'success', duration = 4000) {
             const toast = document.createElement('div');
             toast.textContent = message;
+            const bgColor = type === 'error' ? 'var(--error-color)' : 'var(--success-color)';
             toast.style.cssText = `
                 position: fixed;
                 bottom: 80px;
                 left: 50%;
                 transform: translateX(-50%) translateY(50px);
-                background-color: var(--success-color);
+                background-color: ${bgColor};
                 color: white;
                 padding: 12px 25px;
                 border-radius: 25px;
