@@ -14,7 +14,7 @@
             --background-color: #121212;
             --primary-color: #0095FF;
             --secondary-color: #1E1E1E;
-            --tertiary-color: #2C2C2E;
+            --tertiary-color: #2C2C2E; /* رنگ تیره‌تر برای مودال‌ها */
             --message-sent-bg: #1E88E5;
             --message-received-bg: #2C2C2C;
             --border-color: #30363d;
@@ -77,7 +77,7 @@
         /* --- ساختار اصلی اپلیکیشن --- */
         .app-container {
             width: 100%; max-width: 420px;
-            height: 100dvh;
+            height: 100dvh; /* ارتفاع داینامیک برای موبایل */
             margin: 0 auto; background-color: transparent;
             display: flex; flex-direction: column;
             opacity: 0;
@@ -106,7 +106,7 @@
         #pinned-message-bar {
             padding: 10px 15px; background-color: var(--secondary-color);
             border-bottom: 1px solid var(--border-color);
-            display: none;
+            display: none; /* مخفی به صورت پیش‌فرض */
             align-items: center; cursor: pointer;
             flex-shrink: 0; animation: slide-down 0.3s ease;
         }
@@ -123,11 +123,11 @@
         /* --- بخش اصلی نمایش پیام‌ها --- */
         main {
             flex-grow: 1; overflow-y: auto; padding: 15px;
-            display: flex; flex-direction: column-reverse;
+            display: flex; flex-direction: column-reverse; /* Important */
         }
         #messages-area { display: flex; flex-direction: column; gap: 12px; }
 
-        /* --- استایل حباب‌های پیام --- */
+        /* --- استایل حباب‌های پیام (بهبود یافته) --- */
         .message {
             max-width: 75%; padding: 10px 15px; border-radius: 20px;
             word-wrap: break-word; position: relative;
@@ -151,9 +151,9 @@
             border-radius: 15px;
             overflow: hidden;
             max-width: 100%;
-            background-color: var(--secondary-color);
-            position: relative;
-            min-height: 150px;
+            background-color: var(--secondary-color); /* Placeholder color */
+            position: relative; /* NEW: for overlay */
+            min-height: 150px; /* Placeholder height */
         }
         .message .media-container img, .message .media-container video {
             display: block;
@@ -161,7 +161,9 @@
             height: auto;
             cursor: pointer;
         }
-        .message.has-media .media-container video { width: 100%; }
+        .message.has-media .media-container video {
+            width: 100%; /* Ensure video takes full width of container */
+        }
 
         .message::after {
             content: ''; position: absolute; bottom: 0;
@@ -178,7 +180,7 @@
             margin-top: 5px; text-align: left;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: flex-end; /* NEW: Align items to the end */
         }
         .message.has-media .timestamp {
             position: absolute;
@@ -188,7 +190,7 @@
             padding: 2px 6px;
             border-radius: 10px;
             color: white;
-            z-index: 1;
+            z-index: 1; /* Ensure it's above the media */
         }
 
         .message .edited-indicator { font-size: 0.7em; color: rgba(255, 255, 255, 0.6); margin-right: 5px; font-style: italic;}
@@ -213,86 +215,203 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        /* --- استایل پلیر پیام صوتی --- */
+        /* --- استایل جدید برای پلیر پیام صوتی --- */
         .voice-player {
-            display: flex; align-items: center; gap: 10px; min-width: 220px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 220px;
         }
         .voice-player .play-pause-btn {
-            background: var(--primary-color); border: none; border-radius: 50%;
-            width: 38px; height: 38px; cursor: pointer;
-            display: flex; justify-content: center; align-items: center;
-            color: white; flex-shrink: 0; transition: background-color 0.2s;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            flex-shrink: 0;
+            transition: background-color 0.2s;
         }
         .voice-player .play-pause-btn:hover { background-color: #007acc; }
         .voice-player .progress-container {
-            flex-grow: 1; height: 30px; cursor: pointer; display: flex; align-items: center;
+            flex-grow: 1;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
         }
         .voice-player .waveform {
-            width: 100%; height: 100%;
-            background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.2)) 0 50% / 100% 1px;
-            background-repeat: no-repeat; position: relative; overflow: hidden;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.2)) 0 50% / 100% 1px,
+                linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.2)) 0 50% / 100% 1px;
+            background-repeat: no-repeat;
+            position: relative;
+            overflow: hidden;
             -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30'%3E%3Cpath d='M0 15 Q 2.5 25, 5 15 T 10 15 Q 12.5 5, 15 15 T 20 15 Q 22.5 28, 25 15 T 30 15 Q 32.5 10, 35 15 T 40 15 Q 42.5 22, 45 15 T 50 15 Q 52.5 8, 55 15 T 60 15 Q 62.5 26, 65 15 T 70 15 Q 72.5 12, 75 15 T 80 15 Q 82.5 29, 85 15 T 90 15 Q 92.5 5, 95 15 T 100 15' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E");
             mask-repeat: repeat-x;
         }
         .voice-player .progress-bar {
-            background-color: var(--primary-color); height: 100%; width: 0%;
+            background-color: var(--primary-color);
+            height: 100%;
+            width: 0%; /* Updated by JS */
         }
         .voice-player .duration {
-            font-size: 0.75em; color: rgba(255, 255, 255, 0.7); min-width: 35px; text-align: center;
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 35px;
+            text-align: center;
         }
 
-        /* --- Media Loader --- */
+        /* ===== START: NEW MEDIA LOADER STYLES ===== */
         .media-loader-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px);
-            display: flex; justify-content: center; align-items: center; flex-direction: column;
-            border-radius: 15px; cursor: pointer; z-index: 2;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border-radius: 15px; /* Match media-container */
+            cursor: pointer;
+            z-index: 2;
             transition: opacity 0.3s ease, visibility 0.3s;
         }
-        .media-loader-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .progress-circle { width: 50px; height: 50px; position: relative; }
-        .progress-circle svg { transform: rotate(-90deg); }
-        .progress-circle circle { fill: none; stroke-width: 4; }
-        .progress-circle .bg { stroke: rgba(255, 255, 255, 0.2); }
-        .progress-circle .progress { stroke: var(--primary-color); stroke-linecap: round; transition: stroke-dashoffset 0.1s linear; }
-        .progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 500; font-size: 0.8em; }
-        .download-icon { color: white; width: 24px; height: 24px; }
-        .cancel-download-btn {
-            position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6);
-            border: none; border-radius: 50%; color: white; cursor: pointer;
-            width: 28px; height: 28px; font-size: 18px; line-height: 28px;
-            display: flex; justify-content: center; align-items: center; z-index: 3;
+        .media-loader-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .progress-circle {
+            width: 50px; height: 50px;
+            position: relative;
+        }
+
+        .progress-circle svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-circle circle {
+            fill: none;
+            stroke-width: 4;
+        }
+
+        .progress-circle .bg {
+            stroke: rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-circle .progress {
+            stroke: var(--primary-color);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 500;
+            font-size: 0.8em;
         }
         
-        /* --- لودر ارسال --- */
+        .download-icon {
+            color: white;
+            width: 24px;
+            height: 24px;
+        }
+
+        .cancel-download-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px; /* For RTL */
+            background: rgba(0,0,0,0.6);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            font-size: 18px;
+            line-height: 28px;
+            text-align: center;
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* ===== END: NEW MEDIA LOADER STYLES ===== */
+        
+        /* --- استایل لودر ارسال --- */
         .sending-indicator {
-            display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px;
+            display: flex;
+            flex-direction: column; /* For progress bar */
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
         }
         .sending-indicator .spinner {
-            width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-        .sending-indicator span { font-size: 0.8em; color: rgba(255,255,255,0.7); }
+        .sending-indicator span {
+             font-size: 0.8em;
+             color: rgba(255,255,255,0.7);
+        }
         .sending-indicator progress {
-            width: 80%; height: 4px; -webkit-appearance: none; appearance: none;
+            width: 80%;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
         }
-        .sending-indicator progress::-webkit-progress-bar { background-color: var(--border-color); border-radius: 2px; }
-        .sending-indicator progress::-webkit-progress-value { background-color: var(--primary-color); border-radius: 2px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .sending-indicator progress::-webkit-progress-bar {
+            background-color: var(--border-color);
+            border-radius: 2px;
+        }
+        .sending-indicator progress::-webkit-progress-value {
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
         
         /* --- فرم ورودی پیام --- */
         #message-form-wrapper { flex-shrink: 0; position: relative; }
         
         #reply-preview-bar {
             padding: 10px 15px; background-color: var(--secondary-color);
-            border-top: 1px solid var(--border-color); display: none;
+            border-top: 1px solid var(--border-color);
+            display: none; /* مخفی به صورت پیش‌فرض */
             align-items: center; animation: slide-up 0.3s ease;
         }
         #reply-preview-bar .reply-icon { color: var(--primary-color); margin-left: 10px; }
-        #reply-preview-bar .reply-content { flex-grow: 1; overflow: hidden; }
-        #reply-preview-bar .reply-to-name { font-size: 0.9em; font-weight: bold; color: var(--primary-color); }
-        #reply-preview-bar .reply-preview-text { font-size: 0.85em; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        #reply-preview-bar .cancel-reply-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 5px; }
+        #reply-preview-bar .reply-content {
+            flex-grow: 1; overflow: hidden;
+        }
+        #reply-preview-bar .reply-to-name {
+            font-size: 0.9em; font-weight: bold; color: var(--primary-color);
+        }
+        #reply-preview-bar .reply-preview-text {
+            font-size: 0.85em; color: var(--text-secondary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        #reply-preview-bar .cancel-reply-btn {
+            background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 5px;
+        }
         @keyframes slide-up { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
 
         #blocked-user-overlay {
@@ -302,21 +421,31 @@
             z-index: 5; display: none;
         }
         
+        /* === CSS اصلاح شده برای فرم === */
         #message-form {
-            display: flex; padding: 10px; border-top: 1px solid var(--border-color);
-            background: var(--secondary-color); align-items: center; gap: 8px;
-            box-shadow: 0 -2px 10px var(--shadow-color); transition: opacity 0.3s, filter 0.3s;
-            position: relative;
+            display: flex;
+            padding: 10px; /* پدینگ یکنواخت */
+            border-top: 1px solid var(--border-color);
+            background: var(--secondary-color);
+            align-items: center;
+            gap: 8px; /* ایجاد فاصله استاندارد بین آیتم‌ها */
+            box-shadow: 0 -2px 10px var(--shadow-color);
+            transition: opacity 0.3s, filter 0.3s;
+            position: relative; /* NEW: for cancel indicator */
         }
         #message-form.disabled { pointer-events: none; opacity: 0.5; filter: grayscale(80%); }
         
         #message-form .icon-btn {
             background: none; border: none; cursor: pointer; color: var(--text-secondary); padding: 8px;
-            transition: color 0.2s, transform 0.2s; flex-shrink: 0;
+            transition: color 0.2s, transform 0.2s;
+            flex-shrink: 0; /* جلوگیری از کوچک شدن دکمه */
         }
         #message-form .icon-btn:hover { color: var(--primary-color); transform: scale(1.1); }
         
-        #voice-btn.recording { color: var(--danger-color); animation: pulse-recording 1.5s infinite; }
+        #voice-btn.recording {
+            color: var(--danger-color);
+            animation: pulse-recording 1.5s infinite;
+        }
         @keyframes pulse-recording {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.7); }
             70% { transform: scale(1.1); box-shadow: 0 0 5px 10px rgba(229, 57, 53, 0); }
@@ -324,27 +453,51 @@
         }
 
         #message-input {
-            flex-grow: 1; padding: 12px 18px; border: none; border-radius: 22px;
-            font-family: 'Vazirmatn', sans-serif; background-color: var(--background-color);
-            color: var(--text-primary); transition: box-shadow 0.2s, transform 0.3s, opacity 0.3s;
-            min-width: 0;
+            flex-grow: 1;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 22px;
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            transition: box-shadow 0.2s, transform 0.3s, opacity 0.3s;
+            min-width: 0; /* جلوگیری از سرریز شدن در فلکس */
         }
-        #message-input.recording { transform: translateX(100%); opacity: 0; pointer-events: none; }
+        #message-input.recording {
+            transform: translateX(100%);
+            opacity: 0;
+            pointer-events: none;
+        }
         #message-input:focus { box-shadow: 0 0 0 2px var(--primary-color); }
         
+        /* --- NEW: استایل نشانگر لغو ارسال ویس --- */
         #voice-cancel-indicator {
-            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
-            display: flex; align-items: center; color: var(--text-secondary);
-            opacity: 0; transition: opacity 0.3s, color 0.3s; pointer-events: none;
+            position: absolute;
+            left: 15px; /* RTL */
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: opacity 0.3s, color 0.3s;
+            pointer-events: none;
         }
         #voice-cancel-indicator.visible { opacity: 1; }
         #voice-cancel-indicator span { margin: 0 10px; }
         #voice-record-timer {
-            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
-            color: var(--danger-color); font-weight: 500; opacity: 0;
-            transition: opacity 0.3s; pointer-events: none;
+            position: absolute;
+            right: 15px; /* RTL */
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--danger-color);
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
         }
         #voice-record-timer.visible { opacity: 1; }
+
 
         #send-btn {
             background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 45px; height: 45px;
@@ -356,57 +509,102 @@
         #send-btn:hover { background-color: #007acc; transform: scale(1.05); }
 
         #attachment-buttons {
-            display: flex; transition: transform 0.3s, opacity 0.3s, visibility 0.3s; flex-shrink: 0;
+            display: flex;
+            transition: transform 0.3s, opacity 0.3s, visibility 0.3s; /* NEW: added visibility */
+            flex-shrink: 0; /* جلوگیری از فشرده شدن دکمه‌ها */
         }
-        #attachment-buttons.hidden { transform: scale(0); opacity: 0; position: absolute; visibility: hidden; }
-        #attachment-buttons.recording { opacity: 0; pointer-events: none; }
+        #attachment-buttons.hidden { 
+            transform: scale(0); 
+            opacity: 0; 
+            position: absolute;
+            visibility: hidden; /* NEW: Ensure it's fully hidden */
+        }
+        #attachment-buttons.recording {
+            opacity: 0;
+            pointer-events: none;
+        }
         
-        /* --- مودال‌ها --- */
+        /* --- مودال‌های مرکزی (برای پروفایل، گزینه‌ها و دیالوگ‌ها) --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--modal-backdrop-color); z-index: 998; opacity: 0;
+            background-color: var(--modal-backdrop-color);
+            z-index: 998; opacity: 0;
             transition: opacity 0.3s ease; pointer-events: none;
             display: flex; justify-content: center; align-items: center;
         }
         .modal-overlay.visible { opacity: 1; pointer-events: auto; }
         .modal-card {
-            background-color: var(--tertiary-color); border-radius: 16px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.3); padding: 20px;
-            width: 90%; max-width: 320px; transform: scale(0.9) translateY(20px);
-            opacity: 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            background-color: var(--tertiary-color);
+            border-radius: 16px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+            padding: 20px;
+            width: 90%; max-width: 320px;
+            transform: scale(0.9) translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
         }
-        .modal-overlay.visible .modal-card { transform: scale(1) translateY(0); opacity: 1; }
+        .modal-overlay.visible .modal-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
         
-        #image-viewer-overlay { background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        /* --- NEW: استایل مودال نمایش عکس --- */
+        #image-viewer-overlay {
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
         #image-viewer-overlay .viewer-container {
-            position: relative; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         #image-viewer-overlay img {
-            max-width: 95%; max-height: 95%; object-fit: contain;
-            border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
         }
         #image-viewer-close-btn {
-            position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.4);
-            border: none; border-radius: 50%; color: white; cursor: pointer;
-            width: 40px; height: 40px; font-size: 24px; line-height: 40px; text-align: center;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.4);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            line-height: 40px;
+            text-align: center;
         }
 
+
+        /* --- مودال گزینه‌های پیام و منوی اصلی --- */
         .menu-option {
             display: flex; align-items: center; padding: 14px 10px;
-            cursor: pointer; transition: background-color 0.2s; font-size: 1em; border-radius: 8px;
+            cursor: pointer; transition: background-color 0.2s; font-size: 1em;
+            border-radius: 8px;
         }
         .menu-option:hover { background-color: rgba(255,255,255,0.1); }
         .menu-option.danger { color: var(--danger-color); }
         .menu-option svg { margin-left: 15px; }
-        .menu-divider { height: 1px; background-color: var(--border-color); margin: 8px 0; }
+        .menu-divider {
+            height: 1px; background-color: var(--border-color); margin: 8px 0;
+        }
 
+        /* --- مودال پروفایل --- */
         #profile-overlay .profile-card {
              position: fixed; bottom: -100%; left: 0; right: 0; margin: 0 auto;
              width: 100%; max-width: 420px; background-color: var(--secondary-color);
              border-top-left-radius: 20px; border-top-right-radius: 20px;
              transition: bottom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-             text-align: center; transform: none; opacity: 1;
+             text-align: center; transform: none; opacity: 1; /* Override modal-card styles */
         }
         #profile-overlay.visible .profile-card { bottom: 0; }
         .profile-card .handle {
@@ -425,27 +623,50 @@
         .profile-info-list li:last-child { border-bottom: none; }
         .profile-info-list strong { color: var(--text-primary); }
         
+        /* ===== START: NEW FOLLOW BUTTON STYLES ===== */
         #profile-follow-btn {
-            background-color: var(--primary-color); color: white; padding: 10px 20px;
-            border-radius: 8px; cursor: pointer; font-family: 'Vazirmatn', sans-serif;
-            font-size: 0.95em; margin-top: 20px; width: 100%; border: 1px solid transparent;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 0.95em;
+            margin-top: 20px;
+            width: 100%;
+            border: 1px solid transparent;
             transition: background-color 0.2s, color 0.2s, border-color 0.2s;
         }
-        #profile-follow-btn:disabled { opacity: 0.6; cursor: wait; }
-        #profile-follow-btn.following { background-color: transparent; border-color: var(--primary-color); color: var(--primary-color); }
-        #profile-follow-btn.following:hover:not(:disabled) { background-color: var(--primary-color); color: white; }
-        #profile-follow-btn:hover:not(:disabled) { background-color: #007acc; }
+        #profile-follow-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+        #profile-follow-btn.following {
+            background-color: transparent;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        #profile-follow-btn.following:hover:not(:disabled) {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        #profile-follow-btn:hover:not(:disabled) {
+            background-color: #007acc;
+        }
+        /* ===== END: NEW FOLLOW BUTTON STYLES ===== */
 
         #block-user-btn {
             background-color: transparent; border: 1px solid var(--danger-color); color: var(--danger-color);
             padding: 10px 20px; border-radius: 8px; cursor: pointer;
-            font-family: 'Vazirmatn', sans-serif; font-size: 0.95em; margin-top: 10px;
-            width: 100%; transition: background-color 0.2s, color 0.2s;
+            font-family: 'Vazirmatn', sans-serif; font-size: 0.95em; margin-top: 10px; /* Adjusted margin */
+            width: 100%;
+            transition: background-color 0.2s, color 0.2s;
         }
         #block-user-btn:hover { background-color: var(--danger-color); color: white; }
         #block-user-btn.unblock { border-color: var(--primary-color); color: var(--primary-color); }
         #block-user-btn.unblock:hover { background-color: var(--primary-color); color: white; }
 
+        /* --- مودال دیالوگ سفارشی --- */
         .dialog-card { text-align: center; }
         .dialog-card h4 { font-size: 1.2em; margin-bottom: 10px; }
         .dialog-card p { color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6; }
@@ -466,6 +687,7 @@
         .dialog-footer .btn-primary { background-color: var(--primary-color); color: white; }
         .dialog-footer .btn-secondary { background-color: var(--border-color); color: var(--text-primary); }
         
+        /* --- استایل‌های مودال تنظیمات --- */
         .setting-item { margin-top: 15px; }
         .setting-item label { font-weight: 500; display: block; margin-bottom: 5px; }
         .setting-item p { font-size: 0.85em; color: var(--text-secondary); margin-bottom: 15px; }
@@ -477,43 +699,88 @@
         }
         #keyboard-offset-slider::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none;
-            width: 20px; height: 20px; background: var(--primary-color); border-radius: 50%;
+            width: 20px; height: 20px; background: var(--primary-color);
+            border-radius: 50%;
         }
         #keyboard-offset-value { font-weight: 500; min-width: 50px; text-align: left; }
         
-        .modal-overlay.bottom-sheet { align-items: flex-end; }
+        /* --- NEW: استایل‌های پنل استیکر --- */
+        .modal-overlay.bottom-sheet {
+            align-items: flex-end; /* تراز کردن در پایین */
+        }
         .sticker-panel {
-            background-color: var(--secondary-color); width: 100%; max-width: 420px;
-            height: 50vh; border-top-left-radius: 20px; border-top-right-radius: 20px;
-            box-shadow: 0 -5px 25px rgba(0,0,0,0.3); display: flex; flex-direction: column;
-            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background-color: var(--secondary-color);
+            width: 100%;
+            max-width: 420px;
+            height: 50vh; /* 50% ارتفاع صفحه */
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .modal-overlay.visible .sticker-panel { transform: translateY(0); }
+        .modal-overlay.visible .sticker-panel {
+            transform: translateY(0);
+        }
         .sticker-panel-header {
-            padding: 15px; border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
         }
-        .sticker-panel-header h4 { font-size: 1.1em; margin: 0; }
+        .sticker-panel-header h4 {
+            font-size: 1.1em;
+            margin: 0;
+        }
         #close-sticker-panel-btn {
-            background: none; border: none; color: var(--text-secondary); font-size: 24px; cursor: pointer; line-height: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
         }
         .sticker-grid {
-            flex-grow: 1; overflow-y: auto; padding: 15px;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 10px; justify-content: center;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+            justify-content: center;
         }
         .sticker-grid img {
-            width: 100%; height: 100%; object-fit: cover; cursor: pointer;
-            border-radius: 8px; background-color: var(--tertiary-color);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: 8px;
+            background-color: var(--tertiary-color);
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        .sticker-grid img:hover { transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .sticker-grid .loader {
-            width: 30px; height: 30px; border: 3px solid var(--border-color);
-            border-top-color: var(--primary-color); border-radius: 50%;
-            animation: spin 1s linear infinite; margin: 50px auto; grid-column: 1 / -1;
+        .sticker-grid img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        .sticker-grid .error-text { color: var(--text-secondary); text-align: center; grid-column: 1 / -1; }
+        .sticker-grid .loader {
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 50px auto;
+            grid-column: 1 / -1; /* Span all columns */
+        }
+        .sticker-grid .error-text {
+            color: var(--text-secondary);
+            text-align: center;
+            grid-column: 1 / -1; /* Span all columns */
+        }
 
     </style>
 </head>
@@ -571,6 +838,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </button>
 
+                <!-- NEW: نشانگرهای جدید برای ضبط ویس -->
                 <div id="voice-record-timer">00:00</div>
                 <div id="voice-cancel-indicator">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--danger-color);"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -579,6 +847,7 @@
                 </div>
                 
                 <input type="text" id="message-input" placeholder="پیامت رو بنویس..." autocomplete="off">
+                <!-- NEW: Hidden file input -->
                 <input type="file" id="file-input" style="display:none" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm">
 
                 <div id="attachment-buttons">
@@ -606,7 +875,7 @@
         </div>
     </div>
 
-    <!-- مودال گزینه‌های پیام -->
+    <!-- مودال گزینه‌های پیام (مخفی) -->
     <div id="message-options-overlay" class="modal-overlay">
         <div id="message-options-menu" class="modal-card">
              <div class="menu-option" id="reply-msg-btn">
@@ -629,7 +898,7 @@
         </div>
     </div>
     
-    <!-- دیالوگ سفارشی -->
+    <!-- دیالوگ سفارشی (برای تایید، پرامپت و ...) -->
     <div id="custom-dialog-overlay" class="modal-overlay">
         <div class="modal-card dialog-card">
             <h4 id="dialog-title">عنوان دیالوگ</h4>
@@ -660,7 +929,7 @@
         </div>
     </div>
 
-    <!-- صفحه پروفایل کاربر -->
+    <!-- صفحه پروفایل کاربر (مخفی) -->
     <div id="profile-overlay" class="modal-overlay">
         <div class="profile-card">
             <div class="handle"></div>
@@ -671,6 +940,7 @@
                 <li>وضعیت: <strong id="profile-card-status">...</strong></li>
                 <li>شناسه کاربری: <strong id="profile-card-uid">...</strong></li>
             </ul>
+            <!-- NEW: Follow Button -->
             <button id="profile-follow-btn">دنبال کردن</button>
             <button id="block-user-btn">مسدود کردن کاربر</button>
         </div>
@@ -691,29 +961,48 @@
                 <h4>استیکرها</h4>
                 <button id="close-sticker-panel-btn" aria-label="بستن">&times;</button>
             </div>
-            <div id="sticker-grid" class="sticker-grid"></div>
+            <div id="sticker-grid" class="sticker-grid">
+                <!-- استیکرها به صورت داینامیک اینجا قرار می‌گیرند -->
+            </div>
         </div>
     </div>
 
 
     <script>
+        // ===============================================
+        //  !!!   مهم: این بخش را حتما ویرایش کنید   !!!
+        // ===============================================
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const UPLOAD_PHP_ENDPOINT = 'https://miko.freehost.io/upload_to_parspack.php';
         const SHARED_SECRET = 'miko1234';
+        // ===============================================
 
-        // --- CacheManager ---
+        // ==============================================================
+        //  >>> START OF REVISED CacheManager IMPLEMENTATION <<<
+        // ==============================================================
         class CacheManager {
             constructor(dbName = 'PiviMediaDB', storeName = 'media_metadata', cacheName = 'pivi-media-cache', maxSizeMB = 500) {
-                this.dbName = dbName; this.storeName = storeName; this.cacheName = cacheName;
-                this.maxSizeBytes = maxSizeMB * 1024 * 1024; this.db = null;
-                this._blobUrlReferences = new Map(); this._ongoingDownloads = new Map();
+                this.dbName = dbName;
+                this.storeName = storeName;
+                this.cacheName = cacheName;
+                this.maxSizeBytes = maxSizeMB * 1024 * 1024;
+                this.db = null;
+                this._blobUrlReferences = new Map();
+                this._ongoingDownloads = new Map();
             }
+
             async init() {
                 return new Promise((resolve, reject) => {
-                    if (!('indexedDB' in window) || !('caches' in window)) return reject(new Error('Caching not supported.'));
+                    if (!('indexedDB' in window) || !('caches' in window)) {
+                        console.warn('Caching is not supported in this browser.');
+                        return reject(new Error('Caching not supported.'));
+                    }
                     const request = indexedDB.open(this.dbName, 1);
                     request.onerror = (event) => reject(new Error('IndexedDB error: ' + request.error));
-                    request.onsuccess = (event) => { this.db = event.target.result; resolve(this.db); };
+                    request.onsuccess = (event) => {
+                        this.db = event.target.result;
+                        resolve(this.db);
+                    };
                     request.onupgradeneeded = (event) => {
                         const db = event.target.result;
                         if (!db.objectStoreNames.contains(this.storeName)) {
@@ -723,19 +1012,31 @@
                     };
                 });
             }
+
             async put(url, blob) {
                 if (!this.db || !(blob instanceof Blob)) return;
                 try {
                     const cache = await caches.open(this.cacheName);
-                    const response = new Response(blob, { headers: { 'Content-Type': blob.type, 'Content-Length': blob.size } });
+                    const response = new Response(blob, {
+                        headers: { 'Content-Type': blob.type, 'Content-Length': blob.size }
+                    });
                     await cache.put(url, response);
+
                     const transaction = this.db.transaction(this.storeName, 'readwrite');
-                    transaction.objectStore(this.storeName).put({ url, lastAccessed: Date.now(), size: blob.size });
+                    const store = transaction.objectStore(this.storeName);
+                    store.put({ url, lastAccessed: Date.now(), size: blob.size });
+
                     await this.evictIfNeeded();
-                } catch (error) { console.error(`Failed to cache ${url}:`, error); }
+                } catch (error) {
+                    console.error(`Failed to cache ${url}:`, error);
+                }
             }
+
             async get(url) {
-                if (this._blobUrlReferences.has(url)) return this._blobUrlReferences.get(url);
+                if (this._blobUrlReferences.has(url)) {
+                    return this._blobUrlReferences.get(url);
+                }
+
                 try {
                     const cache = await caches.open(this.cacheName);
                     const response = await cache.match(url);
@@ -743,62 +1044,106 @@
                         const blob = await response.blob();
                         const objectURL = URL.createObjectURL(blob);
                         this._blobUrlReferences.set(url, objectURL);
-                        this.db.transaction(this.storeName, 'readwrite').objectStore(this.storeName).get(url).onsuccess = (event) => {
+                        
+                        this.db.transaction(this.storeName, 'readwrite')
+                           .objectStore(this.storeName)
+                           .get(url).onsuccess = (event) => {
                                const metadata = event.target.result;
-                               if(metadata) { metadata.lastAccessed = Date.now(); this.db.transaction(this.storeName, 'readwrite').objectStore(this.storeName).put(metadata); }
+                               if(metadata) {
+                                   metadata.lastAccessed = Date.now();
+                                   this.db.transaction(this.storeName, 'readwrite')
+                                        .objectStore(this.storeName).put(metadata);
+                               }
                            };
+
                         return objectURL;
                     }
                     return null;
-                } catch (error) { return null; }
+                } catch (error) {
+                    console.error(`Failed to get ${url} from cache:`, error);
+                    return null;
+                }
             }
+            
             async downloadWithProgress(url, onProgress, signal) {
-                if (this._ongoingDownloads.has(url)) return this._ongoingDownloads.get(url);
+                if (this._ongoingDownloads.has(url)) {
+                    return this._ongoingDownloads.get(url);
+                }
+
                 const downloadPromise = (async () => {
                     try {
                         const proxyFetchUrl = `${PROXY_URL}?media_url=${encodeURIComponent(url)}`;
                         const response = await fetch(proxyFetchUrl, { signal });
                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        
                         const contentLength = response.headers.get('Content-Length');
                         if (!contentLength) {
+                            console.warn('Content-Length header not found. Progress will not be available.');
                             const blob = await response.blob();
                             onProgress({ loaded: blob.size, total: blob.size, percent: 100 });
-                            await this.put(url, blob); return blob;
+                            await this.put(url, blob);
+                            return blob;
                         }
-                        const total = parseInt(contentLength, 10); let loaded = 0; const chunks = []; const reader = response.body.getReader();
+
+                        const total = parseInt(contentLength, 10);
+                        let loaded = 0;
+                        const chunks = [];
+                        const reader = response.body.getReader();
+
                         while (true) {
                             const { done, value } = await reader.read();
                             if (done) break;
-                            chunks.push(value); loaded += value.length;
-                            onProgress({ loaded, total, percent: Math.round((loaded / total) * 100) });
+                            
+                            chunks.push(value);
+                            loaded += value.length;
+                            const percent = Math.round((loaded / total) * 100);
+                            onProgress({ loaded, total, percent });
                         }
-                        const blob = new Blob(chunks); await this.put(url, blob); return blob;
-                    } finally { this._ongoingDownloads.delete(url); }
+
+                        const blob = new Blob(chunks);
+                        await this.put(url, blob);
+                        return blob;
+                    } finally {
+                        this._ongoingDownloads.delete(url);
+                    }
                 })();
-                this._ongoingDownloads.set(url, downloadPromise); return downloadPromise;
+                
+                this._ongoingDownloads.set(url, downloadPromise);
+                return downloadPromise;
             }
+
             revokeUrl(url) {
-                if (this._blobUrlReferences.has(url)) { URL.revokeObjectURL(this._blobUrlReferences.get(url)); this._blobUrlReferences.delete(url); }
+                if (this._blobUrlReferences.has(url)) {
+                    URL.revokeObjectURL(this._blobUrlReferences.get(url));
+                    this._blobUrlReferences.delete(url);
+                }
             }
+
             async evictIfNeeded() {
                 if (!this.db) return;
                 const tx = this.db.transaction(this.storeName, 'readwrite');
                 const store = tx.objectStore(this.storeName);
                 const allMetadata = await new Promise(r => store.getAll().onsuccess = e => r(e.target.result));
                 const totalSize = allMetadata.reduce((sum, item) => sum + (item.size || 0), 0);
+
                 if (totalSize > this.maxSizeBytes) {
                     allMetadata.sort((a, b) => a.lastAccessed - b.lastAccessed);
-                    let currentSize = totalSize; const cache = await caches.open(this.cacheName);
+                    let currentSize = totalSize;
+                    const cache = await caches.open(this.cacheName);
                     for (const item of allMetadata) {
                         if (currentSize <= this.maxSizeBytes) break;
-                        await cache.delete(item.url); await new Promise(r => store.delete(item.url).onsuccess = r);
-                        this.revokeUrl(item.url); currentSize -= (item.size || 0);
+                        await cache.delete(item.url);
+                        await new Promise(r => store.delete(item.url).onsuccess = r);
+                        this.revokeUrl(item.url);
+                        currentSize -= (item.size || 0);
+                        console.log(`Evicted ${item.url} (${(item.size/1024/1024).toFixed(2)}MB) to free up space.`);
                     }
                 }
             }
         }
+        // ============================================================
 
-        // --- DOM Elements ---
+        // --- بخش ۱: ارجاع به عناصر DOM و متغیرهای اصلی ---
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingErrorEl = document.getElementById('loading-error');
         const appContainer = document.getElementById('app-container');
@@ -841,7 +1186,7 @@
         const cacheManager = new CacheManager();
         const activeControllers = new Map();
 
-        // --- State ---
+        // --- وضعیت کلی اپلیکیشن ---
         let currentUser = null, clientToken = null, chatPartner = null, chatId = null;
         let messagePollingInterval = null, presencePollingInterval = null;
         let isPartnerBlocked = false;
@@ -855,16 +1200,30 @@
         let recordStartTime, recordTimerInterval;
         let touchStartX, isCancelThresholdMet = false;
 
-        // --- Lifecycle ---
+        // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
         window.addEventListener('load', initializeApp);
-        window.addEventListener('beforeunload', () => { updatePresence(false); for (const url of cacheManager._blobUrlReferences.keys()) cacheManager.revokeUrl(url); });
-        document.addEventListener('visibilitychange', () => { if (!currentUser) return; updatePresence(!document.hidden); if (document.hidden) pauseApp(); else resumeApp(); });
+        window.addEventListener('beforeunload', () => {
+             updatePresence(false);
+             for (const url of cacheManager._blobUrlReferences.keys()) {
+                 cacheManager.revokeUrl(url);
+             }
+        });
+        document.addEventListener('visibilitychange', () => {
+            if (!currentUser) return;
+            updatePresence(!document.hidden);
+            if (document.hidden) pauseApp(); else resumeApp();
+        });
         
         async function initializeApp() {
             if (window.piviAppInitialized) return;
             window.piviAppInitialized = true;
             showLoading();
-            try { await cacheManager.init(); } catch (error) { console.warn('Cache Manager Init Failed', error); }
+            
+            try {
+                await cacheManager.init();
+            } catch (error) {
+                console.warn('Could not initialize Cache Manager.', error);
+            }
 
             keyboardOffset = parseInt(localStorage.getItem('keyboardOffset') || '80', 10);
             keyboardOffsetSlider.value = keyboardOffset;
@@ -879,6 +1238,9 @@
             if (!partnerUsername) { showError('کاربر مقصد مشخص نشده است.'); return; }
 
             try {
+                if (PROXY_URL.includes('miko.freehost.io') && SHARED_SECRET === 'miko1234') {
+                     console.warn('هشدار: شما در حال استفاده از تنظیمات پیش‌فرض هستید. لطفاً آدرس پروکسی و کلید اشتراکی خود را تغییر دهید.');
+                }
                 await refreshClientToken();
                 await fetchCurrentUserData();
                 await fetchPartnerData(partnerUsername);
@@ -897,25 +1259,47 @@
                 updatePresence(true);
                 showApp();
             } catch (error) {
-                console.error("Init Error:", error);
+                console.error("خطا در مقداردهی اولیه:", error);
                 showError(`خطا در بارگذاری چت: ${error.message}`);
             }
         }
         
+        // --- بخش ۳: توابع مدیریت وضعیت برنامه (Pause/Resume) ---
         function startPolling() {
             if (messagePollingInterval) clearInterval(messagePollingInterval);
             messagePollingInterval = setInterval(() => loadChatData(false), 5000);
+            
             if (presencePollingInterval) clearInterval(presencePollingInterval);
             presencePollingInterval = setInterval(pollPartnerStatus, 10000);
         }
-        function pauseApp() { clearInterval(messagePollingInterval); messagePollingInterval = null; clearInterval(presencePollingInterval); presencePollingInterval = null; }
-        function resumeApp() { if (window.piviAppInitialized && !messagePollingInterval) { loadChatData(false); pollPartnerStatus(); startPolling(); } }
+        function pauseApp() {
+            clearInterval(messagePollingInterval); messagePollingInterval = null;
+            clearInterval(presencePollingInterval); presencePollingInterval = null;
+        }
+        function resumeApp() {
+            if (window.piviAppInitialized && !messagePollingInterval) {
+                loadChatData(false); pollPartnerStatus(); startPolling();
+            }
+        }
         
-        // --- UI Functions ---
-        function showLoading() { loadingOverlay.style.opacity = '1'; loadingOverlay.style.display = 'flex'; appContainer.classList.remove('visible'); }
-        function showApp() { loadingOverlay.style.opacity = '0'; setTimeout(() => { loadingOverlay.style.display = 'none'; }, 500); appContainer.classList.add('visible'); }
-        function showError(message) { loadingErrorEl.textContent = message; loadingErrorEl.style.display = 'block'; document.querySelector('#loading-overlay .loading-dots').style.display = 'none'; }
-        function scrollToBottom() { mainContent.scrollTop = 0; }
+        // --- بخش ۴: توابع مرتبط با UI ---
+        function showLoading() {
+            loadingOverlay.style.opacity = '1'; loadingOverlay.style.display = 'flex';
+            appContainer.classList.remove('visible');
+        }
+        function showApp() {
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => { loadingOverlay.style.display = 'none'; }, 500);
+            appContainer.classList.add('visible');
+        }
+        function showError(message) {
+            loadingErrorEl.textContent = message;
+            loadingErrorEl.style.display = 'block';
+            document.querySelector('#loading-overlay .loading-dots').style.display = 'none';
+        }
+        function scrollToBottom() {
+            mainContent.scrollTop = 0;
+        }
 
         function createVerifiedNameHTML(displayName, isVerified) {
             if (isVerified) {
@@ -927,7 +1311,9 @@
         
         function setupUI() {
             partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
-            const partnerAvatarUrl = chatPartner.profilePicUrl ? chatPartner.profilePicUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=0095FF&color=fff&size=80`;
+            const partnerAvatarUrl = chatPartner.profilePicUrl
+                ? chatPartner.profilePicUrl
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=0095FF&color=fff&size=80`;
             partnerAvatarEl.src = partnerAvatarUrl;
             updateStatusUI(chatPartner.isOnline, chatPartner.lastSeen);
         }
@@ -938,30 +1324,48 @@
             optionsBtn.addEventListener('click', () => showModal(mainOptionsOverlay));
             document.getElementById('partner-info-header').addEventListener('click', () => showModal(profileOverlay));
             messagesArea.addEventListener('click', handleMessageClick);
+            
             attachFileBtn.addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) sendFileMessage(file); e.target.value = ''; });
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) sendFileMessage(file);
+                e.target.value = ''; 
+            });
+
             document.getElementById('reply-msg-btn').addEventListener('click', handleReplyAction);
             document.getElementById('pin-msg-btn').addEventListener('click', handlePinAction);
             cancelReplyBtn.addEventListener('click', cancelReply);
-            pinnedMessageBar.addEventListener('click', (e) => { if(e.target.closest('.unpin-btn')) return; scrollToMessage(currentPinnedMessage.msgId); });
+            pinnedMessageBar.addEventListener('click', (e) => {
+                if(e.target.closest('.unpin-btn')) return;
+                scrollToMessage(currentPinnedMessage.msgId);
+            });
             unpinBtn.addEventListener('click', handleUnpinAction);
+            
             document.getElementById('edit-msg-btn').addEventListener('click', handleEditAction);
             document.getElementById('delete-msg-btn').addEventListener('click', handleDeleteAction);
             blockUserBtn.addEventListener('click', handleBlockToggle);
             profileFollowBtn.addEventListener('click', toggleFollow);
+
             document.getElementById('main-menu-profile-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(profileOverlay); });
             document.getElementById('main-menu-settings-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(settingsOverlay); });
             document.getElementById('close-settings-btn').addEventListener('click', () => hideModal(settingsOverlay));
             keyboardOffsetSlider.addEventListener('input', handleKeyboardOffsetChange);
             messageInput.addEventListener('focus', applyKeyboardOffset);
             messageInput.addEventListener('blur', removeKeyboardOffset);
-            voiceBtn.addEventListener('mousedown', startRecording); voiceBtn.addEventListener('touchstart', startRecording);
-            document.addEventListener('mouseup', stopRecording); document.addEventListener('touchend', stopRecording);
-            document.addEventListener('mousemove', handleRecordingMove); document.addEventListener('touchmove', handleRecordingMove);
+
+            voiceBtn.addEventListener('mousedown', startRecording);
+            voiceBtn.addEventListener('touchstart', startRecording);
+            document.addEventListener('mouseup', stopRecording);
+            document.addEventListener('touchend', stopRecording);
+            document.addEventListener('mousemove', handleRecordingMove);
+            document.addEventListener('touchmove', handleRecordingMove);
+
             imageViewerCloseBtn.addEventListener('click', closeImageViewer);
+            
             stickerBtn.addEventListener('click', openStickerPanel);
             closeStickerPanelBtn.addEventListener('click', closeStickerPanel);
             stickerGrid.addEventListener('click', handleStickerClick);
+
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 overlay.addEventListener('click', (e) => {
                     if (e.target === overlay) {
@@ -980,18 +1384,27 @@
             attachmentButtons.classList.toggle('hidden', hasText);
         }
         
+        // --- بخش ۵: توابع مدیریت فاصله کیبورد ---
         function handleKeyboardOffsetChange(e) {
             keyboardOffset = parseInt(e.target.value, 10);
             keyboardOffsetValue.textContent = `${keyboardOffset} px`;
             localStorage.setItem('keyboardOffset', keyboardOffset);
-            if (document.activeElement === messageInput) applyKeyboardOffset();
+            if (document.activeElement === messageInput) { applyKeyboardOffset(); }
         }
-        function applyKeyboardOffset() { appContainer.style.paddingBottom = `${keyboardOffset}px`; setTimeout(() => { messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100); }
-        function removeKeyboardOffset() { appContainer.style.paddingBottom = '0px'; }
+        function applyKeyboardOffset() {
+            appContainer.style.paddingBottom = `${keyboardOffset}px`;
+            setTimeout(() => { messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
+        }
+        function removeKeyboardOffset() {
+            appContainer.style.paddingBottom = '0px';
+        }
 
+        // --- بخش ۶: مدیریت وضعیت آنلاین/آفلاین (Presence) ---
         async function updatePresence(isOnline) {
             if (!currentUser || !clientToken) return;
-            try { await apiRequest(`users/${currentUser.username}`, 'PATCH', { isOnline, lastSeen: new Date().toISOString() }, true); } catch (e) {}
+            const presenceData = { isOnline, lastSeen: new Date().toISOString() };
+            try { await apiRequest(`users/${currentUser.username}`, 'PATCH', presenceData, true); } 
+            catch (error) { console.warn("خطا در به‌روزرسانی وضعیت حضور:", error); }
         }
         
         async function pollPartnerStatus() {
@@ -999,33 +1412,42 @@
             try {
                 const partnerData = await apiRequest(`users/${chatPartner.username}`, 'GET');
                 if (partnerData) {
-                    chatPartner = { ...chatPartner, ...partnerData };
+                    chatPartner.isOnline = partnerData.isOnline;
+                    chatPartner.lastSeen = partnerData.lastSeen;
+                    chatPartner.verified = partnerData.verified;
+                    chatPartner.profilePicUrl = partnerData.profilePicUrl; 
                     updateStatusUI(partnerData.isOnline, partnerData.lastSeen);
                     partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
                     const newAvatarUrl = partnerData.profilePicUrl ? partnerData.profilePicUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=0095FF&color=fff&size=80`;
-                    if (partnerAvatarEl.src !== newAvatarUrl) partnerAvatarEl.src = newAvatarUrl;
+                    if (partnerAvatarEl.src !== newAvatarUrl) {
+                        partnerAvatarEl.src = newAvatarUrl;
+                    }
                 }
-            } catch (e) {}
+            } catch (error) { console.warn("خطا در بررسی وضعیت کاربر:", error); }
         }
 
         function updateStatusUI(isOnline, lastSeen) {
-            if (isOnline) { partnerStatusEl.textContent = 'آنلاین'; partnerStatusEl.className = 'status'; }
-            else {
+            if (isOnline) {
+                partnerStatusEl.textContent = 'آنلاین';
+                partnerStatusEl.className = 'status';
+            } else {
                 const lastSeenDate = lastSeen ? new Date(lastSeen) : null;
-                partnerStatusEl.textContent = lastSeenDate ? `آخرین بازدید ${lastSeenDate.toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'})}` : 'آفلاین';
+                const statusText = lastSeenDate ? `آخرین بازدید ${lastSeenDate.toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'})}` : 'آفلاین';
+                partnerStatusEl.textContent = statusText;
                 partnerStatusEl.className = 'status offline';
             }
         }
 
-        // --- Blocking Logic ---
+        // --- بخش ۷: مدیریت مسدودسازی کاربر ---
         function checkBlockStatus() {
             isPartnerBlocked = !!(currentUser.blockedUsers && currentUser.blockedUsers[chatPartner.username]);
         }
         function updateBlockUI() {
-            messageForm.classList.toggle('disabled', isPartnerBlocked);
-            blockedUserOverlay.style.display = isPartnerBlocked ? 'block' : 'none';
-            blockUserBtn.textContent = isPartnerBlocked ? 'رفع مسدودیت' : 'مسدود کردن کاربر';
-            blockUserBtn.classList.toggle('unblock', isPartnerBlocked);
+            const isBlocked = isPartnerBlocked;
+            messageForm.classList.toggle('disabled', isBlocked);
+            blockedUserOverlay.style.display = isBlocked ? 'block' : 'none';
+            blockUserBtn.textContent = isBlocked ? 'رفع مسدودیت' : 'مسدود کردن کاربر';
+            blockUserBtn.classList.toggle('unblock', isBlocked);
         }
         
         async function handleBlockToggle() {
@@ -1042,33 +1464,36 @@
                     await apiRequest(path, 'PUT', true);
                     if (!currentUser.blockedUsers) currentUser.blockedUsers = {};
                     currentUser.blockedUsers[chatPartner.username] = true;
-                    // Remove messages from DOM immediately
-                    document.querySelectorAll(`.message[data-sender-id="${chatPartner.username}"]`).forEach(el => el.remove());
                 } else {
                     await apiRequest(path, 'DELETE');
                     if (currentUser.blockedUsers) delete currentUser.blockedUsers[chatPartner.username];
-                    // Reload chat to show messages again
-                    setTimeout(() => loadChatData(true), 500);
                 }
                 isPartnerBlocked = willBlock;
                 updateBlockUI();
             } catch (error) {
                 showCustomAlert({ title: 'خطا', message: 'خطا در انجام عملیات مسدودسازی.' });
+                console.error(error);
             }
         }
         
-        // --- API & Data ---
+        // --- بخش ۸: ارتباط با سرور و واکشی اطلاعات ---
         async function refreshClientToken() {
             try {
                 const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-                if (!response.ok) throw new Error('Token Error');
-                const data = await response.json(); clientToken = data.token;
-            } catch (error) { throw new Error(`Network Error: ${error.message}`); }
+                if (!response.ok) throw new Error(`خطای ${response.status} در دریافت توکن از سرور`);
+                const data = await response.json();
+                clientToken = data.token;
+            } catch (error) { throw new Error(`خطای شبکه در دریافت توکن: ${error.message}.`); }
         }
-        async function fetchCurrentUserData() { const data = await apiRequest(`users/${currentUser.username}`, 'GET'); if(data) currentUser = { ...currentUser, ...data }; }
-        async function fetchPartnerData(username) { chatPartner = await apiRequest(`users/${username}`, 'GET'); }
+        async function fetchCurrentUserData() {
+             const data = await apiRequest(`users/${currentUser.username}`, 'GET');
+             if(data) currentUser = { ...currentUser, ...data };
+        }
+        async function fetchPartnerData(username) {
+             chatPartner = await apiRequest(`users/${username}`, 'GET');
+        }
 
-        // --- Chat Logic ---
+        // --- بخش ۹: منطق اصلی چت (ارسال و دریافت پیام) ---
         async function loadChatData(isInitialLoad = false) {
             if (!chatId || !clientToken) return;
             try {
@@ -1083,34 +1508,22 @@
                 }
 
                 const sortedMessages = Object.entries(messagesData).sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
-                let hasNewMessage = false;
-
                 sortedMessages.forEach(([msgId, msg]) => {
-                    // *** CRITICAL FIX: Filter blocked messages ***
-                    if (currentUser.blockedUsers && currentUser.blockedUsers[msg.senderId]) {
-                        const existingEl = document.querySelector(`.message[data-id="${msgId}"]`);
-                        if (existingEl) existingEl.remove();
-                        return; // Skip rendering
-                    }
-
                     const existingMsg = lastMessagesSnapshot[msgId];
                     const existingElement = document.querySelector(`.message[data-id="${msgId}"]`);
-                    
-                    if (!existingElement) {
-                        createMessageElement(msgId, msg);
-                        hasNewMessage = true;
-                    } else if (JSON.stringify(existingMsg) !== JSON.stringify(msg)) {
-                        updateMessageElement(existingElement, msg);
-                    }
+                    if (!existingElement) createMessageElement(msgId, msg);
+                    else if (JSON.stringify(existingMsg) !== JSON.stringify(msg)) updateMessageElement(existingElement, msg);
                 });
                 lastMessagesSnapshot = messagesData; 
-                if(isInitialLoad || hasNewMessage) scrollToBottom();
-            } catch(error) { console.error("Chat Load Error:", error); }
+                if(isInitialLoad) scrollToBottom();
+            } catch(error) { console.error("خطا در بارگذاری داده‌های چت:", error); }
         }
         
         async function startRecording(e) {
-            e.preventDefault(); if (isRecording) return;
-            isRecording = true; isCancelThresholdMet = false;
+            e.preventDefault();
+            if (isRecording) return;
+            isRecording = true;
+            isCancelThresholdMet = false;
             touchStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
             updateRecordingUI(true);
             try {
@@ -1119,30 +1532,39 @@
                 voiceChunks = [];
                 recorder.ondataavailable = event => { if (event.data.size > 0) voiceChunks.push(event.data); };
                 recorder.onstop = () => {
-                    if (mediaStream) { mediaStream.getTracks().forEach(track => track.stop()); mediaStream = null; }
+                    if (mediaStream) {
+                        mediaStream.getTracks().forEach(track => track.stop());
+                        mediaStream = null;
+                    }
                     if (!isCancelThresholdMet) {
                         const voiceBlob = new Blob(voiceChunks, { type: 'audio/webm' });
                         if (voiceBlob.size > 1000) sendVoiceMessage(voiceBlob);
                     }
                     voiceChunks = [];
                 };
-                recorder.start(); startTimer();
+                recorder.start();
+                startTimer();
             } catch (err) {
+                console.error("خطا در دسترسی به میکروفون:", err);
                 showCustomAlert({ title: 'خطا', message: 'امکان دسترسی به میکروفون وجود ندارد.' });
-                updateRecordingUI(false); isRecording = false;
+                updateRecordingUI(false); 
+                isRecording = false;
             }
         }
 
         function stopRecording() {
             if (!isRecording) return;
-            isRecording = false; if (recorder && recorder.state === 'recording') recorder.stop();
-            updateRecordingUI(false); stopTimer();
+            isRecording = false;
+            if (recorder && recorder.state === 'recording') recorder.stop();
+            updateRecordingUI(false);
+            stopTimer();
         }
 
         function handleRecordingMove(e) {
             if (!isRecording) return;
             const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-            isCancelThresholdMet = (touchStartX - currentX) > 100;
+            const distance = touchStartX - currentX;
+            isCancelThresholdMet = distance > 100;
             voiceCancelIndicator.style.color = isCancelThresholdMet ? 'var(--danger-color)' : 'var(--text-secondary)';
         }
 
@@ -1158,23 +1580,42 @@
             recordStartTime = Date.now();
             recordTimerInterval = setInterval(() => {
                 const elapsedTime = Math.floor((Date.now() - recordStartTime) / 1000);
-                voiceRecordTimer.textContent = `${String(Math.floor(elapsedTime / 60)).padStart(2, '0')}:${String(elapsedTime % 60).padStart(2, '0')}`;
+                const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+                const seconds = String(elapsedTime % 60).padStart(2, '0');
+                voiceRecordTimer.textContent = `${minutes}:${seconds}`;
             }, 1000);
         }
-        function stopTimer() { clearInterval(recordTimerInterval); voiceRecordTimer.textContent = "00:00"; }
+
+        function stopTimer() {
+            clearInterval(recordTimerInterval);
+            voiceRecordTimer.textContent = "00:00";
+        }
         
         async function sendFileMessage(file) {
-            if (file.size > 100 * 1024 * 1024) { showCustomAlert({ title: 'خطا', message: 'حجم فایل نباید بیشتر از 100 مگابایت باشد.' }); return; }
+            const MAX_SIZE_MB = 100;
+            if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+                showCustomAlert({ title: 'خطا', message: `حجم فایل نباید بیشتر از ${MAX_SIZE_MB} مگابایت باشد.` });
+                return;
+            }
             const fileType = file.type.split('/')[0] === 'image' && file.type.includes('gif') ? 'image' : file.type.split('/')[0];
             const tempId = `temp_${Date.now()}`;
             createMessageElement(tempId, { senderId: currentUser.username, timestamp: new Date().toISOString(), isSending: true, type: fileType });
             scrollToBottom();
-            const formData = new FormData(); formData.append('file', file, file.name);
+
+            const formData = new FormData();
+            formData.append('file', file, file.name);
+
             try {
                 const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
                 const progressIndicator = tempElement ? tempElement.querySelector('progress') : null;
-                const xhr = new XMLHttpRequest(); xhr.open('POST', UPLOAD_PHP_ENDPOINT, true);
-                xhr.upload.onprogress = (event) => { if (event.lengthComputable && progressIndicator) { progressIndicator.value = event.loaded; progressIndicator.max = event.total; } };
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', UPLOAD_PHP_ENDPOINT, true);
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable && progressIndicator) {
+                        progressIndicator.value = event.loaded;
+                        progressIndicator.max = event.total;
+                    }
+                };
                 xhr.onload = async () => {
                     if (xhr.status === 200) {
                         const result = JSON.parse(xhr.responseText);
@@ -1183,21 +1624,35 @@
                             const finalMsg = { senderId: currentUser.username, receiverId: chatPartner.username, mediaUrl: result.url, timestamp: new Date().toISOString(), type: fileType };
                             const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', finalMsg);
                             await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: fileType === 'image' ? 'تصویر' : 'ویدیو', timestamp: finalMsg.timestamp });
-                            if (tempElement) { tempElement.dataset.id = newMsgRef.name; updateMessageElement(tempElement, finalMsg); lastMessagesSnapshot[newMsgRef.name] = finalMsg; }
-                        } else throw new Error(result.error || 'Upload Failed');
-                    } else throw new Error('Server Error');
+                            if (tempElement) {
+                                tempElement.dataset.id = newMsgRef.name;
+                                updateMessageElement(tempElement, finalMsg);
+                                lastMessagesSnapshot[newMsgRef.name] = finalMsg;
+                            }
+                        } else { throw new Error(result.error || 'خطا در آپلود فایل'); }
+                    } else { throw new Error(`خطای سرور: ${xhr.status}`); }
                 };
+                xhr.onerror = () => { throw new Error('خطای شبکه در هنگام آپلود فایل.'); };
                 xhr.send(formData);
-            } catch (err) { const tempElement = document.querySelector(`.message[data-id="${tempId}"]`); if (tempElement) tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود.</div>`; }
+            } catch (err) {
+                console.error("خطا در ارسال فایل:", err);
+                const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
+                if (tempElement) tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود. ${err.message}</div>`;
+            }
         }
 
         async function sendVoiceMessage(blob) {
             const tempId = `temp_${Date.now()}`;
             createMessageElement(tempId, { senderId: currentUser.username, timestamp: new Date().toISOString(), isSending: true, type: 'voice' });
             scrollToBottom();
-            const formData = new FormData(); formData.append('file', blob, `voice_${currentUser.username}_${Date.now()}.ogg`);
+            const formData = new FormData();
+            formData.append('file', blob, `voice_${currentUser.username}_${Date.now()}.ogg`);
             try {
                 const response = await fetch(UPLOAD_PHP_ENDPOINT, { method: 'POST', body: formData });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `خطای سرور: ${response.status}`);
+                }
                 const result = await response.json();
                 if (result.success && result.url) {
                     await cacheManager.put(result.url, blob);
@@ -1205,9 +1660,17 @@
                     const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', finalMsg);
                     await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: 'پیام صوتی', timestamp: finalMsg.timestamp });
                     const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
-                    if (tempElement) { tempElement.dataset.id = newMsgRef.name; updateMessageElement(tempElement, finalMsg); lastMessagesSnapshot[newMsgRef.name] = finalMsg; }
-                }
-            } catch (err) { const tempElement = document.querySelector(`.message[data-id="${tempId}"]`); if (tempElement) tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود.</div>`; }
+                    if (tempElement) {
+                        tempElement.dataset.id = newMsgRef.name;
+                        updateMessageElement(tempElement, finalMsg);
+                        lastMessagesSnapshot[newMsgRef.name] = finalMsg;
+                    }
+                } else { throw new Error(result.error || 'خطا در آپلود صدا'); }
+            } catch (err) {
+                console.error("خطا در ارسال ویس:", err);
+                const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
+                if (tempElement) tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود.</div>`;
+            }
         }
 
         function createMessageElement(msgId, msg) {
@@ -1217,7 +1680,6 @@
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${msg.senderId === currentUser.username ? 'sent' : 'received'}`;
             msgDiv.dataset.id = msgId;
-            msgDiv.dataset.senderId = msg.senderId; // Added for easier DOM manipulation
             updateMessageElement(msgDiv, msg);
             messagesArea.appendChild(msgDiv);
         }
@@ -1253,14 +1715,22 @@
             const text = messageInput.value.trim();
             if (!text || !chatPartner || isPartnerBlocked) return;
             const message = { senderId: currentUser.username, receiverId: chatPartner.username, text, timestamp: new Date().toISOString(), deleted: false, replyTo: activeReplyContext };
-            const tempInputValue = text; messageInput.value = ''; toggleSendButton(); cancelReply();
+            const tempInputValue = text;
+            messageInput.value = '';
+            toggleSendButton();
+            cancelReply();
             try {
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
                 await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: text, timestamp: message.timestamp });
-                const tempId = newMsgRef.name; lastMessagesSnapshot[tempId] = message; createMessageElement(tempId, message); scrollToBottom();
+                const tempId = newMsgRef.name;
+                lastMessagesSnapshot[tempId] = message;
+                createMessageElement(tempId, message);
+                scrollToBottom();
             } catch(error) {
-                showCustomAlert({ title: 'خطا', message: 'ارسال پیام ممکن نیست.' });
-                messageInput.value = tempInputValue; toggleSendButton();
+                const errorMsg = error.message.includes("blocked") ? 'ارسال پیام ممکن نیست. شما توسط این کاربر مسدود شده‌اید.' : 'خطا در ارسال پیام!';
+                showCustomAlert({ title: 'خطا', message: errorMsg });
+                messageInput.value = tempInputValue;
+                toggleSendButton();
             }
         }
         
@@ -1271,8 +1741,14 @@
             try {
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
                 await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: 'استیکر', timestamp: message.timestamp });
-                const tempId = newMsgRef.name; lastMessagesSnapshot[tempId] = message; createMessageElement(tempId, message); scrollToBottom();
-            } catch (error) { showCustomAlert({ title: 'خطا', message: 'خطا در ارسال استیکر.' }); }
+                const tempId = newMsgRef.name;
+                lastMessagesSnapshot[tempId] = message;
+                createMessageElement(tempId, message);
+                scrollToBottom();
+            } catch (error) {
+                console.error("Error sending sticker:", error);
+                showCustomAlert({ title: 'خطا', message: 'خطا در ارسال استیکر.' });
+            }
         }
         
         async function deleteMessage(messageId) {
@@ -1293,13 +1769,17 @@
             } catch(error) { showCustomAlert({ title: 'خطا', message: 'خطا در ویرایش پیام.' }); }
         }
         
+        // --- بخش ۱۰: مدیریت منوها و قابلیت‌های پیام ---
         function handleMessageClick(e) {
             const mediaContainer = e.target.closest('.media-container');
             if (mediaContainer && mediaContainer.querySelector('img')) {
                 const img = mediaContainer.querySelector('img');
                 const originalUrl = img.dataset.originalSrc;
                 if (!originalUrl || !img.src || img.src.startsWith('data:')) return;
-                cacheManager.get(originalUrl).then(localUrl => { fullscreenImage.src = localUrl || originalUrl; showModal(imageViewerOverlay); });
+                cacheManager.get(originalUrl).then(localUrl => {
+                    fullscreenImage.src = localUrl || originalUrl; 
+                    showModal(imageViewerOverlay);
+                });
                 return;
             }
             const messageElement = e.target.closest('.message:not(.deleted)');
@@ -1340,40 +1820,65 @@
             activeReplyContext = { msgId: activeMessageId, text: activeMessageElement.dataset.text, senderName: activeMessageElement.dataset.senderName };
             document.getElementById('reply-to-name').textContent = `پاسخ به ${activeReplyContext.senderName}`;
             document.getElementById('reply-preview-text').textContent = activeReplyContext.text;
-            replyPreviewBar.style.display = 'flex'; hideModal(messageOptionsOverlay); messageInput.focus();
+            replyPreviewBar.style.display = 'flex';
+            hideModal(messageOptionsOverlay);
+            messageInput.focus();
         }
-        function cancelReply() { activeReplyContext = null; replyPreviewBar.style.display = 'none'; }
+
+        function cancelReply() {
+            activeReplyContext = null;
+            replyPreviewBar.style.display = 'none';
+        }
         
         async function handlePinAction() {
             if (!activeMessageId) return;
             hideModal(messageOptionsOverlay);
-            if (currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) await handleUnpinAction();
-            else {
+            if (currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) {
+                await handleUnpinAction();
+            } else {
                 const textToPin = activeMessageElement.dataset.text;
-                if (!textToPin) { showCustomAlert({ title: 'توجه', message: 'امکان سنجاق کردن پیام‌های بدون متن وجود ندارد.' }); activeMessageId = null; return; }
+                if (!textToPin) {
+                    showCustomAlert({ title: 'توجه', message: 'امکان سنجاق کردن پیام‌های بدون متن وجود ندارد.' });
+                    activeMessageId = null;
+                    return;
+                }
                 const pinnedData = { msgId: activeMessageId, text: textToPin };
-                try { await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { pinnedMessage: pinnedData }); updatePinnedMessageUI(pinnedData); } catch (error) { showCustomAlert({ title: 'خطا', message: 'خطا در سنجاق کردن پیام.' }); }
+                try {
+                    await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { pinnedMessage: pinnedData });
+                    updatePinnedMessageUI(pinnedData);
+                } catch (error) { showCustomAlert({ title: 'خطا', message: 'خطا در سنجاق کردن پیام.' }); }
             }
             activeMessageId = null;
         }
+
         async function handleUnpinAction() {
-            try { await apiRequest(`pivi_chats/${chatId}/pinnedMessage`, 'DELETE'); updatePinnedMessageUI(null); } catch (error) { showCustomAlert({ title: 'خطا', message: 'خطا در حذف سنجاق پیام.' }); }
+            try {
+                await apiRequest(`pivi_chats/${chatId}/pinnedMessage`, 'DELETE');
+                updatePinnedMessageUI(null);
+            } catch (error) { showCustomAlert({ title: 'خطا', message: 'خطا در حذف سنجاق پیام.' }); }
         }
+        
         function updatePinnedMessageUI(pinnedData) {
             currentPinnedMessage = pinnedData;
-            if (pinnedData && pinnedData.text) { document.getElementById('pinned-message-text').textContent = pinnedData.text; pinnedMessageBar.style.display = 'flex'; }
-            else pinnedMessageBar.style.display = 'none';
+            if (pinnedData && pinnedData.text) {
+                document.getElementById('pinned-message-text').textContent = pinnedData.text;
+                pinnedMessageBar.style.display = 'flex';
+            } else {
+                pinnedMessageBar.style.display = 'none';
+            }
         }
+        
         function scrollToMessage(msgId) {
             const element = document.querySelector(`.message[data-id="${msgId}"]`);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                element.style.transition = 'background-color 0.5s'; element.style.backgroundColor = 'rgba(0, 149, 255, 0.3)';
+                element.style.transition = 'background-color 0.5s';
+                element.style.backgroundColor = 'rgba(0, 149, 255, 0.3)';
                 setTimeout(() => { element.style.backgroundColor = ''; }, 1500);
             }
         }
 
-        // --- Modals & Dialogs ---
+        // --- بخش ۱۱: توابع مدیریت مودال‌ها و دیالوگ‌ها ---
         async function showModal(overlayElement) {
             if(overlayElement.id === 'profile-overlay' && chatPartner){
                 const profileCardAvatarUrl = chatPartner.profilePicUrl ? chatPartner.profilePicUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=2C2C2E&color=fff&size=120`;
@@ -1382,15 +1887,24 @@
                 document.getElementById('profile-card-username').textContent = `@${chatPartner.username}`;
                 document.getElementById('profile-card-uid').textContent = chatPartner.username;
                 const statusEl = document.getElementById('profile-card-status');
-                if(chatPartner.isOnline) { statusEl.textContent = 'آنلاین'; statusEl.style.color = 'var(--online-indicator)'; }
-                else { statusEl.textContent = 'آفلاین'; statusEl.style.color = 'var(--text-secondary)'; }
+                if(chatPartner.isOnline) {
+                    statusEl.textContent = 'آنلاین'; statusEl.style.color = 'var(--online-indicator)';
+                } else {
+                    statusEl.textContent = 'آفلاین'; statusEl.style.color = 'var(--text-secondary)';
+                }
                 updateBlockUI();
                 await checkFollowStatus(chatPartner.username);
             }
             overlayElement.classList.add('visible');
         }
-        function hideModal(overlayElement) { overlayElement.classList.remove('visible'); }
-        function closeImageViewer() { fullscreenImage.src = ''; hideModal(imageViewerOverlay); }
+        function hideModal(overlayElement) {
+            overlayElement.classList.remove('visible');
+        }
+
+        function closeImageViewer() {
+            fullscreenImage.src = '';
+            hideModal(imageViewerOverlay);
+        }
         
         const dialogOverlay = document.getElementById('custom-dialog-overlay');
         const dialogTitle = document.getElementById('dialog-title');
@@ -1401,64 +1915,124 @@
         let dialogResolver = null;
 
         function showCustomDialog(options) {
-            dialogTitle.textContent = options.title || ''; dialogMessage.textContent = options.message || '';
-            dialogInput.style.display = options.prompt ? 'block' : 'none'; dialogInput.value = options.initialValue || '';
-            cancelBtn.style.display = options.alert ? 'none' : 'inline-flex'; confirmBtn.textContent = options.alert ? 'باشه' : 'تایید';
-            showModal(dialogOverlay); if(options.prompt) dialogInput.focus();
+            dialogTitle.textContent = options.title || '';
+            dialogMessage.textContent = options.message || '';
+            dialogInput.style.display = options.prompt ? 'block' : 'none';
+            dialogInput.value = options.initialValue || '';
+            cancelBtn.style.display = options.alert ? 'none' : 'inline-flex';
+            confirmBtn.textContent = options.alert ? 'باشه' : 'تایید';
+            showModal(dialogOverlay);
+            if(options.prompt) dialogInput.focus();
             return new Promise(resolve => { dialogResolver = resolve; });
         }
-        confirmBtn.onclick = () => { if (dialogResolver) dialogResolver(dialogInput.style.display === 'block' ? dialogInput.value : true); dialogResolver = null; hideModal(dialogOverlay); };
-        cancelBtn.onclick = () => { if (dialogResolver) dialogResolver(dialogInput.style.display === 'block' ? null : false); dialogResolver = null; hideModal(dialogOverlay); };
+        confirmBtn.onclick = () => {
+            if (dialogResolver) dialogResolver(dialogInput.style.display === 'block' ? dialogInput.value : true);
+            dialogResolver = null;
+            hideModal(dialogOverlay);
+        };
+        cancelBtn.onclick = () => {
+            if (dialogResolver) dialogResolver(dialogInput.style.display === 'block' ? null : false);
+            dialogResolver = null;
+            hideModal(dialogOverlay);
+        };
+
         function showCustomConfirm(options) { return showCustomDialog({ ...options, prompt: false }); }
         function showCustomPrompt(options) { return showCustomDialog({ ...options, prompt: true }); }
         function showCustomAlert(options) { return showCustomDialog({ ...options, alert: true }); }
 
+        // --- بخش ۱۲: تابع کمکی برای ارسال درخواست‌های API (با قابلیت تلاش مجدد) ---
         async function apiRequest(path, method = 'GET', body, keepalive = false, retries = 3, timeout = 15000) {
             for (let i = 0; i < retries; i++) {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), timeout);
+                
                 try {
                     const finalUrl = path === '/' ? PROXY_URL : `${PROXY_URL}?path=${encodeURIComponent(path)}`;
-                    const options = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }, keepalive, signal: controller.signal };
-                    if (body !== undefined && method !== 'GET') options.body = JSON.stringify(body);
+                    const options = {
+                        method,
+                        headers: { 
+                            'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}`,
+                            'X-User-Username': currentUser.username
+                        },
+                        keepalive,
+                        signal: controller.signal
+                    };
+                    if (body !== undefined && method !== 'GET') {
+                        options.body = JSON.stringify(body);
+                    }
+                    
                     const response = await fetch(finalUrl, options);
                     clearTimeout(timeoutId);
-                    if (response.status >= 500 && i < retries - 1) { await new Promise(res => setTimeout(res, 1000 * (i + 1))); continue; }
+
+                    if (response.status >= 500 && i < retries - 1) { // Server error, retry
+                        await new Promise(res => setTimeout(res, 1000 * (i + 1)));
+                        continue;
+                    }
+
                     const responseData = await response.json().catch(() => ({}));
-                    if (!response.ok) throw new Error(responseData.error || `Error ${response.status}`);
+                    if (!response.ok) {
+                        console.error("API Error Response:", responseData);
+                        throw new Error(responseData.error || `یک خطای ${response.status} رخ داد.`);
+                    }
                     return responseData;
+
                 } catch (error) {
                     clearTimeout(timeoutId);
-                    if ((error.name === 'AbortError' || error.message.includes('Failed to fetch')) && i < retries - 1) { await new Promise(res => setTimeout(res, 1500 * (i + 1))); continue; }
-                    throw error;
+                    if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) { // Timeout or Network error
+                        console.warn(`Attempt ${i + 1} failed for ${path}: ${error.message}. Retrying...`);
+                        if (i < retries - 1) {
+                            await new Promise(res => setTimeout(res, 1500 * (i + 1))); // Exponential backoff
+                            continue;
+                        }
+                    }
+                    throw error; // Rethrow after final attempt or for non-network errors
                 }
             }
-            throw new Error(`Request failed after ${retries} attempts.`);
+            throw new Error(`عملیات برای ${path} پس از ${retries} تلاش ناموفق بود.`);
         }
         
-        function openStickerPanel() { showModal(stickerPanelOverlay); if (!stickersLoaded) loadStickers(); }
+        // --- بخش ۱۳: منطق پنل استیکر ---
+        function openStickerPanel() {
+            showModal(stickerPanelOverlay);
+            if (!stickersLoaded) loadStickers();
+        }
         function closeStickerPanel() { hideModal(stickerPanelOverlay); }
         async function loadStickers() {
             stickerGrid.innerHTML = '<div class="loader"></div>';
             try {
                 let stickers = await apiRequest('stickers', 'GET');
-                populateStickerGrid(stickers); stickersLoaded = true;
-            } catch (error) { stickerGrid.innerHTML = `<p class="error-text">خطا در بارگذاری استیکرها</p>`; }
+                populateStickerGrid(stickers);
+                stickersLoaded = true;
+            } catch (error) {
+                console.error("Failed to load stickers:", error);
+                stickerGrid.innerHTML = `<p class="error-text">خطا در بارگذاری استیکرها</p>`;
+            }
         }
         function populateStickerGrid(stickerData) {
             stickerGrid.innerHTML = '';
             const stickerUrls = Array.isArray(stickerData) ? stickerData : Object.values(stickerData).map(item => item.url);
-            if (!stickerUrls || stickerUrls.length === 0) { stickerGrid.innerHTML = `<p class="error-text">استیکری یافت نشد.</p>`; return; }
+            if (!stickerUrls || stickerUrls.length === 0) {
+                 stickerGrid.innerHTML = `<p class="error-text">استیکری یافت نشد.</p>`;
+                 return;
+            }
             stickerUrls.forEach(url => {
                 if (typeof url !== 'string') return;
-                const img = document.createElement('img'); img.src = url; img.alt = 'Sticker'; img.loading = 'lazy';
+                const img = document.createElement('img');
+                img.src = url; img.alt = 'Sticker'; img.loading = 'lazy';
                 stickerGrid.appendChild(img);
             });
         }
-        function handleStickerClick(e) { if (e.target.tagName === 'IMG') { sendImageMessage(e.target.src); closeStickerPanel(); } }
+        function handleStickerClick(e) {
+            if (e.target.tagName === 'IMG') {
+                sendImageMessage(e.target.src);
+                closeStickerPanel();
+            }
+        }
 
+        // --- بخش ۱۴: منطق پلیر سفارشی پیام صوتی ---
         async function setupVoicePlayer(messageElement, voiceUrl) {
-            const player = messageElement.querySelector('.voice-player'); if (!player) return;
+            const player = messageElement.querySelector('.voice-player');
+            if (!player) return;
             const audio = player.querySelector('.voice-audio'), playPauseBtn = player.querySelector('.play-pause-btn');
             const playIcon = player.querySelector('.play-icon'), pauseIcon = player.querySelector('.pause-icon');
             const progressContainer = player.querySelector('.progress-container'), progressBar = player.querySelector('.progress-bar');
@@ -1469,73 +2043,138 @@
                 if (!localUrl) {
                     const blob = await cacheManager.downloadWithProgress(voiceUrl, () => {});
                     const newLocalUrl = URL.createObjectURL(blob);
-                    cacheManager._blobUrlReferences.set(voiceUrl, newLocalUrl); audio.src = newLocalUrl;
+                    cacheManager._blobUrlReferences.set(voiceUrl, newLocalUrl);
+                    audio.src = newLocalUrl;
                 }
-            } catch (error) { audio.src = voiceUrl; }
+            } catch (error) { console.error("Failed to load voice message:", error); audio.src = voiceUrl; }
             const formatTime = (s) => isNaN(s) ? '0:00' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
             audio.addEventListener('loadedmetadata', () => durationEl.textContent = formatTime(audio.duration));
-            audio.addEventListener('timeupdate', () => { progressBar.style.width = `${(audio.currentTime/audio.duration)*100}%`; durationEl.textContent = formatTime(audio.currentTime); });
-            audio.addEventListener('ended', () => { playIcon.style.display = 'inline'; pauseIcon.style.display = 'none'; progressBar.style.width = '0%'; durationEl.textContent = formatTime(audio.duration); });
+            audio.addEventListener('timeupdate', () => {
+                progressBar.style.width = `${(audio.currentTime/audio.duration)*100}%`;
+                durationEl.textContent = formatTime(audio.currentTime);
+            });
+            audio.addEventListener('ended', () => {
+                playIcon.style.display = 'inline'; pauseIcon.style.display = 'none';
+                progressBar.style.width = '0%'; durationEl.textContent = formatTime(audio.duration);
+            });
             playPauseBtn.addEventListener('click', () => {
                 if (audio.paused) { audio.play(); playIcon.style.display = 'none'; pauseIcon.style.display = 'inline'; }
                 else { audio.pause(); playIcon.style.display = 'inline'; pauseIcon.style.display = 'none'; }
             });
-            progressContainer.addEventListener('click', (e) => { const rect = progressContainer.getBoundingClientRect(); audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration; });
+            progressContainer.addEventListener('click', (e) => {
+                const rect = progressContainer.getBoundingClientRect();
+                audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+            });
         }
         
+        // --- بخش ۱۵: منطق جدید مدیریت و دانلود مدیا ---
         async function setupMediaLoader(container, mediaUrl, type) {
-            const mediaElement = container.querySelector('img, video'); if (!mediaElement) return;
+            const mediaElement = container.querySelector('img, video');
+            if (!mediaElement) return;
             mediaElement.dataset.originalSrc = mediaUrl;
             const cachedUrl = await cacheManager.get(mediaUrl);
-            if (cachedUrl) { mediaElement.src = cachedUrl; if (type === 'video') mediaElement.controls = true; return; }
-            const loaderOverlay = document.createElement('div'); loaderOverlay.className = 'media-loader-overlay';
+            if (cachedUrl) {
+                mediaElement.src = cachedUrl;
+                if (type === 'video') mediaElement.controls = true;
+                return;
+            }
+            const loaderOverlay = document.createElement('div');
+            loaderOverlay.className = 'media-loader-overlay';
             loaderOverlay.innerHTML = `<div class="download-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></div>`;
             container.appendChild(loaderOverlay);
             loaderOverlay.addEventListener('click', () => initiateMediaDownload(container, mediaUrl, type), { once: true });
         }
 
         async function initiateMediaDownload(container, mediaUrl, type) {
-            const mediaElement = container.querySelector('img, video'); const overlay = container.querySelector('.media-loader-overlay'); if (!overlay) return;
+            const mediaElement = container.querySelector('img, video');
+            const overlay = container.querySelector('.media-loader-overlay');
+            if (!overlay) return;
             overlay.innerHTML = `<button class="cancel-download-btn">&times;</button><div class="progress-circle"><svg viewBox="0 0 36 36"><path class="bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path class="progress" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg><div class="progress-text">0%</div></div>`;
             const progressPath = overlay.querySelector('.progress-circle .progress'), progressText = overlay.querySelector('.progress-text'), cancelBtn = overlay.querySelector('.cancel-download-btn');
-            const controller = new AbortController(); activeControllers.set(mediaUrl, controller);
+            const controller = new AbortController();
+            activeControllers.set(mediaUrl, controller);
             cancelBtn.onclick = (e) => { e.stopPropagation(); controller.abort(); };
             try {
                 const onProgress = ({ percent }) => { if (percent !== undefined) { progressPath.style.strokeDasharray = `${percent}, 100`; progressText.textContent = `${percent}%`; } };
                 const blob = await cacheManager.downloadWithProgress(mediaUrl, onProgress, controller.signal);
                 const localUrl = await cacheManager.get(mediaUrl) || URL.createObjectURL(blob);
-                mediaElement.src = localUrl; if (type === 'video') { mediaElement.controls = true; mediaElement.autoplay = true; }
-                overlay.classList.add('hidden'); setTimeout(() => overlay.remove(), 300);
-            } catch (error) { overlay.remove(); setupMediaLoader(container, mediaUrl, type); } finally { activeControllers.delete(mediaUrl); }
+                mediaElement.src = localUrl;
+                if (type === 'video') { mediaElement.controls = true; mediaElement.autoplay = true; }
+                overlay.classList.add('hidden');
+                setTimeout(() => overlay.remove(), 300);
+            } catch (error) {
+                if (error.name === 'AbortError') console.log('Download cancelled.');
+                else console.error('Download failed:', error);
+                overlay.remove();
+                setupMediaLoader(container, mediaUrl, type);
+            } finally {
+                activeControllers.delete(mediaUrl);
+            }
         }
 
+        // --- بخش ۱۶: منطق سیستم دنبال کردن ---
         async function checkFollowStatus(targetUsername) {
             if (!currentUser || !targetUsername) return;
             profileFollowBtn.disabled = true;
             try {
                 const status = await apiRequest(`following/${currentUser.username}/${targetUsername}`, 'GET');
-                if (status === true) { profileFollowBtn.classList.add('following'); profileFollowBtn.textContent = 'دنبال می‌کنید'; }
-                else { profileFollowBtn.classList.remove('following'); profileFollowBtn.textContent = 'دنبال کردن'; }
-            } catch (error) { profileFollowBtn.classList.remove('following'); profileFollowBtn.textContent = 'دنبال کردن'; }
-            finally { profileFollowBtn.disabled = false; }
+                if (status === true) {
+                    profileFollowBtn.classList.add('following');
+                    profileFollowBtn.textContent = 'دنبال می‌کنید';
+                } else {
+                    profileFollowBtn.classList.remove('following');
+                    profileFollowBtn.textContent = 'دنبال کردن';
+                }
+            } catch (error) {
+                console.error("Error checking follow status:", error);
+                profileFollowBtn.classList.remove('following');
+                profileFollowBtn.textContent = 'دنبال کردن';
+            } finally {
+                profileFollowBtn.disabled = false;
+            }
         }
 
         async function toggleFollow() {
-            const targetUsername = chatPartner.username; if (!targetUsername) return;
+            const targetUsername = chatPartner.username;
+            if (!targetUsername) return;
+
             profileFollowBtn.disabled = true;
             const isCurrentlyFollowing = profileFollowBtn.classList.contains('following');
-            if (isCurrentlyFollowing) { profileFollowBtn.classList.remove('following'); profileFollowBtn.textContent = 'دنبال کردن'; }
-            else { profileFollowBtn.classList.add('following'); profileFollowBtn.textContent = 'دنبال می‌کنید'; }
+            
+            // Optimistic UI update
+            if (isCurrentlyFollowing) {
+                profileFollowBtn.classList.remove('following');
+                profileFollowBtn.textContent = 'دنبال کردن';
+            } else {
+                profileFollowBtn.classList.add('following');
+                profileFollowBtn.textContent = 'دنبال می‌کنید';
+            }
+
             try {
-                const valueToSet = isCurrentlyFollowing ? null : true;
-                const payload = { [`following/${currentUser.username}/${targetUsername}`]: valueToSet, [`followers/${targetUsername}/${currentUser.username}`]: valueToSet };
-                await apiRequest('/', 'PATCH', payload);
+                const valueToSet = isCurrentlyFollowing ? null : true; // null for delete
+                const payload = {
+                    [`following/${currentUser.username}/${targetUsername}`]: valueToSet,
+                    [`followers/${targetUsername}/${currentUser.username}`]: valueToSet,
+                };
+
+                await apiRequest('/', 'PATCH', payload); // Use root path for multi-path update
+                
             } catch (error) {
+                console.error("Failed to toggle follow:", error);
                 showCustomAlert({ title: 'خطا', message: `خطا در عملیات: ${error.message}` });
-                if (isCurrentlyFollowing) { profileFollowBtn.classList.add('following'); profileFollowBtn.textContent = 'دنبال می‌کنید'; }
-                else { profileFollowBtn.classList.remove('following'); profileFollowBtn.textContent = 'دنبال کردن'; }
-            } finally { profileFollowBtn.disabled = false; }
+                // Revert UI on failure
+                if (isCurrentlyFollowing) {
+                    profileFollowBtn.classList.add('following');
+                    profileFollowBtn.textContent = 'دنبال می‌کنید';
+                } else {
+                    profileFollowBtn.classList.remove('following');
+                    profileFollowBtn.textContent = 'دنبال کردن';
+                }
+            } finally {
+                profileFollowBtn.disabled = false;
+            }
         }
+
     </script>
 </body>
 </html>
