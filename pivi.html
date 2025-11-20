@@ -669,7 +669,7 @@
         }
         #keyboard-offset-value { font-weight: 500; min-width: 50px; text-align: left; }
         
-        /* --- استایل‌های پنل استیکر --- */
+        /* --- NEW: استایل‌های پنل استیکر --- */
         .modal-overlay.bottom-sheet {
             align-items: flex-end; /* تراز کردن در پایین */
         }
@@ -813,7 +813,7 @@
                 
                 <input type="text" id="message-input" placeholder="پیامت رو بنویس..." autocomplete="off">
                 <!-- NEW: Hidden file input -->
-                <input type="file" id="file-input" style="display:none" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm">
+                <input type="file" id="file-input" style="display:none" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm">
 
                 <div id="attachment-buttons">
                     <button type="button" id="attach-file-btn" class="icon-btn" title="افزودن فایل"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg></button>
@@ -1011,7 +1011,6 @@
                         const objectURL = URL.createObjectURL(blob);
                         this._blobUrlReferences.set(url, objectURL);
                         
-                        // Update last accessed time in background
                         this.db.transaction(this.storeName, 'readwrite')
                            .objectStore(this.storeName)
                            .get(url).onsuccess = (event) => {
@@ -1032,6 +1031,9 @@
                 }
             }
             
+            // =================================================================
+            //  >>> START: THE CORS FIX IS APPLIED HERE <<<
+            // =================================================================
             async downloadWithProgress(url, onProgress, signal) {
                 if (this._ongoingDownloads.has(url)) {
                     return this._ongoingDownloads.get(url);
@@ -1039,7 +1041,12 @@
 
                 const downloadPromise = (async () => {
                     try {
-                        const response = await fetch(url, { signal });
+                        // Create the proxied URL to bypass CORS
+                        const proxyFetchUrl = `${PROXY_URL}?media_url=${encodeURIComponent(url)}`;
+                        
+                        // Fetch from your proxy instead of the direct URL
+                        const response = await fetch(proxyFetchUrl, { signal });
+
                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                         
                         const contentLength = response.headers.get('Content-Length');
@@ -1047,7 +1054,7 @@
                             console.warn('Content-Length header not found. Progress will not be available.');
                             const blob = await response.blob();
                             onProgress({ loaded: blob.size, total: blob.size, percent: 100 });
-                            await this.put(url, blob);
+                            await this.put(url, blob); // Still cache with the original URL
                             return blob;
                         }
 
@@ -1067,7 +1074,7 @@
                         }
 
                         const blob = new Blob(chunks);
-                        await this.put(url, blob);
+                        await this.put(url, blob); // Cache with original URL
                         return blob;
                     } finally {
                         this._ongoingDownloads.delete(url);
@@ -1077,6 +1084,9 @@
                 this._ongoingDownloads.set(url, downloadPromise);
                 return downloadPromise;
             }
+            // ===============================================================
+            //  >>> END: THE CORS FIX IS APPLIED HERE <<<
+            // ===============================================================
 
             revokeUrl(url) {
                 if (this._blobUrlReferences.has(url)) {
@@ -1805,13 +1815,10 @@
             cancelReply();
 
             try {
+                // This request now also triggers the chat list update on the server side (via proxy)
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
-                await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
-                    lastMessage: text, timestamp: message.timestamp,
-                    members: { [currentUser.username]: true, [chatPartner.username]: true }
-                });
-                // No need to call createMessageElement here, polling will handle it.
-                // But for instant feedback:
+                
+                // For instant feedback in the UI:
                 const tempId = newMsgRef.name;
                 lastMessagesSnapshot[tempId] = message;
                 createMessageElement(tempId, message);
@@ -1838,7 +1845,6 @@
 
             try {
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
-                await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: 'استیکر', timestamp: message.timestamp });
                 
                 const tempId = newMsgRef.name;
                 lastMessagesSnapshot[tempId] = message;
