@@ -66,7 +66,7 @@
         }
         .loading-dots div:nth-child(2) { animation-delay: 0.4s; }
         .loading-dots div:nth-child(3) { animation-delay: 0.8s; }
-        #loading-error { color: var(--danger-color); margin-top: 20px; text-align: center; display: none; }
+        #loading-error { color: var(--danger-color); margin-top: 20px; text-align: center; display: none; padding: 0 20px; line-height: 1.6; }
 
         @keyframes dot-flashing {
             0% { opacity: 0.2; transform: scale(0.8); }
@@ -93,9 +93,10 @@
             position: relative; z-index: 10;
         }
         .chat-header .back-btn { background: none; border: none; cursor: pointer; color: var(--text-primary); padding: 5px; }
-        .chat-header .partner-info { display: flex; align-items: center; margin-right: 15px; flex-grow: 1; cursor: pointer; }
+        .chat-header .partner-info { display: flex; align-items: center; margin-right: 15px; flex-grow: 1; cursor: pointer; overflow: hidden; }
         .partner-info img { width: 45px; height: 45px; border-radius: 50%; margin-left: 12px; object-fit: cover; background-color: var(--tertiary-color); }
-        .partner-details h2 { font-size: 1.1em; font-weight: 500; }
+        .partner-details { overflow: hidden; }
+        .partner-details h2 { font-size: 1.1em; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
         .partner-details .status { font-size: 0.8em; color: var(--online-indicator); transition: color 0.3s; }
         .partner-details .status.offline { color: var(--text-secondary); }
         .options-btn { background: none; border: none; cursor: pointer; color: var(--text-secondary); }
@@ -479,7 +480,7 @@
             align-items: center;
             color: var(--text-secondary);
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s, color 0.3s;
             pointer-events: none;
         }
         #voice-cancel-indicator.visible { opacity: 1; }
@@ -1142,7 +1143,7 @@
         }
         // ============================================================
 
-        // --- ارجاع به عناصر DOM ---
+        // --- بخش ۱: ارجاع به عناصر DOM و متغیرهای اصلی ---
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingErrorEl = document.getElementById('loading-error');
         const appContainer = document.getElementById('app-container');
@@ -1158,7 +1159,6 @@
         const messageOptionsOverlay = document.getElementById('message-options-overlay');
         const profileOverlay = document.getElementById('profile-overlay');
         const blockUserBtn = document.getElementById('block-user-btn');
-        // NEW: Follow button reference
         const profileFollowBtn = document.getElementById('profile-follow-btn');
         const blockedUserOverlay = document.getElementById('blocked-user-overlay');
         const replyPreviewBar = document.getElementById('reply-preview-bar');
@@ -1183,7 +1183,6 @@
         const stickerGrid = document.getElementById('sticker-grid');
         const closeStickerPanelBtn = document.getElementById('close-sticker-panel-btn');
 
-        // CACHE MANAGER INSTANCE
         const cacheManager = new CacheManager();
         const activeControllers = new Map();
 
@@ -1239,8 +1238,8 @@
             if (!partnerUsername) { showError('کاربر مقصد مشخص نشده است.'); return; }
 
             try {
-                if (PROXY_URL.includes('YOUR_CORRECT_DOMAIN') || UPLOAD_PHP_ENDPOINT.includes('YOUR_CORRECT_DOMAIN')) {
-                     throw new Error('لطفاً آدرس دامنه صحیح خود را در متغیرهای PROXY_URL و UPLOAD_PHP_ENDPOINT در کد جاوااسکریپت وارد کنید.');
+                if (PROXY_URL.includes('miko.freehost.io') && SHARED_SECRET === 'miko1234') {
+                     console.warn('هشدار: شما در حال استفاده از تنظیمات پیش‌فرض هستید. لطفاً آدرس پروکسی و کلید اشتراکی خود را تغییر دهید.');
                 }
                 await refreshClientToken();
                 await fetchCurrentUserData();
@@ -1345,7 +1344,6 @@
             document.getElementById('edit-msg-btn').addEventListener('click', handleEditAction);
             document.getElementById('delete-msg-btn').addEventListener('click', handleDeleteAction);
             blockUserBtn.addEventListener('click', handleBlockToggle);
-            // NEW: Follow button listener
             profileFollowBtn.addEventListener('click', toggleFollow);
 
             document.getElementById('main-menu-profile-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(profileOverlay); });
@@ -1406,7 +1404,7 @@
             if (!currentUser || !clientToken) return;
             const presenceData = { isOnline, lastSeen: new Date().toISOString() };
             try { await apiRequest(`users/${currentUser.username}`, 'PATCH', presenceData, true); } 
-            catch (error) { console.error("خطا در به‌روزرسانی وضعیت حضور:", error); }
+            catch (error) { console.warn("خطا در به‌روزرسانی وضعیت حضور:", error); }
         }
         
         async function pollPartnerStatus() {
@@ -1723,6 +1721,7 @@
             cancelReply();
             try {
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
+                await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: text, timestamp: message.timestamp });
                 const tempId = newMsgRef.name;
                 lastMessagesSnapshot[tempId] = message;
                 createMessageElement(tempId, message);
@@ -1741,6 +1740,7 @@
             cancelReply();
             try {
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
+                await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: 'استیکر', timestamp: message.timestamp });
                 const tempId = newMsgRef.name;
                 lastMessagesSnapshot[tempId] = message;
                 createMessageElement(tempId, message);
@@ -1893,7 +1893,6 @@
                     statusEl.textContent = 'آفلاین'; statusEl.style.color = 'var(--text-secondary)';
                 }
                 updateBlockUI();
-                // NEW: Check follow status when profile is opened
                 await checkFollowStatus(chatPartner.username);
             }
             overlayElement.classList.add('visible');
@@ -1941,28 +1940,55 @@
         function showCustomPrompt(options) { return showCustomDialog({ ...options, prompt: true }); }
         function showCustomAlert(options) { return showCustomDialog({ ...options, alert: true }); }
 
-        // --- بخش ۱۲: تابع کمکی برای ارسال درخواست‌های API ---
-        async function apiRequest(path, method, body, keepalive = false) {
-            const finalUrl = path === '/' ? PROXY_URL : `${PROXY_URL}?path=${path}`;
-            const options = {
-                method,
-                headers: { 
-                    'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}`,
-                    'X-User-Username': currentUser.username
-                },
-                keepalive
-            };
-            if (body !== undefined && method !== 'GET') {
-                options.body = JSON.stringify(body);
+        // --- بخش ۱۲: تابع کمکی برای ارسال درخواست‌های API (با قابلیت تلاش مجدد) ---
+        async function apiRequest(path, method = 'GET', body, keepalive = false, retries = 3, timeout = 15000) {
+            for (let i = 0; i < retries; i++) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+                
+                try {
+                    const finalUrl = path === '/' ? PROXY_URL : `${PROXY_URL}?path=${encodeURIComponent(path)}`;
+                    const options = {
+                        method,
+                        headers: { 
+                            'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}`,
+                            'X-User-Username': currentUser.username
+                        },
+                        keepalive,
+                        signal: controller.signal
+                    };
+                    if (body !== undefined && method !== 'GET') {
+                        options.body = JSON.stringify(body);
+                    }
+                    
+                    const response = await fetch(finalUrl, options);
+                    clearTimeout(timeoutId);
+
+                    if (response.status >= 500 && i < retries - 1) { // Server error, retry
+                        await new Promise(res => setTimeout(res, 1000 * (i + 1)));
+                        continue;
+                    }
+
+                    const responseData = await response.json().catch(() => ({}));
+                    if (!response.ok) {
+                        console.error("API Error Response:", responseData);
+                        throw new Error(responseData.error || `یک خطای ${response.status} رخ داد.`);
+                    }
+                    return responseData;
+
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) { // Timeout or Network error
+                        console.warn(`Attempt ${i + 1} failed for ${path}: ${error.message}. Retrying...`);
+                        if (i < retries - 1) {
+                            await new Promise(res => setTimeout(res, 1500 * (i + 1))); // Exponential backoff
+                            continue;
+                        }
+                    }
+                    throw error; // Rethrow after final attempt or for non-network errors
+                }
             }
-            
-            const response = await fetch(finalUrl, options);
-            const responseData = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                 console.error("API Error Response:", responseData);
-                 throw new Error(responseData.error || `یک خطای ${response.status} رخ داد.`);
-            }
-            return responseData;
+            throw new Error(`عملیات برای ${path} پس از ${retries} تلاش ناموفق بود.`);
         }
         
         // --- بخش ۱۳: منطق پنل استیکر ---
@@ -2086,9 +2112,7 @@
             }
         }
 
-        // ==============================================================
-        //  >>> START: NEW FOLLOW SYSTEM LOGIC <<<
-        // ==============================================================
+        // --- بخش ۱۶: منطق سیستم دنبال کردن ---
         async function checkFollowStatus(targetUsername) {
             if (!currentUser || !targetUsername) return;
             profileFollowBtn.disabled = true;
@@ -2150,9 +2174,6 @@
                 profileFollowBtn.disabled = false;
             }
         }
-        // ==============================================================
-        //  >>> END: NEW FOLLOW SYSTEM LOGIC <<<
-        // ==============================================================
 
     </script>
 </body>
