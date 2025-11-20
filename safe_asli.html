@@ -1008,9 +1008,14 @@
         let allUsers = {};
         let allChannels = {};
         let recentChats = [];
-        let pollingIntervalId = null; 
         let currentSearchMode = 'accounts';
-        let currentProfileUsername = null; // Stores the username of the profile being viewed in the overlay
+        let currentProfileUsername = null; 
+
+        // --- NEW: Robust Polling State ---
+        let pollingTimeoutId = null;
+        let pollingErrorCount = 0;
+        const BASE_POLLING_INTERVAL = 20000; // Increased to 20 seconds
+        const MAX_POLLING_INTERVAL = 120000; // Max wait time of 2 minutes
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1024,7 +1029,7 @@
             // EVENT LISTENERS
             searchInput.addEventListener('input', handleSearch);
             searchTabsContainer.addEventListener('click', handleTabSwitch);
-            openProfileBtn.addEventListener('click', () => openUserProfile(currentUser.username)); // Modified
+            openProfileBtn.addEventListener('click', () => openUserProfile(currentUser.username));
             closeProfileBtn.addEventListener('click', hideProfile);
             logoutBtn.addEventListener('click', () => {
                 showCustomConfirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟', handleLogoutConfirmed);
@@ -1035,7 +1040,6 @@
                 window.location.href = 'https://abolfazl140122.github.io/miko_rel/Channel.html';
             });
             
-            // Edit Profile Event Listeners
             editProfileBtn.addEventListener('click', showEditProfileModal);
             cancelEditBtn.addEventListener('click', hideEditProfileModal);
             editProfileModal.addEventListener('click', (e) => {
@@ -1046,7 +1050,6 @@
             pfpUploadInput.addEventListener('change', handleImagePreview);
             editProfileForm.addEventListener('submit', handleProfileUpdate);
 
-            // Follow System Event Listener
             profileFollowBtn.addEventListener('click', toggleFollow);
 
             await loadInitialData();
@@ -1090,7 +1093,10 @@
 
             } catch (error) {
                 console.error("Initialization Error:", error);
-                showErrorMessage(`خطا در بارگذاری اطلاعات: ${error.message}`);
+                showErrorMessage(`خطا در بارگذاری اطلاعات اولیه: ${error.message}`);
+                 if (error instanceof TypeError) { // It's a network error
+                    showErrorMessage('خطای شبکه. لطفاً اتصال اینترنت خود را بررسی کرده و صفحه را رفرش کنید.');
+                }
             }
         }
 
@@ -1120,7 +1126,6 @@
 
         async function updateUserDataOnServer(path, data) {
             if (!clientToken || !currentUser) throw new Error('کاربر احراز هویت نشده است.');
-            // For multi-path updates, the path should be the root '/'
             const finalPath = path === '/' ? '' : `?path=${path}`;
             const response = await fetch(`${PROXY_URL}${finalPath}`, {
                 method: 'PATCH',
@@ -1290,10 +1295,8 @@
 
                     if (targetUid) {
                          if (item.classList.contains('search-result-item')) {
-                            // For search results, open profile overlay
                             openUserProfile(targetUid);
                         } else {
-                            // For existing chats, navigate to chat page
                             console.log(`Navigating to chat with user: ${targetUid}`);
                             window.location.href = `pivi.html?uid=${targetUid}`;
                         }
@@ -1325,19 +1328,15 @@
             profileDisplayName.innerHTML = `${userData.displayName || userData.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${userData.username}`;
             
-            // Reset counts and button state
             profileFollowersCount.textContent = '...';
             profileFollowingCount.textContent = '...';
             profileFollowBtn.disabled = true;
 
-            // Handle UI based on whether it's my profile or someone else's
             const isMyProfile = username === currentUser.username;
             profileFollowBtn.style.display = isMyProfile ? 'none' : 'block';
             editProfileBtn.style.display = isMyProfile ? 'flex' : 'none';
-            logoutBtn.style.display = isMyProfile ? 'flex' : 'none'; // Also manage logout button visibility
+            logoutBtn.style.display = isMyProfile ? 'flex' : 'none';
 
-
-            // Fetch stats and status
             getFollowCounts(username);
             if (!isMyProfile) {
                 await checkFollowStatus(username);
@@ -1349,12 +1348,12 @@
 
         function hideProfile() {
             profileOverlay.classList.remove('active');
-            currentProfileUsername = null; // Clear the state when closing
+            currentProfileUsername = null; 
         }
 
         function handleLogoutConfirmed() {
             localStorage.removeItem('currentUser');
-            if (pollingIntervalId) clearInterval(pollingIntervalId);
+            if (pollingTimeoutId) clearTimeout(pollingTimeoutId); // Stop polling on logout
             window.location.href = 'login.html'; 
         }
 
@@ -1365,7 +1364,6 @@
 
         // --- Edit Profile Modal Functions ---
         function showEditProfileModal() {
-            // Data is already loaded for the current user when their profile is opened
             const avatarUrl = currentUser.profilePicUrl 
                 ? currentUser.profilePicUrl 
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=1B212A&color=fff&size=110`;
@@ -1431,7 +1429,7 @@
                 
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 
-                openUserProfile(currentUser.username); // Refresh profile view
+                openUserProfile(currentUser.username); 
                 hideEditProfileModal();
                 showToast('پروفایل با موفقیت به‌روزرسانی شد.', 'success');
 
@@ -1460,8 +1458,8 @@
 
             } catch (error) {
                 console.error("Error fetching follow counts:", error);
-                profileFollowersCount.textContent = 'خطا';
-                profileFollowingCount.textContent = 'خطا';
+                profileFollowersCount.textContent = '0';
+                profileFollowingCount.textContent = '0';
             }
         }
 
@@ -1490,7 +1488,6 @@
             const isCurrentlyFollowing = profileFollowBtn.classList.contains('following');
             const myUsername = currentUser.username;
             
-            // Optimistic UI update
             const originalFollowerCount = parseInt(profileFollowersCount.textContent, 10);
             if (isCurrentlyFollowing) {
                 profileFollowBtn.classList.remove('following');
@@ -1507,18 +1504,17 @@
             }
 
             try {
-                const valueToSet = isCurrentlyFollowing ? null : true; // null for delete, true for add
+                const valueToSet = isCurrentlyFollowing ? null : true;
                 const payload = {
                     [`following/${myUsername}/${targetUsername}`]: valueToSet,
                     [`followers/${targetUsername}/${myUsername}`]: valueToSet,
                 };
 
-                await updateUserDataOnServer('/', payload); // Use root path for multi-path update
+                await updateUserDataOnServer('/', payload);
 
             } catch (error) {
                 console.error("Failed to toggle follow:", error);
                 showToast(`خطا در عملیات: ${error.message}`, 'error');
-                // Revert UI on failure
                 if (isCurrentlyFollowing) {
                     profileFollowBtn.classList.add('following');
                     profileFollowBtn.textContent = 'دنبال می‌کنید';
@@ -1533,7 +1529,7 @@
         }
 
 
-        // --- SECTION: Real-time Updates ---
+        // --- SECTION: Robust Polling with Exponential Backoff ---
         async function checkForUpdates() {
             try {
                 if (!clientToken) await refreshClientToken();
@@ -1543,6 +1539,9 @@
                     fetchProxyData('pivi_chats'),
                     fetchProxyData('channels')
                 ]);
+                
+                // If we reach here, the connection was successful. Reset the error counter.
+                pollingErrorCount = 0;
 
                 let needsUIRefresh = false;
                 if (newUsers && JSON.stringify(allUsers) !== JSON.stringify(newUsers)) {
@@ -1573,22 +1572,43 @@
                     renderChatList();
                 }
                 if (needsUIRefresh && profileOverlay.classList.contains('active') && currentProfileUsername) {
-                    openUserProfile(currentProfileUsername); // Refresh the currently viewed profile
+                    openUserProfile(currentProfileUsername);
                 }
 
             } catch (error) {
-                console.error("Polling Error:", error.message);
+                pollingErrorCount++; // Increment error count on failure
+                console.error(`Polling Error (Attempt ${pollingErrorCount}):`, error.message);
+                
                 if (error.message.includes('Token') || error.message.includes('احراز هویت')) {
-                    if(pollingIntervalId) clearInterval(pollingIntervalId);
-                    console.warn("Polling stopped due to authentication error.");
+                    console.warn("Stopping polling due to authentication error.");
+                    if(pollingTimeoutId) clearTimeout(pollingTimeoutId); // Stop future attempts
+                    return; // Exit the function
                 }
+            } finally {
+                // Schedule the next poll regardless of success or failure
+                scheduleNextUpdate();
             }
         }
 
-        function startRealtimeUpdates(interval = 8000) {
-            if (pollingIntervalId) clearInterval(pollingIntervalId);
-            pollingIntervalId = setInterval(checkForUpdates, interval);
+        function scheduleNextUpdate() {
+            if (pollingTimeoutId) clearTimeout(pollingTimeoutId);
+
+            // Calculate delay using exponential backoff
+            const delay = Math.min(
+                BASE_POLLING_INTERVAL * Math.pow(2, pollingErrorCount),
+                MAX_POLLING_INTERVAL
+            );
+
+            console.log(`Next update scheduled in ${delay / 1000} seconds.`);
+            pollingTimeoutId = setTimeout(checkForUpdates, delay);
         }
+
+        function startRealtimeUpdates() {
+            if (pollingTimeoutId) clearTimeout(pollingTimeoutId);
+            // Start the first check immediately, then schedule subsequent ones
+            checkForUpdates();
+        }
+
 
         // --- SECTION: Utility Functions ---
         function showCustomConfirm(message, onConfirm) {
