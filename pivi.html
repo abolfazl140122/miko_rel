@@ -21,7 +21,7 @@
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
             --online-indicator: #28a745;
-            --success-color: #28a745;
+            --typing-indicator: #AAAAAA;
             --shadow-color: rgba(0, 0, 0, 0.2);
             --danger-color: #e53935;
             --modal-backdrop-color: rgba(0, 0, 0, 0.5);
@@ -92,15 +92,13 @@
             flex-shrink: 0; box-shadow: 0 2px 10px var(--shadow-color);
             position: relative; z-index: 10;
         }
-        .chat-header .header-btn { background: none; border: none; cursor: pointer; color: var(--text-primary); padding: 5px; transition: color 0.2s; }
-        .chat-header .header-btn:hover { color: var(--primary-color); }
+        .chat-header .back-btn { background: none; border: none; cursor: pointer; color: var(--text-primary); padding: 5px; }
         .chat-header .partner-info { display: flex; align-items: center; margin-right: 15px; flex-grow: 1; cursor: pointer; }
         .partner-info img { width: 45px; height: 45px; border-radius: 50%; margin-left: 12px; object-fit: cover; background-color: var(--tertiary-color); }
         .partner-details h2 { font-size: 1.1em; font-weight: 500; }
         .partner-details .status { font-size: 0.8em; color: var(--online-indicator); transition: color 0.3s; }
         .partner-details .status.offline { color: var(--text-secondary); }
-        .header-actions { display: flex; align-items: center; gap: 10px; }
-        .header-actions .options-btn { color: var(--text-secondary); }
+        .options-btn { background: none; border: none; cursor: pointer; color: var(--text-secondary); }
         svg { vertical-align: middle; }
         
         /* --- نوار پیام سنجاق شده --- */
@@ -749,114 +747,6 @@
             grid-column: 1 / -1; /* Span all columns */
         }
 
-        /* ========================================
-           --- START: AUDIO CALL FEATURE STYLES ---
-           ======================================== */
-        #call-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(18, 18, 18, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 1001;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        #call-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        .call-container {
-            width: 100%;
-            max-width: 420px;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 50px 20px;
-            color: var(--text-primary);
-            text-align: center;
-        }
-        .caller-info {
-            margin-top: 20%;
-        }
-        .caller-info img {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            border: 4px solid var(--primary-color);
-            box-shadow: 0 0 20px rgba(0, 149, 255, 0.5);
-            object-fit: cover;
-            animation: pulse-avatar 2s infinite ease-in-out;
-        }
-        @keyframes pulse-avatar {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 149, 255, 0.4); }
-            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 149, 255, 0.7); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 149, 255, 0.4); }
-        }
-        .caller-info h3 {
-            font-size: 2em;
-            margin-top: 25px;
-            margin-bottom: 10px;
-        }
-        .caller-info p {
-            font-size: 1.1em;
-            color: var(--text-secondary);
-        }
-        #call-timer { font-weight: 500; }
-
-        .call-actions {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-bottom: 15%;
-        }
-        .call-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease, background-color 0.2s;
-        }
-        .call-btn:active {
-            transform: scale(0.95);
-        }
-        .call-btn svg {
-            width: 32px;
-            height: 32px;
-        }
-        #answer-call-btn { background-color: var(--success-color); }
-        #reject-call-btn, #hangup-call-btn { background-color: var(--danger-color); }
-        #mute-call-btn { background-color: var(--secondary-color); }
-        #mute-call-btn.muted { background-color: var(--primary-color); }
-        
-        /* Hide/Show buttons based on call state */
-        #call-overlay .incoming-actions,
-        #call-overlay .outgoing-actions,
-        #call-overlay .active-actions {
-            display: none;
-        }
-        #call-overlay.incoming .incoming-actions { display: flex; }
-        #call-overlay.outgoing .outgoing-actions { display: flex; }
-        #call-overlay.active .active-actions { display: flex; }
-        /* ======================================
-           --- END: AUDIO CALL FEATURE STYLES ---
-           ====================================== */
     </style>
 </head>
 <body>
@@ -868,7 +758,7 @@
 
     <div class="app-container" id="app-container">
         <header class="chat-header">
-            <button class="header-btn back-btn" aria-label="بازگشت" onclick="history.back()">
+             <button class="back-btn" aria-label="بازگشت" onclick="history.back()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </button>
             <div class="partner-info" id="partner-info-header">
@@ -878,14 +768,9 @@
                     <span class="status" id="partner-status">در حال اتصال...</span>
                 </div>
             </div>
-            <div class="header-actions">
-                <button class="header-btn" id="start-call-btn" aria-label="تماس صوتی">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                </button>
-                <button class="header-btn options-btn" aria-label="گزینه‌ها" id="options-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-                </button>
-            </div>
+            <button class="options-btn" aria-label="گزینه‌ها" id="options-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+            </button>
         </header>
         
         <div id="pinned-message-bar">
@@ -918,6 +803,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </button>
 
+                <!-- NEW: نشانگرهای جدید برای ضبط ویس -->
                 <div id="voice-record-timer">00:00</div>
                 <div id="voice-cancel-indicator">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--danger-color);"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -926,6 +812,7 @@
                 </div>
                 
                 <input type="text" id="message-input" placeholder="پیامت رو بنویس..." autocomplete="off">
+                <!-- NEW: Hidden file input -->
                 <input type="file" id="file-input" style="display:none" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm">
 
                 <div id="attachment-buttons">
@@ -942,7 +829,7 @@
     <!-- مودال گزینه‌های اصلی (هدر) -->
     <div id="main-options-overlay" class="modal-overlay">
         <div id="main-options-menu" class="modal-card">
-             <div class="menu-option" id="main-menu-profile-btn">
+            <div class="menu-option" id="main-menu-profile-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 <span>مشاهده پروفایل</span>
             </div>
@@ -1043,62 +930,22 @@
         </div>
     </div>
 
-    <!-- ========================================
-         --- START: AUDIO CALL FEATURE HTML ---
-         ======================================== -->
-    <div id="call-overlay">
-        <div class="call-container">
-            <div class="caller-info">
-                <img id="call-partner-avatar" src="" alt="آواتار تماس">
-                <h3 id="call-partner-name"></h3>
-                <p id="call-status-text"></p>
-            </div>
-            <div class="call-actions">
-                <!-- دکمه‌های تماس ورودی -->
-                <div class="incoming-actions">
-                    <button class="call-btn" id="reject-call-btn" aria-label="رد تماس">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                    </button>
-                    <button class="call-btn" id="answer-call-btn" aria-label="پاسخ به تماس">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                    </button>
-                </div>
-                <!-- دکمه‌های تماس خروجی و فعال -->
-                <div class="outgoing-actions active-actions">
-                     <button class="call-btn" id="mute-call-btn" aria-label="بی‌صدا کردن">
-                        <svg class="unmuted-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                        <svg class="muted-icon" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                    </button>
-                    <button class="call-btn" id="hangup-call-btn" aria-label="قطع تماس">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <audio id="remote-audio" autoplay playsinline></audio>
-    <audio id="ringtone-audio" loop></audio>
-    <!-- ======================================
-         --- END: AUDIO CALL FEATURE HTML ---
-         ====================================== -->
-
 
     <script>
         // ===============================================
         //  !!!   مهم: این بخش را حتما ویرایش کنید   !!!
         // ===============================================
+        // آدرس کامل فایل پراکسی PHP خود را در اینجا قرار دهید.
+        // مطمئن شوید که دامنه شما صحیح و فعال است.
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        // Endpoint جدید آپلود مستقیم به PHP در هاست رایگان (این فایل PHP را روی public_html بسازید)
         const UPLOAD_PHP_ENDPOINT = 'https://miko.freehost.io/upload_to_parspack.php';
         const SHARED_SECRET = 'miko1234';
         // ===============================================
 
-        // --- START: AUDIO CALL CONFIG ---
-        const RTC_CONFIGURATION = {
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-        };
-        const RINGING_SOUND_B64 = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU3LjgyLjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAASw9AAAACAAADSAAAAACAAD/7QNAAAEACgAAAAEAAAAHAAAJAFAACQAFAAgtAAgAATEp3Bw0kYyDAwMDgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA-";
-        // --- END: AUDIO CALL CONFIG ---
-
+        // ==============================================================
+        //  >>> START OF REVISED CacheManager IMPLEMENTATION <<<
+        // ==============================================================
         class CacheManager {
             constructor(dbName = 'PiviMediaDB', storeName = 'media_metadata', cacheName = 'pivi-media-cache', maxSizeMB = 500) {
                 this.dbName = dbName;
@@ -1184,6 +1031,9 @@
                 }
             }
             
+            // =================================================================
+            //  >>> START: THE CORS FIX IS APPLIED HERE <<<
+            // =================================================================
             async downloadWithProgress(url, onProgress, signal) {
                 if (this._ongoingDownloads.has(url)) {
                     return this._ongoingDownloads.get(url);
@@ -1191,31 +1041,40 @@
 
                 const downloadPromise = (async () => {
                     try {
+                        // Create the proxied URL to bypass CORS
                         const proxyFetchUrl = `${PROXY_URL}?media_url=${encodeURIComponent(url)}`;
+                        
+                        // Fetch from your proxy instead of the direct URL
                         const response = await fetch(proxyFetchUrl, { signal });
+
                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        
                         const contentLength = response.headers.get('Content-Length');
                         if (!contentLength) {
                             console.warn('Content-Length header not found. Progress will not be available.');
                             const blob = await response.blob();
                             onProgress({ loaded: blob.size, total: blob.size, percent: 100 });
-                            await this.put(url, blob);
+                            await this.put(url, blob); // Still cache with the original URL
                             return blob;
                         }
+
                         const total = parseInt(contentLength, 10);
                         let loaded = 0;
                         const chunks = [];
                         const reader = response.body.getReader();
+
                         while (true) {
                             const { done, value } = await reader.read();
                             if (done) break;
+                            
                             chunks.push(value);
                             loaded += value.length;
                             const percent = Math.round((loaded / total) * 100);
                             onProgress({ loaded, total, percent });
                         }
+
                         const blob = new Blob(chunks);
-                        await this.put(url, blob);
+                        await this.put(url, blob); // Cache with original URL
                         return blob;
                     } finally {
                         this._ongoingDownloads.delete(url);
@@ -1225,6 +1084,9 @@
                 this._ongoingDownloads.set(url, downloadPromise);
                 return downloadPromise;
             }
+            // ===============================================================
+            //  >>> END: THE CORS FIX IS APPLIED HERE <<<
+            // ===============================================================
 
             revokeUrl(url) {
                 if (this._blobUrlReferences.has(url)) {
@@ -1255,6 +1117,10 @@
                 }
             }
         }
+        // ============================================================
+        //  <<< END OF REVISED CacheManager IMPLEMENTATION >>>
+        // ============================================================
+
 
         // --- ارجاع به عناصر DOM ---
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -1295,22 +1161,9 @@
         const stickerGrid = document.getElementById('sticker-grid');
         const closeStickerPanelBtn = document.getElementById('close-sticker-panel-btn');
 
-        // --- START: AUDIO CALL DOM Elements ---
-        const startCallBtn = document.getElementById('start-call-btn');
-        const callOverlay = document.getElementById('call-overlay');
-        const callPartnerAvatar = document.getElementById('call-partner-avatar');
-        const callPartnerName = document.getElementById('call-partner-name');
-        const callStatusText = document.getElementById('call-status-text');
-        const answerCallBtn = document.getElementById('answer-call-btn');
-        const rejectCallBtn = document.getElementById('reject-call-btn');
-        const hangupCallBtn = document.getElementById('hangup-call-btn');
-        const muteCallBtn = document.getElementById('mute-call-btn');
-        const remoteAudio = document.getElementById('remote-audio');
-        const ringtoneAudio = document.getElementById('ringtone-audio');
-        // --- END: AUDIO CALL DOM Elements ---
-
+        // CACHE MANAGER INSTANCE
         const cacheManager = new CacheManager();
-        const activeControllers = new Map();
+        const activeControllers = new Map(); // For aborting downloads
 
         // --- وضعیت کلی اپلیکیشن ---
         let currentUser = null, clientToken = null, chatPartner = null, chatId = null;
@@ -1320,25 +1173,19 @@
         let currentPinnedMessage = null;
         let activeMessageId = null, activeMessageElement = null;
         let keyboardOffset = 80;
-        let lastMessagesSnapshot = {}, lastSignalSnapshot = null;
-        let stickersLoaded = false;
+        let lastMessagesSnapshot = {}; // برای مقایسه پیام‌های جدید و قدیم
+        let stickersLoaded = false; // فلگ برای جلوگیری از لود مجدد استیکرها
+
         let recorder, voiceChunks = [], mediaStream = null, isRecording = false;
         let recordStartTime, recordTimerInterval;
         let touchStartX, isCancelThresholdMet = false;
 
-        // --- START: AUDIO CALL State ---
-        let peerConnection;
-        let localStream;
-        let callState = 'idle'; // idle, outgoing, incoming, active
-        let callTimerInterval;
-        let receivedOffer;
-        // --- END: AUDIO CALL State ---
 
         // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
         window.addEventListener('load', initializeApp);
         window.addEventListener('beforeunload', () => {
              updatePresence(false);
-             if (callState !== 'idle') hangupCall();
+             // Clean up any active object URLs to prevent memory leaks
              for (const url of cacheManager._blobUrlReferences.keys()) {
                  cacheManager.revokeUrl(url);
              }
@@ -1352,28 +1199,38 @@
         async function initializeApp() {
             if (window.piviAppInitialized) return;
             window.piviAppInitialized = true;
+
             showLoading();
+            
             try {
                 await cacheManager.init();
+                console.log('Cache Manager initialized successfully.');
             } catch (error) {
                 console.warn('Could not initialize Cache Manager. Media will not be cached.', error);
             }
+
             keyboardOffset = parseInt(localStorage.getItem('keyboardOffset') || '80', 10);
             keyboardOffsetSlider.value = keyboardOffset;
             keyboardOffsetValue.textContent = `${keyboardOffset} px`;
+
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
                 window.location.href = 'login.html';
                 return;
             }
             currentUser = JSON.parse(storedUser);
+
             const urlParams = new URLSearchParams(window.location.search);
             const partnerUsername = urlParams.get('uid') || urlParams.get('with');
             if (!partnerUsername) {
                 showError('کاربر مقصد مشخص نشده است.');
                 return;
             }
+
             try {
+                if (PROXY_URL.includes('YOUR_CORRECT_DOMAIN') || UPLOAD_PHP_ENDPOINT.includes('YOUR_CORRECT_DOMAIN')) {
+                     throw new Error('لطفاً آدرس دامنه صحیح خود را در متغیرهای PROXY_URL و UPLOAD_PHP_ENDPOINT در کد جاوااسکریپت وارد کنید.');
+                }
                 await refreshClientToken();
                 await fetchCurrentUserData();
                 await fetchPartnerData(partnerUsername);
@@ -1381,12 +1238,16 @@
                     showError('کاربر مورد نظر پیدا نشد.');
                     return;
                 }
+                
                 chatId = [currentUser.username, chatPartner.username].sort().join('_');
+                
                 checkBlockStatus();
                 updateBlockUI();
+
                 setupUI();
                 setupEventListeners();
-                await loadChatData(true);
+                await loadChatData(true); // بارگذاری اولیه
+                
                 startPolling();
                 updatePresence(true);
                 showApp();
@@ -1399,7 +1260,7 @@
         // --- بخش ۳: توابع مدیریت وضعیت برنامه (Pause/Resume) ---
         function startPolling() {
             if (messagePollingInterval) clearInterval(messagePollingInterval);
-            messagePollingInterval = setInterval(() => loadChatData(false), 4000); // 4 seconds for faster signaling
+            messagePollingInterval = setInterval(() => loadChatData(false), 5000); // به‌روزرسانی‌های بعدی
             
             if (presencePollingInterval) clearInterval(presencePollingInterval);
             presencePollingInterval = setInterval(pollPartnerStatus, 10000);
@@ -1430,7 +1291,7 @@
             document.querySelector('#loading-overlay .loading-dots').style.display = 'none';
         }
         function scrollToBottom() {
-            mainContent.scrollTop = 0;
+            mainContent.scrollTop = 0; // به دلیل flex-direction: column-reverse
         }
 
         function createVerifiedNameHTML(displayName, isVerified) {
@@ -1448,7 +1309,6 @@
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=0095FF&color=fff&size=80`;
             partnerAvatarEl.src = partnerAvatarUrl;
             updateStatusUI(chatPartner.isOnline, chatPartner.lastSeen);
-            ringtoneAudio.src = RINGING_SOUND_B64;
         }
 
         function setupEventListeners() {
@@ -1457,12 +1317,14 @@
             optionsBtn.addEventListener('click', () => showModal(mainOptionsOverlay));
             document.getElementById('partner-info-header').addEventListener('click', () => showModal(profileOverlay));
             messagesArea.addEventListener('click', handleMessageClick);
+            
             attachFileBtn.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) sendFileMessage(file);
                 e.target.value = ''; 
             });
+
             document.getElementById('reply-msg-btn').addEventListener('click', handleReplyAction);
             document.getElementById('pin-msg-btn').addEventListener('click', handlePinAction);
             cancelReplyBtn.addEventListener('click', cancelReply);
@@ -1471,43 +1333,46 @@
                 scrollToMessage(currentPinnedMessage.msgId);
             });
             unpinBtn.addEventListener('click', handleUnpinAction);
+            
             document.getElementById('edit-msg-btn').addEventListener('click', handleEditAction);
             document.getElementById('delete-msg-btn').addEventListener('click', handleDeleteAction);
             blockUserBtn.addEventListener('click', handleBlockToggle);
+
             document.getElementById('main-menu-profile-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(profileOverlay); });
             document.getElementById('main-menu-settings-btn').addEventListener('click', () => { hideModal(mainOptionsOverlay); showModal(settingsOverlay); });
             document.getElementById('close-settings-btn').addEventListener('click', () => hideModal(settingsOverlay));
             keyboardOffsetSlider.addEventListener('input', handleKeyboardOffsetChange);
             messageInput.addEventListener('focus', applyKeyboardOffset);
             messageInput.addEventListener('blur', removeKeyboardOffset);
+
             voiceBtn.addEventListener('mousedown', startRecording);
             voiceBtn.addEventListener('touchstart', startRecording);
             document.addEventListener('mouseup', stopRecording);
             document.addEventListener('touchend', stopRecording);
             document.addEventListener('mousemove', handleRecordingMove);
             document.addEventListener('touchmove', handleRecordingMove);
+
             imageViewerCloseBtn.addEventListener('click', closeImageViewer);
+            
             stickerBtn.addEventListener('click', openStickerPanel);
             closeStickerPanelBtn.addEventListener('click', closeStickerPanel);
             stickerGrid.addEventListener('click', handleStickerClick);
+
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 overlay.addEventListener('click', (e) => {
                     if (e.target === overlay) {
-                        if (overlay.id === 'image-viewer-overlay') closeImageViewer();
-                        else if (overlay.id === 'sticker-panel-overlay') closeStickerPanel();
-                        else hideModal(overlay);
+                        if (overlay.id === 'image-viewer-overlay') {
+                            closeImageViewer();
+                        } else if (overlay.id === 'sticker-panel-overlay') {
+                            closeStickerPanel();
+                        }
+                        else {
+                            hideModal(overlay);
+                        }
                     }
                 });
             });
             document.querySelector('.profile-card .handle').addEventListener('click', () => hideModal(profileOverlay));
-
-            // --- START: AUDIO CALL Event Listeners ---
-            startCallBtn.addEventListener('click', startCall);
-            answerCallBtn.addEventListener('click', answerCall);
-            rejectCallBtn.addEventListener('click', hangupCall);
-            hangupCallBtn.addEventListener('click', hangupCall);
-            muteCallBtn.addEventListener('click', toggleMute);
-            // --- END: AUDIO CALL Event Listeners ---
         }
 
         function toggleSendButton() {
@@ -1516,6 +1381,7 @@
             attachmentButtons.classList.toggle('hidden', hasText);
         }
         
+        // --- بخش ۵: توابع مدیریت فاصله کیبورد ---
         function handleKeyboardOffsetChange(e) {
             keyboardOffset = parseInt(e.target.value, 10);
             keyboardOffsetValue.textContent = `${keyboardOffset} px`;
@@ -1530,6 +1396,7 @@
             appContainer.style.paddingBottom = '0px';
         }
 
+        // --- بخش ۶: مدیریت وضعیت آنلاین/آفلاین (Presence) ---
         async function updatePresence(isOnline) {
             if (!currentUser || !clientToken) return;
             const presenceData = { isOnline, lastSeen: new Date().toISOString() };
@@ -1568,6 +1435,7 @@
             }
         }
 
+        // --- بخش ۷: مدیریت مسدودسازی کاربر ---
         function checkBlockStatus() {
             isPartnerBlocked = !!(currentUser.blockedUsers && currentUser.blockedUsers[chatPartner.username]);
         }
@@ -1607,13 +1475,14 @@
             }
         }
         
+        // --- بخش ۸: ارتباط با سرور و واکشی اطلاعات ---
         async function refreshClientToken() {
             try {
                 const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
                 if (!response.ok) throw new Error(`خطای ${response.status} در دریافت توکن از سرور`);
                 const data = await response.json();
                 clientToken = data.token;
-            } catch (error) { throw new Error(`خطای شبکه در دریافت توکن: ${error.message}.`); }
+            } catch (error) { throw new Error(`خطای شبکه در دریافت توکن: ${error.message}. از صحت آدرس پراکسی و روشن بودن سرور مطمئن شوید.`); }
         }
         async function fetchCurrentUserData() {
              const data = await apiRequest(`users/${currentUser.username}`, 'GET');
@@ -1624,40 +1493,36 @@
         }
 
         // --- بخش ۹: منطق اصلی چت (ارسال و دریافت پیام) ---
-        // MODIFIED: This function now also checks for signaling data
         async function loadChatData(isInitialLoad = false) {
             if (!chatId || !clientToken) return;
             try {
                 const chatData = await apiRequest(`pivi_chats/${chatId}`, 'GET');
-                if (!chatData) { // Handle case where chat doesn't exist yet
-                    if (isInitialLoad) messagesArea.innerHTML = `<div style="text-align:center; color: var(--text-secondary);"><p>هنوز پیامی رد و بدل نشده است.</p></div>`;
-                    return;
-                }
                 
-                updatePinnedMessageUI(chatData.pinnedMessage);
+                updatePinnedMessageUI(chatData ? chatData.pinnedMessage : null);
                 
-                // Process Messages
-                const messagesData = chatData.messages || {};
+                const messagesData = chatData ? chatData.messages : {};
+                
                 if (isInitialLoad && Object.keys(messagesData).length === 0) {
                     messagesArea.innerHTML = `<div style="text-align:center; color: var(--text-secondary);"><p>هنوز پیامی رد و بدل نشده است.</p></div>`;
                     lastMessagesSnapshot = {};
+                    return;
                 }
-                const sortedMessages = Object.entries(messagesData).sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
+
+                const sortedMessages = Object.entries(messagesData)
+                    .sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
+
                 sortedMessages.forEach(([msgId, msg]) => {
                     const existingMsg = lastMessagesSnapshot[msgId];
                     const existingElement = document.querySelector(`.message[data-id="${msgId}"]`);
-                    if (!existingElement) createMessageElement(msgId, msg);
-                    else if (JSON.stringify(existingMsg) !== JSON.stringify(msg)) updateMessageElement(existingElement, msg);
-                });
-                lastMessagesSnapshot = messagesData; 
 
-                // --- START: AUDIO CALL Signaling Check ---
-                const signalData = chatData.signal || null;
-                if (signalData && JSON.stringify(signalData) !== JSON.stringify(lastSignalSnapshot)) {
-                    handleSignalingData(signalData);
-                }
-                lastSignalSnapshot = signalData;
-                // --- END: AUDIO CALL Signaling Check ---
+                    if (!existingElement) {
+                        createMessageElement(msgId, msg);
+                    } else if (JSON.stringify(existingMsg) !== JSON.stringify(msg)) {
+                        updateMessageElement(existingElement, msg);
+                    }
+                });
+
+                lastMessagesSnapshot = messagesData; 
                 
                 if(isInitialLoad) scrollToBottom();
 
@@ -1669,13 +1534,17 @@
             if (isRecording) return;
             isRecording = true;
             isCancelThresholdMet = false;
+
             touchStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+
             updateRecordingUI(true);
+
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 recorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
                 voiceChunks = [];
                 recorder.ondataavailable = event => { if (event.data.size > 0) voiceChunks.push(event.data); };
+                
                 recorder.onstop = () => {
                     if (mediaStream) {
                         mediaStream.getTracks().forEach(track => track.stop());
@@ -1689,6 +1558,7 @@
                     }
                     voiceChunks = [];
                 };
+
                 recorder.start();
                 startTimer();
             } catch (err) {
@@ -1702,7 +1572,10 @@
         function stopRecording() {
             if (!isRecording) return;
             isRecording = false;
-            if (recorder && recorder.state === 'recording') recorder.stop();
+            
+            if (recorder && recorder.state === 'recording') {
+                recorder.stop();
+            }
             updateRecordingUI(false);
             stopTimer();
         }
@@ -1711,7 +1584,8 @@
             if (!isRecording) return;
             const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
             const distance = touchStartX - currentX;
-            isCancelThresholdMet = distance > 100;
+            const cancelThreshold = 100;
+            isCancelThresholdMet = distance > cancelThreshold;
             voiceCancelIndicator.style.color = isCancelThresholdMet ? 'var(--danger-color)' : 'var(--text-secondary)';
         }
 
@@ -1744,56 +1618,89 @@
                 showCustomAlert({ title: 'خطا', message: `حجم فایل نباید بیشتر از ${MAX_SIZE_MB} مگابایت باشد.` });
                 return;
             }
+
             const fileType = file.type.split('/')[0] === 'image' && file.type.includes('gif') ? 'image' : file.type.split('/')[0];
             const tempId = `temp_${Date.now()}`;
-            const tempMsgData = { senderId: currentUser.username, timestamp: new Date().toISOString(), isSending: true, type: fileType };
+            const tempMsgData = {
+                senderId: currentUser.username,
+                timestamp: new Date().toISOString(),
+                isSending: true,
+                type: fileType
+            };
             createMessageElement(tempId, tempMsgData);
             scrollToBottom();
+
             const formData = new FormData();
             formData.append('file', file, file.name);
+
             try {
                 const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
                 const progressIndicator = tempElement ? tempElement.querySelector('progress') : null;
+
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', UPLOAD_PHP_ENDPOINT, true);
+
                 xhr.upload.onprogress = (event) => {
                     if (event.lengthComputable && progressIndicator) {
                         progressIndicator.value = event.loaded;
                         progressIndicator.max = event.total;
                     }
                 };
+
                 xhr.onload = async () => {
                     if (xhr.status === 200) {
                         const result = JSON.parse(xhr.responseText);
                         if (result.success && result.url) {
                             await cacheManager.put(result.url, file);
-                            const finalMsg = { senderId: currentUser.username, receiverId: chatPartner.username, mediaUrl: result.url, timestamp: new Date().toISOString(), type: fileType };
+
+                            const finalMsg = {
+                                senderId: currentUser.username, receiverId: chatPartner.username,
+                                mediaUrl: result.url, timestamp: new Date().toISOString(), type: fileType
+                            };
                             const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', finalMsg);
-                            await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: fileType === 'image' ? 'تصویر' : 'ویدیو', timestamp: finalMsg.timestamp });
+                            await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
+                                lastMessage: fileType === 'image' ? 'تصویر' : 'ویدیو', timestamp: finalMsg.timestamp
+                            });
+                            
                             if (tempElement) {
                                 tempElement.dataset.id = newMsgRef.name;
                                 updateMessageElement(tempElement, finalMsg);
                                 lastMessagesSnapshot[newMsgRef.name] = finalMsg;
                             }
-                        } else { throw new Error(result.error || 'خطا در آپلود فایل'); }
-                    } else { throw new Error(`خطای سرور: ${xhr.status}`); }
+                        } else {
+                           throw new Error(result.error || 'خطا در آپلود فایل');
+                        }
+                    } else {
+                        throw new Error(`خطای سرور: ${xhr.status}`);
+                    }
                 };
                 xhr.onerror = () => { throw new Error('خطای شبکه در هنگام آپلود فایل.'); };
                 xhr.send(formData);
+
             } catch (err) {
                 console.error("خطا در ارسال فایل:", err);
                 const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
-                if (tempElement) tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود. ${err.message}</div>`;
+                if (tempElement) {
+                   tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود. ${err.message}</div>`;
+                }
             }
         }
 
+
         async function sendVoiceMessage(blob) {
             const tempId = `temp_${Date.now()}`;
-            const tempMsgData = { senderId: currentUser.username, timestamp: new Date().toISOString(), isSending: true, type: 'voice' };
+            const tempMsgData = {
+                senderId: currentUser.username,
+                timestamp: new Date().toISOString(),
+                isSending: true,
+                type: 'voice'
+            };
             createMessageElement(tempId, tempMsgData);
             scrollToBottom();
+
             const formData = new FormData();
             formData.append('file', blob, `voice_${currentUser.username}_${Date.now()}.ogg`);
+
             try {
                 const response = await fetch(UPLOAD_PHP_ENDPOINT, { method: 'POST', body: formData });
                 if (!response.ok) {
@@ -1803,20 +1710,31 @@
                 const result = await response.json();
                 if (result.success && result.url) {
                     await cacheManager.put(result.url, blob);
-                    const finalMsg = { senderId: currentUser.username, receiverId: chatPartner.username, voiceUrl: result.url, timestamp: new Date().toISOString(), type: 'voice' };
+
+                    const finalMsg = {
+                        senderId: currentUser.username, receiverId: chatPartner.username,
+                        voiceUrl: result.url, timestamp: new Date().toISOString(), type: 'voice'
+                    };
                     const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', finalMsg);
-                    await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: 'پیام صوتی', timestamp: finalMsg.timestamp });
+                    await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
+                        lastMessage: 'پیام صوتی', timestamp: finalMsg.timestamp
+                    });
+                    
                     const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
                     if (tempElement) {
                         tempElement.dataset.id = newMsgRef.name;
                         updateMessageElement(tempElement, finalMsg);
                         lastMessagesSnapshot[newMsgRef.name] = finalMsg;
                     }
-                } else { throw new Error(result.error || 'خطا در آپلود صدا'); }
+                } else {
+                    throw new Error(result.error || 'خطا در آپلود صدا');
+                }
             } catch (err) {
                 console.error("خطا در ارسال ویس:", err);
                 const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
-                if (tempElement) tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود.</div>`;
+                if (tempElement) {
+                   tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">ارسال ناموفق بود.</div>`;
+                }
             }
         }
 
@@ -1824,10 +1742,12 @@
             if (!msg || !msg.timestamp) return;
             const placeholder = messagesArea.querySelector('div[style*="text-align:center"]');
             if(placeholder) placeholder.remove();
+
             const msgDiv = document.createElement('div');
             const isSent = msg.senderId === currentUser.username;
             msgDiv.className = `message ${isSent ? 'sent' : 'received'}`;
             msgDiv.dataset.id = msgId;
+            
             updateMessageElement(msgDiv, msg);
             messagesArea.appendChild(msgDiv);
         }
@@ -1836,16 +1756,20 @@
             const isMedia = ['image', 'video'].includes(msg.type);
             msgDiv.classList.toggle('deleted', !!msg.deleted);
             msgDiv.classList.toggle('has-media', isMedia && !msg.isSending);
+
             const isSent = msg.senderId === currentUser.username;
             msgDiv.dataset.senderName = isSent ? currentUser.displayName : chatPartner.displayName;
             let textForReply = msg.text || (msg.type === 'voice' ? 'پیام صوتی' : msg.type === 'image' ? 'تصویر' : msg.type === 'video' ? 'ویدیو' : '');
             msgDiv.dataset.text = textForReply;
+
             const timestamp = new Date(msg.timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
             const editedIndicator = msg.edited ? `<span class="edited-indicator">(ویرایش شده)</span>` : '';
+            
             let replyHtml = '';
             if (msg.replyTo && !msg.deleted) {
                 replyHtml = `<div class="reply-context"><div class="reply-sender">${msg.replyTo.senderName}</div><span class="reply-text">${msg.replyTo.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span></div>`;
             }
+
             let messageContentHTML;
             if (msg.deleted) {
                 messageContentHTML = `<div class="text">این پیام حذف شده است</div>`;
@@ -1862,11 +1786,16 @@
                 let textContent = msg.text || "";
                 messageContentHTML = `<div class="text">${textContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
             }
+            
             msgDiv.innerHTML = `${replyHtml}${messageContentHTML}<div class="timestamp">${editedIndicator}${timestamp}</div>`;
+            
             const mediaUrl = msg.mediaUrl || msg.voiceUrl;
             if (mediaUrl && !msg.isSending && !msg.deleted) {
-                if (isMedia) setupMediaLoader(msgDiv.querySelector('.media-container'), mediaUrl, msg.type);
-                else if (msg.type === 'voice') setupVoicePlayer(msgDiv, mediaUrl);
+                if (isMedia) {
+                    setupMediaLoader(msgDiv.querySelector('.media-container'), mediaUrl, msg.type);
+                } else if (msg.type === 'voice') {
+                    setupVoicePlayer(msgDiv, mediaUrl);
+                }
             }
         }
 
@@ -1874,19 +1803,30 @@
             e.preventDefault();
             const text = messageInput.value.trim();
             if (!text || !chatPartner || isPartnerBlocked) return;
-            const message = { senderId: currentUser.username, receiverId: chatPartner.username, text, timestamp: new Date().toISOString(), deleted: false, replyTo: activeReplyContext };
+            
+            const message = { 
+                senderId: currentUser.username, receiverId: chatPartner.username, text, 
+                timestamp: new Date().toISOString(), deleted: false,
+                replyTo: activeReplyContext
+            };
             const tempInputValue = text;
             messageInput.value = '';
             toggleSendButton();
             cancelReply();
+
             try {
+                // This request now also triggers the chat list update on the server side (via proxy)
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
+                
+                // For instant feedback in the UI:
                 const tempId = newMsgRef.name;
                 lastMessagesSnapshot[tempId] = message;
                 createMessageElement(tempId, message);
                 scrollToBottom();
             } catch(error) {
-                const errorMsg = error.message.includes("blocked") ? 'ارسال پیام ممکن نیست. شما توسط این کاربر مسدود شده‌اید.' : 'خطا در ارسال پیام!';
+                const errorMsg = error.message.includes("blocked")
+                    ? 'ارسال پیام ممکن نیست. شما توسط این کاربر مسدود شده‌اید.'
+                    : 'خطا در ارسال پیام!';
                 showCustomAlert({ title: 'خطا', message: errorMsg });
                 messageInput.value = tempInputValue;
                 toggleSendButton();
@@ -1895,10 +1835,17 @@
         
         async function sendImageMessage(imageUrl) {
             if (!imageUrl || !chatPartner || isPartnerBlocked) return;
-            const message = { senderId: currentUser.username, receiverId: chatPartner.username, mediaUrl: imageUrl, timestamp: new Date().toISOString(), type: 'image', replyTo: activeReplyContext };
+
+            const message = {
+                senderId: currentUser.username, receiverId: chatPartner.username,
+                mediaUrl: imageUrl, timestamp: new Date().toISOString(),
+                type: 'image', replyTo: activeReplyContext,
+            };
             cancelReply();
+
             try {
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
+                
                 const tempId = newMsgRef.name;
                 lastMessagesSnapshot[tempId] = message;
                 createMessageElement(tempId, message);
@@ -1927,32 +1874,40 @@
             } catch(error) { showCustomAlert({ title: 'خطا', message: 'خطا در ویرایش پیام.' }); }
         }
         
+        // --- بخش ۱۰: مدیریت منوها و قابلیت‌های پیام ---
         function handleMessageClick(e) {
             const mediaContainer = e.target.closest('.media-container');
             if (mediaContainer && mediaContainer.querySelector('img')) {
                 const img = mediaContainer.querySelector('img');
                 const originalUrl = img.dataset.originalSrc;
                 if (!originalUrl || !img.src || img.src.startsWith('data:')) return;
+
                 cacheManager.get(originalUrl).then(localUrl => {
                     fullscreenImage.src = localUrl || originalUrl; 
                     showModal(imageViewerOverlay);
                 });
                 return;
             }
+            
             const messageElement = e.target.closest('.message:not(.deleted)');
             if (!messageElement || messageElement.dataset.id.startsWith('temp_')) return;
+
             if (e.target.closest('.voice-player, .media-loader-overlay')) {
                  activeMessageElement = null;
                  return;
             }
+
             if (messageElement) {
                 activeMessageElement = messageElement;
                 const isSentByUser = activeMessageElement.classList.contains('sent');
                 const msgData = lastMessagesSnapshot[messageElement.dataset.id];
-                const isEditable = isSentByUser && (!msgData || !msgData.type || msgData.type === 'text');
+                const isEditable = isSentByUser && (!msgData || !msgData.type || msgData.type === 'text'); // only text messages
+
                 document.getElementById('edit-msg-btn').style.display = isEditable ? 'flex' : 'none';
                 document.getElementById('delete-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
+
                 activeMessageId = activeMessageElement.dataset.id;
+                
                 const pinBtnText = document.getElementById('pin-msg-btn-text');
                 pinBtnText.textContent = (currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) ? "حذف سنجاق" : "سنجاق کردن";
                 showModal(messageOptionsOverlay);
@@ -1963,7 +1918,13 @@
             if (!activeMessageId) return;
             const currentText = activeMessageElement.dataset.text || '';
             hideModal(messageOptionsOverlay);
-            const newText = await showCustomPrompt({ title: 'ویرایش پیام', message: 'پیام جدید را وارد کنید:', initialValue: currentText });
+
+            const newText = await showCustomPrompt({
+                title: 'ویرایش پیام',
+                message: 'پیام جدید را وارد کنید:',
+                initialValue: currentText
+            });
+
             if (newText && newText.trim() !== "" && newText.trim() !== currentText) {
                 await editMessage(activeMessageId, newText.trim());
             }
@@ -1973,8 +1934,15 @@
         async function handleDeleteAction() {
             if (!activeMessageId) return;
             hideModal(messageOptionsOverlay);
-            const confirmed = await showCustomConfirm({ title: 'حذف پیام', message: 'آیا از حذف این پیام برای همه اطمینان دارید؟' });
-            if (confirmed) await deleteMessage(activeMessageId);
+
+            const confirmed = await showCustomConfirm({
+                title: 'حذف پیام',
+                message: 'آیا از حذف این پیام برای همه اطمینان دارید؟ این عمل قابل بازگشت نیست.'
+            });
+
+            if (confirmed) {
+                await deleteMessage(activeMessageId);
+            }
             activeMessageId = null;
         }
 
@@ -1983,6 +1951,7 @@
             const text = activeMessageElement.dataset.text;
             const senderName = activeMessageElement.dataset.senderName;
             activeReplyContext = { msgId: activeMessageId, text: text, senderName: senderName };
+            
             document.getElementById('reply-to-name').textContent = `پاسخ به ${senderName}`;
             document.getElementById('reply-preview-text').textContent = text;
             replyPreviewBar.style.display = 'flex';
@@ -1998,6 +1967,7 @@
         async function handlePinAction() {
             if (!activeMessageId) return;
             hideModal(messageOptionsOverlay);
+            
             if (currentPinnedMessage && currentPinnedMessage.msgId === activeMessageId) {
                 await handleUnpinAction();
             } else {
@@ -2043,9 +2013,12 @@
             }
         }
 
+        // --- بخش ۱۱: توابع مدیریت مودال‌ها و دیالوگ‌ها ---
         function showModal(overlayElement) {
             if(overlayElement.id === 'profile-overlay' && chatPartner){
-                const profileCardAvatarUrl = chatPartner.profilePicUrl ? chatPartner.profilePicUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=2C2C2E&color=fff&size=120`;
+                const profileCardAvatarUrl = chatPartner.profilePicUrl
+                    ? chatPartner.profilePicUrl
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=2C2C2E&color=fff&size=120`;
                 document.getElementById('profile-card-avatar').src = profileCardAvatarUrl;
                 document.getElementById('profile-card-name').innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
                 document.getElementById('profile-card-username').textContent = `@${chatPartner.username}`;
@@ -2065,7 +2038,8 @@
         }
 
         function closeImageViewer() {
-            fullscreenImage.src = '';
+            // No need to revoke URL here, it's managed by CacheManager
+            fullscreenImage.src = ''; // for memory release
             hideModal(imageViewerOverlay);
         }
         
@@ -2086,25 +2060,44 @@
             confirmBtn.textContent = options.alert ? 'باشه' : 'تایید';
             showModal(dialogOverlay);
             if(options.prompt) dialogInput.focus();
-            return new Promise(resolve => { dialogResolver = resolve; });
+
+            return new Promise(resolve => {
+                dialogResolver = resolve;
+            });
         }
         confirmBtn.onclick = () => {
-            if (dialogResolver) dialogResolver(dialogInput.style.display === 'block' ? dialogInput.value : true);
-            dialogResolver = null;
+            if (dialogResolver) {
+                dialogResolver(dialogInput.style.display === 'block' ? dialogInput.value : true);
+                dialogResolver = null;
+            }
             hideModal(dialogOverlay);
         };
         cancelBtn.onclick = () => {
-            if (dialogResolver) dialogResolver(dialogInput.style.display === 'block' ? null : false);
-            dialogResolver = null;
+            if (dialogResolver) {
+                dialogResolver(dialogInput.style.display === 'block' ? null : false);
+                dialogResolver = null;
+            }
             hideModal(dialogOverlay);
         };
+
         function showCustomConfirm(options) { return showCustomDialog({ ...options, prompt: false }); }
         function showCustomPrompt(options) { return showCustomDialog({ ...options, prompt: true }); }
         function showCustomAlert(options) { return showCustomDialog({ ...options, alert: true }); }
 
+        // --- بخش ۱۲: تابع کمکی برای ارسال درخواست‌های API ---
         async function apiRequest(path, method, body, keepalive = false) {
-            const options = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }, keepalive };
-            if (body !== undefined && method !== 'GET') options.body = JSON.stringify(body);
+            const options = {
+                method,
+                headers: { 
+                    'Content-Type': 'application/json', 'Authorization': `Bearer ${clientToken}`,
+                    'X-User-Username': currentUser.username
+                },
+                keepalive
+            };
+            if (body !== undefined && method !== 'GET') {
+                options.body = JSON.stringify(body);
+            }
+            
             const response = await fetch(`${PROXY_URL}?path=${path}`, options);
             const responseData = await response.json().catch(() => ({}));
             if (!response.ok) {
@@ -2114,36 +2107,51 @@
             return responseData;
         }
         
+        // --- بخش ۱۳: منطق پنل استیکر ---
         function openStickerPanel() {
             showModal(stickerPanelOverlay);
-            if (!stickersLoaded) loadStickers();
+            if (!stickersLoaded) {
+                loadStickers();
+            }
         }
+
         function closeStickerPanel() {
             hideModal(stickerPanelOverlay);
         }
+
         async function loadStickers() {
             stickerGrid.innerHTML = '<div class="loader"></div>';
             try {
                 let stickers = await apiRequest('stickers', 'GET');
                 if (stickers === null) {
-                    const sampleGifs = ["https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3dta25ub2Z0eXQ3cGI2a2d4MnpkeG5hbnR1ZHBwZWZqZmJmZ2Q4dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/CjmvTCZf2U3pMwyq2p/giphy.gif", "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2J2eW1idW12cWNwZG9sNWY4Z2V1aXo1Z2R0OGFudW1jY2R0Z3d6bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/5z9k423kYx92Qtz3lH/giphy.gif"];
+                    console.log("Sticker collection not found. Creating with sample data...");
+                    const sampleGifs = [
+                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3dta25ub2Z0eXQ3cGI2a2d4MnpkeG5hbnR1ZHBwZWZqZmJmZ2Q4dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/CjmvTCZf2U3pMwyq2p/giphy.gif",
+                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2J2eW1idW12cWNwZG9sNWY4Z2V1aXo1Z2R0OGFudW1jY2R0Z3d6bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/5z9k423kYx92Qtz3lH/giphy.gif",
+                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGFsNXRqZ2lqb2M3NmF5MjN3Z2M2c2ZqM3FmNGVqM3Y5bmR5c3Q0ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3Fm0GGv2oA5A4/giphy.gif"
+                    ];
                     await apiRequest('stickers', 'PUT', sampleGifs);
                     stickers = await apiRequest('stickers', 'GET');
                 }
+                
                 populateStickerGrid(stickers);
                 stickersLoaded = true;
+
             } catch (error) {
                 console.error("Failed to load stickers:", error);
                 stickerGrid.innerHTML = `<p class="error-text">خطا در بارگذاری استیکرها</p>`;
             }
         }
+
         function populateStickerGrid(stickerData) {
             stickerGrid.innerHTML = '';
             const stickerUrls = Array.isArray(stickerData) ? stickerData : Object.values(stickerData);
+
             if (!stickerUrls || stickerUrls.length === 0) {
                  stickerGrid.innerHTML = `<p class="error-text">استیکری یافت نشد.</p>`;
                  return;
             }
+
             stickerUrls.forEach(url => {
                 if (typeof url !== 'string') return;
                 const img = document.createElement('img');
@@ -2153,6 +2161,7 @@
                 stickerGrid.appendChild(img);
             });
         }
+
         function handleStickerClick(e) {
             if (e.target.tagName === 'IMG') {
                 const stickerUrl = e.target.src;
@@ -2161,9 +2170,11 @@
             }
         }
 
+        // --- بخش ۱۴: منطق پلیر سفارشی پیام صوتی ---
         async function setupVoicePlayer(messageElement, voiceUrl) {
             const player = messageElement.querySelector('.voice-player');
             if (!player) return;
+
             const audio = player.querySelector('.voice-audio');
             const playPauseBtn = player.querySelector('.play-pause-btn');
             const playIcon = player.querySelector('.play-icon');
@@ -2171,274 +2182,155 @@
             const progressContainer = player.querySelector('.progress-container');
             const progressBar = player.querySelector('.progress-bar');
             const durationEl = player.querySelector('.duration');
+            
             try {
                 const localUrl = await cacheManager.get(voiceUrl);
-                audio.src = localUrl || await (async () => {
+                if (localUrl) {
+                    audio.src = localUrl;
+                } else {
+                    // Download and cache it if not available
                     const blob = await cacheManager.downloadWithProgress(voiceUrl, () => {});
                     const newLocalUrl = URL.createObjectURL(blob);
-                    cacheManager._blobUrlReferences.set(voiceUrl, newLocalUrl);
-                    return newLocalUrl;
-                })();
+                    cacheManager._blobUrlReferences.set(voiceUrl, newLocalUrl); // Manually add to map
+                    audio.src = newLocalUrl;
+                }
             } catch (error) {
                 console.error("Failed to load voice message:", error);
-                audio.src = voiceUrl;
+                audio.src = voiceUrl; // Fallback to network
             }
+
             const formatTime = (seconds) => {
                 if (isNaN(seconds)) return '0:00';
                 const mins = Math.floor(seconds / 60);
                 const secs = Math.floor(seconds % 60);
                 return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
             };
-            audio.addEventListener('loadedmetadata', () => { durationEl.textContent = formatTime(audio.duration); });
+            
+            audio.addEventListener('loadedmetadata', () => {
+                durationEl.textContent = formatTime(audio.duration);
+            });
+
             audio.addEventListener('timeupdate', () => {
-                progressBar.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+                const progress = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = `${progress}%`;
                 durationEl.textContent = formatTime(audio.currentTime);
             });
+
             audio.addEventListener('ended', () => {
                 playIcon.style.display = 'inline';
                 pauseIcon.style.display = 'none';
                 progressBar.style.width = '0%';
                 durationEl.textContent = formatTime(audio.duration);
             });
+
             playPauseBtn.addEventListener('click', () => {
-                if (audio.paused) { audio.play(); playIcon.style.display = 'none'; pauseIcon.style.display = 'inline'; }
-                else { audio.pause(); playIcon.style.display = 'inline'; pauseIcon.style.display = 'none'; }
+                if (audio.paused) {
+                    audio.play();
+                    playIcon.style.display = 'none';
+                    pauseIcon.style.display = 'inline';
+                } else {
+                    audio.pause();
+                    playIcon.style.display = 'inline';
+                    pauseIcon.style.display = 'none';
+                }
             });
+
             progressContainer.addEventListener('click', (e) => {
                 const rect = progressContainer.getBoundingClientRect();
-                audio.currentTime = (e.clientX - rect.left) / rect.width * audio.duration;
+                const offsetX = e.clientX - rect.left;
+                const progress = offsetX / rect.width;
+                audio.currentTime = progress * audio.duration;
             });
         }
         
+        // --- بخش ۱۵: منطق جدید مدیریت و دانلود مدیا ---
         async function setupMediaLoader(container, mediaUrl, type) {
             const mediaElement = container.querySelector('img, video');
             if (!mediaElement) return;
+
             mediaElement.dataset.originalSrc = mediaUrl;
+            
+            // Check cache first
             const cachedUrl = await cacheManager.get(mediaUrl);
             if (cachedUrl) {
                 mediaElement.src = cachedUrl;
                 if (type === 'video') mediaElement.controls = true;
                 return;
             }
+
+            // If not in cache, show download UI
             const loaderOverlay = document.createElement('div');
             loaderOverlay.className = 'media-loader-overlay';
-            loaderOverlay.innerHTML = `<div class="download-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></div>`;
+            loaderOverlay.innerHTML = `
+                <div class="download-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </div>`;
             container.appendChild(loaderOverlay);
-            loaderOverlay.addEventListener('click', () => { initiateMediaDownload(container, mediaUrl, type); }, { once: true });
+
+            loaderOverlay.addEventListener('click', () => {
+                initiateMediaDownload(container, mediaUrl, type);
+            }, { once: true });
         }
 
         async function initiateMediaDownload(container, mediaUrl, type) {
             const mediaElement = container.querySelector('img, video');
             const overlay = container.querySelector('.media-loader-overlay');
             if (!overlay) return;
-            overlay.innerHTML = `<button class="cancel-download-btn">&times;</button><div class="progress-circle"><svg viewBox="0 0 36 36"><path class="bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path class="progress" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg><div class="progress-text">0%</div></div>`;
+
+            // Setup progress UI
+            overlay.innerHTML = `
+                <button class="cancel-download-btn">&times;</button>
+                <div class="progress-circle">
+                    <svg viewBox="0 0 36 36">
+                        <path class="bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="progress" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div class="progress-text">0%</div>
+                </div>`;
+            
             const progressPath = overlay.querySelector('.progress-circle .progress');
             const progressText = overlay.querySelector('.progress-text');
             const cancelBtn = overlay.querySelector('.cancel-download-btn');
+            
             const controller = new AbortController();
             activeControllers.set(mediaUrl, controller);
-            cancelBtn.onclick = (e) => { e.stopPropagation(); controller.abort(); };
+
+            cancelBtn.onclick = (e) => {
+                e.stopPropagation();
+                controller.abort();
+            };
+
             try {
-                const onProgress = ({ percent }) => { if (percent === undefined) return; progressPath.style.strokeDasharray = `${percent}, 100`; progressText.textContent = `${percent}%`; };
+                const onProgress = ({ percent }) => {
+                    if (percent === undefined) return;
+                    progressPath.style.strokeDasharray = `${percent}, 100`;
+                    progressText.textContent = `${percent}%`;
+                };
+                
                 const blob = await cacheManager.downloadWithProgress(mediaUrl, onProgress, controller.signal);
+                
                 const localUrl = await cacheManager.get(mediaUrl) || URL.createObjectURL(blob);
                 mediaElement.src = localUrl;
-                if (type === 'video') { mediaElement.controls = true; mediaElement.autoplay = true; }
+                if (type === 'video') {
+                    mediaElement.controls = true;
+                    mediaElement.autoplay = true; // Start playing after download
+                }
                 overlay.classList.add('hidden');
                 setTimeout(() => overlay.remove(), 300);
+
             } catch (error) {
-                if (error.name !== 'AbortError') console.error('Download failed:', error);
-                overlay.remove();
-                setupMediaLoader(container, mediaUrl, type);
+                if (error.name === 'AbortError') {
+                    console.log('Download cancelled by user.');
+                } else {
+                    console.error('Download failed:', error);
+                }
+                // Reset UI
+                overlay.remove(); // Remove current progress overlay
+                setupMediaLoader(container, mediaUrl, type); // Re-add the initial download button
             } finally {
                 activeControllers.delete(mediaUrl);
             }
         }
-
-        // ========================================
-        // --- START: AUDIO CALL IMPLEMENTATION ---
-        // ========================================
-
-        function updateCallUI(state, statusText = '') {
-            callState = state;
-            callOverlay.className = state; // 'idle', 'incoming', 'outgoing', 'active'
-            callStatusText.textContent = statusText;
-
-            if (state === 'idle') {
-                callOverlay.classList.remove('visible');
-                stopCallTimer();
-                ringtoneAudio.pause();
-                ringtoneAudio.currentTime = 0;
-            } else {
-                callOverlay.classList.add('visible');
-                const avatarUrl = chatPartner.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=121212&color=fff&size=140`;
-                callPartnerAvatar.src = avatarUrl;
-                callPartnerName.textContent = chatPartner.displayName || chatPartner.username;
-            }
-
-            if (state === 'incoming') {
-                ringtoneAudio.play().catch(e => console.warn("Ringtone autoplay failed:", e));
-            } else if (state === 'active') {
-                startCallTimer();
-                ringtoneAudio.pause();
-            }
-        }
-
-        async function createPeerConnection() {
-            peerConnection = new RTCPeerConnection(RTC_CONFIGURATION);
-
-            peerConnection.onicecandidate = event => {
-                if (event.candidate) {
-                    sendSignal({ type: 'candidate', candidate: event.candidate });
-                }
-            };
-
-            peerConnection.ontrack = event => {
-                remoteAudio.srcObject = event.streams[0];
-            };
-
-            peerConnection.onconnectionstatechange = () => {
-                console.log('Call connection state:', peerConnection.connectionState);
-                if (['disconnected', 'failed', 'closed'].includes(peerConnection.connectionState)) {
-                    hangupCall();
-                }
-            };
-
-            localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, localStream);
-            });
-        }
-
-        async function sendSignal(data) {
-            if (!chatId) return;
-            try {
-                // We add sender to identify who sent the signal
-                const payload = { ...data, sender: currentUser.username };
-                await apiRequest(`pivi_chats/${chatId}/signal`, 'PUT', payload);
-            } catch (error) {
-                console.error("Failed to send signal:", error);
-            }
-        }
-
-        async function startCall() {
-            if (callState !== 'idle') return showCustomAlert({title: 'خطا', message: 'شما در حال حاضر در یک تماس هستید.'});
-
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                updateCallUI('outgoing', 'در حال تماس...');
-                await createPeerConnection();
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                sendSignal({ type: 'offer', sdp: offer.sdp });
-            } catch (error) {
-                console.error("Error starting call:", error);
-                showCustomAlert({title: 'خطا', message: 'امکان شروع تماس وجود ندارد. لطفاً دسترسی به میکروفون را بررسی کنید.'});
-                updateCallUI('idle');
-            }
-        }
-
-        async function answerCall() {
-            if (callState !== 'incoming' || !receivedOffer) return;
-
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                updateCallUI('active', '00:00');
-                await createPeerConnection();
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(receivedOffer));
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                sendSignal({ type: 'answer', sdp: answer.sdp });
-            } catch (error) {
-                console.error("Error answering call:", error);
-                hangupCall();
-            }
-        }
-
-        async function hangupCall() {
-            if (callState === 'idle') return;
-            
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-            
-            // Send hangup signal and clean the signal node
-            try {
-                await apiRequest(`pivi_chats/${chatId}/signal`, 'DELETE');
-            } catch (error) {
-                console.error("Failed to clear signal node on hangup:", error);
-            }
-            
-            updateCallUI('idle');
-            lastSignalSnapshot = null;
-            receivedOffer = null;
-        }
-
-        async function handleSignalingData(data) {
-            if (!data || data.sender === currentUser.username) return; // Ignore my own signals
-            
-            switch (data.type) {
-                case 'offer':
-                    if (callState === 'idle') {
-                        receivedOffer = { type: 'offer', sdp: data.sdp };
-                        updateCallUI('incoming', 'تماس ورودی');
-                    }
-                    break;
-                case 'answer':
-                    if (callState === 'outgoing' && peerConnection) {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
-                        updateCallUI('active', '00:00');
-                    }
-                    break;
-                case 'candidate':
-                    if (peerConnection && peerConnection.remoteDescription) {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                    }
-                    break;
-                case 'hangup':
-                     if (callState !== 'idle') {
-                        hangupCall();
-                     }
-                    break;
-            }
-        }
-
-        function toggleMute() {
-            if (!localStream) return;
-            const audioTrack = localStream.getAudioTracks()[0];
-            if (audioTrack) {
-                audioTrack.enabled = !audioTrack.enabled;
-                muteCallBtn.classList.toggle('muted', !audioTrack.enabled);
-                muteCallBtn.querySelector('.unmuted-icon').style.display = audioTrack.enabled ? 'block' : 'none';
-                muteCallBtn.querySelector('.muted-icon').style.display = audioTrack.enabled ? 'none' : 'block';
-            }
-        }
-
-        function startCallTimer() {
-            stopCallTimer();
-            let seconds = 0;
-            const timerEl = document.getElementById('call-status-text');
-            timerEl.textContent = '00:00';
-            callTimerInterval = setInterval(() => {
-                seconds++;
-                const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
-                const secs = String(seconds % 60).padStart(2, '0');
-                timerEl.textContent = `${mins}:${secs}`;
-            }, 1000);
-        }
-
-        function stopCallTimer() {
-            if (callTimerInterval) clearInterval(callTimerInterval);
-            callTimerInterval = null;
-        }
-
-        // ======================================
-        // --- END: AUDIO CALL IMPLEMENTATION ---
-        // ======================================
 
     </script>
 </body>
