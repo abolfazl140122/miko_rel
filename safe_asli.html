@@ -476,7 +476,7 @@
             color: var(--text-secondary);
         }
 
-        /* --- NEW: Profile Stats --- */
+        /* --- Profile Stats --- */
         .profile-stats {
             display: flex;
             justify-content: center;
@@ -497,7 +497,7 @@
             color: var(--text-secondary);
         }
 
-        /* --- NEW: Follow Button --- */
+        /* --- Follow Button --- */
         .follow-btn {
             width: 80%;
             max-width: 250px;
@@ -511,13 +511,17 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
+        .follow-btn:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
         /* State 1: Default state to Follow */
         .follow-btn {
             background-color: var(--primary-color);
             color: white;
             box-shadow: 0 4px 10px rgba(0, 163, 255, 0.3);
         }
-        .follow-btn:hover {
+        .follow-btn:hover:not(:disabled) {
             background-color: #00baff;
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 163, 255, 0.4);
@@ -529,7 +533,7 @@
             box-shadow: none;
             border-color: var(--border-color);
         }
-        .follow-btn.following:hover {
+        .follow-btn.following:hover:not(:disabled) {
             background-color: rgba(220, 53, 69, 0.15); /* light red */
             border-color: rgba(220, 53, 69, 0.5);
             color: var(--error-color);
@@ -893,7 +897,7 @@
                 <h3 id="profile-display-name"></h3>
                 <p id="profile-username"></p>
 
-                <!-- NEW: Follow Stats -->
+                <!-- Follow Stats -->
                 <div class="profile-stats">
                     <div class="stat-item">
                         <span class="stat-count" id="profile-followers-count">0</span>
@@ -905,12 +909,11 @@
                     </div>
                 </div>
                 
-                <!-- NEW: Follow/Unfollow Button -->
-                <!-- Note: This button might be hidden via JS when viewing your own profile -->
+                <!-- Follow/Unfollow Button -->
                 <button class="follow-btn" id="profile-follow-btn">دنبال کردن</button>
 
                 <ul class="profile-actions">
-                    <li id="edit-profile-btn"> <!-- ID Added Here -->
+                    <li id="edit-profile-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         <span>ویرایش پروفایل</span>
                     </li>
@@ -979,7 +982,7 @@
         const profileDisplayName = document.getElementById('profile-display-name');
         const profileUsername = document.getElementById('profile-username');
         
-        // NEW Profile Elements
+        // Profile Elements
         const profileFollowersCount = document.getElementById('profile-followers-count');
         const profileFollowingCount = document.getElementById('profile-following-count');
         const profileFollowBtn = document.getElementById('profile-follow-btn');
@@ -1007,6 +1010,7 @@
         let recentChats = [];
         let pollingIntervalId = null; 
         let currentSearchMode = 'accounts';
+        let currentProfileUsername = null; // Stores the username of the profile being viewed in the overlay
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1020,7 +1024,7 @@
             // EVENT LISTENERS
             searchInput.addEventListener('input', handleSearch);
             searchTabsContainer.addEventListener('click', handleTabSwitch);
-            openProfileBtn.addEventListener('click', showProfile);
+            openProfileBtn.addEventListener('click', () => openUserProfile(currentUser.username)); // Modified
             closeProfileBtn.addEventListener('click', hideProfile);
             logoutBtn.addEventListener('click', () => {
                 showCustomConfirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟', handleLogoutConfirmed);
@@ -1042,6 +1046,8 @@
             pfpUploadInput.addEventListener('change', handleImagePreview);
             editProfileForm.addEventListener('submit', handleProfileUpdate);
 
+            // Follow System Event Listener
+            profileFollowBtn.addEventListener('click', toggleFollow);
 
             await loadInitialData();
         });
@@ -1060,12 +1066,10 @@
                 if (usersResponse) {
                     allUsers = usersResponse;
                     if (allUsers[currentUser.username]) {
-                        // Sync local user data with server data
                         const serverUser = allUsers[currentUser.username];
                         currentUser = {...currentUser, ...serverUser};
                         localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     } else {
-                        // This case can happen if user was deleted on server
                         showErrorMessage('کاربر فعلی در سرور یافت نشد. لطفاً دوباره وارد شوید.');
                         handleLogoutConfirmed();
                         return;
@@ -1116,8 +1120,10 @@
 
         async function updateUserDataOnServer(path, data) {
             if (!clientToken || !currentUser) throw new Error('کاربر احراز هویت نشده است.');
-            const response = await fetch(`${PROXY_URL}?path=${path}`, {
-                method: 'PATCH', // Use PATCH to update specific fields
+            // For multi-path updates, the path should be the root '/'
+            const finalPath = path === '/' ? '' : `?path=${path}`;
+            const response = await fetch(`${PROXY_URL}${finalPath}`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${clientToken}`,
@@ -1283,8 +1289,14 @@
                     const targetChannelId = item.dataset.channelId;
 
                     if (targetUid) {
-                        console.log(`Navigating to chat with user: ${targetUid}`);
-                        window.location.href = `pivi.html?uid=${targetUid}`;
+                         if (item.classList.contains('search-result-item')) {
+                            // For search results, open profile overlay
+                            openUserProfile(targetUid);
+                        } else {
+                            // For existing chats, navigate to chat page
+                            console.log(`Navigating to chat with user: ${targetUid}`);
+                            window.location.href = `pivi.html?uid=${targetUid}`;
+                        }
                     } else if (targetChannelId) {
                         console.log(`Navigating to channel: ${targetChannelId}`);
                         window.location.href = `Channel.html?id=${targetChannelId}`;
@@ -1294,32 +1306,50 @@
         }
         
         // --- Profile Page Functions ---
-        function showProfile() {
-            if (!currentUser) return;
+        async function openUserProfile(username) {
+            currentProfileUsername = username;
+            const userData = allUsers[username];
+
+            if (!userData) {
+                showToast('اطلاعات کاربر یافت نشد.', 'error');
+                return;
+            }
             
-            const avatarUrl = currentUser.profilePicUrl 
-                ? currentUser.profilePicUrl 
-                : `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=0D1117&color=fff&size=150`;
+            const avatarUrl = userData.profilePicUrl 
+                ? userData.profilePicUrl 
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=0D1117&color=fff&size=150`;
             
             profileImage.src = avatarUrl;
             
-            const verifiedTickHtml = currentUser.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
-            profileDisplayName.innerHTML = `${currentUser.displayName || currentUser.username} ${verifiedTickHtml}`;
-            profileUsername.textContent = `@${currentUser.username}`;
+            const verifiedTickHtml = userData.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
+            profileDisplayName.innerHTML = `${userData.displayName || userData.username} ${verifiedTickHtml}`;
+            profileUsername.textContent = `@${userData.username}`;
             
-            // TODO: Fetch and display actual follower/following counts
+            // Reset counts and button state
             profileFollowersCount.textContent = '...';
             profileFollowingCount.textContent = '...';
+            profileFollowBtn.disabled = true;
 
-            // Logic to show/hide follow button
-            // For now, it's always visible but should be hidden for own profile
-            profileFollowBtn.style.display = 'block'; // or 'none'
+            // Handle UI based on whether it's my profile or someone else's
+            const isMyProfile = username === currentUser.username;
+            profileFollowBtn.style.display = isMyProfile ? 'none' : 'block';
+            editProfileBtn.style.display = isMyProfile ? 'flex' : 'none';
+            logoutBtn.style.display = isMyProfile ? 'flex' : 'none'; // Also manage logout button visibility
+
+
+            // Fetch stats and status
+            getFollowCounts(username);
+            if (!isMyProfile) {
+                await checkFollowStatus(username);
+                profileFollowBtn.disabled = false;
+            }
 
             profileOverlay.classList.add('active');
         }
 
         function hideProfile() {
             profileOverlay.classList.remove('active');
+            currentProfileUsername = null; // Clear the state when closing
         }
 
         function handleLogoutConfirmed() {
@@ -1335,8 +1365,7 @@
 
         // --- Edit Profile Modal Functions ---
         function showEditProfileModal() {
-            if (!currentUser) return;
-            
+            // Data is already loaded for the current user when their profile is opened
             const avatarUrl = currentUser.profilePicUrl 
                 ? currentUser.profilePicUrl 
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.username)}&background=1B212A&color=fff&size=110`;
@@ -1355,7 +1384,6 @@
         function handleImagePreview(event) {
             const file = event.target.files[0];
             if (file) {
-                // Limit file size to avoid overly large data URLs
                 if (file.size > 2 * 1024 * 1024) { // 2MB limit
                     showToast('حجم عکس پروفایل باید کمتر از ۲ مگابایت باشد.', 'error');
                     return;
@@ -1383,35 +1411,27 @@
             try {
                 const newDisplayName = editDisplayNameInput.value.trim();
                 const newProfilePicUrl = editPfpPreview.src;
-
-                // Create a payload with only the fields that have changed
                 const payload = {};
                 if (newDisplayName !== (currentUser.displayName || '')) {
                     payload.displayName = newDisplayName;
                 }
-                // Check if the profile picture source is a data URL (newly uploaded)
                 if (newProfilePicUrl.startsWith('data:image') && newProfilePicUrl !== currentUser.profilePicUrl) {
                     payload.profilePicUrl = newProfilePicUrl;
                 }
-                
-                // If there's nothing to update, just close the modal
                 if (Object.keys(payload).length === 0) {
                      hideEditProfileModal();
                      return;
                 }
 
-                // Send update to the server
                 const path = `users/${currentUser.username}`;
                 await updateUserDataOnServer(path, payload);
 
-                // Update local state on success
                 if (payload.displayName) currentUser.displayName = payload.displayName;
                 if (payload.profilePicUrl) currentUser.profilePicUrl = payload.profilePicUrl;
                 
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-                // Update UI
-                showProfile();
+                
+                openUserProfile(currentUser.username); // Refresh profile view
                 hideEditProfileModal();
                 showToast('پروفایل با موفقیت به‌روزرسانی شد.', 'success');
 
@@ -1419,16 +1439,103 @@
                 console.error('Profile Update Failed:', error);
                 showToast(`خطا در ذخیره تغییرات: ${error.message}`, 'error');
             } finally {
-                // Restore button state
                 saveBtn.disabled = false;
                 saveBtn.textContent = originalBtnText;
             }
         }
 
+        // --- SECTION: Follow System ---
+        async function getFollowCounts(targetUsername) {
+            try {
+                const [followersData, followingData] = await Promise.all([
+                    fetchProxyData(`followers/${targetUsername}`),
+                    fetchProxyData(`following/${targetUsername}`)
+                ]);
+
+                const followersCount = followersData ? Object.keys(followersData).length : 0;
+                const followingCount = followingData ? Object.keys(followingData).length : 0;
+
+                profileFollowersCount.textContent = followersCount;
+                profileFollowingCount.textContent = followingCount;
+
+            } catch (error) {
+                console.error("Error fetching follow counts:", error);
+                profileFollowersCount.textContent = 'خطا';
+                profileFollowingCount.textContent = 'خطا';
+            }
+        }
+
+        async function checkFollowStatus(targetUsername) {
+            try {
+                const status = await fetchProxyData(`following/${currentUser.username}/${targetUsername}`);
+                if (status === true) {
+                    profileFollowBtn.classList.add('following');
+                    profileFollowBtn.textContent = 'دنبال می‌کنید';
+                } else {
+                    profileFollowBtn.classList.remove('following');
+                    profileFollowBtn.textContent = 'دنبال کردن';
+                }
+            } catch (error) {
+                console.error("Error checking follow status:", error);
+                profileFollowBtn.classList.remove('following');
+                profileFollowBtn.textContent = 'دنبال کردن';
+            }
+        }
+
+        async function toggleFollow() {
+            const targetUsername = currentProfileUsername;
+            if (!targetUsername || targetUsername === currentUser.username) return;
+
+            profileFollowBtn.disabled = true;
+            const isCurrentlyFollowing = profileFollowBtn.classList.contains('following');
+            const myUsername = currentUser.username;
+            
+            // Optimistic UI update
+            const originalFollowerCount = parseInt(profileFollowersCount.textContent, 10);
+            if (isCurrentlyFollowing) {
+                profileFollowBtn.classList.remove('following');
+                profileFollowBtn.textContent = 'دنبال کردن';
+                if (!isNaN(originalFollowerCount)) {
+                    profileFollowersCount.textContent = Math.max(0, originalFollowerCount - 1);
+                }
+            } else {
+                profileFollowBtn.classList.add('following');
+                profileFollowBtn.textContent = 'دنبال می‌کنید';
+                 if (!isNaN(originalFollowerCount)) {
+                    profileFollowersCount.textContent = originalFollowerCount + 1;
+                }
+            }
+
+            try {
+                const valueToSet = isCurrentlyFollowing ? null : true; // null for delete, true for add
+                const payload = {
+                    [`following/${myUsername}/${targetUsername}`]: valueToSet,
+                    [`followers/${targetUsername}/${myUsername}`]: valueToSet,
+                };
+
+                await updateUserDataOnServer('/', payload); // Use root path for multi-path update
+
+            } catch (error) {
+                console.error("Failed to toggle follow:", error);
+                showToast(`خطا در عملیات: ${error.message}`, 'error');
+                // Revert UI on failure
+                if (isCurrentlyFollowing) {
+                    profileFollowBtn.classList.add('following');
+                    profileFollowBtn.textContent = 'دنبال می‌کنید';
+                } else {
+                    profileFollowBtn.classList.remove('following');
+                    profileFollowBtn.textContent = 'دنبال کردن';
+                }
+                profileFollowersCount.textContent = originalFollowerCount;
+            } finally {
+                profileFollowBtn.disabled = false;
+            }
+        }
+
+
         // --- SECTION: Real-time Updates ---
         async function checkForUpdates() {
             try {
-                // Before fetching, ensure we have a valid token
                 if (!clientToken) await refreshClientToken();
 
                 const [newUsers, newChats, newChannels] = await Promise.all([
@@ -1441,9 +1548,6 @@
                 if (newUsers && JSON.stringify(allUsers) !== JSON.stringify(newUsers)) {
                     allUsers = newUsers;
                     if (currentUser && allUsers[currentUser.username]) {
-                        // Update local user object with latest data from server
-                        // but keep the local version of displayName and profilePicUrl if they are different
-                        // to prevent overwriting a just-submitted change before it appears on the server.
                         const serverUser = allUsers[currentUser.username];
                         const mergedUser = { ...serverUser, ...currentUser };
                         if (JSON.stringify(currentUser) !== JSON.stringify(mergedUser)) {
@@ -1468,13 +1572,12 @@
                 if (needsUIRefresh && searchInput.value.trim() === '') {
                     renderChatList();
                 }
-                if (needsUIRefresh && profileOverlay.classList.contains('active')) {
-                    showProfile();
+                if (needsUIRefresh && profileOverlay.classList.contains('active') && currentProfileUsername) {
+                    openUserProfile(currentProfileUsername); // Refresh the currently viewed profile
                 }
 
             } catch (error) {
                 console.error("Polling Error:", error.message);
-                // Stop polling on auth errors to prevent spamming the server
                 if (error.message.includes('Token') || error.message.includes('احراز هویت')) {
                     if(pollingIntervalId) clearInterval(pollingIntervalId);
                     console.warn("Polling stopped due to authentication error.");
