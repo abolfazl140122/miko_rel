@@ -141,7 +141,6 @@
             background-color: var(--message-received-bg); align-self: flex-end; /* RTL: right */
             border-bottom-right-radius: 6px;
         }
-        /* NEW: No padding for image/video messages */
         .message.has-media {
             padding: 5px;
             background-color: transparent;
@@ -152,12 +151,17 @@
             overflow: hidden;
             max-width: 100%;
             background-color: var(--secondary-color); /* Placeholder color */
+            position: relative; /* NEW: for overlay */
+            min-height: 150px; /* Placeholder height */
         }
         .message .media-container img, .message .media-container video {
             display: block;
             max-width: 100%;
             height: auto;
             cursor: pointer;
+        }
+        .message.has-media .media-container video {
+            width: 100%; /* Ensure video takes full width of container */
         }
 
         .message::after {
@@ -185,6 +189,7 @@
             padding: 2px 6px;
             border-radius: 10px;
             color: white;
+            z-index: 1; /* Ensure it's above the media */
         }
 
         .message .edited-indicator { font-size: 0.7em; color: rgba(255, 255, 255, 0.6); margin-right: 5px; font-style: italic;}
@@ -261,8 +266,90 @@
             min-width: 35px;
             text-align: center;
         }
+
+        /* ===== START: NEW MEDIA LOADER STYLES ===== */
+        .media-loader-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border-radius: 15px; /* Match media-container */
+            cursor: pointer;
+            z-index: 2;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+        .media-loader-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .progress-circle {
+            width: 50px; height: 50px;
+            position: relative;
+        }
+
+        .progress-circle svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-circle circle {
+            fill: none;
+            stroke-width: 4;
+        }
+
+        .progress-circle .bg {
+            stroke: rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-circle .progress {
+            stroke: var(--primary-color);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 500;
+            font-size: 0.8em;
+        }
         
-        /* --- NEW: استایل لودر ارسال --- */
+        .download-icon {
+            color: white;
+            width: 24px;
+            height: 24px;
+        }
+
+        .cancel-download-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px; /* For RTL */
+            background: rgba(0,0,0,0.6);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            font-size: 18px;
+            line-height: 28px;
+            text-align: center;
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* ===== END: NEW MEDIA LOADER STYLES ===== */
+        
+        /* --- استایل لودر ارسال --- */
         .sending-indicator {
             display: flex;
             flex-direction: column; /* For progress bar */
@@ -582,7 +669,7 @@
         }
         #keyboard-offset-value { font-weight: 500; min-width: 50px; text-align: left; }
         
-        /* --- NEW: استایل‌های پنل استیکر --- */
+        /* --- استایل‌های پنل استیکر --- */
         .modal-overlay.bottom-sheet {
             align-items: flex-end; /* تراز کردن در پایین */
         }
@@ -672,7 +759,7 @@
     <div class="app-container" id="app-container">
         <header class="chat-header">
              <button class="back-btn" aria-label="بازگشت" onclick="history.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </button>
             <div class="partner-info" id="partner-info-header">
                 <img id="partner-avatar" src="" alt="آواتار">
@@ -682,7 +769,7 @@
                 </div>
             </div>
             <button class="options-btn" aria-label="گزینه‌ها" id="options-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
             </button>
         </header>
         
@@ -726,13 +813,11 @@
                 
                 <input type="text" id="message-input" placeholder="پیامت رو بنویس..." autocomplete="off">
                 <!-- NEW: Hidden file input -->
-                <input type="file" id="file-input" style="display:none" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm">
+                <input type="file" id="file-input" style="display:none" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm">
 
                 <div id="attachment-buttons">
                     <button type="button" id="attach-file-btn" class="icon-btn" title="افزودن فایل"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg></button>
-                    <!-- === START: MODIFICATION 1 === -->
                     <button type="button" id="sticker-btn" class="icon-btn" title="استیکر"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></button>
-                    <!-- === END: MODIFICATION 1 === -->
                     <button type="button" id="voice-btn" class="icon-btn" title="ارسال ویس">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
                     </button>
@@ -824,7 +909,7 @@
         </div>
     </div>
 
-    <!-- NEW: مودال نمایش تمام‌صفحه عکس -->
+    <!-- مودال نمایش تمام‌صفحه عکس -->
     <div id="image-viewer-overlay" class="modal-overlay">
         <div class="viewer-container">
             <img id="fullscreen-image" src="" alt="نمایش تمام‌صفحه">
@@ -832,7 +917,6 @@
         </div>
     </div>
 
-    <!-- === START: MODIFICATION 2 === -->
     <!-- پنل استیکرها -->
     <div id="sticker-panel-overlay" class="modal-overlay bottom-sheet">
         <div class="sticker-panel">
@@ -845,7 +929,6 @@
             </div>
         </div>
     </div>
-    <!-- === END: MODIFICATION 2 === -->
 
 
     <script>
@@ -864,14 +947,14 @@
         //  >>> START OF REVISED CacheManager IMPLEMENTATION <<<
         // ==============================================================
         class CacheManager {
-            constructor(dbName = 'PiviMediaCacheDB', storeName = 'media_metadata', cacheName = 'pivi-media-cache', maxSizeMB = 200) {
+            constructor(dbName = 'PiviMediaDB', storeName = 'media_metadata', cacheName = 'pivi-media-cache', maxSizeMB = 500) {
                 this.dbName = dbName;
                 this.storeName = storeName;
                 this.cacheName = cacheName;
                 this.maxSizeBytes = maxSizeMB * 1024 * 1024;
                 this.db = null;
-                // برای نگه‌داری ارجاع به blobها در حافظه تا زمانی که صفحه باز است
-                this._blobReferences = new Map();
+                this._blobUrlReferences = new Map();
+                this._ongoingDownloads = new Map();
             }
 
             async init() {
@@ -900,52 +983,45 @@
                 if (!this.db || !(blob instanceof Blob)) return;
                 try {
                     const cache = await caches.open(this.cacheName);
-                    const headers = new Headers({ 'Content-Type': blob.type, 'Content-Length': blob.size, 'Access-Control-Allow-Origin': '*' });
-                    const response = new Response(blob, { headers });
+                    const response = new Response(blob, {
+                        headers: { 'Content-Type': blob.type, 'Content-Length': blob.size }
+                    });
                     await cache.put(url, response);
 
                     const transaction = this.db.transaction(this.storeName, 'readwrite');
                     const store = transaction.objectStore(this.storeName);
                     store.put({ url, lastAccessed: Date.now(), size: blob.size });
-                    
-                    await this.evictIfNeeded(); // پاک‌سازی در صورت نیاز
+
+                    await this.evictIfNeeded();
                 } catch (error) {
                     console.error(`Failed to cache ${url}:`, error);
                 }
             }
 
             async get(url) {
-                if (!this.db) return null;
-
-                // مرحله ۱: ابتدا بررسی می‌کنیم که آیا blob از قبل در حافظه (Map) وجود دارد یا نه
-                if (this._blobReferences.has(url)) {
-                    const blob = this._blobReferences.get(url);
-                    // یک Object URL جدید و معتبر می‌سازیم تا از خطای "revoked" جلوگیری شود
-                    return URL.createObjectURL(blob);
+                if (this._blobUrlReferences.has(url)) {
+                    return this._blobUrlReferences.get(url);
                 }
 
-                // مرحله ۲: اگر در حافظه نبود، از Cache API می‌خوانیم
                 try {
                     const cache = await caches.open(this.cacheName);
                     const response = await cache.match(url);
                     if (response) {
                         const blob = await response.blob();
-                        
-                        // blob را در حافظه نگه می‌داریم تا در فراخوانی‌های بعدی سریعاً در دسترس باشد
-                        this._blobReferences.set(url, blob);
-                        
                         const objectURL = URL.createObjectURL(blob);
-
-                        // به‌روزرسانی زمان آخرین دسترسی برای مدیریت حافظه (LRU)
-                        const transaction = this.db.transaction(this.storeName, 'readwrite');
-                        const store = transaction.objectStore(this.storeName);
-                        const metadata = await new Promise(r => {
-                            const req = store.get(url);
-                            req.onsuccess = e => r(e.target.result);
-                        });
-                        if (metadata) {
-                            store.put({ ...metadata, lastAccessed: Date.now() });
-                        }
+                        this._blobUrlReferences.set(url, objectURL);
+                        
+                        // Update last accessed time in background
+                        this.db.transaction(this.storeName, 'readwrite')
+                           .objectStore(this.storeName)
+                           .get(url).onsuccess = (event) => {
+                               const metadata = event.target.result;
+                               if(metadata) {
+                                   metadata.lastAccessed = Date.now();
+                                   this.db.transaction(this.storeName, 'readwrite')
+                                        .objectStore(this.storeName).put(metadata);
+                               }
+                           };
 
                         return objectURL;
                     }
@@ -956,81 +1032,77 @@
                 }
             }
             
-            async ensurePreloaded(urls, concurrency = 4) {
-                const queue = [...urls];
-                
-                const prefetch = async (url) => {
+            async downloadWithProgress(url, onProgress, signal) {
+                if (this._ongoingDownloads.has(url)) {
+                    return this._ongoingDownloads.get(url);
+                }
+
+                const downloadPromise = (async () => {
                     try {
-                        // ۱. بررسی اینکه آیا فایل از قبل در کش وجود دارد یا نه
-                        const cache = await caches.open(this.cacheName);
-                        const existing = await cache.match(url);
-                        if (existing) return; // اگر وجود داشت، نیازی به دانلود مجدد نیست
-
-                        // ۲. تنظیم یک تایم‌اوت تطبیقی فقط برای نمایش هشدار (soft handling)
-                        // این تایمر عملیات fetch را متوقف نمی‌کند
-                        const dynamicTimeout = url.match(/\.(mp4|mov|webm)$/i) ? 20000 : 8000;
-                        const timeoutId = setTimeout(() => {
-                            console.warn(`Preloading is taking longer than expected for: ${url}`);
-                        }, dynamicTimeout);
-
-                        // ۳. دانلود فایل با استفاده از کش مرورگر
-                        const response = await fetch(url, {
-                            mode: 'cors',
-                            cache: 'force-cache',
-                        });
-
-                        // ۴. پاک کردن تایمر هشدار پس از اتمام دانلود
-                        clearTimeout(timeoutId);
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
+                        const response = await fetch(url, { signal });
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        
+                        const contentLength = response.headers.get('Content-Length');
+                        if (!contentLength) {
+                            console.warn('Content-Length header not found. Progress will not be available.');
+                            const blob = await response.blob();
+                            onProgress({ loaded: blob.size, total: blob.size, percent: 100 });
+                            await this.put(url, blob);
+                            return blob;
                         }
 
-                        // ۵. تبدیل پاسخ به blob و ذخیره‌سازی از طریق متد put
-                        const blob = await response.blob();
+                        const total = parseInt(contentLength, 10);
+                        let loaded = 0;
+                        const chunks = [];
+                        const reader = response.body.getReader();
+
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+                            
+                            chunks.push(value);
+                            loaded += value.length;
+                            const percent = Math.round((loaded / total) * 100);
+                            onProgress({ loaded, total, percent });
+                        }
+
+                        const blob = new Blob(chunks);
                         await this.put(url, blob);
-
-                    } catch (error) {
-                        // نمایش خطا بدون متوقف کردن سایر دانلودها
-                        console.warn(`Preloading failed for ${url}:`, error.message);
+                        return blob;
+                    } finally {
+                        this._ongoingDownloads.delete(url);
                     }
-                };
-
-                const run = async () => {
-                    while (queue.length > 0) {
-                        const url = queue.shift();
-                        if (url) await prefetch(url);
-                    }
-                };
+                })();
                 
-                // اجرای همزمان چند دانلود برای افزایش سرعت
-                const workers = Array(concurrency).fill(null).map(() => run());
-                await Promise.all(workers);
+                this._ongoingDownloads.set(url, downloadPromise);
+                return downloadPromise;
+            }
+
+            revokeUrl(url) {
+                if (this._blobUrlReferences.has(url)) {
+                    URL.revokeObjectURL(this._blobUrlReferences.get(url));
+                    this._blobUrlReferences.delete(url);
+                }
             }
 
             async evictIfNeeded() {
                 if (!this.db) return;
-
-                const transaction = this.db.transaction(this.storeName, 'readwrite');
-                const store = transaction.objectStore(this.storeName);
+                const tx = this.db.transaction(this.storeName, 'readwrite');
+                const store = tx.objectStore(this.storeName);
                 const allMetadata = await new Promise(r => store.getAll().onsuccess = e => r(e.target.result));
-
-                const totalSize = allMetadata.reduce((sum, item) => sum + item.size, 0);
+                const totalSize = allMetadata.reduce((sum, item) => sum + (item.size || 0), 0);
 
                 if (totalSize > this.maxSizeBytes) {
                     allMetadata.sort((a, b) => a.lastAccessed - b.lastAccessed);
                     let currentSize = totalSize;
                     const cache = await caches.open(this.cacheName);
-
                     for (const item of allMetadata) {
                         if (currentSize <= this.maxSizeBytes) break;
-                        
                         await cache.delete(item.url);
                         await new Promise(r => store.delete(item.url).onsuccess = r);
-                        // همچنین از حافظه موقت (Map) هم پاک می‌کنیم
-                        this._blobReferences.delete(item.url);
-                        currentSize -= item.size;
-                        console.log(`Evicted ${item.url} to free up space.`);
+                        this.revokeUrl(item.url);
+                        currentSize -= (item.size || 0);
+                        console.log(`Evicted ${item.url} (${(item.size/1024/1024).toFixed(2)}MB) to free up space.`);
                     }
                 }
             }
@@ -1074,15 +1146,14 @@
         const imageViewerOverlay = document.getElementById('image-viewer-overlay');
         const fullscreenImage = document.getElementById('fullscreen-image');
         const imageViewerCloseBtn = document.getElementById('image-viewer-close-btn');
-        // === START: MODIFICATION 3 ===
         const stickerBtn = document.getElementById('sticker-btn');
         const stickerPanelOverlay = document.getElementById('sticker-panel-overlay');
         const stickerGrid = document.getElementById('sticker-grid');
         const closeStickerPanelBtn = document.getElementById('close-sticker-panel-btn');
-        // === END: MODIFICATION 3 ===
 
         // CACHE MANAGER INSTANCE
         const cacheManager = new CacheManager();
+        const activeControllers = new Map(); // For aborting downloads
 
         // --- وضعیت کلی اپلیکیشن ---
         let currentUser = null, clientToken = null, chatPartner = null, chatId = null;
@@ -1102,7 +1173,13 @@
 
         // --- بخش ۲: مدیریت چرخه عمر و راه‌اندازی برنامه ---
         window.addEventListener('load', initializeApp);
-        window.addEventListener('beforeunload', () => updatePresence(false));
+        window.addEventListener('beforeunload', () => {
+             updatePresence(false);
+             // Clean up any active object URLs to prevent memory leaks
+             for (const url of cacheManager._blobUrlReferences.keys()) {
+                 cacheManager.revokeUrl(url);
+             }
+        });
         document.addEventListener('visibilitychange', () => {
             if (!currentUser) return;
             updatePresence(!document.hidden);
@@ -1267,11 +1344,9 @@
 
             imageViewerCloseBtn.addEventListener('click', closeImageViewer);
             
-            // === START: MODIFICATION 4 ===
             stickerBtn.addEventListener('click', openStickerPanel);
             closeStickerPanelBtn.addEventListener('click', closeStickerPanel);
             stickerGrid.addEventListener('click', handleStickerClick);
-            // === END: MODIFICATION 4 ===
 
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 overlay.addEventListener('click', (e) => {
@@ -1423,19 +1498,6 @@
                     return;
                 }
 
-                if (isInitialLoad) {
-                    const mediaUrls = Object.values(messagesData)
-                        .map(msg => msg.mediaUrl || msg.voiceUrl)
-                        .filter(Boolean);
-                    const uniqueUrls = [...new Set(mediaUrls)];
-                    if (uniqueUrls.length > 0) {
-                        // این عملیات در پس‌زمینه انجام می‌شود و UI را مسدود نمی‌کند
-                        cacheManager.ensurePreloaded(uniqueUrls).then(() => {
-                           console.log('Preloading complete.');
-                        });
-                    }
-                }
-
                 const sortedMessages = Object.entries(messagesData)
                     .sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
 
@@ -1547,7 +1609,7 @@
                 return;
             }
 
-            const fileType = file.type.split('/')[0];
+            const fileType = file.type.split('/')[0] === 'image' && file.type.includes('gif') ? 'image' : file.type.split('/')[0];
             const tempId = `temp_${Date.now()}`;
             const tempMsgData = {
                 senderId: currentUser.username,
@@ -1681,9 +1743,9 @@
         }
 
         function updateMessageElement(msgDiv, msg) {
-            const hasMedia = ['image', 'video'].includes(msg.type);
+            const isMedia = ['image', 'video'].includes(msg.type);
             msgDiv.classList.toggle('deleted', !!msg.deleted);
-            msgDiv.classList.toggle('has-media', hasMedia && !msg.isSending);
+            msgDiv.classList.toggle('has-media', isMedia && !msg.isSending);
 
             const isSent = msg.senderId === currentUser.username;
             msgDiv.dataset.senderName = isSent ? currentUser.displayName : chatPartner.displayName;
@@ -1702,14 +1764,14 @@
             if (msg.deleted) {
                 messageContentHTML = `<div class="text">این پیام حذف شده است</div>`;
             } else if (msg.isSending) {
-                const progressHTML = (hasMedia) ? '<progress value="0" max="100"></progress>' : '<div class="spinner"></div>';
+                const progressHTML = (isMedia) ? '<progress value="0" max="100"></progress>' : '<div class="spinner"></div>';
                 messageContentHTML = `<div class="sending-indicator">${progressHTML}<span>در حال ارسال...</span></div>`;
             } else if (msg.type === 'voice' && msg.voiceUrl) {
-                messageContentHTML = `<div class="voice-player"><button class="play-pause-btn" aria-label="پخش/توقف"><svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><svg class="pause-icon" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg></button><div class="progress-container"><div class="waveform"><div class="progress-bar"></div></div></div><span class="duration">0:00</span><audio class="voice-audio" src="${msg.voiceUrl}" preload="metadata"></audio></div>`;
+                messageContentHTML = `<div class="voice-player"><button class="play-pause-btn" aria-label="پخش/توقف"><svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><svg class="pause-icon" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg></button><div class="progress-container"><div class="waveform"><div class="progress-bar"></div></div></div><span class="duration">0:00</span><audio class="voice-audio" preload="metadata"></audio></div>`;
             } else if (msg.type === 'image' && msg.mediaUrl) {
                 messageContentHTML = `<div class="media-container"><img alt="تصویر ارسال شده" loading="lazy"></div>`;
             } else if (msg.type === 'video' && msg.mediaUrl) {
-                messageContentHTML = `<div class="media-container"><video controls preload="metadata"></video></div>`;
+                messageContentHTML = `<div class="media-container"><video preload="metadata" playsinline></video></div>`;
             } else {
                 let textContent = msg.text || "";
                 messageContentHTML = `<div class="text">${textContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
@@ -1717,43 +1779,13 @@
             
             msgDiv.innerHTML = `${replyHtml}${messageContentHTML}<div class="timestamp">${editedIndicator}${timestamp}</div>`;
             
-            // --- منطق بارگذاری مدیا از کش ---
             const mediaUrl = msg.mediaUrl || msg.voiceUrl;
             if (mediaUrl && !msg.isSending && !msg.deleted) {
-                const mediaElement = msgDiv.querySelector('img, video, audio');
-                if (mediaElement) {
-                    mediaElement.dataset.originalSrc = mediaUrl; // ذخیره آدرس اصلی
-                    let temporaryUrl = null;
-                    cacheManager.get(mediaUrl)
-                        .then(localUrl => {
-                            if (localUrl) {
-                                temporaryUrl = localUrl;
-                                mediaElement.src = localUrl;
-                            } else {
-                                mediaElement.src = mediaUrl; // اگر در کش نبود، از شبکه بخوان
-                            }
-                        })
-                        .catch(() => {
-                            mediaElement.src = mediaUrl; // در صورت بروز خطا، از شبکه بخوان
-                        })
-                        .finally(() => {
-                            // مهم: آزاد کردن حافظه پس از استفاده
-                            // این کار از memory leak جلوگیری می‌کند
-                            const revoke = () => {
-                                if (temporaryUrl) {
-                                    URL.revokeObjectURL(temporaryUrl);
-                                }
-                                mediaElement.removeEventListener('load', revoke);
-                                mediaElement.removeEventListener('canplay', revoke);
-                            };
-                            mediaElement.addEventListener('load', revoke, { once: true });
-                            mediaElement.addEventListener('canplay', revoke, { once: true });
-                        });
+                if (isMedia) {
+                    setupMediaLoader(msgDiv.querySelector('.media-container'), mediaUrl, msg.type);
+                } else if (msg.type === 'voice') {
+                    setupVoicePlayer(msgDiv, mediaUrl);
                 }
-            }
-
-            if (msg.type === 'voice' && !msg.deleted && !msg.isSending) {
-                setupVoicePlayer(msgDiv);
             }
         }
 
@@ -1778,8 +1810,11 @@
                     lastMessage: text, timestamp: message.timestamp,
                     members: { [currentUser.username]: true, [chatPartner.username]: true }
                 });
-                createMessageElement(newMsgRef.name, message);
-                lastMessagesSnapshot[newMsgRef.name] = message;
+                // No need to call createMessageElement here, polling will handle it.
+                // But for instant feedback:
+                const tempId = newMsgRef.name;
+                lastMessagesSnapshot[tempId] = message;
+                createMessageElement(tempId, message);
                 scrollToBottom();
             } catch(error) {
                 const errorMsg = error.message.includes("blocked")
@@ -1791,39 +1826,29 @@
             }
         }
         
-        // === START: MODIFICATION 5 ===
         async function sendImageMessage(imageUrl) {
             if (!imageUrl || !chatPartner || isPartnerBlocked) return;
 
             const message = {
-                senderId: currentUser.username,
-                receiverId: chatPartner.username,
-                mediaUrl: imageUrl,
-                timestamp: new Date().toISOString(),
-                type: 'image',
-                replyTo: activeReplyContext, // حفظ قابلیت پاسخ
+                senderId: currentUser.username, receiverId: chatPartner.username,
+                mediaUrl: imageUrl, timestamp: new Date().toISOString(),
+                type: 'image', replyTo: activeReplyContext,
             };
-            
-            // پاک کردن حالت ریپلای بعد از آماده‌سازی پیام
             cancelReply();
 
             try {
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
-                await apiRequest(`pivi_chats/${chatId}`, 'PATCH', {
-                    lastMessage: 'استیکر', // یا 'تصویر'
-                    timestamp: message.timestamp,
-                });
+                await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: 'استیکر', timestamp: message.timestamp });
                 
-                // پیام جدید را به UI اضافه می‌کنیم
-                createMessageElement(newMsgRef.name, message);
-                lastMessagesSnapshot[newMsgRef.name] = message;
+                const tempId = newMsgRef.name;
+                lastMessagesSnapshot[tempId] = message;
+                createMessageElement(tempId, message);
                 scrollToBottom();
             } catch (error) {
                 console.error("Error sending sticker:", error);
                 showCustomAlert({ title: 'خطا', message: 'خطا در ارسال استیکر.' });
             }
         }
-        // === END: MODIFICATION 5 ===
         
         async function deleteMessage(messageId) {
             try {
@@ -1845,14 +1870,14 @@
         
         // --- بخش ۱۰: مدیریت منوها و قابلیت‌های پیام ---
         function handleMessageClick(e) {
-            if (e.target.tagName === 'IMG' && e.target.closest('.media-container')) {
-                const originalUrl = e.target.dataset.originalSrc;
-                if (!originalUrl) return;
+            const mediaContainer = e.target.closest('.media-container');
+            if (mediaContainer && mediaContainer.querySelector('img')) {
+                const img = mediaContainer.querySelector('img');
+                const originalUrl = img.dataset.originalSrc;
+                if (!originalUrl || !img.src || img.src.startsWith('data:')) return;
 
-                // یک URL جدید و پایدار از کش برای نمایش تمام‌صفحه دریافت می‌شود
-                cacheManager.get(originalUrl).then(stableUrl => {
-                    // اگر کش ناموفق بود از src اصلی استفاده کن
-                    fullscreenImage.src = stableUrl || originalUrl; 
+                cacheManager.get(originalUrl).then(localUrl => {
+                    fullscreenImage.src = localUrl || originalUrl; 
                     showModal(imageViewerOverlay);
                 });
                 return;
@@ -1861,7 +1886,7 @@
             const messageElement = e.target.closest('.message:not(.deleted)');
             if (!messageElement || messageElement.dataset.id.startsWith('temp_')) return;
 
-            if (e.target.closest('.voice-player, .media-container')) {
+            if (e.target.closest('.voice-player, .media-loader-overlay')) {
                  activeMessageElement = null;
                  return;
             }
@@ -1870,7 +1895,7 @@
                 activeMessageElement = messageElement;
                 const isSentByUser = activeMessageElement.classList.contains('sent');
                 const msgData = lastMessagesSnapshot[messageElement.dataset.id];
-                const isEditable = isSentByUser && (!msgData || !msgData.type); // only text messages
+                const isEditable = isSentByUser && (!msgData || !msgData.type || msgData.type === 'text'); // only text messages
 
                 document.getElementById('edit-msg-btn').style.display = isEditable ? 'flex' : 'none';
                 document.getElementById('delete-msg-btn').style.display = isSentByUser ? 'flex' : 'none';
@@ -2007,12 +2032,8 @@
         }
 
         function closeImageViewer() {
-            const currentSrc = fullscreenImage.src;
-            // فقط در صورتی که blob URL باشد، آن را آزاد کن
-            if (currentSrc && currentSrc.startsWith('blob:')) {
-                URL.revokeObjectURL(currentSrc);
-            }
-            fullscreenImage.src = ''; // برای آزاد کردن حافظه
+            // No need to revoke URL here, it's managed by CacheManager
+            fullscreenImage.src = ''; // for memory release
             hideModal(imageViewerOverlay);
         }
         
@@ -2080,8 +2101,7 @@
             return responseData;
         }
         
-        // === START: MODIFICATION 6 ===
-        // --- بخش جدید: منطق پنل استیکر ---
+        // --- بخش ۱۳: منطق پنل استیکر ---
         function openStickerPanel() {
             showModal(stickerPanelOverlay);
             if (!stickersLoaded) {
@@ -2097,20 +2117,14 @@
             stickerGrid.innerHTML = '<div class="loader"></div>';
             try {
                 let stickers = await apiRequest('stickers', 'GET');
-
-                // شرط مهم: اگر کالکشن وجود نداشت، آن را بساز
                 if (stickers === null) {
                     console.log("Sticker collection not found. Creating with sample data...");
                     const sampleGifs = [
                         "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3dta25ub2Z0eXQ3cGI2a2d4MnpkeG5hbnR1ZHBwZWZqZmJmZ2Q4dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/CjmvTCZf2U3pMwyq2p/giphy.gif",
                         "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2J2eW1idW12cWNwZG9sNWY4Z2V1aXo1Z2R0OGFudW1jY2R0Z3d6bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/5z9k423kYx92Qtz3lH/giphy.gif",
-                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGFsNXRqZ2lqb2M3NmF5MjN3Z2M2c2ZqM3FmNGVqM3Y5bmR5c3Q0ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3Fm0GGv2oA5A4/giphy.gif",
-                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaG13a29uam1mZG15d3E1b2s5M2Z2N2V4dW1tZmF5ZzU1aXl6ZHg2eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/gMxh6u2W3z3kQ/giphy.gif",
-                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGIxemQ3cWdydm56NWF0MnR1aG1pZ29xNXp4MjRtbHdxbjZzZ3JmaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/P8LgB0sQP3k4g/giphy.gif",
-                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExczJtaHlqZDV6Z2J4b2VqczZ2b2M3b2N1NGk5eHNzb3ZobzQybm52ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/SggILpMXO7mjFp2OHg/giphy.gif"
+                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGFsNXRqZ2lqb2M3NmF5MjN3Z2M2c2ZqM3FmNGVqM3Y5bmR5c3Q0ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3Fm0GGv2oA5A4/giphy.gif"
                     ];
                     await apiRequest('stickers', 'PUT', sampleGifs);
-                    // بلافاصله لیست را دوباره لود کن
                     stickers = await apiRequest('stickers', 'GET');
                 }
                 
@@ -2125,7 +2139,6 @@
 
         function populateStickerGrid(stickerData) {
             stickerGrid.innerHTML = '';
-            // فایربیس ممکن است آرایه را به صورت یک آبجکت با کلیدهای عددی برگرداند
             const stickerUrls = Array.isArray(stickerData) ? stickerData : Object.values(stickerData);
 
             if (!stickerUrls || stickerUrls.length === 0) {
@@ -2144,17 +2157,15 @@
         }
 
         function handleStickerClick(e) {
-            // استفاده از event delegation برای کارایی بهتر
             if (e.target.tagName === 'IMG') {
                 const stickerUrl = e.target.src;
                 sendImageMessage(stickerUrl);
                 closeStickerPanel();
             }
         }
-        // === END: MODIFICATION 6 ===
 
-        // --- بخش ۱۳: منطق پلیر سفارشی پیام صوتی ---
-        function setupVoicePlayer(messageElement) {
+        // --- بخش ۱۴: منطق پلیر سفارشی پیام صوتی ---
+        async function setupVoicePlayer(messageElement, voiceUrl) {
             const player = messageElement.querySelector('.voice-player');
             if (!player) return;
 
@@ -2165,6 +2176,22 @@
             const progressContainer = player.querySelector('.progress-container');
             const progressBar = player.querySelector('.progress-bar');
             const durationEl = player.querySelector('.duration');
+            
+            try {
+                const localUrl = await cacheManager.get(voiceUrl);
+                if (localUrl) {
+                    audio.src = localUrl;
+                } else {
+                    // Download and cache it if not available
+                    const blob = await cacheManager.downloadWithProgress(voiceUrl, () => {});
+                    const newLocalUrl = URL.createObjectURL(blob);
+                    cacheManager._blobUrlReferences.set(voiceUrl, newLocalUrl); // Manually add to map
+                    audio.src = newLocalUrl;
+                }
+            } catch (error) {
+                console.error("Failed to load voice message:", error);
+                audio.src = voiceUrl; // Fallback to network
+            }
 
             const formatTime = (seconds) => {
                 if (isNaN(seconds)) return '0:00';
@@ -2209,6 +2236,96 @@
                 audio.currentTime = progress * audio.duration;
             });
         }
+        
+        // --- بخش ۱۵: منطق جدید مدیریت و دانلود مدیا ---
+        async function setupMediaLoader(container, mediaUrl, type) {
+            const mediaElement = container.querySelector('img, video');
+            if (!mediaElement) return;
+
+            mediaElement.dataset.originalSrc = mediaUrl;
+            
+            // Check cache first
+            const cachedUrl = await cacheManager.get(mediaUrl);
+            if (cachedUrl) {
+                mediaElement.src = cachedUrl;
+                if (type === 'video') mediaElement.controls = true;
+                return;
+            }
+
+            // If not in cache, show download UI
+            const loaderOverlay = document.createElement('div');
+            loaderOverlay.className = 'media-loader-overlay';
+            loaderOverlay.innerHTML = `
+                <div class="download-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </div>`;
+            container.appendChild(loaderOverlay);
+
+            loaderOverlay.addEventListener('click', () => {
+                initiateMediaDownload(container, mediaUrl, type);
+            }, { once: true });
+        }
+
+        async function initiateMediaDownload(container, mediaUrl, type) {
+            const mediaElement = container.querySelector('img, video');
+            const overlay = container.querySelector('.media-loader-overlay');
+            if (!overlay) return;
+
+            // Setup progress UI
+            overlay.innerHTML = `
+                <button class="cancel-download-btn">&times;</button>
+                <div class="progress-circle">
+                    <svg viewBox="0 0 36 36">
+                        <path class="bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="progress" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div class="progress-text">0%</div>
+                </div>`;
+            
+            const progressPath = overlay.querySelector('.progress-circle .progress');
+            const progressText = overlay.querySelector('.progress-text');
+            const cancelBtn = overlay.querySelector('.cancel-download-btn');
+            
+            const controller = new AbortController();
+            activeControllers.set(mediaUrl, controller);
+
+            cancelBtn.onclick = (e) => {
+                e.stopPropagation();
+                controller.abort();
+            };
+
+            try {
+                const onProgress = ({ percent }) => {
+                    if (percent === undefined) return;
+                    progressPath.style.strokeDasharray = `${percent}, 100`;
+                    progressText.textContent = `${percent}%`;
+                };
+                
+                const blob = await cacheManager.downloadWithProgress(mediaUrl, onProgress, controller.signal);
+                
+                const localUrl = await cacheManager.get(mediaUrl) || URL.createObjectURL(blob);
+                mediaElement.src = localUrl;
+                if (type === 'video') {
+                    mediaElement.controls = true;
+                    mediaElement.autoplay = true; // Start playing after download
+                }
+                overlay.classList.add('hidden');
+                setTimeout(() => overlay.remove(), 300);
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Download cancelled by user.');
+                } else {
+                    console.error('Download failed:', error);
+                }
+                // Reset UI
+                overlay.remove(); // Remove current progress overlay
+                setupMediaLoader(container, mediaUrl, type); // Re-add the initial download button
+            } finally {
+                activeControllers.delete(mediaUrl);
+            }
+        }
+
     </script>
 </body>
 </html>
