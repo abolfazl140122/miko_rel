@@ -1439,12 +1439,9 @@
                     }
 
                     if (targetUid) {
-                         if (item.classList.contains('search-result-item')) {
-                            openUserProfile(targetUid);
-                        } else {
-                            console.log(`Navigating to chat with user: ${targetUid}`);
-                            window.location.href = `pivi.html?uid=${targetUid}`;
-                        }
+                        // MODIFIED LOGIC: Always navigate to PV, even for search results
+                        console.log(`Navigating to chat with user: ${targetUid}`);
+                        window.location.href = `pivi.html?uid=${targetUid}`;
                     } else if (targetChannelId) {
                         console.log(`Navigating to channel: ${targetChannelId}`);
                         window.location.href = `Channel.html?id=${targetChannelId}`;
