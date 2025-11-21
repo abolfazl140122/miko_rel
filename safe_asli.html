@@ -22,7 +22,7 @@
             --error-color: #dc3545;
             --shadow-light: rgba(45, 50, 56, 0.1);
             --shadow-dark: rgba(0, 0, 0, 0.6);
-            --profile-card-bg: #1B212A; /* Slightly lighter for the profile card */
+            --profile-card-bg: #1B212A;
         }
 
         *, *::before, *::after {
@@ -114,7 +114,7 @@
         
         /* --- Search Tabs --- */
         .search-tabs {
-            display: none; /* Hidden by default */
+            display: none;
             justify-content: space-around;
             background-color: var(--secondary-color);
             padding: 0 10px;
@@ -122,7 +122,7 @@
             flex-shrink: 0;
         }
         body.search-active .search-tabs {
-            display: flex; /* Shown when search is active */
+            display: flex;
         }
         .search-tab {
             flex: 1;
@@ -158,7 +158,7 @@
         .chat-list {
             padding: 0;
         }
-        .chat-item, .search-result-item {
+        .chat-item, .search-result-item, .user-list-item {
             display: flex;
             align-items: center;
             padding: 15px 20px;
@@ -179,7 +179,7 @@
         .chat-item:nth-child(4) { animation-delay: 0.25s; }
         .chat-item:nth-child(5) { animation-delay: 0.3s; }
 
-        .chat-item:hover, .search-result-item:hover {
+        .chat-item:hover, .search-result-item:hover, .user-list-item:hover {
             background-color: var(--secondary-hover);
             transform: scale(1.01);
             box-shadow: 0 0 15px rgba(0, 163, 255, 0.1);
@@ -197,7 +197,7 @@
             box-shadow: 0 0 0 3px rgba(0, 163, 255, 0.2); 
             transition: box-shadow 0.3s ease;
         }
-        .chat-item:hover .profile-picture {
+        .chat-item:hover .profile-picture, .user-list-item:hover .profile-picture {
              box-shadow: 0 0 0 3px var(--primary-color);
         }
         .profile-picture img {
@@ -206,7 +206,7 @@
             border-radius: 50%;
             transition: transform 0.3s ease;
         }
-        .chat-item:hover .profile-picture img {
+        .chat-item:hover .profile-picture img, .user-list-item:hover .profile-picture img {
              transform: scale(1.05);
         }
         .online-indicator {
@@ -485,42 +485,33 @@
         }
         .stat-item {
             text-align: center;
-            position: relative;
+            cursor: pointer; /* Make clickable */
+            transition: transform 0.2s ease;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        .stat-item:hover {
+            background-color: var(--secondary-hover);
+            transform: translateY(-2px);
         }
         .stat-count {
             display: block;
             font-size: 1.3em;
             font-weight: 700;
             color: var(--text-primary);
-            /* Transition for the blur removal and scale effect */
-            transition: filter 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
-                        opacity 0.6s ease, 
-                        transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                        text-shadow 0.4s ease;
-            filter: blur(0);
-            opacity: 1;
-            transform: scale(1);
+            /* Transition for blur effect */
+            transition: filter 0.6s ease-out, opacity 0.6s ease-out; 
         }
         .stat-label {
             font-size: 0.9em;
             color: var(--text-secondary);
         }
 
-        /* --- BLUR LOADING STATE --- */
-        .stat-count.blur-loading {
-            filter: blur(12px); /* Heavy blur */
+        /* --- BLUR CLASS (Dynamic) --- */
+        .loading-blur {
+            filter: blur(8px);
             opacity: 0.6;
-            transform: scale(0.8);
-            user-select: none;
-            pointer-events: none;
-            color: var(--primary-color); /* Change color while loading */
-            text-shadow: 0 0 15px rgba(0, 163, 255, 0.8); /* Neon glow */
-            animation: pulseBlur 1.5s infinite alternate;
-        }
-
-        @keyframes pulseBlur {
-            0% { opacity: 0.4; filter: blur(12px); }
-            100% { opacity: 0.8; filter: blur(8px); }
+            pointer-events: none; /* Prevent clicks while loading */
         }
 
         /* --- Follow Button --- */
@@ -541,7 +532,6 @@
             opacity: 0.7;
             cursor: wait;
         }
-        /* State 1: Default state to Follow */
         .follow-btn {
             background-color: var(--primary-color);
             color: white;
@@ -552,7 +542,6 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 163, 255, 0.4);
         }
-        /* State 2: When user is 'Following' */
         .follow-btn.following {
             background-color: var(--secondary-hover);
             color: var(--text-primary);
@@ -560,16 +549,16 @@
             border-color: var(--border-color);
         }
         .follow-btn.following:hover:not(:disabled) {
-            background-color: rgba(220, 53, 69, 0.15); /* light red */
+            background-color: rgba(220, 53, 69, 0.15);
             border-color: rgba(220, 53, 69, 0.5);
             color: var(--error-color);
-            transform: translateY(0); /* reset hover effect */
+            transform: translateY(0);
         }
         
         .profile-actions {
             list-style: none;
             padding: 0;
-            margin: 0; /* Adjusted margin */
+            margin: 0;
             background-color: var(--secondary-color);
             border-radius: 15px;
             overflow: hidden;
@@ -606,6 +595,78 @@
         #logout-btn:hover { background-color: rgba(255, 77, 77, 0.1); transform: translateX(3px); }
 
         /* ==============================================
+           --- User List Modal (Followers/Following) --- 
+           ==============================================
+        */
+        .user-list-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 1002; /* Higher than profile overlay */
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Bottom sheet style */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .user-list-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .user-list-modal {
+            width: 100%;
+            max-width: 420px;
+            height: 80vh; /* 80% of screen height */
+            background-color: var(--profile-card-bg);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .user-list-overlay.active .user-list-modal {
+            transform: translateY(0);
+        }
+        .user-list-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--secondary-color);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        .user-list-header h3 {
+            margin: 0;
+            font-size: 1.2em;
+            color: var(--text-primary);
+        }
+        .user-list-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5em;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .user-list-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+        .user-list-item {
+            /* Inherits basic style from chat-item */
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* ==============================================
            --- Edit Profile Modal STYLES --- 
            ==============================================
         */
@@ -616,7 +677,7 @@
             right: 0;
             bottom: 0;
             background-color: rgba(0, 0, 0, 0.85);
-            z-index: 1001; /* Higher than profile overlay */
+            z-index: 1001; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -925,11 +986,11 @@
 
                 <!-- Follow Stats -->
                 <div class="profile-stats">
-                    <div class="stat-item">
+                    <div class="stat-item" id="stat-followers-btn">
                         <span class="stat-count" id="profile-followers-count">0</span>
                         <span class="stat-label">دنبال‌کننده</span>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item" id="stat-following-btn">
                         <span class="stat-count" id="profile-following-count">0</span>
                         <span class="stat-label">دنبال‌شونده</span>
                     </div>
@@ -987,6 +1048,19 @@
         </div>
     </div>
 
+    <!-- User List Modal (Followers/Following) -->
+    <div class="user-list-overlay" id="user-list-overlay">
+        <div class="user-list-modal">
+            <div class="user-list-header">
+                <h3 id="user-list-title">لیست</h3>
+                <button class="user-list-close" id="user-list-close">&times;</button>
+            </div>
+            <div class="user-list-content" id="user-list-content">
+                <!-- User items will be injected here -->
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // --- SECTION: App Configuration ---
@@ -1012,6 +1086,8 @@
         const profileFollowersCount = document.getElementById('profile-followers-count');
         const profileFollowingCount = document.getElementById('profile-following-count');
         const profileFollowBtn = document.getElementById('profile-follow-btn');
+        const statFollowersBtn = document.getElementById('stat-followers-btn');
+        const statFollowingBtn = document.getElementById('stat-following-btn');
 
         const fabContainer = document.getElementById('fab-container');
         const fabMainBtn = document.getElementById('fab-main-btn');
@@ -1026,6 +1102,12 @@
         const pfpUploadInput = document.getElementById('pfp-upload-input');
         const editDisplayNameInput = document.getElementById('edit-display-name');
         const editUsernameInput = document.getElementById('edit-username');
+
+        // User List Modal Elements
+        const userListOverlay = document.getElementById('user-list-overlay');
+        const userListTitle = document.getElementById('user-list-title');
+        const userListContent = document.getElementById('user-list-content');
+        const userListClose = document.getElementById('user-list-close');
 
 
         // --- SECTION: App State ---
@@ -1077,6 +1159,14 @@
             editProfileForm.addEventListener('submit', handleProfileUpdate);
 
             profileFollowBtn.addEventListener('click', toggleFollow);
+
+            // User List Event Listeners
+            statFollowersBtn.addEventListener('click', () => handleShowUserList('followers'));
+            statFollowingBtn.addEventListener('click', () => handleShowUserList('following'));
+            userListClose.addEventListener('click', hideUserListModal);
+            userListOverlay.addEventListener('click', (e) => {
+                if (e.target === userListOverlay) hideUserListModal();
+            });
 
             await loadInitialData();
         });
@@ -1269,6 +1359,26 @@
                 </div>`;
         }
 
+        function createUserListHtml(userData) {
+             const avatarUrl = userData.profilePicUrl 
+                ? userData.profilePicUrl 
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
+            const verifiedTickHtml = userData.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
+            
+            return `
+                <div class="user-list-item" data-uid="${userData.username}">
+                     <div class="profile-picture">
+                        <img src="${avatarUrl}" alt="${userData.displayName}">
+                    </div>
+                    <div class="chat-details">
+                        <h3>${userData.displayName || userData.username} ${verifiedTickHtml}</h3>
+                        <p class="last-message">@${userData.username}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+
         // --- SECTION: Event Handlers & Interactions ---
         function performSearch() {
             const query = searchInput.value.toLowerCase().trim();
@@ -1314,10 +1424,19 @@
         }
 
         function addClickListenersToItems() {
-            mainContent.querySelectorAll('.chat-item, .search-result-item').forEach(item => {
+            document.querySelectorAll('.chat-item, .search-result-item, .user-list-item').forEach(item => {
+                // Prevent duplicate listeners (though re-rendering handles this by destroying elements)
                 item.addEventListener('click', () => {
                     const targetUid = item.dataset.uid;
                     const targetChannelId = item.dataset.channelId;
+
+                    // If inside user-list-modal, close it first
+                    if(item.classList.contains('user-list-item')) {
+                        hideUserListModal();
+                        // Small delay to let modal close
+                        setTimeout(() => openUserProfile(targetUid), 300);
+                        return;
+                    }
 
                     if (targetUid) {
                          if (item.classList.contains('search-result-item')) {
@@ -1354,15 +1473,11 @@
             profileDisplayName.innerHTML = `${userData.displayName || userData.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${userData.username}`;
             
-            // --- BLUR EFFECT LOGIC START ---
-            // 1. Apply blur class immediately
-            profileFollowersCount.classList.add('blur-loading');
-            profileFollowingCount.classList.add('blur-loading');
-            
-            // 2. Set placeholder text (optional, but good for layout)
-            profileFollowersCount.textContent = '---';
-            profileFollowingCount.textContent = '---';
-            // --- BLUR EFFECT LOGIC END ---
+            // Apply Blur effect immediately
+            profileFollowersCount.classList.add('loading-blur');
+            profileFollowingCount.classList.add('loading-blur');
+            profileFollowersCount.textContent = '0'; // Placeholder
+            profileFollowingCount.textContent = '0'; // Placeholder
 
             profileFollowBtn.disabled = true;
 
@@ -1371,12 +1486,10 @@
             editProfileBtn.style.display = isMyProfile ? 'flex' : 'none';
             logoutBtn.style.display = isMyProfile ? 'flex' : 'none';
 
-            // Show overlay first
             profileOverlay.classList.add('active');
 
-            // Fetch data (Blur remains until this completes)
+            // Fetch data
             getFollowCounts(username);
-            
             if (!isMyProfile) {
                 await checkFollowStatus(username);
                 profileFollowBtn.disabled = false;
@@ -1479,24 +1592,7 @@
             }
         }
 
-        // --- SECTION: Follow System & Animation ---
-        
-        // Helper function for counting animation
-        function animateValue(obj, start, end, duration) {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.innerHTML = Math.floor(progress * (end - start) + start);
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                } else {
-                    obj.innerHTML = end; // Ensure final value is exact
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
-
+        // --- SECTION: Follow System & Lists ---
         async function getFollowCounts(targetUsername) {
             try {
                 const [followersData, followingData] = await Promise.all([
@@ -1507,22 +1603,21 @@
                 const followersCount = followersData ? Object.keys(followersData).length : 0;
                 const followingCount = followingData ? Object.keys(followingData).length : 0;
 
-                // --- REVEAL ANIMATION LOGIC ---
-                // 1. Remove blur class to trigger CSS transition
-                profileFollowersCount.classList.remove('blur-loading');
-                profileFollowingCount.classList.remove('blur-loading');
+                // Update Text
+                profileFollowersCount.textContent = followersCount;
+                profileFollowingCount.textContent = followingCount;
 
-                // 2. Trigger counting animation
-                animateValue(profileFollowersCount, 0, followersCount, 1000); // 1 second animation
-                animateValue(profileFollowingCount, 0, followingCount, 1000);
+                // Remove Blur effect graphically
+                profileFollowersCount.classList.remove('loading-blur');
+                profileFollowingCount.classList.remove('loading-blur');
 
             } catch (error) {
                 console.error("Error fetching follow counts:", error);
-                // Even on error, remove blur so user isn't stuck
-                profileFollowersCount.classList.remove('blur-loading');
-                profileFollowingCount.classList.remove('blur-loading');
+                // Even on error, remove blur
                 profileFollowersCount.textContent = '0';
                 profileFollowingCount.textContent = '0';
+                profileFollowersCount.classList.remove('loading-blur');
+                profileFollowingCount.classList.remove('loading-blur');
             }
         }
 
@@ -1591,6 +1686,58 @@
             }
         }
 
+        // --- SECTION: User List Modal Logic ---
+        async function handleShowUserList(type) {
+            const targetUsername = currentProfileUsername;
+            if(!targetUsername) return;
+
+            userListTitle.textContent = type === 'followers' ? 'دنبال‌کنندگان' : 'دنبال‌شوندگان';
+            userListContent.innerHTML = '<div class="status-container"><div class="spinner"></div><p>در حال دریافت لیست...</p></div>';
+            
+            userListOverlay.classList.add('active');
+
+            try {
+                // 1. Fetch the list of IDs (keys)
+                const path = `${type}/${targetUsername}`;
+                const listData = await fetchProxyData(path);
+
+                if (!listData || Object.keys(listData).length === 0) {
+                    userListContent.innerHTML = '<div class="status-container"><p>لیست خالی است.</p></div>';
+                    return;
+                }
+
+                const userIds = Object.keys(listData);
+
+                // 2. Fetch details for each user
+                // Optimization: We can use Promise.all to fetch user details in parallel
+                const userPromises = userIds.map(uid => fetchProxyData(`users/${uid}`));
+                const users = await Promise.all(userPromises);
+
+                // 3. Render
+                let html = '';
+                users.forEach(user => {
+                    if(user) {
+                        html += createUserListHtml(user);
+                    }
+                });
+
+                if(html === '') {
+                     userListContent.innerHTML = '<div class="status-container"><p>اطلاعات کاربران یافت نشد.</p></div>';
+                } else {
+                     userListContent.innerHTML = html;
+                     addClickListenersToItems();
+                }
+
+            } catch (error) {
+                console.error("Error loading user list:", error);
+                userListContent.innerHTML = '<div class="status-container"><p>خطا در دریافت اطلاعات.</p></div>';
+            }
+        }
+
+        function hideUserListModal() {
+            userListOverlay.classList.remove('active');
+        }
+
 
         // --- SECTION: Robust Polling with Exponential Backoff ---
         async function checkForUpdates() {
@@ -1634,10 +1781,7 @@
                 if (needsUIRefresh && searchInput.value.trim() === '') {
                     renderChatList();
                 }
-                if (needsUIRefresh && profileOverlay.classList.contains('active') && currentProfileUsername) {
-                    // Note: We don't re-open profile here to avoid resetting the blur animation constantly
-                    // Just updating data silently would be better, but for now we keep it simple
-                }
+                // Note: We generally don't refresh the profile modal live to avoid UX jitter, unless necessary.
 
             } catch (error) {
                 pollingErrorCount++; // Increment error count on failure
