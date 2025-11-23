@@ -938,9 +938,9 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 <span>پروفایل</span>
             </button>
-            <button class="nav-btn">
+            <button class="nav-btn" id="nav-top-users-btn">
                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                <span>دوستان</span>
+                <span>برترین کاربران</span>
             </button>
             <button class="nav-btn active" id="nav-chats-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -1109,6 +1109,9 @@
         const userListContent = document.getElementById('user-list-content');
         const userListClose = document.getElementById('user-list-close');
 
+        // Top Users Button
+        const navTopUsersBtn = document.getElementById('nav-top-users-btn');
+
 
         // --- SECTION: App State ---
         let currentUser = null;
@@ -1166,6 +1169,11 @@
             userListClose.addEventListener('click', hideUserListModal);
             userListOverlay.addEventListener('click', (e) => {
                 if (e.target === userListOverlay) hideUserListModal();
+            });
+
+            // Top Users Button Event Listener
+            navTopUsersBtn.addEventListener('click', () => {
+                window.location.href = 'Follow list.html';
             });
 
             await loadInitialData();
