@@ -10,19 +10,23 @@
         /* --- Variables and Basic Setup --- */
         :root {
             --background-color: #0D1117;
-            --primary-color: #00A3FF; /* Brightened blue */
+            --primary-color: #00A3FF;
             --secondary-color: #161B22;
             --secondary-hover: #2C2F33;
             --border-color: #30363d;
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
-            --online-indicator: #00ff88; /* Neon green */
-            --notification-badge: #FF4D4D; /* Alert Red */
+            --online-indicator: #00ff88;
+            --notification-badge: #FF4D4D;
             --success-color: #28a745;
             --error-color: #dc3545;
             --shadow-light: rgba(45, 50, 56, 0.1);
             --shadow-dark: rgba(0, 0, 0, 0.6);
             --profile-card-bg: #1B212A;
+            
+            /* Skeleton Variables */
+            --skeleton-base: #161B22;
+            --skeleton-highlight: #21262d;
         }
 
         *, *::before, *::after {
@@ -46,6 +50,67 @@
             background: radial-gradient(circle at top left, #1a202c 0%, var(--background-color) 70%);
         }
 
+        /* =========================================
+           --- SKELETON LOADING STYLES (NEW) ---
+           ========================================= */
+        #skeleton-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--background-color);
+            z-index: 2000;
+            display: flex; flex-direction: column;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        #skeleton-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .skeleton-animate {
+            background: var(--skeleton-base);
+            background-image: linear-gradient(
+                90deg, 
+                var(--skeleton-base) 0px, 
+                var(--skeleton-highlight) 40px, 
+                var(--skeleton-base) 80px
+            );
+            background-size: 600px;
+            animation: shimmer 1.6s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -100px; }
+            100% { background-position: 300px; }
+        }
+
+        /* Skeleton Structure mimicking the main app */
+        .sk-header {
+            height: 70px; padding: 18px 20px; 
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color); background-color: var(--secondary-color);
+        }
+        .sk-title { width: 100px; height: 28px; border-radius: 8px; }
+        .sk-search { width: 140px; height: 36px; border-radius: 25px; }
+
+        .sk-list { flex-grow: 1; padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+        .sk-item {
+            display: flex; align-items: center; padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .sk-avatar { width: 60px; height: 60px; border-radius: 50%; margin-left: 15px; flex-shrink: 0; }
+        .sk-info { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
+        .sk-name { width: 40%; height: 18px; border-radius: 5px; }
+        .sk-msg { width: 70%; height: 14px; border-radius: 5px; }
+        .sk-time { width: 30px; height: 12px; border-radius: 4px; margin-right: auto; }
+
+        .sk-footer {
+            height: 60px; border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-around; align-items: center;
+            background-color: var(--secondary-color);
+        }
+        .sk-nav-item { width: 40px; height: 40px; border-radius: 10px; }
+
         /* --- Main App Structure --- */
         .app-container {
             width: 100%;
@@ -59,7 +124,10 @@
             position: relative;
             border-radius: 20px;
             overflow: hidden;
+            opacity: 0; /* Hidden initially until loaded */
+            transition: opacity 0.5s ease;
         }
+        .app-container.visible { opacity: 1; }
 
         /* --- Header --- */
         .app-header {
@@ -292,7 +360,7 @@
             filter: drop-shadow(0 0 2px rgba(0, 163, 255, 0.5));
         }
         
-        /* --- Loading and Status Messages --- */
+        /* --- Loading and Status Messages (Fallback) --- */
         .status-container {
             display: flex;
             justify-content: center;
@@ -910,7 +978,84 @@
 </head>
 <body id="page-body">
 
-    <div class="app-container">
+    <!-- Skeleton Loader (Replaces simple spinner) -->
+    <div id="skeleton-loader">
+        <div class="sk-header">
+            <div class="skeleton-animate sk-title"></div>
+            <div class="skeleton-animate sk-search"></div>
+        </div>
+        <div class="sk-list">
+            <!-- Repeated Items to simulate list -->
+            <div class="sk-item">
+                <div class="skeleton-animate sk-avatar"></div>
+                <div class="sk-info">
+                    <div style="display:flex; justify-content: space-between; align-items:center;">
+                        <div class="skeleton-animate sk-name"></div>
+                        <div class="skeleton-animate sk-time"></div>
+                    </div>
+                    <div class="skeleton-animate sk-msg"></div>
+                </div>
+            </div>
+            <div class="sk-item">
+                <div class="skeleton-animate sk-avatar"></div>
+                <div class="sk-info">
+                    <div style="display:flex; justify-content: space-between; align-items:center;">
+                        <div class="skeleton-animate sk-name"></div>
+                        <div class="skeleton-animate sk-time"></div>
+                    </div>
+                    <div class="skeleton-animate sk-msg"></div>
+                </div>
+            </div>
+             <div class="sk-item">
+                <div class="skeleton-animate sk-avatar"></div>
+                <div class="sk-info">
+                    <div style="display:flex; justify-content: space-between; align-items:center;">
+                        <div class="skeleton-animate sk-name"></div>
+                        <div class="skeleton-animate sk-time"></div>
+                    </div>
+                    <div class="skeleton-animate sk-msg"></div>
+                </div>
+            </div>
+             <div class="sk-item">
+                <div class="skeleton-animate sk-avatar"></div>
+                <div class="sk-info">
+                    <div style="display:flex; justify-content: space-between; align-items:center;">
+                        <div class="skeleton-animate sk-name"></div>
+                        <div class="skeleton-animate sk-time"></div>
+                    </div>
+                    <div class="skeleton-animate sk-msg"></div>
+                </div>
+            </div>
+             <div class="sk-item">
+                <div class="skeleton-animate sk-avatar"></div>
+                <div class="sk-info">
+                    <div style="display:flex; justify-content: space-between; align-items:center;">
+                        <div class="skeleton-animate sk-name"></div>
+                        <div class="skeleton-animate sk-time"></div>
+                    </div>
+                    <div class="skeleton-animate sk-msg"></div>
+                </div>
+            </div>
+             <div class="sk-item">
+                <div class="skeleton-animate sk-avatar"></div>
+                <div class="sk-info">
+                    <div style="display:flex; justify-content: space-between; align-items:center;">
+                        <div class="skeleton-animate sk-name"></div>
+                        <div class="skeleton-animate sk-time"></div>
+                    </div>
+                    <div class="skeleton-animate sk-msg"></div>
+                </div>
+            </div>
+        </div>
+        <div class="sk-footer">
+            <div class="skeleton-animate sk-nav-item"></div>
+            <div class="skeleton-animate sk-nav-item"></div>
+            <div class="skeleton-animate sk-nav-item"></div>
+            <div class="skeleton-animate sk-nav-item"></div>
+        </div>
+    </div>
+
+    <div class="app-container" id="app-container">
         <!-- TOP BAR with search -->
         <header class="app-header">
             <h1>همیار</h1>
@@ -929,7 +1074,7 @@
 
         <!-- MAIN CONTENT: Chat list or search results -->
         <main id="main-content">
-            <!-- Loading spinner will be shown here initially -->
+            <!-- Content will be injected here after loading -->
         </main>
 
         <!-- BOTTOM NAVIGATION BAR -->
@@ -1074,6 +1219,10 @@
         const searchInput = document.getElementById('search-input');
         const searchTabsContainer = document.getElementById('search-tabs');
         
+        // Skeleton Loader Elements
+        const skeletonLoader = document.getElementById('skeleton-loader');
+        const appContainer = document.getElementById('app-container');
+        
         const profileOverlay = document.getElementById('profile-overlay');
         const openProfileBtn = document.getElementById('nav-profile-btn');
         const closeProfileBtn = document.getElementById('close-profile-btn');
@@ -1171,8 +1320,19 @@
             await loadInitialData();
         });
 
+        // --- NEW: Loading Functions ---
+        function showSkeleton() {
+            skeletonLoader.classList.remove('hidden');
+            appContainer.classList.remove('visible');
+        }
+
+        function hideSkeleton() {
+            skeletonLoader.classList.add('hidden');
+            appContainer.classList.add('visible');
+        }
+
         async function loadInitialData() {
-            showLoadingSpinner();
+            showSkeleton(); // Use new Skeleton loader instead of simple spinner
             try {
                 await refreshClientToken();
 
@@ -1213,6 +1373,8 @@
                  if (error instanceof TypeError) { // It's a network error
                     showErrorMessage('خطای شبکه. لطفاً اتصال اینترنت خود را بررسی کرده و صفحه را رفرش کنید.');
                 }
+            } finally {
+                hideSkeleton(); // Hide the skeleton when done or failed
             }
         }
 
