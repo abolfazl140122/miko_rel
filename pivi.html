@@ -21,7 +21,8 @@
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
             --online-indicator: #28a745;
-            --typing-indicator: #AAAAAA;
+            --skeleton-base: #1E1E1E;
+            --skeleton-highlight: #2A2A2A;
             --shadow-color: rgba(0, 0, 0, 0.2);
             --danger-color: #e53935;
             --modal-backdrop-color: rgba(0, 0, 0, 0.5);
@@ -51,27 +52,61 @@
             user-select: none;
         }
 
-        /* --- لودر تمام‌صفحه --- */
-        #loading-overlay {
+        /* =========================================
+           --- SKELETON LOADING STYLES (NEW) ---
+           ========================================= */
+        #skeleton-loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--background-color);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 1000; transition: opacity 0.5s ease;
+            z-index: 2000;
+            display: flex; flex-direction: column;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
-        .loading-dots { display: flex; align-items: center; }
-        .loading-dots div {
-            width: 12px; height: 12px; background-color: var(--primary-color);
-            border-radius: 50%; margin: 0 4px;
-            animation: dot-flashing 1.2s infinite linear alternate;
+        
+        #skeleton-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
         }
-        .loading-dots div:nth-child(2) { animation-delay: 0.4s; }
-        .loading-dots div:nth-child(3) { animation-delay: 0.8s; }
-        #loading-error { color: var(--danger-color); margin-top: 20px; text-align: center; display: none; padding: 0 20px; line-height: 1.6; }
 
-        @keyframes dot-flashing {
-            0% { opacity: 0.2; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0.2; transform: scale(0.8); }
+        .skeleton-animate {
+            background: var(--skeleton-base);
+            background-image: linear-gradient(
+                90deg, 
+                var(--skeleton-base) 0px, 
+                var(--skeleton-highlight) 40px, 
+                var(--skeleton-base) 80px
+            );
+            background-size: 600px;
+            animation: shimmer 1.6s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -100px; }
+            100% { background-position: 300px; }
+        }
+
+        .sk-header {
+            height: 65px; padding: 10px 15px; display: flex; align-items: center;
+            border-bottom: 1px solid var(--border-color); background-color: var(--secondary-color);
+        }
+        .sk-avatar { width: 45px; height: 45px; border-radius: 50%; margin-left: 12px; }
+        .sk-name { width: 120px; height: 16px; border-radius: 8px; margin-bottom: 6px; }
+        .sk-status { width: 60px; height: 12px; border-radius: 6px; }
+        
+        .sk-chat-area { flex-grow: 1; padding: 20px 15px; display: flex; flex-direction: column-reverse; gap: 15px; overflow: hidden; }
+        .sk-msg { height: 40px; border-radius: 18px; width: 100%; max-width: 70%; }
+        .sk-msg.sent { align-self: flex-start; border-bottom-left-radius: 4px; }
+        .sk-msg.received { align-self: flex-end; border-bottom-right-radius: 4px; }
+        .w-40 { width: 40%; } .w-60 { width: 60%; } .w-30 { width: 30%; } .h-60 { height: 60px; }
+
+        .sk-footer { height: 60px; padding: 10px; display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border-color); background-color: var(--secondary-color); }
+        .sk-input { flex-grow: 1; height: 40px; border-radius: 20px; }
+        .sk-btn { width: 40px; height: 40px; border-radius: 50%; }
+
+        #loading-error {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: var(--danger-color); text-align: center; display: none; z-index: 2001;
+            width: 80%; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 12px;
         }
 
         /* --- ساختار اصلی اپلیکیشن --- */
@@ -566,8 +601,27 @@
 </head>
 <body>
 
-    <div id="loading-overlay">
-        <div class="loading-dots"><div></div><div></div><div></div></div>
+    <!-- Skeleton Loader -->
+    <div id="skeleton-loader">
+        <div class="sk-header">
+            <div class="skeleton-animate sk-avatar"></div>
+            <div style="display: flex; flex-direction: column; margin-right: 10px;">
+                <div class="skeleton-animate sk-name"></div>
+                <div class="skeleton-animate sk-status"></div>
+            </div>
+        </div>
+        <div class="sk-chat-area">
+            <div class="skeleton-animate sk-msg sent w-60"></div>
+            <div class="skeleton-animate sk-msg received w-40"></div>
+            <div class="skeleton-animate sk-msg received h-60 w-30"></div>
+            <div class="skeleton-animate sk-msg sent w-40"></div>
+            <div class="skeleton-animate sk-msg received w-60"></div>
+        </div>
+        <div class="sk-footer">
+            <div class="skeleton-animate sk-btn"></div>
+            <div class="skeleton-animate sk-input"></div>
+            <div class="skeleton-animate sk-btn"></div>
+        </div>
         <p id="loading-error"></p>
     </div>
 
@@ -916,7 +970,7 @@
         }
 
         // --- متغیرهای اصلی ---
-        const loadingOverlay = document.getElementById('loading-overlay');
+        const skeletonLoader = document.getElementById('skeleton-loader'); // NEW
         const loadingErrorEl = document.getElementById('loading-error');
         const appContainer = document.getElementById('app-container');
         const partnerNameEl = document.getElementById('partner-name');
@@ -1048,20 +1102,22 @@
             }
         }
         
+        // --- NEW LOADING FUNCTIONS ---
         function showLoading() {
-            loadingOverlay.style.opacity = '1'; loadingOverlay.style.display = 'flex';
+            skeletonLoader.classList.remove('hidden');
             appContainer.classList.remove('visible');
         }
         function showApp() {
-            loadingOverlay.style.opacity = '0';
-            setTimeout(() => { loadingOverlay.style.display = 'none'; }, 500);
+            skeletonLoader.classList.add('hidden');
             appContainer.classList.add('visible');
         }
         function showError(message) {
             loadingErrorEl.textContent = message;
             loadingErrorEl.style.display = 'block';
-            document.querySelector('#loading-overlay .loading-dots').style.display = 'none';
+            // We keep skeleton but show error overlay
         }
+        // -----------------------------
+
         function scrollToBottom() {
             mainContent.scrollTop = 0;
         }
