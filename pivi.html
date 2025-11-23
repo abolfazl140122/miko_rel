@@ -24,7 +24,8 @@
             --typing-indicator: #AAAAAA;
             --shadow-color: rgba(0, 0, 0, 0.2);
             --danger-color: #e53935;
-            --modal-backdrop-color: rgba(0, 0, 0, 0.5);
+            --danger-bg: #3e1b1b;
+            --modal-backdrop-color: rgba(0, 0, 0, 0.6);
         }
 
         /* --- تنظیمات پایه و ریست --- */
@@ -562,6 +563,29 @@
         }
         .sticker-grid .error-text { color: var(--text-secondary); text-align: center; grid-column: 1 / -1; }
 
+        /* --- استایل اختصاصی پنل خطا (فحاشی) --- */
+        #profanity-error-card {
+            border: 1px solid var(--danger-color);
+            background-color: var(--secondary-color);
+        }
+        #profanity-error-card h4 {
+            color: var(--danger-color);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        #profanity-bad-word {
+            color: var(--text-primary);
+            font-weight: bold;
+            background: rgba(229, 57, 53, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 0 4px;
+        }
+        .profanity-icon {
+            color: var(--danger-color);
+            width: 48px; height: 48px;
+            margin-bottom: 15px;
+        }
+
     </style>
 </head>
 <body>
@@ -636,6 +660,21 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- مودال اختصاصی خطا برای فحاشی -->
+    <div id="profanity-error-overlay" class="modal-overlay">
+        <div class="modal-card dialog-card" id="profanity-error-card">
+             <div style="display:flex; justify-content:center;">
+                <svg class="profanity-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            </div>
+            <h4>خطای محتوا</h4>
+            <p>پیام شما حاوی کلمات نامناسب است و ارسال نشد.</p>
+            <p style="margin-top: -10px; font-size: 0.9em;">کلمه شناسایی شده: <span id="profanity-bad-word"></span></p>
+            <div class="dialog-footer">
+                <button class="btn-primary" id="profanity-close-btn" style="background-color: var(--danger-color);">متوجه شدم</button>
+            </div>
         </div>
     </div>
 
@@ -750,6 +789,10 @@
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const UPLOAD_PHP_ENDPOINT = 'https://miko.freehost.io/upload_to_parspack.php';
         const SHARED_SECRET = 'miko1234';
+        
+        // --- لیست کلمات ممنوعه (برای نمایش قابلیت پنل ارور) ---
+        // این لیست را می‌توانید گسترش دهید
+        const BAD_WORDS = ['احمق', 'بیشعور', 'نفهم', 'کثافت', 'عوضی', 'دیوانه', 'بی‌شعور', 'تست_بد'];
         // ===============================================
 
         // ==============================================================
@@ -954,6 +997,9 @@
         const stickerPanelOverlay = document.getElementById('sticker-panel-overlay');
         const stickerGrid = document.getElementById('sticker-grid');
         const closeStickerPanelBtn = document.getElementById('close-sticker-panel-btn');
+        const profanityErrorOverlay = document.getElementById('profanity-error-overlay');
+        const profanityCloseBtn = document.getElementById('profanity-close-btn');
+        const profanityBadWordEl = document.getElementById('profanity-bad-word');
 
         const cacheManager = new CacheManager();
         const activeControllers = new Map();
@@ -1131,11 +1177,14 @@
             closeStickerPanelBtn.addEventListener('click', closeStickerPanel);
             stickerGrid.addEventListener('click', handleStickerClick);
 
+            profanityCloseBtn.addEventListener('click', () => hideModal(profanityErrorOverlay));
+
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 overlay.addEventListener('click', (e) => {
                     if (e.target === overlay) {
                         if (overlay.id === 'image-viewer-overlay') closeImageViewer();
                         else if (overlay.id === 'sticker-panel-overlay') closeStickerPanel();
+                        else if (overlay.id === 'profanity-error-overlay') hideModal(profanityErrorOverlay);
                         else hideModal(overlay);
                     }
                 });
@@ -1232,7 +1281,6 @@
                 }
                 isPartnerBlocked = willBlock;
                 updateBlockUI();
-                // Reload chat to apply filter immediately
                 loadChatData(false);
             } catch (error) {
                 showCustomAlert({ title: 'خطا', message: 'خطا در انجام عملیات مسدودسازی.' });
@@ -1252,7 +1300,6 @@
              const data = await apiRequest(`users/${currentUser.username}`, 'GET');
              if(data) {
                  currentUser = { ...currentUser, ...data };
-                 // Ensure blockedUsers is initialized
                  if (!currentUser.blockedUsers) currentUser.blockedUsers = {};
              }
         }
@@ -1260,6 +1307,8 @@
              chatPartner = await apiRequest(`users/${username}`, 'GET');
         }
 
+        // --- Logic Update for Duplicate Fix ---
+        // این تابع اکنون بررسی می‌کند که آیا پیام تکراری (چه با ID واقعی و چه موقت) وجود دارد یا خیر
         async function loadChatData(isInitialLoad = false) {
             if (!chatId || !clientToken) return;
             try {
@@ -1275,28 +1324,40 @@
 
                 const sortedMessages = Object.entries(messagesData).sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp));
                 
-                // Clear area if re-rendering to ensure blocked messages are removed if block status changed
-                if (!isInitialLoad && isPartnerBlocked) {
-                     // If we just blocked someone, we might want to re-evaluate visible messages
-                     // But for performance, we usually just append. 
-                     // However, to fix the bug "User A still receives", we must filter.
-                }
-
                 sortedMessages.forEach(([msgId, msg]) => {
-                    // *** FIX: Filter out messages from blocked users ***
                     if (currentUser.blockedUsers && currentUser.blockedUsers[msg.senderId]) {
-                        // If the message is already in DOM, remove it
                         const existingElement = document.querySelector(`.message[data-id="${msgId}"]`);
                         if (existingElement) existingElement.remove();
-                        return; // Skip rendering this message
+                        return; 
+                    }
+
+                    // بررسی وجود پیام با شناسه واقعی
+                    let existingElement = document.querySelector(`.message[data-id="${msgId}"]`);
+                    
+                    // اگر پیام با شناسه واقعی نبود، چک کن پیام موقتی با همان زمان و فرستنده هست؟
+                    // این قسمت برای جلوگیری از نمایش دوگانه پیام‌هایی است که هنوز پولینگ نشده‌اند اما در کلاینت هستند
+                    if (!existingElement && msg.senderId === currentUser.username) {
+                        const allTempMessages = document.querySelectorAll('.message[data-id^="temp_"]');
+                        allTempMessages.forEach(tempEl => {
+                            const tempMsgData = lastMessagesSnapshot[tempEl.dataset.id];
+                            if (tempMsgData && 
+                                Math.abs(new Date(tempMsgData.timestamp) - new Date(msg.timestamp)) < 1000 && 
+                                tempMsgData.text === msg.text) {
+                                // این همان پیام است! شناسه را آپدیت کن
+                                tempEl.dataset.id = msgId;
+                                delete lastMessagesSnapshot[tempEl.dataset.id]; // حذف رفرنس قدیمی
+                                existingElement = tempEl; // حالا پیام موجود است
+                            }
+                        });
                     }
 
                     const existingMsg = lastMessagesSnapshot[msgId];
-                    const existingElement = document.querySelector(`.message[data-id="${msgId}"]`);
                     if (!existingElement) createMessageElement(msgId, msg);
                     else if (JSON.stringify(existingMsg) !== JSON.stringify(msg)) updateMessageElement(existingElement, msg);
+                    
+                    lastMessagesSnapshot[msgId] = msg; // آپدیت اسنپ‌شات
                 });
-                lastMessagesSnapshot = messagesData; 
+                
                 if(isInitialLoad) scrollToBottom();
             } catch(error) { console.error("خطا در بارگذاری داده‌های چت:", error); }
         }
@@ -1373,6 +1434,7 @@
             voiceRecordTimer.textContent = "00:00";
         }
         
+        // --- Optimistic UI for Files ---
         async function sendFileMessage(file) {
             const MAX_SIZE_MB = 100;
             if (file.size > MAX_SIZE_MB * 1024 * 1024) {
@@ -1381,14 +1443,16 @@
             }
             const fileType = file.type.split('/')[0] === 'image' && file.type.includes('gif') ? 'image' : file.type.split('/')[0];
             const tempId = `temp_${Date.now()}`;
-            createMessageElement(tempId, { senderId: currentUser.username, timestamp: new Date().toISOString(), isSending: true, type: fileType });
+            // 1. نمایش پیام بلافاصله
+            const tempMsg = { senderId: currentUser.username, timestamp: new Date().toISOString(), isSending: true, type: fileType };
+            lastMessagesSnapshot[tempId] = tempMsg;
+            createMessageElement(tempId, tempMsg);
             scrollToBottom();
 
             const formData = new FormData();
             formData.append('file', file, file.name);
 
             try {
-                // *** FIX: Check if blocked before uploading ***
                 const amIBlocked = await apiRequest(`users/${chatPartner.username}/blockedUsers/${currentUser.username}`, 'GET');
                 if (amIBlocked === true) throw new Error("YOU_ARE_BLOCKED");
 
@@ -1410,10 +1474,13 @@
                             const finalMsg = { senderId: currentUser.username, receiverId: chatPartner.username, mediaUrl: result.url, timestamp: new Date().toISOString(), type: fileType };
                             const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', finalMsg);
                             await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: fileType === 'image' ? 'تصویر' : 'ویدیو', timestamp: finalMsg.timestamp });
+                            
+                            // 2. آپدیت شناسه موقت به شناسه واقعی بدون ساخت مجدد
                             if (tempElement) {
                                 tempElement.dataset.id = newMsgRef.name;
+                                delete lastMessagesSnapshot[tempId]; // حذف از اسنپ‌شات موقت
+                                lastMessagesSnapshot[newMsgRef.name] = finalMsg; // افزودن با شناسه جدید
                                 updateMessageElement(tempElement, finalMsg);
-                                lastMessagesSnapshot[newMsgRef.name] = finalMsg;
                             }
                         } else { throw new Error(result.error || 'خطا در آپلود فایل'); }
                     } else { throw new Error(`خطای سرور: ${xhr.status}`); }
@@ -1430,14 +1497,18 @@
             }
         }
 
+        // --- Optimistic UI for Voice ---
         async function sendVoiceMessage(blob) {
             const tempId = `temp_${Date.now()}`;
-            createMessageElement(tempId, { senderId: currentUser.username, timestamp: new Date().toISOString(), isSending: true, type: 'voice' });
+            // 1. نمایش پیام
+            const tempMsg = { senderId: currentUser.username, timestamp: new Date().toISOString(), isSending: true, type: 'voice' };
+            lastMessagesSnapshot[tempId] = tempMsg;
+            createMessageElement(tempId, tempMsg);
             scrollToBottom();
+            
             const formData = new FormData();
             formData.append('file', blob, `voice_${currentUser.username}_${Date.now()}.ogg`);
             try {
-                // *** FIX: Check if blocked before uploading ***
                 const amIBlocked = await apiRequest(`users/${chatPartner.username}/blockedUsers/${currentUser.username}`, 'GET');
                 if (amIBlocked === true) throw new Error("YOU_ARE_BLOCKED");
 
@@ -1452,11 +1523,13 @@
                     const finalMsg = { senderId: currentUser.username, receiverId: chatPartner.username, voiceUrl: result.url, timestamp: new Date().toISOString(), type: 'voice' };
                     const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', finalMsg);
                     await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: 'پیام صوتی', timestamp: finalMsg.timestamp });
+                    
                     const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
                     if (tempElement) {
-                        tempElement.dataset.id = newMsgRef.name;
-                        updateMessageElement(tempElement, finalMsg);
+                        tempElement.dataset.id = newMsgRef.name; // تعویض ID
+                        delete lastMessagesSnapshot[tempId];
                         lastMessagesSnapshot[newMsgRef.name] = finalMsg;
+                        updateMessageElement(tempElement, finalMsg);
                     }
                 } else { throw new Error(result.error || 'خطا در آپلود صدا'); }
             } catch (err) {
@@ -1473,9 +1546,11 @@
             if (!msg || !msg.timestamp) return;
             const placeholder = messagesArea.querySelector('div[style*="text-align:center"]');
             if(placeholder) placeholder.remove();
+            
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${msg.senderId === currentUser.username ? 'sent' : 'received'}`;
-            msgDiv.dataset.id = msgId;
+            msgDiv.dataset.id = msgId; // شناسه می‌تواند موقت یا دائمی باشد
+            
             updateMessageElement(msgDiv, msg);
             messagesArea.appendChild(msgDiv);
         }
@@ -1506,38 +1581,83 @@
             }
         }
 
+        // --- Profanity Check Function ---
+        function containsProfanity(text) {
+            if (!text) return false;
+            const normalizedText = text.toLowerCase();
+            for (let word of BAD_WORDS) {
+                if (normalizedText.includes(word)) {
+                    return word; // کلمه پیدا شده را برگردان
+                }
+            }
+            return false;
+        }
+
+        // --- Main Text Send Logic (With Optimistic UI & Profanity Check) ---
         async function handleSendMessage(e) {
             e.preventDefault();
             const text = messageInput.value.trim();
             if (!text || !chatPartner || isPartnerBlocked) return;
             
-            const message = { senderId: currentUser.username, receiverId: chatPartner.username, text, timestamp: new Date().toISOString(), deleted: false, replyTo: activeReplyContext };
+            // 1. بررسی فحاشی قبل از هر اقدامی
+            const detectedBadWord = containsProfanity(text);
+            if (detectedBadWord) {
+                profanityBadWordEl.textContent = detectedBadWord;
+                showModal(profanityErrorOverlay);
+                return; // توقف عملیات ارسال
+            }
+            
+            // 2. ساخت پیام Optimistic (نمایش فوری)
+            const tempId = `temp_${Date.now()}`;
+            const message = { 
+                senderId: currentUser.username, 
+                receiverId: chatPartner.username, 
+                text, 
+                timestamp: new Date().toISOString(), 
+                deleted: false, 
+                replyTo: activeReplyContext 
+            };
+            
             const tempInputValue = text;
             messageInput.value = '';
             toggleSendButton();
             cancelReply();
             
+            // نمایش در صفحه با ID موقت
+            lastMessagesSnapshot[tempId] = message;
+            createMessageElement(tempId, message);
+            scrollToBottom();
+            
             try {
-                // *** FIX: Check if I am blocked by the recipient before sending ***
                 const amIBlocked = await apiRequest(`users/${chatPartner.username}/blockedUsers/${currentUser.username}`, 'GET');
                 if (amIBlocked === true) {
                     throw new Error("YOU_ARE_BLOCKED");
                 }
 
+                // ارسال به سرور
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
                 await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: text, timestamp: message.timestamp });
-                const tempId = newMsgRef.name;
-                lastMessagesSnapshot[tempId] = message;
-                createMessageElement(tempId, message);
-                scrollToBottom();
+                
+                // 3. جایگزینی ID موقت با ID واقعی
+                const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
+                if (tempElement) {
+                    tempElement.dataset.id = newMsgRef.name; // تغییر خصوصیت data-id در DOM
+                    delete lastMessagesSnapshot[tempId]; // حذف از حافظه موقت
+                    lastMessagesSnapshot[newMsgRef.name] = message; // ذخیره با ID جدید
+                    // نیازی به updateMessageElement نیست چون محتوا تغییری نکرده، فقط ID عوض شده
+                }
             } catch(error) {
                 let errorMsg = 'خطا در ارسال پیام!';
                 if (error.message === "YOU_ARE_BLOCKED") {
-                    errorMsg = 'شما توسط این کاربر مسدود شده‌اید و نمی‌توانید پیام ارسال کنید.';
-                } else if (error.message.includes("blocked")) {
-                    errorMsg = 'ارسال پیام ممکن نیست. شما توسط این کاربر مسدود شده‌اید.';
+                    errorMsg = 'شما توسط این کاربر مسدود شده‌اید.';
                 }
-                showCustomAlert({ title: 'خطا', message: errorMsg });
+                
+                // در صورت خطا، پیام موقت را قرمز یا حذف کنید
+                const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
+                if(tempElement) {
+                    tempElement.innerHTML = `<div class="text" style="color: var(--danger-color);">${errorMsg}</div>`;
+                }
+                
                 messageInput.value = tempInputValue;
                 toggleSendButton();
             }
@@ -1545,22 +1665,33 @@
         
         async function sendImageMessage(imageUrl) {
             if (!imageUrl || !chatPartner || isPartnerBlocked) return;
+            const tempId = `temp_${Date.now()}`;
             const message = { senderId: currentUser.username, receiverId: chatPartner.username, mediaUrl: imageUrl, timestamp: new Date().toISOString(), type: 'image', replyTo: activeReplyContext };
             cancelReply();
+            
+            // Optimistic
+            lastMessagesSnapshot[tempId] = message;
+            createMessageElement(tempId, message);
+            scrollToBottom();
+
             try {
-                // *** FIX: Check block status ***
                 const amIBlocked = await apiRequest(`users/${chatPartner.username}/blockedUsers/${currentUser.username}`, 'GET');
                 if (amIBlocked === true) throw new Error("YOU_ARE_BLOCKED");
 
                 const newMsgRef = await apiRequest(`pivi_chats/${chatId}/messages`, 'POST', message);
                 await apiRequest(`pivi_chats/${chatId}`, 'PATCH', { lastMessage: 'استیکر', timestamp: message.timestamp });
-                const tempId = newMsgRef.name;
-                lastMessagesSnapshot[tempId] = message;
-                createMessageElement(tempId, message);
-                scrollToBottom();
+                
+                const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
+                if(tempElement) {
+                    tempElement.dataset.id = newMsgRef.name;
+                    delete lastMessagesSnapshot[tempId];
+                    lastMessagesSnapshot[newMsgRef.name] = message;
+                }
             } catch (error) {
                 const msg = error.message === "YOU_ARE_BLOCKED" ? "شما مسدود شده‌اید." : "خطا در ارسال استیکر.";
                 showCustomAlert({ title: 'خطا', message: msg });
+                const tempElement = document.querySelector(`.message[data-id="${tempId}"]`);
+                if(tempElement) tempElement.remove();
             }
         }
         
@@ -1615,7 +1746,15 @@
             const currentText = activeMessageElement.dataset.text || '';
             hideModal(messageOptionsOverlay);
             const newText = await showCustomPrompt({ title: 'ویرایش پیام', message: 'پیام جدید را وارد کنید:', initialValue: currentText });
-            if (newText && newText.trim() !== "" && newText.trim() !== currentText) await editMessage(activeMessageId, newText.trim());
+            if (newText && newText.trim() !== "" && newText.trim() !== currentText) {
+                 const detectedBadWord = containsProfanity(newText);
+                 if(detectedBadWord) {
+                     profanityBadWordEl.textContent = detectedBadWord;
+                     showModal(profanityErrorOverlay);
+                     return;
+                 }
+                 await editMessage(activeMessageId, newText.trim());
+            }
             activeMessageId = null;
         }
 
