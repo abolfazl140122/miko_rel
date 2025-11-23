@@ -753,46 +753,6 @@
         // ===============================================
 
         // ==============================================================
-        //  >>> Profanity Guard System <<<
-        //  سیستم یکپارچه تشخیص کلمات رکیک (هوش مصنوعی + قوانین سرور)
-        // ==============================================================
-        const ProfanityGuard = {
-            // لیست کلماتی که توسط هوش مصنوعی کلاینت تشخیص داده می‌شوند (Simulated AI Model)
-            // این کلمات صرفا برای تست هستند.
-            aiBlacklist: ['احمق', 'نادان', 'کودن', 'دیوانه', 'بیشعور', 'بی‌شعور'],
-
-            // لیست کلماتی که در سمت سرور ممنوع هستند (Server Rules)
-            serverBlacklist: ['فحش', 'ناسزا', 'رکیک', 'زشت', 'بددهن'],
-
-            /**
-             * بررسی متن برای یافتن کلمات نامناسب
-             * @param {string} text متن پیام
-             * @returns {object|null} نتیجه بررسی: { type: 'AI' | 'SERVER', word: string } یا null
-             */
-            check: function(text) {
-                if (!text) return null;
-                const normalizedText = text.trim(); 
-
-                // 1. بررسی توسط هوش مصنوعی (شبیه‌سازی شده)
-                // در سناریوی واقعی، اینجا مدل تنسورفلو یا API هوش مصنوعی صدا زده می‌شود
-                for (let word of this.aiBlacklist) {
-                    if (normalizedText.includes(word)) {
-                        return { type: 'AI', word: word };
-                    }
-                }
-
-                // 2. بررسی قوانین سرور (شبیه‌سازی شده برای جلوگیری از ارسال به سرور)
-                for (let word of this.serverBlacklist) {
-                    if (normalizedText.includes(word)) {
-                        return { type: 'SERVER', word: word };
-                    }
-                }
-
-                return null;
-            }
-        };
-
-        // ==============================================================
         //  >>> CacheManager IMPLEMENTATION <<<
         // ==============================================================
         class CacheManager {
@@ -1318,6 +1278,8 @@
                 // Clear area if re-rendering to ensure blocked messages are removed if block status changed
                 if (!isInitialLoad && isPartnerBlocked) {
                      // If we just blocked someone, we might want to re-evaluate visible messages
+                     // But for performance, we usually just append. 
+                     // However, to fix the bug "User A still receives", we must filter.
                 }
 
                 sortedMessages.forEach(([msgId, msg]) => {
@@ -1549,30 +1511,6 @@
             const text = messageInput.value.trim();
             if (!text || !chatPartner || isPartnerBlocked) return;
             
-            // ---------------------------------------------------------
-            // >>> PROFANITY CHECK IMPLEMENTATION <<<
-            // ---------------------------------------------------------
-            const profanityResult = ProfanityGuard.check(text);
-            if (profanityResult) {
-                if (profanityResult.type === 'AI') {
-                    // توسط هوش مصنوعی فهمیده شده
-                    showCustomAlert({ 
-                        title: 'تشخیص هوش مصنوعی', 
-                        message: 'توسط هوش مصنوعی فهمیده شده و پیام شما حاوی محتوای نامناسب است.' 
-                    });
-                } else if (profanityResult.type === 'SERVER') {
-                    // ارور سرور (شبیه‌سازی)
-                    showCustomAlert({ 
-                        title: 'خطای ارسال', 
-                        message: 'به علت استفاده از کلمات رکیک ارسال نمیشه.' 
-                    });
-                }
-                // پاک کردن ورودی یا نگه‌داشتن آن (بسته به UX، اینجا نگه می‌داریم تا اصلاح کند)
-                toggleSendButton();
-                return; // توقف ارسال
-            }
-            // ---------------------------------------------------------
-
             const message = { senderId: currentUser.username, receiverId: chatPartner.username, text, timestamp: new Date().toISOString(), deleted: false, replyTo: activeReplyContext };
             const tempInputValue = text;
             messageInput.value = '';
@@ -1636,20 +1574,6 @@
         }
         
         async function editMessage(messageId, newText) {
-            // ---------------------------------------------------------
-            // >>> PROFANITY CHECK FOR EDIT <<<
-            // ---------------------------------------------------------
-            const profanityResult = ProfanityGuard.check(newText);
-            if (profanityResult) {
-                 if (profanityResult.type === 'AI') {
-                    showCustomAlert({ title: 'تشخیص هوش مصنوعی', message: 'توسط هوش مصنوعی فهمیده شده و ویرایش امکان‌پذیر نیست.' });
-                } else {
-                    showCustomAlert({ title: 'خطا', message: 'به علت استفاده از کلمات رکیک ویرایش امکان‌پذیر نیست.' });
-                }
-                return;
-            }
-            // ---------------------------------------------------------
-
             try {
                 await apiRequest(`pivi_chats/${chatId}/messages/${messageId}`, 'PATCH', { text: newText, edited: true });
                 const editedMsgData = { ...lastMessagesSnapshot[messageId], text: newText, edited: true };
