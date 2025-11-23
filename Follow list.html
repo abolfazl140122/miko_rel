@@ -1,1 +1,474 @@
-.
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لیست برترین‌ها - همیار</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+
+        :root {
+            --background-color: #0D1117;
+            --secondary-color: #161B22;
+            --secondary-hover: #2C2F33;
+            --border-color: #30363d;
+            --text-primary: #E4E6EB;
+            --text-secondary: #8b949e;
+            --primary-color: #1E90FF;
+            --gold-color: #FFD700;
+            --gold-bg: rgba(255, 215, 0, 0.08);
+            --gold-border: rgba(255, 215, 0, 0.4);
+            --rank-1: #FFD700; /* Gold */
+            --rank-2: #C0C0C0; /* Silver */
+            --rank-3: #CD7F32; /* Bronze */
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            margin: 0 auto;
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* --- Header --- */
+        .header {
+            padding: 15px 20px;
+            background-color: var(--secondary-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* --- List Container --- */
+        .list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; /* Space for FAB */
+            scroll-behavior: smooth;
+        }
+
+        /* --- User Card --- */
+        .user-card {
+            display: flex;
+            align-items: center;
+            background-color: var(--secondary-color);
+            padding: 12px 15px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, background-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- Current User Style (Golden Theme) --- */
+        .user-card.is-me {
+            background-color: var(--gold-bg);
+            border: 2px solid var(--gold-border);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+        }
+        
+        .user-card.is-me::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05), transparent);
+            pointer-events: none;
+        }
+        
+        .user-card.is-me .rank-number {
+            color: var(--gold-color);
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .user-card.is-me .badge-me {
+            display: inline-block;
+        }
+
+        .rank-number {
+            font-size: 1.2rem;
+            font-weight: 900;
+            width: 30px;
+            text-align: center;
+            margin-left: 10px;
+            color: var(--text-secondary);
+        }
+
+        /* Top 3 Colors */
+        .user-card[data-rank="1"] .rank-number { color: var(--rank-1); font-size: 1.5rem; }
+        .user-card[data-rank="2"] .rank-number { color: var(--rank-2); font-size: 1.4rem; }
+        .user-card[data-rank="3"] .rank-number { color: var(--rank-3); font-size: 1.3rem; }
+
+        .avatar-wrapper {
+            position: relative;
+            margin-left: 15px;
+        }
+
+        .avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: var(--secondary-hover);
+            border: 2px solid transparent;
+        }
+        
+        .user-card.is-me .avatar {
+            border-color: var(--gold-color);
+        }
+
+        .user-info {
+            flex-grow: 1;
+            min-width: 0; /* Text truncation fix */
+        }
+
+        .display-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .username {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .badge-me {
+            display: none;
+            background-color: var(--gold-color);
+            color: #000;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-right: 5px;
+        }
+
+        .follower-count {
+            text-align: center;
+            padding-right: 10px;
+            min-width: 60px;
+        }
+
+        .count-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .user-card.is-me .count-value {
+            color: var(--gold-color);
+        }
+
+        .count-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            display: block;
+        }
+
+        /* --- Find Me Button (FAB) --- */
+        .find-me-btn {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            background: linear-gradient(135deg, var(--gold-color), #FFA500);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 20;
+            transition: transform 0.2s, box-shadow 0.2s;
+            opacity: 0;
+            pointer-events: none; /* Initially disabled */
+        }
+
+        .find-me-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .find-me-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .find-me-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* --- Loading --- */
+        .loading-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--secondary-hover);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .verified-tick {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <button class="back-btn" onclick="window.history.back()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </button>
+            <h1>رتبه‌بندی فالوورها</h1>
+            <div style="width: 24px;"></div> <!-- Spacer -->
+        </header>
+
+        <!-- Loading -->
+        <div class="loading-container" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: var(--text-secondary);">در حال محاسبه رتبه‌بندی...</p>
+        </div>
+
+        <!-- List -->
+        <div class="list-container" id="list-container">
+            <!-- Items injected by JS -->
+        </div>
+
+        <!-- FAB Button -->
+        <button class="find-me-btn" id="find-me-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+            جستجوی خودم
+        </button>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        const SHARED_SECRET = 'miko1234';
+        const VERIFIED_TICK_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
+
+        // --- DOM Elements ---
+        const listContainer = document.getElementById('list-container');
+        const loadingScreen = document.getElementById('loading');
+        const findMeBtn = document.getElementById('find-me-btn');
+
+        // --- State ---
+        let currentUser = null;
+        let clientToken = null;
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const storedUser = localStorage.getItem('currentUser');
+            if (!storedUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = JSON.parse(storedUser);
+
+            try {
+                await refreshClientToken();
+                await loadAndRenderLeaderboard();
+            } catch (error) {
+                console.error(error);
+                listContainer.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">خطا در بارگذاری اطلاعات.<br>${error.message}</div>`;
+                loadingScreen.style.display = 'none';
+            }
+        });
+
+        // --- API & Logic ---
+        async function refreshClientToken() {
+            const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+            if (!response.ok) throw new Error('خطا در دریافت توکن.');
+            const data = await response.json();
+            clientToken = data.token;
+        }
+
+        async function proxyRequest(path) {
+            const response = await fetch(`${PROXY_URL}?path=${path}`, {
+                headers: {
+                    'Authorization': `Bearer ${clientToken}`,
+                    'X-User-Username': currentUser.username
+                }
+            });
+            if (!response.ok) return null;
+            return response.json();
+        }
+
+        async function loadAndRenderLeaderboard() {
+            // 1. Fetch All Users & All Followers Data in parallel
+            const [usersData, followersData] = await Promise.all([
+                proxyRequest('users'),
+                proxyRequest('followers')
+            ]);
+
+            if (!usersData) {
+                throw new Error('لیست کاربران دریافت نشد.');
+            }
+
+            // 2. Process Data
+            const leaderboard = [];
+            const allUserIds = Object.keys(usersData);
+
+            allUserIds.forEach(userId => {
+                const user = usersData[userId];
+                if (!user) return;
+
+                // Count followers
+                let count = 0;
+                if (followersData && followersData[userId]) {
+                    // followersData structure: { targetId: { followerId: true, ... } }
+                    count = Object.keys(followersData[userId]).length;
+                }
+
+                leaderboard.push({
+                    username: user.username,
+                    displayName: user.displayName || user.username,
+                    profilePicUrl: user.profilePicUrl,
+                    verified: user.verified || false,
+                    followerCount: count
+                });
+            });
+
+            // 3. Sort: Descending by followerCount
+            leaderboard.sort((a, b) => b.followerCount - a.followerCount);
+
+            // 4. Render
+            renderList(leaderboard);
+        }
+
+        function renderList(data) {
+            listContainer.innerHTML = '';
+            let myElementId = null;
+
+            data.forEach((user, index) => {
+                const rank = index + 1;
+                const isMe = user.username === currentUser.username;
+                const avatarUrl = user.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=161B22&color=fff&size=100`;
+                const verifiedHtml = user.verified ? `<img src="${VERIFIED_TICK_URL}" class="verified-tick" alt="verified">` : '';
+                
+                const elementId = `user-row-${user.username}`;
+                if (isMe) myElementId = elementId;
+
+                const html = `
+                    <div class="user-card ${isMe ? 'is-me' : ''}" id="${elementId}" data-rank="${rank}">
+                        <div class="rank-number">${rank}</div>
+                        <div class="avatar-wrapper">
+                            <img src="${avatarUrl}" class="avatar" alt="${user.displayName}" loading="lazy">
+                        </div>
+                        <div class="user-info" style="margin-right: 15px;">
+                            <div class="display-name">
+                                ${user.displayName} 
+                                ${verifiedHtml}
+                                ${isMe ? '<span class="badge-me">شما</span>' : ''}
+                            </div>
+                            <div class="username">@${user.username}</div>
+                        </div>
+                        <div class="follower-count">
+                            <span class="count-value">${formatNumber(user.followerCount)}</span>
+                            <span class="count-label">دنبال‌کننده</span>
+                        </div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', html);
+            });
+
+            // Hide loading
+            loadingScreen.style.display = 'none';
+
+            // Setup "Find Me" button functionality
+            if (myElementId) {
+                findMeBtn.classList.add('visible');
+                findMeBtn.onclick = () => {
+                    const el = document.getElementById(myElementId);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Add a temporary flash effect
+                        el.style.transition = 'transform 0.3s';
+                        el.style.transform = 'scale(1.02)';
+                        setTimeout(() => el.style.transform = 'scale(1)', 300);
+                    }
+                };
+            }
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num;
+        }
+
+    </script>
+</body>
+</html>
