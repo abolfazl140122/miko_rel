@@ -22,7 +22,8 @@
             --rank-2: #C0C0C0;
             --rank-3: #CD7F32;
             --modal-bg: #1C2128;
-            --danger-color: #e53935;
+            --online-color: #28a745;
+            --offline-color: #6a737d;
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -73,6 +74,7 @@
             padding: 15px;
             padding-bottom: 80px;
             scroll-behavior: smooth;
+            position: relative;
         }
 
         /* --- User Card --- */
@@ -86,7 +88,7 @@
             border: 1px solid var(--border-color);
             position: relative;
             overflow: hidden;
-            cursor: pointer; /* Clickable */
+            cursor: pointer;
             transition: transform 0.2s, background-color 0.2s;
         }
         
@@ -116,16 +118,37 @@
         .user-card[data-rank="2"] .rank-number { color: var(--rank-2); font-size: 1.4rem; }
         .user-card[data-rank="3"] .rank-number { color: var(--rank-3); font-size: 1.3rem; }
 
-        .avatar {
+        .avatar-wrapper {
+            position: relative;
+            margin-left: 15px;
             width: 55px;
             height: 55px;
+            flex-shrink: 0;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            margin-left: 15px;
             background-color: var(--secondary-hover);
             border: 2px solid transparent;
         }
         .user-card.is-me .avatar { border-color: var(--gold-color); }
+
+        /* Online/Offline Dot */
+        .status-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid var(--secondary-color);
+            z-index: 2;
+        }
+        .status-dot.online { background-color: var(--online-color); box-shadow: 0 0 4px var(--online-color); }
+        .status-dot.offline { background-color: var(--offline-color); }
 
         .user-info { flex-grow: 1; min-width: 0; }
         .display-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
@@ -151,17 +174,32 @@
         .find-me-btn:active { transform: scale(0.95); }
         .find-me-btn svg { width: 20px; height: 20px; }
 
-        /* --- Loading --- */
-        .loading-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--background-color); display: flex;
-            flex-direction: column; justify-content: center; align-items: center; z-index: 50;
+        /* --- Skeleton Loading --- */
+        .skeleton-container {
+            display: flex; flex-direction: column; gap: 12px;
+            width: 100%; height: 100%; position: absolute; top: 0; left: 0;
+            padding: 15px; background: var(--background-color); z-index: 40;
         }
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid var(--secondary-hover);
-            border-top-color: var(--primary-color); border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .skeleton-card {
+            display: flex; align-items: center; padding: 12px 15px;
+            background-color: var(--secondary-color); border-radius: 16px;
+            border: 1px solid var(--border-color);
         }
+        .sk-rank { width: 30px; height: 20px; background: #2C2F33; border-radius: 4px; margin-left: 10px; }
+        .sk-avatar { width: 55px; height: 55px; border-radius: 50%; background: #2C2F33; margin-left: 15px; flex-shrink: 0; }
+        .sk-info { flex-grow: 1; }
+        .sk-line-1 { width: 60%; height: 14px; background: #2C2F33; border-radius: 4px; margin-bottom: 8px; }
+        .sk-line-2 { width: 40%; height: 10px; background: #2C2F33; border-radius: 4px; }
+        .sk-count { width: 40px; height: 30px; background: #2C2F33; border-radius: 4px; }
+
+        /* Skeleton Animation */
+        .sk-rank, .sk-avatar, .sk-line-1, .sk-line-2, .sk-count {
+            animation: shimmer 1.5s infinite linear;
+            background: linear-gradient(90deg, #2C2F33 0%, #3a3f45 50%, #2C2F33 100%);
+            background-size: 200% 100%;
+        }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
         .verified-tick { width: 16px; height: 16px; vertical-align: middle; }
 
         /* --- Profile Modal (Bottom Sheet) --- */
@@ -174,8 +212,7 @@
         .modal-overlay.active { opacity: 1; visibility: visible; }
         
         .profile-modal {
-            background-color: var(--modal-bg);
-            width: 100%; max-width: 480px;
+            background-color: var(--modal-bg); width: 100%; max-width: 480px;
             border-top-left-radius: 24px; border-top-right-radius: 24px;
             padding: 25px 20px;
             transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
@@ -189,9 +226,7 @@
             border-radius: 10px; margin: 0 auto 20px;
         }
 
-        .profile-header {
-            display: flex; flex-direction: column; align-items: center; text-align: center;
-        }
+        .profile-header { display: flex; flex-direction: column; align-items: center; text-align: center; }
         .profile-avatar {
             width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary-color);
             padding: 2px; background-color: var(--secondary-color); object-fit: cover;
@@ -213,15 +248,33 @@
             line-height: 1.5; margin-bottom: 25px; opacity: 0.9;
         }
 
-        .follow-btn {
+        /* Action Buttons Grid */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .btn {
             width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 1rem;
             cursor: pointer; transition: all 0.2s; border: none; font-family: 'Vazirmatn', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .follow-btn.action-follow { background-color: var(--primary-color); color: white; }
-        .follow-btn.action-unfollow { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-primary); }
-        .follow-btn:disabled { opacity: 0.6; cursor: wait; }
+        
+        /* Message Button */
+        .btn-message {
+            background-color: var(--secondary-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-message:hover { background-color: var(--border-color); }
+        .btn-message svg { width: 20px; height: 20px; }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        /* Follow Button */
+        .btn-follow { background-color: var(--primary-color); color: white; }
+        .btn-follow.action-unfollow { background-color: transparent; border: 1px solid var(--danger-color); color: var(--danger-color); }
+        .btn-follow:disabled { opacity: 0.6; cursor: wait; }
+
         @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
     </style>
 </head>
@@ -237,10 +290,17 @@
             <div style="width: 24px;"></div>
         </header>
 
-        <!-- Loading -->
-        <div class="loading-container" id="loading">
-            <div class="spinner"></div>
-            <p style="margin-top: 15px; color: var(--text-secondary);">در حال محاسبه رتبه‌بندی...</p>
+        <!-- Skeleton Loading -->
+        <div class="skeleton-container" id="skeleton-loading">
+            <!-- Generating 8 skeleton items -->
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
         </div>
 
         <!-- List -->
@@ -276,7 +336,13 @@
 
             <div id="p-bio" class="profile-bio"></div>
 
-            <button id="p-action-btn" class="follow-btn action-follow">دنبال کردن</button>
+            <div class="action-buttons">
+                <button id="p-message-btn" class="btn btn-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                    پیام
+                </button>
+                <button id="p-follow-btn" class="btn btn-follow">دنبال کردن</button>
+            </div>
         </div>
     </div>
 
@@ -288,7 +354,7 @@
 
         // --- DOM Elements ---
         const listContainer = document.getElementById('list-container');
-        const loadingScreen = document.getElementById('loading');
+        const skeletonLoading = document.getElementById('skeleton-loading');
         const findMeBtn = document.getElementById('find-me-btn');
         const profileOverlay = document.getElementById('profile-overlay');
         
@@ -299,15 +365,15 @@
         const pFollowers = document.getElementById('p-followers');
         const pFollowing = document.getElementById('p-following');
         const pBio = document.getElementById('p-bio');
-        const pActionBtn = document.getElementById('p-action-btn');
+        const pFollowBtn = document.getElementById('p-follow-btn');
+        const pMessageBtn = document.getElementById('p-message-btn');
 
         // --- State ---
         let currentUser = null;
         let clientToken = null;
-        let usersCache = {}; // Cache to store user data for modal
-        let followersCache = {}; // Cache for follower counts
-        let followingCache = {}; // Cache for following counts
-        let currentModalUser = null; // Track who is open
+        let usersCache = {}; 
+        let followersCache = {}; 
+        let followingCache = {}; 
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -318,12 +384,10 @@
             }
             currentUser = JSON.parse(storedUser);
 
-            // Close modal on outside click
+            // Close modal events
             profileOverlay.addEventListener('click', (e) => {
                 if (e.target === profileOverlay) closeProfileModal();
             });
-            
-            // Close modal on drag down (simple implementation)
             document.querySelector('.modal-handle').addEventListener('click', closeProfileModal);
 
             try {
@@ -331,8 +395,8 @@
                 await loadAndRenderLeaderboard();
             } catch (error) {
                 console.error(error);
+                skeletonLoading.style.display = 'none';
                 listContainer.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">خطا در بارگذاری.<br>${error.message}</div>`;
-                loadingScreen.style.display = 'none';
             }
         });
 
@@ -364,7 +428,7 @@
         }
 
         async function loadAndRenderLeaderboard() {
-            // Fetch users, followers, and following data in parallel
+            // Data fetching
             const [usersData, followersData, followingData] = await Promise.all([
                 proxyRequest('users'),
                 proxyRequest('followers'),
@@ -391,12 +455,18 @@
                     displayName: user.displayName || user.username,
                     profilePicUrl: user.profilePicUrl,
                     verified: user.verified || false,
+                    isOnline: user.isOnline || false, // Check online status
                     followerCount: count
                 });
             });
 
+            // Sort
             leaderboard.sort((a, b) => b.followerCount - a.followerCount);
-            renderList(leaderboard);
+            
+            // Artificial delay to show off the skeleton loading (can remove in production)
+            setTimeout(() => {
+                renderList(leaderboard);
+            }, 600);
         }
 
         function renderList(data) {
@@ -409,13 +479,19 @@
                 const avatarUrl = user.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=161B22&color=fff&size=100`;
                 const verifiedHtml = user.verified ? `<img src="${VERIFIED_TICK_URL}" class="verified-tick" alt="verified">` : '';
                 
+                // Status dot logic
+                const statusClass = user.isOnline ? 'online' : 'offline';
+                
                 const elementId = `user-row-${user.username}`;
                 if (isMe) myElementId = elementId;
 
                 const html = `
                     <div class="user-card ${isMe ? 'is-me' : ''}" id="${elementId}" data-rank="${rank}" onclick="openUserProfile('${user.username}')">
                         <div class="rank-number">${rank}</div>
-                        <img src="${avatarUrl}" class="avatar" alt="${user.displayName}" loading="lazy">
+                        <div class="avatar-wrapper">
+                            <img src="${avatarUrl}" class="avatar" alt="${user.displayName}" loading="lazy">
+                            <div class="status-dot ${statusClass}"></div>
+                        </div>
                         <div class="user-info">
                             <div class="display-name">
                                 ${user.displayName} 
@@ -433,7 +509,8 @@
                 listContainer.insertAdjacentHTML('beforeend', html);
             });
 
-            loadingScreen.style.display = 'none';
+            // Hide skeleton, show list
+            skeletonLoading.style.display = 'none';
 
             if (myElementId) {
                 findMeBtn.classList.add('visible');
@@ -454,7 +531,7 @@
             const user = usersCache[username];
             if (!user) return;
 
-            currentModalUser = username;
+            const isMe = username === currentUser.username;
             
             // Populate Data
             const avatarUrl = user.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.username)}&background=161B22&color=fff&size=150`;
@@ -471,37 +548,46 @@
             pFollowers.textContent = formatNumber(followerCnt);
             pFollowing.textContent = formatNumber(followingCnt);
 
-            // Button Logic
-            pActionBtn.onclick = null; // Clear previous handlers
-            
-            if (username === currentUser.username) {
-                pActionBtn.style.display = 'none'; // Hide button for self
+            // --- Button Logic ---
+            pFollowBtn.onclick = null;
+            pMessageBtn.onclick = null;
+
+            if (isMe) {
+                // Hide buttons for self
+                pFollowBtn.style.display = 'none';
+                pMessageBtn.style.display = 'none';
+                // Adjust grid to block to remove empty space
+                document.querySelector('.action-buttons').style.display = 'none';
             } else {
-                pActionBtn.style.display = 'block';
-                pActionBtn.disabled = true;
-                pActionBtn.textContent = 'در حال بررسی...';
-                pActionBtn.className = 'follow-btn';
+                document.querySelector('.action-buttons').style.display = 'grid';
+                pFollowBtn.style.display = 'block';
+                pMessageBtn.style.display = 'flex';
+
+                // Message Button Action
+                pMessageBtn.onclick = () => {
+                    window.location.href = `pivi.html?uid=${username}`;
+                };
+
+                // Follow Button Setup
+                pFollowBtn.disabled = true;
+                pFollowBtn.textContent = '...';
+                pFollowBtn.className = 'btn btn-follow';
                 
-                // Check Follow Status
                 const isFollowing = await checkFollowStatus(username);
                 updateFollowButtonUI(isFollowing);
                 
-                pActionBtn.disabled = false;
-                pActionBtn.onclick = () => toggleFollow(username);
+                pFollowBtn.disabled = false;
+                pFollowBtn.onclick = () => toggleFollow(username);
             }
 
-            // Show Modal
             profileOverlay.classList.add('active');
         }
 
         function closeProfileModal() {
             profileOverlay.classList.remove('active');
-            currentModalUser = null;
         }
 
         async function checkFollowStatus(targetUsername) {
-            // Check cache first if possible, or fetch live
-            // Since we fetched 'following' data for everyone in loadAndRenderLeaderboard (followingCache), we can check locally!
             if (followingCache[currentUser.username] && followingCache[currentUser.username][targetUsername]) {
                 return true;
             }
@@ -510,32 +596,28 @@
 
         function updateFollowButtonUI(isFollowing) {
             if (isFollowing) {
-                pActionBtn.textContent = 'دنبال می‌کنید';
-                pActionBtn.className = 'follow-btn action-unfollow';
+                pFollowBtn.textContent = 'لغو دنبال کردن';
+                pFollowBtn.className = 'btn btn-follow action-unfollow';
             } else {
-                pActionBtn.textContent = 'دنبال کردن';
-                pActionBtn.className = 'follow-btn action-follow';
+                pFollowBtn.textContent = 'دنبال کردن';
+                pFollowBtn.className = 'btn btn-follow';
             }
         }
 
         async function toggleFollow(targetUsername) {
-            const isFollowing = pActionBtn.classList.contains('action-unfollow');
-            pActionBtn.disabled = true;
+            const isFollowing = pFollowBtn.classList.contains('action-unfollow');
+            pFollowBtn.disabled = true;
             
             try {
-                // Prepare API Payload
-                // If following -> delete (set to null)
-                // If not following -> set to true
                 const valueToSet = isFollowing ? null : true;
                 const payload = {
                     [`following/${currentUser.username}/${targetUsername}`]: valueToSet,
                     [`followers/${targetUsername}/${currentUser.username}`]: valueToSet
                 };
 
-                // Single atomic update (or as close as we can get with proxy)
                 await proxyRequest('', 'PATCH', payload);
 
-                // Update Local Cache to reflect changes immediately
+                // Update Cache
                 if (!followingCache[currentUser.username]) followingCache[currentUser.username] = {};
                 if (!followersCache[targetUsername]) followersCache[targetUsername] = {};
 
@@ -547,11 +629,10 @@
                     followersCache[targetUsername][currentUser.username] = true;
                 }
 
-                // Update UI inside Modal
                 updateFollowButtonUI(!isFollowing);
                 pFollowers.textContent = formatNumber(Object.keys(followersCache[targetUsername]).length);
 
-                // Update List UI (Find row and update count)
+                // Update List UI
                 const listRow = document.querySelector(`#user-row-${targetUsername} .count-value`);
                 if (listRow) listRow.textContent = formatNumber(Object.keys(followersCache[targetUsername]).length);
 
@@ -559,7 +640,7 @@
                 console.error("Follow error:", error);
                 alert("خطا در انجام عملیات.");
             } finally {
-                pActionBtn.disabled = false;
+                pFollowBtn.disabled = false;
             }
         }
 
