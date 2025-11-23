@@ -1083,9 +1083,9 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 <span>پروفایل</span>
             </button>
-            <button class="nav-btn" id="nav-explore-btn">
+            <button class="nav-btn" id="nav-people-btn">
                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                <span>کاوش</span>
+                <span>افراد</span>
             </button>
             <button class="nav-btn active" id="nav-chats-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -1257,9 +1257,6 @@
         const userListTitle = document.getElementById('user-list-title');
         const userListContent = document.getElementById('user-list-content');
         const userListClose = document.getElementById('user-list-close');
-        
-        // Navigation Buttons
-        const navExploreBtn = document.getElementById('nav-explore-btn');
 
 
         // --- SECTION: App State ---
@@ -1287,6 +1284,8 @@
             currentUser = JSON.parse(storedUser);
 
             // EVENT LISTENERS
+            const navPeopleBtn = document.getElementById('nav-people-btn');
+            
             searchInput.addEventListener('input', handleSearch);
             searchTabsContainer.addEventListener('click', handleTabSwitch);
             openProfileBtn.addEventListener('click', () => openUserProfile(currentUser.username));
@@ -1300,9 +1299,9 @@
                 window.location.href = 'https://abolfazl140122.github.io/miko_rel/Channel.html';
             });
             
-            // Explore Button Listener
-            if (navExploreBtn) {
-                navExploreBtn.addEventListener('click', () => {
+            // New People/Follow List Navigation
+            if(navPeopleBtn) {
+                navPeopleBtn.addEventListener('click', () => {
                     window.location.href = 'Follow list.html';
                 });
             }
