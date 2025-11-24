@@ -1,1002 +1,1067 @@
-<!-- START OF FILE روبینو_پیشرفته.html -->
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>روبینو پلاس</title>
+    <title>روبینو همیار</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
 
         :root {
-            --bg-body: #000000;
-            --bg-card: #121212;
-            --bg-header: rgba(18, 18, 18, 0.95);
-            --text-main: #F5F5F5;
-            --text-muted: #A8A8A8;
-            --primary: #0095F6; /* رنگ آبی اینستاگرام */
-            --primary-hover: #1877F2;
-            --danger: #ED4956;
-            --border: #262626;
-            --separator: #363636;
-            --modal-bg: #262626;
-            --overlay: rgba(0, 0, 0, 0.65);
-            --toast-bg: #333;
+            --background-color: #0D1117;
+            --secondary-color: #161B22;
+            --secondary-hover: #2C2F33;
+            --border-color: #30363d;
+            --text-primary: #E4E6EB;
+            --text-secondary: #8b949e;
+            --primary-color: #00A3FF; /* آبی همیار */
+            --primary-glow: rgba(0, 163, 255, 0.4);
+            --like-color: #ED4956;
+            --modal-bg: #1C2128;
+            --skeleton-base: #161B22;
+            --skeleton-highlight: #21262d;
+            --danger-color: #FF4D4D;
+            --toast-bg: rgba(40, 167, 69, 0.9);
+            --toast-error: rgba(220, 53, 69, 0.9);
         }
 
-        *, *::before, *::after { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-
+        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
+            background-color: var(--background-color);
+            color: var(--text-primary);
             margin: 0; padding: 0;
             height: 100vh; overflow: hidden;
             user-select: none;
+            /* پس‌زمینه با گرادینت ملایم برای عمق بیشتر - از فایل جدید */
+            background: radial-gradient(circle at top left, #1a202c 0%, var(--background-color) 70%);
         }
 
-        /* --- LAYOUT --- */
         .app-container {
             width: 100%; max-width: 480px; height: 100%; margin: 0 auto;
             display: flex; flex-direction: column; position: relative;
-            background-color: var(--bg-body);
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            background-color: var(--background-color);
         }
 
         /* --- HEADER --- */
-        .header {
-            height: 54px;
-            background-color: var(--bg-header);
-            border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 16px;
-            position: absolute; top: 0; left: 0; right: 0; z-index: 100;
+        .header-area {
+            background-color: rgba(22, 27, 34, 0.95); /* کمی شیشه‌ای */
             backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            height: 60px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
         }
         .header-title {
-            font-size: 1.2rem; font-weight: 800; margin: 0;
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            font-family: sans-serif; letter-spacing: 1px;
+            font-size: 1.5rem; 
+            font-weight: 900;
+            margin: 0;
+            color: var(--primary-color);
+            /* افکت درخشش متن */
+            text-shadow: 0 0 15px var(--primary-glow);
+            letter-spacing: 0.5px;
         }
         .header-btn {
-            background: none; border: none; color: var(--text-main); cursor: pointer; padding: 8px;
+            background: none; border: none; color: var(--text-primary);
+            cursor: pointer; padding: 8px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
         }
-        .header-btn svg { width: 24px; height: 24px; stroke-width: 1.8; }
+        .header-btn:active { transform: scale(0.85); background-color: var(--secondary-hover); }
+        .header-btn svg { width: 26px; height: 26px; stroke-width: 2; }
 
         /* --- PULL TO REFRESH --- */
-        .ptr-container {
-            position: absolute; top: 55px; left: 0; right: 0; height: 60px;
+        .pull-indicator {
+            position: absolute; top: 70px; left: 0; right: 0; height: 50px;
             display: flex; justify-content: center; align-items: center;
-            z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.2s;
+            pointer-events: none; transition: transform 0.2s, opacity 0.2s; z-index: 10; opacity: 0;
         }
-        .ptr-spinner {
-            width: 32px; height: 32px; 
-            background: var(--text-main);
+        .pull-spinner {
+            width: 30px; height: 30px;
+            border: 3px solid var(--secondary-hover); 
+            border-top-color: var(--primary-color);
             border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            transform: scale(0); transition: transform 0.2s;
+            box-shadow: 0 0 10px var(--primary-glow);
         }
-        .ptr-icon { width: 20px; height: 20px; color: var(--bg-body); fill: var(--bg-body); }
-        .ptr-spinning .ptr-spinner { animation: rotate 1s linear infinite; transform: scale(1); }
-        @keyframes rotate { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(360deg) scale(1); } }
+        .pull-spinner.spinning { animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* --- FEED --- */
-        .feed {
-            flex-grow: 1; overflow-y: auto; overflow-x: hidden;
-            padding-top: 55px; padding-bottom: 20px;
+        /* --- MAIN FEED --- */
+        .feed-container {
+            flex-grow: 1; overflow-y: auto; 
+            padding-bottom: 20px;
             scrollbar-width: none;
+            position: relative;
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .feed::-webkit-scrollbar { display: none; }
+        .feed-container::-webkit-scrollbar { display: none; }
 
         /* --- POST CARD --- */
-        .post {
-            background-color: var(--bg-body);
-            margin-bottom: 10px;
-            border-bottom: 1px solid var(--border);
+        .post-card {
+            background-color: var(--background-color);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px; padding-bottom: 10px;
+            animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .post-header {
-            padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;
-        }
-        .p-user { display: flex; align-items: center; gap: 10px; }
-        .p-avatar {
-            width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
-            border: 1px solid var(--border);
-            background: linear-gradient(45deg, #222, #333);
-        }
-        .p-name { font-weight: 600; font-size: 0.9rem; color: var(--text-main); display: flex; align-items: center; gap: 4px; }
-        .verified { width: 14px; height: 14px; margin-right: 2px; }
-        .p-options { color: var(--text-main); padding: 5px; cursor: pointer; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* MEDIA */
-        .post-media-wrapper {
-            width: 100%; position: relative; background: #000;
-            /* Adaptive height logic */
-            min-height: 250px;
+        .post-header { padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-avatar {
+            width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--border-color);
+            transition: border-color 0.3s;
+        }
+        .post-card:hover .user-avatar { border-color: var(--primary-color); }
+
+        .username { 
+            font-weight: 700; font-size: 0.95rem; color: var(--text-primary); 
+            display: flex; align-items: center; gap: 4px;
+        }
+        .verified-tick {
+            width: 16px; height: 16px;
+            filter: drop-shadow(0 0 4px var(--primary-glow));
+            vertical-align: middle;
+        }
+        
+        .post-options { 
+            color: var(--text-secondary); cursor: pointer; padding: 6px; border-radius: 50%; transition: all 0.2s;
+        }
+        .post-options:hover { background-color: var(--secondary-hover); color: var(--text-primary); transform: rotate(90deg); }
+        .post-options.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+
+        /* Media Container */
+        .post-media-container {
+            width: 100%; position: relative;
+            background-color: #000; min-height: 300px; 
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
         }
-        /* Video & Img specific */
-        .post-media {
-            width: 100%;
-            height: auto;
-            max-height: 550px; /* جلوگیری از بیش از حد بلند شدن */
-            object-fit: cover; /* پر کردن کادر و حذف سیاهی */
-            display: block;
-        }
-        /* برای ویدیوها، اگر بخواهیم کل صفحه را نگیرد ولی کادر را پر کند */
-        video.post-media {
-            max-height: 65vh; 
-        }
-
-        /* Heart Animation */
-        .big-heart {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            font-size: 80px; color: rgba(255,255,255,0.9); pointer-events: none;
-            filter: drop-shadow(0 0 15px rgba(0,0,0,0.5)); transition: transform 0.2s; z-index: 5;
-        }
-        .big-heart.animate { animation: heartPop 0.9s forwards; }
-        @keyframes heartPop { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 15% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 30% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0); opacity: 0; } }
-
-        /* ACTIONS */
-        .post-actions { padding: 8px 14px; display: flex; gap: 16px; }
-        .act-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--text-main); transition: transform 0.1s; }
-        .act-btn:active { transform: scale(0.9); }
-        .act-btn svg { width: 26px; height: 26px; stroke-width: 1.8; }
-        .act-btn.liked svg { fill: var(--danger); stroke: var(--danger); animation: bounce 0.3s; }
-        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-
-        .likes-count { 
-            padding: 0 14px; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; cursor: pointer; 
-            display: none; /* By default hidden via JS if 0 or private */
-        }
+        .post-media { width: 100%; height: auto; max-height: 580px; object-fit: contain; display: block; }
+        /* Video styles specifically */
+        video.post-media { object-fit: contain; max-height: 600px; }
         
-        .caption { padding: 0 14px 10px; font-size: 0.9rem; line-height: 1.4; color: var(--text-main); }
-        .cap-name { font-weight: 600; margin-left: 5px; }
-        .time-ago { font-size: 0.75rem; color: var(--text-muted); padding: 0 14px 12px; display: block; }
+        /* Heart Animation (Merged from Old File Logic) */
+        .heart-overlay {
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) scale(0);
+            color: #fff; font-size: 90px; pointer-events: none;
+            z-index: 5; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+            opacity: 0;
+        }
+        .heart-overlay.active { animation: heartPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        @keyframes heartPop { 
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 
+            30% { transform: translate(-50%, -50%) scale(0.95); opacity: 1; } 
+            45% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 
+            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 
+        }
 
-        /* --- MODALS (General) --- */
-        .overlay {
+        .post-actions { padding: 12px 15px 8px; display: flex; gap: 18px; align-items: center; }
+        .action-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 0; transition: transform 0.1s; }
+        .action-btn svg { width: 28px; height: 28px; stroke-width: 1.7; transition: all 0.2s; }
+        .action-btn:active svg { transform: scale(0.8); }
+        .action-btn.liked svg { 
+            fill: var(--like-color); stroke: var(--like-color); 
+            animation: likePulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        @keyframes likePulse { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
+
+        .post-likes { 
+            padding: 0 15px; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; 
+            cursor: pointer; width: fit-content; transition: opacity 0.2s;
+        }
+        .post-likes:active { opacity: 0.6; }
+
+        .post-caption { padding: 0 15px 5px; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word; }
+        .caption-username { font-weight: 700; margin-left: 5px; }
+        .post-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px; display: block; padding: 0 15px; letter-spacing: 0.5px; }
+
+        /* --- SKELETON LOADER (Enhanced) --- */
+        #skeleton-loader {
+            position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
+            background: var(--background-color); z-index: 15; overflow: hidden;
+        }
+        .sk-post { margin-bottom: 20px; background: var(--background-color); padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+        .sk-header { display: flex; align-items: center; padding: 15px; gap: 10px; }
+        .sk-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--skeleton-base); }
+        .sk-name { width: 120px; height: 16px; border-radius: 4px; background: var(--skeleton-base); }
+        .sk-image { width: 100%; height: 380px; background: var(--skeleton-base); }
+        .sk-actions { height: 20px; margin: 15px; width: 40%; background: var(--skeleton-base); border-radius: 4px; }
+        
+        /* Shimmer Effect from Old File (Smoother) */
+        .skeleton-animate {
+            position: relative; overflow: hidden;
+        }
+        .skeleton-animate::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        /* --- MODALS (Enhanced Transitions) --- */
+        .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 1000;
-            opacity: 0; visibility: hidden; transition: all 0.25s ease;
-            display: flex; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.8); z-index: 1000; opacity: 0; visibility: hidden;
+            transition: all 0.3s ease-in-out; 
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(3px); /* Glassmorphism */
         }
-        .overlay.active { opacity: 1; visibility: visible; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
         
-        /* Bottom Sheet Modal */
-        .sheet-modal {
-            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1100;
-            background: var(--modal-bg);
-            border-top-left-radius: 16px; border-top-right-radius: 16px;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
-            display: flex; flex-direction: column; max-height: 85vh;
-        }
-        .sheet-modal.active { transform: translateY(0); }
-        
-        .sheet-handle { width: 40px; height: 4px; background: var(--separator); border-radius: 2px; margin: 12px auto; }
-        
-        .sheet-item {
-            padding: 15px 20px; font-size: 1rem; color: var(--text-main);
-            display: flex; align-items: center; gap: 15px; cursor: pointer;
-            border-bottom: 1px solid var(--separator);
-            background: none; border: none; width: 100%; text-align: right;
-            font-family: 'Vazirmatn';
-        }
-        .sheet-item:active { background-color: var(--separator); }
-        .sheet-item:last-child { border-bottom: none; }
-        .sheet-item.red { color: var(--danger); }
-        .sheet-item svg { width: 22px; height: 22px; }
-
-        /* Toggle Switch */
-        .switch-row { justify-content: space-between; cursor: default; }
-        .switch-row:active { background: none; }
-        .switch { position: relative; width: 40px; height: 22px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; inset: 0; background: var(--separator); border-radius: 22px; transition: .3s; }
-        .slider:before { content: ""; position: absolute; height: 18px; width: 18px; left: 2px; bottom: 2px; background: white; border-radius: 50%; transition: .3s; }
-        input:checked + .slider { background: var(--primary); }
-        input:checked + .slider:before { transform: translateX(18px); }
-
-        /* --- CREATE POST MODAL (Full Screen on Mobile) --- */
-        .create-card {
-            background: var(--bg-card); width: 100%; height: 100%; 
+        /* Bottom Sheet (Options & Likes) */
+        .bottom-sheet { align-items: flex-end; }
+        .sheet-card {
+            background: var(--modal-bg); width: 100%; max-width: 480px; 
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+            transform: translateY(100%); 
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); /* iOS Style smooth */
+            padding: 20px 0 15px 0;
+            box-shadow: 0 -5px 40px rgba(0,0,0,0.6);
             display: flex; flex-direction: column;
         }
-        @media (min-width: 481px) {
-            .create-card { width: 400px; height: auto; max-height: 80vh; border-radius: 12px; overflow: hidden; }
-        }
-        
-        .create-header {
-            padding: 10px 15px; border-bottom: 1px solid var(--separator);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .create-title { font-weight: 700; font-size: 1rem; }
-        .share-txt { color: var(--primary); font-weight: 700; border: none; background: none; font-size: 1rem; cursor: pointer; }
-        .share-txt:disabled { opacity: 0.5; cursor: default; }
+        .modal-overlay.active .sheet-card { transform: translateY(0); }
 
-        .create-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; flex: 1; }
-        
-        .upload-box {
-            border: 2px dashed var(--separator); border-radius: 12px;
-            padding: 40px 20px; text-align: center; color: var(--text-muted);
-            cursor: pointer; transition: 0.2s;
-        }
-        .upload-box:hover { border-color: var(--text-main); color: var(--text-main); }
-        
-        .media-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; display: none; background: #000; }
-        
-        .caption-area {
-            width: 100%; background: transparent; border: none; color: var(--text-main);
-            font-family: 'Vazirmatn'; font-size: 0.95rem; resize: none; min-height: 80px;
-        }
-        .caption-area::placeholder { color: var(--text-muted); }
+        .sheet-drag-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 0 auto 15px; }
 
-        /* --- CUSTOM CONFIRM MODAL --- */
-        .confirm-card {
-            background: var(--bg-card); width: 85%; max-width: 320px;
-            border-radius: 16px; text-align: center; overflow: hidden;
-            transform: scale(0.9); transition: transform 0.2s;
+        .sheet-option {
+            width: 100%; padding: 16px 25px; text-align: right; background: none; border: none;
+            color: var(--text-primary); font-size: 1rem; font-family: 'Vazirmatn';
+            display: flex; align-items: center; gap: 15px; cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.2s;
         }
-        .overlay.active .confirm-card { transform: scale(1); }
-        .confirm-body { padding: 25px 20px; }
-        .confirm-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-        .confirm-desc { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
-        .confirm-btns { display: flex; border-top: 1px solid var(--separator); }
-        .c-btn {
-            flex: 1; padding: 12px; border: none; background: none;
-            font-size: 1rem; cursor: pointer; font-family: 'Vazirmatn';
-            border-left: 1px solid var(--separator);
-        }
-        .c-btn:last-child { border-left: none; }
-        .c-btn.danger { color: var(--danger); font-weight: 700; }
-        .c-btn.cancel { color: var(--text-main); }
-        .c-btn:active { background-color: var(--separator); }
+        .sheet-option:last-child { border-bottom: none; }
+        .sheet-option:active { background-color: var(--secondary-hover); }
+        .sheet-option svg { width: 22px; height: 22px; color: var(--text-secondary); }
+        .sheet-option.danger { color: var(--danger-color); font-weight: 700; }
+        .sheet-option.danger svg { color: var(--danger-color); }
 
-        /* --- TOAST --- */
+        /* Toggle Switch */
+        .toggle-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--secondary-hover); transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 26px;
+            border: 1px solid var(--border-color);
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px;
+            background-color: white; transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-color); border-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Create Modal (Popup Style) */
+        .modal-card {
+            background: var(--modal-bg); width: 85%; max-width: 400px; border-radius: 16px;
+            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
+            transform: scale(0.9); opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Pop effect from Old File */
+        }
+        .modal-overlay.active .modal-card { transform: scale(1); opacity: 1; }
+        
+        .modal-header {
+            padding: 15px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+            background: rgba(255,255,255,0.02);
+        }
+        .modal-title { font-weight: 800; margin: 0; font-size: 1rem; color: var(--text-primary); }
+        .share-btn { color: var(--primary-color); font-weight: 700; background: none; border: none; cursor: pointer; font-size: 1rem; transition: opacity 0.2s; }
+        .share-btn:disabled { opacity: 0.5; cursor: default; }
+        .close-modal { color: var(--text-primary); background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 5px; }
+        
+        .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; max-height: 70vh; overflow-y: auto; }
+        .upload-area {
+            border: 2px dashed var(--border-color); border-radius: 12px;
+            padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.3s;
+            background: rgba(255,255,255,0.01);
+        }
+        .upload-area:active { border-color: var(--primary-color); background: rgba(0, 163, 255, 0.05); }
+        .upload-area svg { width: 48px; height: 48px; color: var(--text-secondary); margin-bottom: 10px; }
+        
+        .upload-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; display: none; background: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        
+        .caption-input {
+            width: 100%; background: var(--secondary-color); border: 1px solid var(--border-color); color: var(--text-primary);
+            padding: 12px; border-radius: 10px; font-family: 'Vazirmatn'; resize: none; min-height: 90px;
+            transition: border-color 0.2s;
+        }
+        .caption-input:focus { outline: none; border-color: var(--primary-color); }
+        
+        .progress-bar-container { width: 100%; height: 6px; background: var(--secondary-color); border-radius: 3px; margin-top: 10px; display: none; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary-color), #00C6FF); border-radius: 3px; transition: width 0.2s ease-out; }
+
+        /* --- USER LIST MODAL --- */
+        .user-list-content { 
+            max-height: 60vh; overflow-y: auto; padding: 0; flex-grow: 1;
+        }
+        .user-list-item { 
+            display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            transition: background 0.2s;
+        }
+        .user-list-item:active { background-color: var(--secondary-hover); }
+        .user-list-item img { width: 44px; height: 44px; border-radius: 50%; margin-left: 12px; object-fit: cover; border: 1px solid var(--border-color); }
+        .user-list-info h4 { margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 4px; color: var(--text-primary); }
+        .user-list-info p { margin: 3px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
+
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text-secondary); }
+        
+        /* Toast Notification (Slide Up) */
         .toast {
             position: fixed; bottom: 30px; left: 50%; transform: translate(-50%, 100px);
-            background: var(--text-main); color: var(--bg-body);
-            padding: 10px 20px; border-radius: 4px; font-weight: 600; font-size: 0.9rem;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            text-align: center; min-width: 200px;
+            background: var(--text-primary); color: var(--background-color); padding: 12px 24px; border-radius: 50px;
+            font-size: 0.95rem; font-weight: 700; z-index: 2000; 
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 8px;
+            white-space: nowrap;
         }
-        .toast.error { background: var(--danger); color: white; }
-        .toast.show { transform: translate(-50%, 0); }
+        .toast.error { background: var(--danger-color); color: white; }
+        .toast.active { transform: translate(-50%, 0); }
 
-        /* --- USER LIST IN MODAL --- */
-        .user-row {
-            display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--separator);
-        }
-        .user-row img { width: 44px; height: 44px; border-radius: 50%; margin-left: 12px; }
-        .u-info h4 { margin: 0; font-size: 0.9rem; color: var(--text-main); display: flex; align-items: center; }
-        .u-info span { font-size: 0.8rem; color: var(--text-muted); }
-
-        /* --- EDIT CAPTION MODAL --- */
-        .edit-modal-content {
-            background: var(--bg-card); width: 90%; max-width: 400px; border-radius: 12px; padding: 15px;
-        }
-        .edit-textarea {
-            width: 100%; background: #000; color: white; border: 1px solid var(--border);
-            border-radius: 8px; padding: 10px; font-family: 'Vazirmatn'; min-height: 100px; margin: 10px 0;
-        }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    
-    <!-- HEADER -->
-    <header class="header">
-        <button class="header-btn" onclick="window.history.back()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
-        </button>
-        <h1 class="header-title">Rubino+</h1>
-        <button class="header-btn" id="btn-new-post">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-        </button>
-    </header>
-
-    <!-- PULL REFRESH -->
-    <div class="ptr-container" id="ptr-container">
-        <div class="ptr-spinner" id="ptr-spinner">
-            <svg class="ptr-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8Z"/></svg>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header-area">
+            <button class="header-btn back-btn" onclick="window.location.href='safe_asli.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+            </button>
+            <h1 class="header-title">روبینو همیار</h1>
+            <button class="header-btn" id="open-create-modal">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            </button>
+        </header>
+        
+        <!-- Pull to Refresh Spinner -->
+        <div class="pull-indicator" id="pull-indicator">
+            <div class="pull-spinner" id="pull-spinner"></div>
         </div>
-    </div>
 
-    <!-- FEED -->
-    <div class="feed" id="feed">
-        <!-- Posts injected here -->
-        <div style="padding: 50px; text-align: center; color: var(--text-muted);">درحال دریافت اطلاعات...</div>
-    </div>
-
-</div>
-
-<!-- ========== MODALS ========== -->
-
-<!-- 1. CREATE POST MODAL -->
-<div class="overlay" id="modal-create">
-    <div class="create-card">
-        <div class="create-header">
-            <button class="header-btn" id="close-create">&times;</button>
-            <span class="create-title">پست جدید</span>
-            <button class="share-txt" id="btn-publish">انتشار</button>
-        </div>
-        <div class="create-body">
-            <input type="file" id="file-inp" accept="image/*,video/*" hidden>
-            <div class="upload-box" id="upload-trigger">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                <p>انتخاب عکس یا ویدیو</p>
+        <!-- Skeleton Loader -->
+        <div id="skeleton-loader">
+            <div class="sk-post">
+                <div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div>
+                <div class="sk-image skeleton-animate"></div>
+                <div class="sk-actions skeleton-animate"></div>
             </div>
-            
-            <img id="preview-img" class="media-preview">
-            <video id="preview-vid" class="media-preview" controls></video>
-            
-            <textarea class="caption-area" id="caption-inp" placeholder="کپشن خود را بنویسید..."></textarea>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--separator);">
-                <span style="font-size: 0.9rem;">نمایش تعداد لایک‌ها</span>
-                <label class="switch">
-                    <input type="checkbox" id="create-privacy" checked>
-                    <span class="slider"></span>
-                </label>
+            <div class="sk-post">
+                <div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div>
+                <div class="sk-image skeleton-animate"></div>
+                <div class="sk-actions skeleton-animate"></div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- 2. OPTIONS SHEET -->
-<div class="overlay" id="overlay-options" style="align-items: flex-end;">
-    <div class="sheet-modal" id="sheet-options">
-        <div class="sheet-handle"></div>
-        
-        <div class="sheet-item switch-row">
-            <span>نمایش تعداد لایک‌ها به دیگران</span>
-            <label class="switch">
-                <input type="checkbox" id="opt-privacy-toggle">
-                <span class="slider"></span>
-            </label>
+        <!-- Feed -->
+        <div class="feed-container" id="feed-container">
+            <!-- Posts will be injected here -->
         </div>
-        
-        <button class="sheet-item" id="btn-edit-post">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-            ویرایش
-        </button>
-        
-        <button class="sheet-item red" id="btn-delete-req">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            حذف
-        </button>
-    </div>
-</div>
 
-<!-- 3. CUSTOM CONFIRM MODAL -->
-<div class="overlay" id="modal-confirm">
-    <div class="confirm-card">
-        <div class="confirm-body">
-            <div class="confirm-title" id="conf-title">حذف پست؟</div>
-            <p class="confirm-desc" id="conf-msg">آیا مطمئن هستید؟ این عملیات قابل بازگشت نیست.</p>
-        </div>
-        <div class="confirm-btns">
-            <button class="c-btn cancel" id="conf-cancel">انصراف</button>
-            <button class="c-btn danger" id="conf-yes">حذف کن</button>
-        </div>
-    </div>
-</div>
-
-<!-- 4. LIKES LIST SHEET -->
-<div class="overlay" id="overlay-likes" style="align-items: flex-end;">
-    <div class="sheet-modal" id="sheet-likes" style="max-height: 70vh; overflow-y: auto;">
-        <div class="sheet-handle"></div>
-        <div style="padding: 10px 0 20px;" id="likes-list-content">
-            <!-- Users -->
-        </div>
-    </div>
-</div>
-
-<!-- 5. EDIT CAPTION MODAL -->
-<div class="overlay" id="modal-edit-cap">
-    <div class="edit-modal-content">
-        <h3 style="margin: 0 0 15px; font-size: 1rem;">ویرایش توضیحات</h3>
-        <textarea id="edit-cap-text" class="edit-textarea"></textarea>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-            <button class="c-btn cancel" style="flex:0;" id="edit-cap-cancel">لغو</button>
-            <button class="c-btn" style="flex:0; color: var(--primary); font-weight:700;" id="edit-cap-save">ذخیره</button>
-        </div>
-    </div>
-</div>
-
-<div class="toast" id="toast">پیام</div>
-
-<script>
-    // --- CONFIG ---
-    const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-    const UPLOAD_PHP = 'https://miko.freehost.io/upload_to_parspack.php';
-    const SECRET = 'miko1234';
-    const VERIFIED_IMG = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
-
-    // --- STATE ---
-    let currentUser = null;
-    let token = null;
-    let usersCache = {};
-    let postsCache = {};
-    let selectedFile = null;
-    let activePostId = null; // For Options/Likes
-    let isUploading = false;
-    let isPulling = false; let startY = 0;
-
-    // --- DOM ---
-    const feed = document.getElementById('feed');
-    const toast = document.getElementById('toast');
-    
-    // Create Modal
-    const modalCreate = document.getElementById('modal-create');
-    const fileInp = document.getElementById('file-inp');
-    const previewImg = document.getElementById('preview-img');
-    const previewVid = document.getElementById('preview-vid');
-    const uploadBox = document.getElementById('upload-trigger');
-    const btnPublish = document.getElementById('btn-publish');
-    const btnCloseCreate = document.getElementById('close-create');
-    
-    // Options
-    const overlayOptions = document.getElementById('overlay-options');
-    const sheetOptions = document.getElementById('sheet-options');
-    const optPrivacy = document.getElementById('opt-privacy-toggle');
-
-    // Confirm
-    const modalConfirm = document.getElementById('modal-confirm');
-    const confYes = document.getElementById('conf-yes');
-    const confCancel = document.getElementById('conf-cancel');
-    let confirmCallback = null;
-
-    // Edit Caption
-    const modalEditCap = document.getElementById('modal-edit-cap');
-    const editCapText = document.getElementById('edit-cap-text');
-
-    // Likes
-    const overlayLikes = document.getElementById('overlay-likes');
-    const sheetLikes = document.getElementById('sheet-likes');
-
-    // --- INIT ---
-    document.addEventListener('DOMContentLoaded', async () => {
-        const u = localStorage.getItem('currentUser');
-        if (!u) { window.location.href = 'login.html'; return; }
-        currentUser = JSON.parse(u);
-
-        initEvents();
-        try {
-            await refreshToken();
-            await loadUsers();
-            await loadPosts();
-            startAutoPlayObserver(); // Start Video Autoplay Logic
-            setInterval(updateTimes, 60000);
-            setInterval(syncRealtime, 4000);
-        } catch(e) {
-            console.error(e);
-            feed.innerHTML = '<div style="padding:20px;text-align:center">خطا در اتصال</div>';
-        }
-    });
-
-    // --- EVENT HANDLERS ---
-    function initEvents() {
-        // Create Post
-        document.getElementById('btn-new-post').onclick = () => {
-            resetCreate();
-            modalCreate.classList.add('active');
-        };
-        btnCloseCreate.onclick = () => {
-            if(isUploading) return; // Guard
-            modalCreate.classList.remove('active');
-        };
-        modalCreate.onclick = (e) => {
-            if(e.target === modalCreate && !isUploading) modalCreate.classList.remove('active');
-        };
-        uploadBox.onclick = () => fileInp.click();
-        fileInp.onchange = (e) => {
-            if (e.target.files[0]) showPreview(e.target.files[0]);
-        };
-        btnPublish.onclick = doUpload;
-
-        // Options
-        overlayOptions.onclick = (e) => { if(e.target === overlayOptions) closeOptions(); };
-        document.getElementById('btn-delete-req').onclick = () => {
-            closeOptions();
-            showConfirm('حذف پست', 'آیا از حذف این پست اطمینان دارید؟', doDeletePost);
-        };
-        document.getElementById('btn-edit-post').onclick = openEditModal;
-        optPrivacy.onchange = togglePostPrivacy;
-
-        // Confirm Modal
-        modalConfirm.onclick = (e) => { if(e.target === modalConfirm) modalConfirm.classList.remove('active'); };
-        confCancel.onclick = () => modalConfirm.classList.remove('active');
-        confYes.onclick = () => {
-            if(confirmCallback) confirmCallback();
-            modalConfirm.classList.remove('active');
-        };
-
-        // Edit Caption
-        document.getElementById('edit-cap-cancel').onclick = () => modalEditCap.classList.remove('active');
-        document.getElementById('edit-cap-save').onclick = doSaveCaption;
-
-        // Likes
-        overlayLikes.onclick = (e) => { if(e.target === overlayLikes) closeLikes(); };
-
-        // Pull Refresh
-        feed.addEventListener('touchstart', (e) => {
-            if(feed.scrollTop === 0) { isPulling = true; startY = e.touches[0].clientY; }
-        }, {passive:true});
-        feed.addEventListener('touchmove', (e) => {
-            if(!isPulling) return;
-            const diff = e.touches[0].clientY - startY;
-            if(diff > 0) {
-                e.preventDefault();
-                const scale = Math.min(diff / 80, 1.2);
-                document.getElementById('ptr-spinner').style.transform = `scale(${scale}) rotate(${diff*2}deg)`;
-                document.getElementById('ptr-container').style.opacity = Math.min(diff/50, 1);
-            }
-        }, {passive:false});
-        feed.addEventListener('touchend', async (e) => {
-            if(!isPulling) return;
-            isPulling = false;
-            const diff = e.changedTouches[0].clientY - startY;
-            if(diff > 60) {
-                document.getElementById('ptr-container').classList.add('ptr-spinning');
-                await loadPosts();
-                document.getElementById('ptr-container').classList.remove('ptr-spinning');
-            }
-            document.getElementById('ptr-container').style.opacity = 0;
-            document.getElementById('ptr-spinner').style.transform = '';
-        });
-    }
-
-    // --- CORE API ---
-    async function refreshToken() {
-        const res = await fetch(`${PROXY_URL}?auth=token`, { headers: {'X-Proxy-Secret': SECRET} });
-        const d = await res.json();
-        token = d.token;
-    }
-    
-    async function apiRequest(path, method = 'GET', body = null) {
-        const opts = {
-            method,
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'X-User-Username': currentUser.username,
-                'Content-Type': 'application/json'
-            }
-        };
-        if (body) opts.body = JSON.stringify(body);
-        const res = await fetch(`${PROXY_URL}?path=${path}`, opts);
-        if (!res.ok && res.status !== 404) throw new Error('API Error');
-        return res.json();
-    }
-
-    async function loadUsers() {
-        usersCache = (await apiRequest('users')) || {};
-    }
-
-    // --- POSTS LOGIC ---
-    async function loadPosts() {
-        const data = await apiRequest('rubino_posts') || {};
-        postsCache = data;
-        const list = Object.entries(data)
-            .map(([k,v]) => ({id:k, ...v}))
-            .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-        
-        feed.innerHTML = '';
-        if(list.length === 0) feed.innerHTML = '<div style="padding:40px;text-align:center;color:#666">پستی وجود ندارد</div>';
-        
-        list.forEach(p => feed.appendChild(createPostEl(p)));
-        
-        // Re-attach Video Observer for new elements
-        startAutoPlayObserver();
-    }
-
-    function createPostEl(p) {
-        const u = usersCache[p.sender_username] || { displayName: p.sender_username };
-        const ava = u.profilePicUrl || `https://ui-avatars.com/api/?name=${p.sender_username}&background=random`;
-        const isOwner = p.sender_username === currentUser.username;
-        const liked = p.likes && p.likes[currentUser.username];
-        const count = p.likes ? Object.keys(p.likes).length : 0;
-        
-        // Logic: Show likes if Owner OR public. If private & not owner -> hide.
-        const showLikes = isOwner || (p.show_likes !== false); 
-        
-        const div = document.createElement('div');
-        div.className = 'post';
-        div.id = `post-${p.id}`;
-        
-        // Check Media Type
-        let mediaHtml;
-        if(p.type === 'video') {
-            // Video: playsinline, muted (initially), loop
-            mediaHtml = `<video class="post-media" src="${p.media_url}" loop playsinline muted></video>`;
-        } else {
-            mediaHtml = `<img class="post-media" src="${p.media_url}" ondblclick="doLike('${p.id}')" loading="lazy">`;
-        }
-
-        div.innerHTML = `
-            <div class="post-header">
-                <div class="p-user">
-                    <img src="${ava}" class="p-avatar">
-                    <span class="p-name">${u.displayName} ${u.verified ? `<img src="${VERIFIED_IMG}" class="verified">` : ''}</span>
+        <!-- Create Post Modal -->
+        <div class="modal-overlay" id="create-modal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <button class="close-modal" id="close-modal-btn">&times;</button>
+                    <h3 class="modal-title">پست جدید</h3>
+                    <button class="share-btn" id="share-post-btn">انتشار</button>
                 </div>
-                ${isOwner ? `<div class="p-options" onclick="openOptions('${p.id}')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-                </div>` : ''}
-            </div>
-            <div class="post-media-wrapper">
-                ${mediaHtml}
-                <div class="big-heart" id="heart-${p.id}">❤</div>
-            </div>
-            <div class="post-actions">
-                <button class="act-btn ${liked?'liked':''}" id="btn-like-${p.id}" onclick="doLike('${p.id}')">
-                    <svg viewBox="0 0 24 24" fill="${liked?'currentColor':'none'}" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                </button>
-                <button class="act-btn">
-                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                </button>
-            </div>
-            <div class="likes-count" id="count-${p.id}" style="display: ${showLikes && count>0 ? 'block' : 'none'}" onclick="openLikesList('${p.id}')">
-                ${count} پسند
-            </div>
-            <div class="caption">
-                <span class="cap-name">${u.displayName}</span>
-                <span class="cap-text" id="cap-txt-${p.id}">${p.caption}</span>
-            </div>
-            <span class="time-ago" data-time="${p.timestamp}">${timeAgo(p.timestamp)}</span>
-        `;
-        
-        // Video click to toggle sound
-        if(p.type === 'video') {
-            const vid = div.querySelector('video');
-            div.querySelector('.post-media-wrapper').onclick = () => {
-                vid.muted = !vid.muted;
-                // Optional: Show speaker icon temporarily
-            };
-        }
-        
-        return div;
-    }
+                <div class="modal-body">
+                    <input type="file" id="file-input" accept="image/*,video/*" style="display: none;">
+                    
+                    <div class="upload-area" id="upload-trigger">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <p style="margin:0; font-weight:500;">انتخاب عکس یا ویدیو</p>
+                    </div>
+                    
+                    <img id="image-preview" class="upload-preview" />
+                    <video id="video-preview" class="upload-preview" controls playsinline></video>
 
-    // --- VIDEO AUTOPLAY (Intersection Observer) ---
-    function startAutoPlayObserver() {
-        const options = { root: null, rootMargin: '0px', threshold: 0.65 };
+                    <textarea class="caption-input" id="caption-input" placeholder="کپشن خود را بنویسید..."></textarea>
+                    
+                    <div class="toggle-container" style="padding: 0 5px;">
+                        <span style="font-size: 0.9rem; color: var(--text-secondary);">نمایش تعداد لایک‌ها</span>
+                        <label class="switch">
+                            <input type="checkbox" id="create-privacy-toggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="progress-bar-container" id="upload-progress-container">
+                        <div class="progress-bar" id="upload-progress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Post Options Modal (Bottom Sheet) -->
+        <div class="modal-overlay bottom-sheet" id="options-modal">
+            <div class="sheet-card">
+                <div class="sheet-drag-handle"></div>
+                <div class="sheet-option">
+                    <div class="toggle-container">
+                        <span>نمایش تعداد لایک‌ها</span>
+                        <label class="switch">
+                            <input type="checkbox" id="privacy-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <button class="sheet-option" id="edit-post-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    ویرایش کپشن
+                </button>
+                <button class="sheet-option danger" id="delete-post-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    حذف پست
+                </button>
+                <button class="sheet-option" id="close-options-btn" style="justify-content: center; color: var(--text-secondary);">
+                    انصراف
+                </button>
+            </div>
+        </div>
         
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                const vid = entry.target;
-                if(entry.isIntersecting) {
-                    vid.play().catch(()=>{}); // Auto-play usually requires mute
-                } else {
-                    vid.pause();
+        <!-- Edit Caption Sub-Modal -->
+        <div class="modal-overlay" id="edit-caption-modal">
+             <div class="modal-card">
+                 <div class="modal-header">
+                     <h3 class="modal-title">ویرایش متن</h3>
+                 </div>
+                 <div class="modal-body">
+                     <textarea class="caption-input" id="edit-caption-input"></textarea>
+                     <button class="share-btn" id="save-caption-btn" style="background: var(--primary-color); color: white; padding: 12px; border-radius: 10px; width:100%;">ذخیره تغییرات</button>
+                     <button class="close-modal" id="cancel-caption-btn" style="margin-top: 5px; font-size: 0.9rem; width:100%; text-align:center;">لغو</button>
+                 </div>
+             </div>
+        </div>
+
+        <!-- Likes List Modal (Bottom Sheet) -->
+        <div class="modal-overlay bottom-sheet" id="likes-modal">
+            <div class="sheet-card" style="max-height: 80vh;">
+                <div class="sheet-drag-handle"></div>
+                <div class="modal-header" style="border:none; padding: 0 20px 15px;">
+                    <h3 class="modal-title" style="font-size: 1.1rem;">پسندها</h3>
+                    <button class="close-modal" id="close-likes-btn">&times;</button>
+                </div>
+                <div class="user-list-content" id="likes-list-container">
+                    <!-- Users injected here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Toast Element -->
+        <div class="toast" id="toast">پیام سیستم</div>
+
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        const UPLOAD_PHP_ENDPOINT = 'https://miko.freehost.io/upload_to_parspack.php';
+        const SHARED_SECRET = 'miko1234';
+        const VERIFIED_ICON_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
+        const LIVE_UPDATE_INTERVAL = 4000; 
+
+        // --- DOM REFERENCES ---
+        const feedContainer = document.getElementById('feed-container');
+        const skeletonLoader = document.getElementById('skeleton-loader');
+        
+        // Modals
+        const createModal = document.getElementById('create-modal');
+        const optionsModal = document.getElementById('options-modal');
+        const likesModal = document.getElementById('likes-modal');
+        const editCaptionModal = document.getElementById('edit-caption-modal');
+        
+        // Buttons
+        const openCreateBtn = document.getElementById('open-create-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const sharePostBtn = document.getElementById('share-post-btn');
+        const closeOptionsBtn = document.getElementById('close-options-btn');
+        const closeLikesBtn = document.getElementById('close-likes-btn');
+        const deletePostBtn = document.getElementById('delete-post-btn');
+        const editPostBtn = document.getElementById('edit-post-btn');
+        const saveCaptionBtn = document.getElementById('save-caption-btn');
+        const cancelCaptionBtn = document.getElementById('cancel-caption-btn');
+
+        // Inputs
+        const fileInput = document.getElementById('file-input');
+        const uploadTrigger = document.getElementById('upload-trigger');
+        const imagePreview = document.getElementById('image-preview');
+        const videoPreview = document.getElementById('video-preview');
+        const captionInput = document.getElementById('caption-input');
+        const editCaptionInput = document.getElementById('edit-caption-input');
+        const progressBarContainer = document.getElementById('upload-progress-container');
+        const progressBar = document.getElementById('upload-progress');
+        const privacyToggle = document.getElementById('privacy-toggle');
+        const createPrivacyToggle = document.getElementById('create-privacy-toggle');
+
+        // Refresh & Toast
+        const pullIndicator = document.getElementById('pull-indicator');
+        const pullSpinner = document.getElementById('pull-spinner');
+        const toast = document.getElementById('toast');
+
+        // --- APP STATE ---
+        let currentUser = null;
+        let clientToken = null;
+        let selectedFile = null;
+        let allUsersCache = {};
+        let currentOptionsPostId = null; 
+        let currentViewingLikesPostId = null; 
+        let postsDataCache = {}; 
+        let videoObserver = null; // New Logic from Old File
+
+        // Touch vars
+        let startY = 0; let isPulling = false; let currentTranslate = 0;
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const storedUser = localStorage.getItem('currentUser');
+            if (!storedUser) { window.location.href = 'login.html'; return; }
+            currentUser = JSON.parse(storedUser);
+
+            setupEventListeners();
+            initVideoObserver(); // Initialize Auto-Play Logic
+            
+            try {
+                await refreshClientToken();
+                await fetchUsersCache(); 
+                await fetchPosts();
+                
+                setInterval(updateLiveTimestamps, 60000);
+                setInterval(startRealtimeUpdates, LIVE_UPDATE_INTERVAL);
+            } catch (error) {
+                console.error(error);
+                feedContainer.innerHTML = '<div class="empty-state">خطا در اتصال به سرور.</div>';
+                skeletonLoader.style.display = 'none';
+            }
+        });
+
+        // --- VIDEO AUTOPLAY LOGIC (ADDED FROM OLD FILE) ---
+        function initVideoObserver() {
+            const options = { root: null, rootMargin: '0px', threshold: 0.65 }; // Play when 65% visible
+            
+            videoObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target;
+                    if (entry.isIntersecting) {
+                        // Play if visible
+                        video.play().catch(e => console.log('Autoplay prevented'));
+                        // Pause all other videos
+                        document.querySelectorAll('video').forEach(v => {
+                            if (v !== video && !v.paused) v.pause();
+                        });
+                    } else {
+                        // Pause if not visible
+                        if (!video.paused) video.pause();
+                    }
+                });
+            }, options);
+        }
+
+        // Helper to attach observer to new videos
+        function attachVideoObserver(container) {
+            const videos = container.querySelectorAll('video');
+            videos.forEach(v => videoObserver.observe(v));
+        }
+
+        // --- EVENT LISTENERS ---
+        function setupEventListeners() {
+            openCreateBtn.addEventListener('click', () => { resetModal(); createModal.classList.add('active'); });
+            closeModalBtn.addEventListener('click', () => createModal.classList.remove('active'));
+            uploadTrigger.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) handleFileSelect(e.target.files[0]);
+            });
+            sharePostBtn.addEventListener('click', handleUploadAndPost);
+
+            optionsModal.addEventListener('click', (e) => { if(e.target === optionsModal) closeOptions(); });
+            closeOptionsBtn.addEventListener('click', closeOptions);
+            
+            likesModal.addEventListener('click', (e) => { 
+                if(e.target === likesModal) {
+                    likesModal.classList.remove('active'); 
+                    currentViewingLikesPostId = null;
                 }
             });
-        }, options);
+            closeLikesBtn.addEventListener('click', () => {
+                likesModal.classList.remove('active');
+                currentViewingLikesPostId = null;
+            });
 
-        document.querySelectorAll('video').forEach(v => observer.observe(v));
-    }
+            deletePostBtn.addEventListener('click', handleDeletePost);
+            editPostBtn.addEventListener('click', () => {
+                closeOptions();
+                const post = postsDataCache[currentOptionsPostId];
+                editCaptionInput.value = post ? post.caption : '';
+                editCaptionModal.classList.add('active');
+            });
 
-    // --- UPLOAD ---
-    function resetCreate() {
-        selectedFile = null; fileInp.value=''; 
-        previewImg.style.display='none'; previewImg.src='';
-        previewVid.style.display='none'; previewVid.src='';
-        uploadBox.style.display='block';
-        document.getElementById('caption-inp').value='';
-        btnPublish.textContent = 'انتشار'; btnPublish.disabled = false;
-        isUploading = false;
-    }
+            cancelCaptionBtn.addEventListener('click', () => editCaptionModal.classList.remove('active'));
+            saveCaptionBtn.addEventListener('click', handleSaveCaption);
+            
+            privacyToggle.addEventListener('change', handlePrivacyChange);
 
-    function showPreview(file) {
-        selectedFile = file;
-        uploadBox.style.display='none';
-        const url = URL.createObjectURL(file);
-        if(file.type.startsWith('video/')) {
-            previewVid.src = url; previewVid.style.display='block';
-        } else {
-            previewImg.src = url; previewImg.style.display='block';
+            // Pull to Refresh
+            feedContainer.addEventListener('touchstart', touchStart, {passive: true});
+            feedContainer.addEventListener('touchmove', touchMove, {passive: false});
+            feedContainer.addEventListener('touchend', touchEnd);
         }
-    }
 
-    function doUpload() {
-        if(!selectedFile) return showToast('فایل انتخاب کنید', true);
-        
-        // Lock UI
-        isUploading = true;
-        btnPublish.disabled = true; btnPublish.textContent = 'در حال آپلود...';
-        btnCloseCreate.style.opacity = '0.3'; // Visual cue
-        
-        const fd = new FormData();
-        fd.append('file', selectedFile);
-        
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', UPLOAD_PHP);
-        xhr.onload = async () => {
-            if(xhr.status === 200) {
-                try {
-                    const res = JSON.parse(xhr.responseText);
-                    if(res.success) {
-                        await savePostDb(res.url, selectedFile.type.startsWith('video/') ? 'video':'image');
-                    } else throw new Error(res.error);
-                } catch(e) {
-                    showToast('خطا در آپلود', true);
-                    unlockUpload();
-                }
-            } else { showToast('خطای شبکه', true); unlockUpload(); }
-        };
-        xhr.onerror = () => { showToast('خطا', true); unlockUpload(); };
-        xhr.send(fd);
-    }
-    
-    function unlockUpload() {
-        isUploading = false;
-        btnPublish.disabled = false; btnPublish.textContent = 'انتشار';
-        btnCloseCreate.style.opacity = '1';
-    }
-
-    async function savePostDb(url, type) {
-        btnPublish.textContent = 'ذخیره سازی...';
-        const payload = {
-            sender_username: currentUser.username,
-            media_url: url,
-            type: type,
-            caption: document.getElementById('caption-inp').value,
-            timestamp: new Date().toISOString(),
-            show_likes: document.getElementById('create-privacy').checked
-        };
-        
-        try {
-            await apiRequest('rubino_posts', 'POST', payload);
-            modalCreate.classList.remove('active');
-            showToast('منتشر شد');
-            loadPosts();
-        } catch(e) {
-            showToast('خطا در ذخیره', true);
-        } finally {
-            unlockUpload();
-        }
-    }
-
-    // --- ACTIONS ---
-    async function doLike(pid) {
-        const btn = document.getElementById(`btn-like-${pid}`);
-        const heart = document.getElementById(`heart-${pid}`);
-        const isLiked = btn.classList.contains('liked');
-        
-        // Anim
-        heart.classList.remove('animate');
-        void heart.offsetWidth; 
-        heart.classList.add('animate');
-        
-        // Optimistic update
-        btn.classList.toggle('liked');
-        const svg = btn.querySelector('svg');
-        if(!isLiked) {
-            svg.setAttribute('fill', '#ED4956'); svg.setAttribute('stroke', '#ED4956');
-        } else {
-            svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
-        }
-        
-        // Update Count visually immediately
-        const countEl = document.getElementById(`count-${pid}`);
-        let n = parseInt(countEl.innerText) || 0;
-        n = isLiked ? n-1 : n+1;
-        countEl.innerText = `${Math.max(0, n)} پسند`;
-        // Ensure visibility logic is kept (if owner or public)
-        // (Assuming current visibility state is valid)
-
-        // API
-        try {
-            if(isLiked) {
-                await apiRequest(`rubino_posts/${pid}/likes/${currentUser.username}`, 'DELETE');
+        // --- FILE & MODAL LOGIC ---
+        function handleFileSelect(file) {
+            selectedFile = file;
+            const reader = new FileReader();
+            uploadTrigger.style.display = 'none';
+            if (file.type.startsWith('video/')) {
+                imagePreview.style.display = 'none'; videoPreview.style.display = 'block';
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.play(); // Auto preview
             } else {
-                await apiRequest(`rubino_posts/${pid}/likes/${currentUser.username}`, 'PUT', true);
+                videoPreview.style.display = 'none'; imagePreview.style.display = 'block';
+                reader.onload = (e) => imagePreview.src = e.target.result;
+                reader.readAsDataURL(file);
             }
-        } catch(e) { console.error(e); }
-    }
-
-    function openOptions(pid) {
-        activePostId = pid;
-        const p = postsCache[pid];
-        optPrivacy.checked = (p.show_likes !== false); // Default true
-        overlayOptions.classList.add('active');
-        sheetOptions.classList.add('active');
-    }
-    function closeOptions() {
-        overlayOptions.classList.remove('active');
-        sheetOptions.classList.remove('active');
-        activePostId = null;
-    }
-
-    // --- DELETE / EDIT / PRIVACY ---
-    function showConfirm(title, msg, callback) {
-        document.getElementById('conf-title').innerText = title;
-        document.getElementById('conf-msg').innerText = msg;
-        confirmCallback = callback;
-        modalConfirm.classList.add('active');
-    }
-
-    async function doDeletePost() {
-        if(!activePostId) return;
-        try {
-            await apiRequest(`rubino_posts/${activePostId}`, 'DELETE');
-            document.getElementById(`post-${activePostId}`).remove();
-            showToast('پست حذف شد');
-        } catch(e) { showToast('خطا در حذف', true); }
-    }
-
-    function openEditModal() {
-        closeOptions();
-        const p = postsCache[activePostId];
-        editCapText.value = p.caption || '';
-        modalEditCap.classList.add('active');
-    }
-
-    async function doSaveCaption() {
-        const newTxt = editCapText.value;
-        const btn = document.getElementById('edit-cap-save');
-        btn.textContent = '...';
-        
-        try {
-            // PATCH request to update ONLY caption
-            await apiRequest(`rubino_posts/${activePostId}`, 'PATCH', { caption: newTxt });
-            
-            // DOM Update
-            const capEl = document.getElementById(`cap-txt-${activePostId}`);
-            if(capEl) capEl.innerText = newTxt;
-            
-            // Cache Update
-            if(postsCache[activePostId]) postsCache[activePostId].caption = newTxt;
-
-            modalEditCap.classList.remove('active');
-            showToast('تغییرات ذخیره شد');
-        } catch(e) {
-            showToast('خطا در ویرایش', true);
         }
-        btn.textContent = 'ذخیره';
-    }
 
-    async function togglePostPrivacy() {
-        if(!activePostId) return;
-        const show = optPrivacy.checked;
-        try {
-            // Only update the setting, DO NOT DELETE LIKES
-            await apiRequest(`rubino_posts/${activePostId}`, 'PATCH', { show_likes: show });
-            if(postsCache[activePostId]) postsCache[activePostId].show_likes = show;
-            
-            // Update UI immediately
-            const p = postsCache[activePostId];
-            const countEl = document.getElementById(`count-${activePostId}`);
-            const count = p.likes ? Object.keys(p.likes).length : 0;
-            
-            // If I am owner, always see. If I am viewer, depends on flag.
-            // Since this function is called from Options, I AM THE OWNER.
-            // Owner always sees likes count regardless of setting, 
-            // but the toast confirms the setting for *others*.
-            countEl.style.display = (count > 0) ? 'block' : 'none'; // Owner logic remains
-            
-        } catch(e) {
-            optPrivacy.checked = !show; // Revert
-            showToast('خطا در تغییر تنظیمات', true);
+        function resetModal() {
+            selectedFile = null;
+            fileInput.value = ''; captionInput.value = '';
+            imagePreview.src = ''; videoPreview.src = '';
+            imagePreview.style.display = 'none'; videoPreview.style.display = 'none';
+            uploadTrigger.style.display = 'block';
+            progressBarContainer.style.display = 'none'; progressBar.style.width = '0%';
+            sharePostBtn.disabled = false; sharePostBtn.textContent = 'انتشار';
+            createPrivacyToggle.checked = true; 
         }
-    }
 
-    // --- LIKES LIST ---
-    async function openLikesList(pid) {
-        activePostId = pid; // Track viewing
-        const p = postsCache[pid];
-        const isOwner = p.sender_username === currentUser.username;
-        
-        // If private and not owner, block
-        if(p.show_likes === false && !isOwner) return;
+        function showToast(msg, type = 'success') {
+            toast.textContent = msg;
+            toast.className = `toast ${type} active`;
+            setTimeout(() => toast.classList.remove('active'), 3500);
+        }
 
-        overlayLikes.classList.add('active');
-        sheetLikes.classList.add('active');
-        const cont = document.getElementById('likes-list-content');
-        cont.innerHTML = '<div style="text-align:center;padding:20px;color:#888">در حال بارگیری...</div>';
+        // --- NETWORK CORE ---
+        async function refreshClientToken() {
+            const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+            if (!response.ok) throw new Error('Auth Failed');
+            const data = await response.json();
+            clientToken = data.token;
+        }
 
-        try {
-            const likes = await apiRequest(`rubino_posts/${pid}/likes`);
-            cont.innerHTML = '';
-            if(!likes) {
-                cont.innerHTML = '<div style="text-align:center;padding:20px;color:#888">بدون لایک</div>';
-                return;
+        async function fetchUsersCache() {
+            const response = await fetch(`${PROXY_URL}?path=users`, {
+                headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+            });
+            if (response.ok) allUsersCache = await response.json() || {};
+        }
+
+        // --- UPLOAD & CREATE POST ---
+        async function handleUploadAndPost() {
+            if (!selectedFile) { showToast('فایلی انتخاب نشده است', 'error'); return; }
+            sharePostBtn.disabled = true; sharePostBtn.textContent = 'در حال آپلود...';
+            progressBarContainer.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', UPLOAD_PHP_ENDPOINT, true);
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) progressBar.style.width = ((e.loaded / e.total) * 100) + '%';
+            };
+
+            xhr.onload = async () => {
+                if (xhr.status === 200) {
+                    try {
+                        const result = JSON.parse(xhr.responseText);
+                        if (result.success && result.url) {
+                            await createPostRecord(result.url, selectedFile.type.startsWith('video/') ? 'video' : 'image');
+                        } else throw new Error(result.error);
+                    } catch (err) { showToast(err.message, 'error'); sharePostBtn.disabled = false; }
+                } else { showToast('خطای سرور', 'error'); sharePostBtn.disabled = false; }
+            };
+            xhr.send(formData);
+        }
+
+        async function createPostRecord(mediaUrl, type) {
+            sharePostBtn.textContent = 'ذخیره...';
+            const postData = {
+                sender_username: currentUser.username,
+                media_url: mediaUrl,
+                type: type,
+                caption: captionInput.value.trim(),
+                timestamp: new Date().toISOString(),
+                likes: {},
+                show_likes: createPrivacyToggle.checked 
+            };
+
+            try {
+                await fetch(`${PROXY_URL}?path=rubino_posts`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(postData)
+                });
+                createModal.classList.remove('active');
+                await fetchPosts();
+                showToast('پست منتشر شد');
+            } catch (err) { showToast('خطا در انتشار', 'error'); sharePostBtn.disabled = false; }
+        }
+
+        // --- FEED & REALTIME LOGIC ---
+        async function fetchPosts() {
+            const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
+                headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+            });
+            skeletonLoader.style.display = 'none';
+            
+            if (!response.ok && response.status !== 404) return;
+            
+            const data = await response.json() || {};
+            postsDataCache = data; 
+
+            const posts = Object.entries(data).map(([key, val]) => ({ id: key, ...val }))
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            if (posts.length === 0) {
+                feedContainer.innerHTML = '<div class="empty-state">هیچ پستی وجود ندارد.</div>';
+            } else {
+                renderFeed(posts);
             }
+        }
+
+        function renderFeed(posts) {
+            feedContainer.innerHTML = '';
             
-            Object.keys(likes).forEach(uid => {
-                // Try cache first
-                let u = usersCache[uid];
-                // We assume basic info is in cache or we fallback
-                const name = u ? u.displayName : uid;
-                const pic = (u && u.profilePicUrl) ? u.profilePicUrl : `https://ui-avatars.com/api/?name=${uid}&background=random`;
+            posts.forEach(post => {
+                const isOwner = post.sender_username === currentUser.username;
+                const user = allUsersCache[post.sender_username] || { displayName: post.sender_username };
+                const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${post.sender_username}&background=random`;
+                const isLiked = post.likes && post.likes[currentUser.username];
+                const likeCount = post.likes ? Object.keys(post.likes).length : 0;
+                const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
+
+                const canSeeLikes = isOwner || (post.show_likes !== false); 
+                const likesText = canSeeLikes ? `${likeCount} پسند` : '';
+                const likesClickAction = canSeeLikes ? `onclick="showLikesList('${post.id}', ${isOwner}, ${post.show_likes !== false})"` : '';
+
+                const postEl = document.createElement('div');
+                postEl.className = 'post-card';
+                postEl.id = `post-${post.id}`;
                 
-                cont.innerHTML += `
-                    <div class="user-row">
-                        <img src="${pic}">
-                        <div class="u-info">
-                            <h4>${name} ${(u && u.verified) ? `<img src="${VERIFIED_IMG}" class="verified" style="margin-right:4px;width:14px;height:14px;">` : ''}</h4>
-                            <span>@${uid}</span>
+                let mediaHtml = post.type === 'video' 
+                    ? `<video class="post-media" src="${post.media_url}" loop playsinline muted></video>`
+                    : `<img class="post-media" src="${post.media_url}" loading="lazy" ondblclick="triggerLike('${post.id}')">`;
+
+                // Add Double Click for Video too
+                if (post.type === 'video') {
+                     // Wrap video logic handled by HTML structure below
+                }
+
+                postEl.innerHTML = `
+                    <div class="post-header">
+                        <div class="user-info">
+                            <img src="${avatar}" class="user-avatar" alt="Avatar">
+                            <span class="username">${user.displayName || post.sender_username} ${verifiedHtml}</span>
+                        </div>
+                        <div class="post-options ${isOwner ? '' : 'disabled'}" ${isOwner ? `onclick="openPostOptions('${post.id}', ${post.show_likes !== false})"` : ''}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
                         </div>
                     </div>
+                    <div class="post-media-container" id="media-container-${post.id}" ondblclick="triggerLike('${post.id}')">
+                        ${mediaHtml}
+                        <div class="heart-overlay" id="heart-anim-${post.id}">❤</div>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn ${isLiked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </button>
+                        <button class="action-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        </button>
+                    </div>
+                    <div class="post-likes" id="likes-count-${post.id}" ${likesClickAction}>
+                        ${likesText}
+                    </div>
+                    <div class="post-caption">
+                        <span class="caption-username">${user.displayName || post.sender_username}</span>
+                        <span class="caption-text">${post.caption}</span>
+                    </div>
+                    <span class="post-time" data-timestamp="${post.timestamp}">${timeAgo(post.timestamp)}</span>
                 `;
+                feedContainer.appendChild(postEl);
             });
-        } catch(e) {
-            cont.innerHTML = '<div style="text-align:center;padding:20px;color:red">خطا</div>';
+
+            // Re-attach Video Observer for new elements
+            attachVideoObserver(feedContainer);
         }
-    }
-    function closeLikes() {
-        overlayLikes.classList.remove('active');
-        sheetLikes.classList.remove('active');
-        activePostId = null;
-    }
 
-    // --- UTILS ---
-    function showToast(msg, isErr=false) {
-        toast.textContent = msg;
-        toast.className = `toast ${isErr?'error':''} show`;
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-    
-    function timeAgo(ts) {
-        const s = Math.floor((new Date() - new Date(ts))/1000);
-        if(s<60) return 'همین الان';
-        const m = Math.floor(s/60); if(m<60) return `${m} دقیقه پیش`;
-        const h = Math.floor(m/60); if(h<24) return `${h} ساعت پیش`;
-        return `${Math.floor(h/24)} روز پیش`;
-    }
-    
-    function updateTimes() {
-        document.querySelectorAll('.time-ago').forEach(el => el.innerText = timeAgo(el.dataset.time));
-    }
+        // --- REALTIME UPDATER ---
+        async function startRealtimeUpdates() {
+            try {
+                const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                });
+                if (!response.ok) return;
+                const newData = await response.json() || {};
 
-    // Realtime Sync (Simplified for bandwidth)
-    async function syncRealtime() {
-        if(isUploading) return;
-        try {
-            const data = await apiRequest('rubino_posts');
-            if(!data) return;
-            
-            // Check for new posts or updates
-            Object.entries(data).forEach(([id, p]) => {
-                const old = postsCache[id];
-                if(!old) {
-                    // New Post (Can prepend but simpler to reload via pull refresh for heavy changes, 
-                    // but here we can just skip or add notification. For now we update cache)
-                } else {
-                    // Update Likes Logic
-                    const oldL = old.likes ? Object.keys(old.likes).length : 0;
-                    const newL = p.likes ? Object.keys(p.likes).length : 0;
-                    if(oldL !== newL || old.show_likes !== p.show_likes) {
-                        const countEl = document.getElementById(`count-${id}`);
-                        if(countEl) {
-                            const isOwner = p.sender_username === currentUser.username;
-                            const show = isOwner || (p.show_likes !== false);
-                            countEl.innerText = `${newL} پسند`;
-                            countEl.style.display = (show && newL > 0) ? 'block' : 'none';
-                            
-                            // If viewing likes of THIS post and it became private
-                            if(activePostId === id && !isOwner && p.show_likes === false && overlayLikes.classList.contains('active')) {
-                                closeLikes();
-                                showToast('لیست لایک مخفی شد');
-                            }
-                        }
-                    }
+                const domPosts = document.querySelectorAll('.post-card');
+                
+                // Remove deleted
+                domPosts.forEach(el => {
+                    const pid = el.id.replace('post-', '');
+                    if (!newData[pid]) el.remove(); 
+                });
+
+                Object.keys(newData).forEach(key => {
+                    const post = newData[key];
+                    const el = document.getElementById(`post-${key}`);
                     
-                    // Update Caption
-                    if(old.caption !== p.caption) {
-                         const el = document.getElementById(`cap-txt-${id}`);
-                         if(el) el.innerText = p.caption;
-                    }
-                }
-                postsCache[id] = p;
-            });
-        } catch(e) {}
-    }
+                    if (el) {
+                        const isOwner = post.sender_username === currentUser.username;
+                        
+                        // Sync Likes Modal Privacy
+                        if (currentViewingLikesPostId === key && post.show_likes === false && !isOwner) {
+                            likesModal.classList.remove('active');
+                            currentViewingLikesPostId = null;
+                            showToast('مالک پست نمایش لیست پسندها را غیرفعال کرد.', 'error');
+                        }
 
-</script>
+                        // Update Caption
+                        const capEl = el.querySelector('.caption-text');
+                        if (capEl && capEl.textContent !== post.caption) capEl.textContent = post.caption;
+
+                        // Update Like UI
+                        const likeCountEl = el.querySelector('.post-likes');
+                        const canSee = isOwner || (post.show_likes !== false);
+                        const likeCount = post.likes ? Object.keys(post.likes).length : 0;
+                        
+                        if (canSee) {
+                            likeCountEl.textContent = `${likeCount} پسند`;
+                            likeCountEl.setAttribute('onclick', `showLikesList('${key}', ${isOwner}, true)`);
+                            likeCountEl.style.display = 'block';
+                        } else {
+                            likeCountEl.style.display = 'none';
+                            likeCountEl.removeAttribute('onclick');
+                        }
+                    } else {
+                         // New post logic omitted for simplicity to prevent jumpiness
+                    }
+                });
+                postsDataCache = newData;
+
+            } catch (e) { console.warn("Sync error", e); }
+        }
+
+        // --- POST ACTIONS ---
+        function openPostOptions(postId, isPublic) {
+            currentOptionsPostId = postId;
+            privacyToggle.checked = isPublic;
+            optionsModal.classList.add('active');
+        }
+
+        function closeOptions() {
+            optionsModal.classList.remove('active');
+            currentOptionsPostId = null;
+        }
+
+        async function handleDeletePost() {
+            if(!confirm('حذف شود؟')) return;
+            try {
+                await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
+                    method: 'DELETE', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                });
+                document.getElementById(`post-${currentOptionsPostId}`).remove();
+                closeOptions();
+                showToast('پست حذف شد');
+            } catch(e) { showToast('خطا در حذف', 'error'); }
+        }
+
+        async function handleSaveCaption() {
+            const newCaption = editCaptionInput.value;
+            saveCaptionBtn.textContent = '...';
+            try {
+                await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ caption: newCaption })
+                });
+                document.querySelector(`#post-${currentOptionsPostId} .caption-text`).textContent = newCaption;
+                editCaptionModal.classList.remove('active');
+                showToast('ویرایش شد');
+            } catch(e) { showToast('خطا', 'error'); }
+            saveCaptionBtn.textContent = 'ذخیره تغییرات';
+        }
+
+        async function handlePrivacyChange() {
+            const isChecked = privacyToggle.checked;
+            try {
+                await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ show_likes: isChecked })
+                });
+            } catch(e) { 
+                privacyToggle.checked = !isChecked;
+                showToast('خطا در تغییر تنظیمات', 'error');
+            }
+        }
+
+        // --- LIKES LIST ---
+        async function showLikesList(postId, isOwner, isPublic) {
+            if (!isOwner && !isPublic) return; 
+
+            currentViewingLikesPostId = postId;
+            const listContainer = document.getElementById('likes-list-container');
+            listContainer.innerHTML = '<div class="empty-state"><div class="pull-spinner spinning" style="margin:0 auto;"></div></div>';
+            likesModal.classList.add('active');
+
+            try {
+                const response = await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes`, {
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                });
+                const likesData = await response.json();
+                
+                listContainer.innerHTML = '';
+                if (!likesData) {
+                    listContainer.innerHTML = '<div class="empty-state">هنوز لایکی ثبت نشده.</div>';
+                    return;
+                }
+
+                const userIds = Object.keys(likesData);
+                userIds.forEach(uid => {
+                    const user = allUsersCache[uid] || { displayName: uid, username: uid };
+                    const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${uid}&background=random`;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'user-list-item';
+                    div.innerHTML = `
+                        <img src="${avatar}">
+                        <div class="user-list-info">
+                            <h4>
+                                ${user.displayName || uid} 
+                                ${user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : ''}
+                            </h4>
+                            <p>@${user.username || uid}</p>
+                        </div>
+                    `;
+                    listContainer.appendChild(div);
+                });
+            } catch(e) {
+                listContainer.innerHTML = '<div class="empty-state">خطا در دریافت لیست.</div>';
+            }
+        }
+
+        // --- LIKE LOGIC (With Animation) ---
+        window.toggleLike = async (postId) => {
+            const btn = document.getElementById(`like-btn-${postId}`);
+            const countEl = document.getElementById(`likes-count-${postId}`);
+            const isLiked = btn.classList.contains('liked');
+            let currentCount = parseInt(countEl.textContent) || 0;
+            
+            // Optimistic UI
+            if (isLiked) {
+                btn.classList.remove('liked');
+                btn.querySelector('svg').setAttribute('fill', 'none');
+                btn.querySelector('svg').setAttribute('stroke', 'currentColor');
+                countEl.textContent = `${Math.max(0, currentCount - 1)} پسند`;
+                try {
+                    await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes/${currentUser.username}`, {
+                        method: 'DELETE', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                    });
+                } catch(e) {}
+            } else {
+                btn.classList.add('liked');
+                btn.querySelector('svg').setAttribute('fill', '#ED4956');
+                btn.querySelector('svg').setAttribute('stroke', '#ED4956');
+                countEl.textContent = `${currentCount + 1} پسند`;
+                try {
+                    await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes/${currentUser.username}`, {
+                        method: 'PUT', 
+                        headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' }, 
+                        body: 'true'
+                    });
+                } catch(e) {}
+            }
+        };
+
+        window.triggerLike = (postId) => {
+            const heart = document.getElementById(`heart-anim-${postId}`);
+            const btn = document.getElementById(`like-btn-${postId}`);
+            
+            // Pop Animation
+            heart.classList.remove('active');
+            void heart.offsetWidth; // Force Reflow
+            heart.classList.add('active');
+            
+            if (!btn.classList.contains('liked')) toggleLike(postId);
+        };
+
+        // --- PULL REFRESH & TIME ---
+        function touchStart(e) {
+            if (feedContainer.scrollTop === 0) {
+                startY = e.touches[0].clientY;
+                isPulling = true;
+            }
+        }
+        function touchMove(e) {
+            if (!isPulling) return;
+            const diff = e.touches[0].clientY - startY;
+            if (diff > 0 && feedContainer.scrollTop === 0) {
+                e.preventDefault();
+                currentTranslate = Math.min(diff * 0.5, 80);
+                feedContainer.style.transform = `translateY(${currentTranslate}px)`;
+                pullIndicator.style.opacity = Math.min(diff / 50, 1);
+                pullSpinner.style.transform = `rotate(${diff * 2}deg)`; // Rotate while pulling
+            }
+        }
+        async function touchEnd() {
+            if (!isPulling) return;
+            isPulling = false;
+            if (currentTranslate > 60) {
+                pullSpinner.classList.add('spinning');
+                feedContainer.style.transform = `translateY(60px)`;
+                await fetchPosts();
+                setTimeout(resetPull, 500);
+            } else {
+                resetPull();
+            }
+        }
+        function resetPull() {
+            feedContainer.style.transform = '';
+            pullIndicator.style.opacity = 0;
+            pullSpinner.classList.remove('spinning');
+            currentTranslate = 0;
+        }
+
+        function updateLiveTimestamps() {
+            document.querySelectorAll('.post-time').forEach(el => {
+                const ts = el.getAttribute('data-timestamp');
+                if (ts) el.textContent = timeAgo(ts);
+            });
+        }
+
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            if (seconds < 60) return 'همین الان';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes} دقیقه پیش`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours} ساعت پیش`;
+            const days = Math.floor(hours / 24);
+            return `${days} روز پیش`;
+        }
+    </script>
 </body>
 </html>
