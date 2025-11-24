@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>همیار - در حال بارگذاری...</title>
+    <title>همیار - ورود امن</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
 
@@ -12,11 +12,13 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Vazirmatn', sans-serif;
             overflow: hidden;
             direction: rtl;
+            background-color: #f8f9fa;
         }
 
+        /* کانتینر اصلی لودینگ */
         #loading-container {
             display: flex;
             flex-direction: column;
@@ -24,10 +26,7 @@
             align-items: center;
             width: 100%;
             height: 100%;
-            background-color: #f8f9fa;
-            color: #343a40;
-            text-align: center;
-            transition: opacity 0.5s ease;
+            transition: filter 0.3s ease;
         }
 
         #logo {
@@ -40,24 +39,16 @@
         }
 
         @keyframes pulse {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            }
-            50% {
-                transform: scale(1);
-                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            }
+            0% { transform: scale(0.95); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); }
+            50% { transform: scale(1); box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12); }
+            100% { transform: scale(0.95); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); }
         }
 
         #status-message {
             font-size: 1.2em;
             font-weight: 500;
             color: #495057;
+            margin-bottom: 20px;
         }
         
         .spinner {
@@ -67,75 +58,301 @@
             width: 35px;
             height: 35px;
             animation: spin 1s linear infinite;
-            margin-top: 25px;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* استایل‌های مربوط به کادر رمز عبور (Modal) */
+        #password-modal {
+            display: none; /* پیش‌فرض مخفی */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #password-modal.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        #password-modal.visible .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+            outline: none;
+            text-align: center;
+        }
+
+        .custom-input:focus {
+            border-color: #007bff;
+        }
+
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            border-radius: 12px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .error-msg {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 10px;
+            height: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .error-msg.show {
+            opacity: 1;
+        }
+
     </style>
 </head>
 <body>
 
+    <!-- بخش لودینگ -->
     <div id="loading-container">
         <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/c767edd7cb23c2f1a0314b935c515aa6b43c1905/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85%20%D8%A8%D8%AF%D9%88%D9%86%20%D9%BE%D8%B3%20%D8%B2%D9%85%DB%8C%D9%86%D9%87.png" alt="لوگو اپلیکیشن همیار" id="logo">
-        <p id="status-message">در حال بررسی وضعیت ورود...</p>
+        <p id="status-message">در حال بررسی امنیت...</p>
         <div id="spinner" class="spinner"></div>
+    </div>
+
+    <!-- بخش مودال دریافت رمز عبور -->
+    <div id="password-modal">
+        <div class="modal-content">
+            <div class="modal-title">احراز هویت</div>
+            <p style="font-size: 0.9em; color: #666; margin-bottom: 20px;">لطفاً برای ورود به همیار، رمز عبور را وارد کنید.</p>
+            
+            <div class="input-group">
+                <input type="password" id="password-input" class="custom-input" placeholder="رمز عبور را وارد کنید..." autocomplete="off">
+            </div>
+            
+            <button id="submit-pass-btn" class="submit-btn">ورود به سامانه</button>
+            <div id="error-text" class="error-msg">رمز عبور اشتباه است!</div>
+        </div>
     </div>
 
     <script>
         // --- CONFIG ---
-        const REDIRECT_DELAY = 2000; // 2 ثانیه تاخیر قبل از هدایت کاربر
+        // آدرس دقیق فایل PHP که در هاست خود (مرحله ۱) آپلود کردید را اینجا بنویسید
+        // مثال: https://your-website.com/verify.php
+        const API_URL = 'https://YOUR-HOST-ADDRESS.com/verify.php'; 
+        
+        const REDIRECT_DELAY = 2000;
 
         // --- DOM Elements ---
         const statusMessageElement = document.getElementById('status-message');
         const spinnerElement = document.getElementById('spinner');
+        const passwordModal = document.getElementById('password-modal');
+        const passwordInput = document.getElementById('password-input');
+        const submitBtn = document.getElementById('submit-pass-btn');
+        const errorText = document.getElementById('error-text');
+        const loadingContainer = document.getElementById('loading-container');
 
         // --- Main Logic ---
-        function checkLoginStatus() {
-            // از localStorage برای بررسی وجود اطلاعات کاربر استفاده می‌کنیم
-            const storedUser = localStorage.getItem('currentUser');
+        function init() {
+            // بررسی می‌کنیم آیا کاربر قبلا وارد شده است (توکن دارد؟)
+            const isLoggedIn = localStorage.getItem('auth_token') === 'valid_session';
 
-            if (storedUser) {
-                // کاربر قبلا با موفقیت وارد شده است
-                try {
-                    const user = JSON.parse(storedUser);
-                    
-                    // پیام خوش‌آمدگویی مجدد را نمایش می‌دهیم
-                    statusMessageElement.textContent = `خوش آمدید مجدد، ${user.displayName || user.username}!`;
-                    spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
-
-                    // پس از تاخیر، کاربر را به صفحه اصلی هدایت می‌کنیم
-                    setTimeout(() => {
-                        window.location.href = 'safe_asli.html';
-                    }, REDIRECT_DELAY);
-
-                } catch (e) {
-                    // اگر اطلاعات ذخیره شده معتبر نبود، آن را پاک کرده و به صفحه ثبت‌نام هدایت می‌کنیم
-                    localStorage.removeItem('currentUser');
-                    redirectToRegister();
-                }
-
+            if (isLoggedIn) {
+                // کاربر قبلا رمز صحیح را زده است
+                statusMessageElement.textContent = 'خوش آمدید مجدد!';
+                setTimeout(() => {
+                    // هدایت به صفحه اصلی
+                    window.location.href = 'safe_asli.html';
+                }, REDIRECT_DELAY);
             } else {
-                // کاربر وارد نشده یا برای اولین بار است که اپ را باز می‌کند
-                redirectToRegister();
+                // کاربر باید رمز وارد کند
+                showLoginModal();
             }
         }
-        
-        function redirectToRegister() {
-            // پیام خوش‌آمدگویی اولیه را نمایش می‌دهیم
-            statusMessageElement.textContent = 'به همیار خوش آمدید!';
-            spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
 
-            // پس از تاخیر، کاربر را به صفحه ثبت‌نام هدایت می‌کنیم
+        function showLoginModal() {
+            statusMessageElement.textContent = 'نیاز به احراز هویت';
+            spinnerElement.style.display = 'none';
+            
+            // نمایش مودال با کمی تاخیر برای زیبایی
             setTimeout(() => {
-                window.location.href = 'register.html'; 
-            }, REDIRECT_DELAY);
+                loadingContainer.style.filter = 'blur(5px)';
+                passwordModal.classList.add('visible');
+                passwordInput.focus();
+            }, 500);
         }
 
-        // اجرای تابع پس از بارگذاری کامل صفحه
-        window.onload = checkLoginStatus;
+        // تابع ارتباط با سرور برای چک کردن پسورد
+        async function verifyPasswordOnServer(password) {
+            setLoadingState(true);
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    // رمز درست بود
+                    handleLoginSuccess();
+                } else {
+                    // رمز اشتباه بود
+                    handleLoginError();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorText.textContent = 'خطا در ارتباط با سرور';
+                errorText.classList.add('show');
+                setLoadingState(false);
+            }
+        }
+
+        function handleLoginSuccess() {
+            errorText.classList.remove('show');
+            submitBtn.textContent = 'تایید شد ✓';
+            submitBtn.style.backgroundColor = '#28a745';
+            
+            // ذخیره وضعیت ورود
+            localStorage.setItem('auth_token', 'valid_session');
+            // اگر نام کاربری نداریم، یک مقدار پیش فرض ست میکنیم یا کاربر را به صفحه ثبت نام میفرستیم
+            // طبق کد قبلی شما:
+            if (!localStorage.getItem('currentUser')) {
+                 // هدایت به ثبت نام اگر دیتای یوزر نیست ولی پسورد درست بوده
+                 setTimeout(() => {
+                    window.location.href = 'register.html';
+                 }, 1000);
+            } else {
+                 // هدایت به صفحه اصلی
+                 setTimeout(() => {
+                    window.location.href = 'safe_asli.html';
+                 }, 1000);
+            }
+        }
+
+        function handleLoginError() {
+            errorText.textContent = 'رمز عبور اشتباه است!';
+            errorText.classList.add('show');
+            passwordInput.value = '';
+            passwordInput.focus();
+            setLoadingState(false);
+            
+            // لرزش مودال
+            document.querySelector('.modal-content').style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                document.querySelector('.modal-content').style.animation = '';
+            }, 500);
+        }
+
+        function setLoadingState(isLoading) {
+            if (isLoading) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'در حال بررسی...';
+                errorText.classList.remove('show');
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'ورود به سامانه';
+            }
+        }
+
+        // --- Event Listeners ---
+        submitBtn.addEventListener('click', () => {
+            const pass = passwordInput.value;
+            if (pass.length > 0) {
+                verifyPasswordOnServer(pass);
+            }
+        });
+
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const pass = passwordInput.value;
+                if (pass.length > 0) {
+                    verifyPasswordOnServer(pass);
+                }
+            }
+        });
+        
+        // انیمیشن لرزش برای خطا
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes shake {
+                0% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                50% { transform: translateX(10px); }
+                75% { transform: translateX(-10px); }
+                100% { transform: translateX(0); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // شروع برنامه
+        window.onload = init;
     </script>
 </body>
 </html>
