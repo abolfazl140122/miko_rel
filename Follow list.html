@@ -1,3 +1,4 @@
+<!-- START OF FILE صفه لیست فالوور ها_Admin_Update.txt -->
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -19,11 +20,12 @@
             --gold-bg: rgba(255, 215, 0, 0.08);
             --gold-border: rgba(255, 215, 0, 0.4);
             
-            /* Admin Specific Variables */
-            --admin-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --admin-border: #764ba2;
-            --admin-glow: rgba(118, 75, 162, 0.4);
-            --admin-badge-color: #00d2ff;
+            /* Admin Styles */
+            --admin-color: #ff4757;
+            --admin-dark: #2f3542;
+            --admin-glow: rgba(255, 71, 87, 0.25);
+            --admin-border: rgba(255, 71, 87, 0.6);
+            --admin-bg-gradient: linear-gradient(135deg, #161B22 0%, #1e0f0f 100%);
 
             --rank-1: #FFD700;
             --rank-2: #C0C0C0;
@@ -40,243 +42,417 @@
             font-family: 'Vazirmatn', sans-serif;
             background-color: var(--background-color);
             color: var(--text-primary);
-            margin: 0; padding: 0;
-            height: 100vh; overflow: hidden;
-            user-select: none; -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .app-container {
-            width: 100%; max-width: 480px; height: 100%; margin: 0 auto;
-            background-color: var(--background-color); display: flex; flex-direction: column;
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            margin: 0 auto;
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
             position: relative;
         }
 
-        /* --- Header --- */
+        /* --- Header & Search Area --- */
         .header-area {
             background-color: var(--secondary-color);
             border-bottom: 1px solid var(--border-color);
-            z-index: 20; box-shadow: 0 4px 20px rgba(0,0,0,0.3); flex-shrink: 0;
+            z-index: 20;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            flex-shrink: 0;
         }
 
         .header-top {
-            padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .header-top h1 { font-size: 1.2rem; margin: 0; font-weight: 900; color: var(--text-primary); }
-        .back-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 5px; }
 
-        /* --- Search --- */
-        .search-container { padding: 0 20px 15px 20px; }
-        .search-box { position: relative; width: 100%; }
-        .search-box input {
-            width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-color);
-            padding: 12px 45px 12px 15px; border-radius: 14px; color: var(--text-primary);
-            font-family: 'Vazirmatn', sans-serif; font-size: 0.95rem; transition: all 0.3s ease;
+        .header-top h1 { font-size: 1.2rem; margin: 0; font-weight: 900; color: var(--text-primary); }
+        .back-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 5px; display: flex; align-items: center; transition: transform 0.2s; }
+        .back-btn:active { transform: scale(0.9); }
+
+        /* --- Search Bar --- */
+        .search-container {
+            padding: 0 20px 15px 20px;
+            position: relative;
         }
-        .search-box input:focus { outline: none; border-color: var(--primary-color); background-color: #05070a; }
-        .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-box input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 45px 12px 15px;
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(30, 144, 255, 0.15);
+            background-color: #05070a;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .search-box input:focus + .search-icon {
+            color: var(--primary-color);
+        }
 
         /* --- Tabs --- */
-        .tabs-container { display: flex; padding: 0 20px; gap: 15px; position: relative; }
+        .tabs-container {
+            display: flex;
+            padding: 0 20px;
+            gap: 15px;
+            margin-bottom: 0;
+        }
+
         .tab-btn {
-            flex: 1; padding: 12px; background: transparent; border: none;
-            color: var(--text-secondary); font-family: 'Vazirmatn', sans-serif; font-weight: 700;
-            cursor: pointer; transition: color 0.3s; padding-bottom: 15px;
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Vazirmatn', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s;
+            padding-bottom: 15px;
         }
-        .tab-btn.active { color: var(--primary-color); }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+        }
+
         .tab-indicator {
-            position: absolute; bottom: 0; left: 20px; height: 3px;
-            background-color: var(--primary-color); width: calc(50% - 27.5px); /* Adjust for gap/padding */
-            transition: transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1); border-radius: 3px 3px 0 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background-color: var(--primary-color);
+            width: 50%;
+            transition: transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+            border-radius: 3px 3px 0 0;
         }
 
-        /* --- List --- */
+        /* --- List Container --- */
         .list-container {
-            flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 80px;
             scroll-behavior: smooth;
+            position: relative;
         }
 
-        /* --- User Card Styles --- */
+        /* --- User Card --- */
         .user-card {
-            display: flex; align-items: center;
+            display: flex;
+            align-items: center;
             background-color: var(--secondary-color);
-            padding: 12px 15px; border-radius: 18px; margin-bottom: 12px;
-            border: 1px solid var(--border-color); position: relative;
-            cursor: pointer; transition: transform 0.2s, background-color 0.2s;
-            animation: slideUp 0.4s ease forwards; opacity: 0; transform: translateY(20px);
+            padding: 12px 15px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            animation: slideUp 0.4s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
         }
-        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         .user-card:hover { background-color: var(--secondary-hover); }
         .user-card:active { transform: scale(0.98); }
 
-        /* Self Card */
+        /* Current User Style */
         .user-card.is-me {
-            background-color: var(--gold-bg); border: 2px solid var(--gold-border);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+            background-color: var(--gold-bg);
+            border: 2px solid var(--gold-border);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
         }
-
-        /* --- ADMIN CARD STYLES (The Cool Part) --- */
-        .user-card.is-admin {
-            background: linear-gradient(145deg, rgba(22, 27, 34, 0.9), rgba(30, 30, 50, 0.95));
-            border: 2px solid transparent;
-            background-clip: padding-box;
-            position: relative;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            overflow: visible; /* For glow effects outside */
-        }
-
-        /* Gradient Border Trick */
-        .user-card.is-admin::before {
-            content: ''; position: absolute; top: -2px; bottom: -2px; left: -2px; right: -2px;
-            background: var(--admin-gradient); z-index: -1; border-radius: 20px;
-        }
-
-        .user-card.is-admin .rank-number { color: #fff; text-shadow: 0 0 8px var(--admin-border); }
         
-        /* Admin Avatar Ring */
-        .user-card.is-admin .avatar { border: 2px solid #fff; box-shadow: 0 0 10px var(--admin-glow); }
-
-        /* Rank Numbers */
-        .rank-number {
-            font-size: 1.2rem; font-weight: 900; width: 35px; text-align: center;
-            margin-left: 10px; color: var(--text-secondary);
+        /* --- ADMIN STYLE --- */
+        .user-card.is-admin {
+            background: var(--admin-bg-gradient);
+            border: 1px solid var(--admin-border);
+            box-shadow: 0 0 20px var(--admin-glow);
         }
-        .user-card[data-rank="1"] .rank-number { color: var(--rank-1); font-size: 1.6rem; }
+        
+        .user-card.is-admin::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 71, 87, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .user-card.is-admin .rank-number {
+            color: var(--admin-color);
+            text-shadow: 0 0 8px var(--admin-color);
+        }
+        
+        .user-card.is-admin .avatar {
+            border: 2px solid var(--admin-color);
+        }
+
+        .admin-badge-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--admin-color), #d63031);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            margin-right: 6px;
+            box-shadow: 0 2px 5px rgba(255, 71, 87, 0.3);
+            vertical-align: middle;
+            gap: 2px;
+        }
+
+        /* --- Ranks & Info --- */
+        .rank-number {
+            font-size: 1.2rem;
+            font-weight: 900;
+            width: 35px;
+            text-align: center;
+            margin-left: 10px;
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .user-card[data-rank="1"] .rank-number { color: var(--rank-1); font-size: 1.6rem; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
         .user-card[data-rank="2"] .rank-number { color: var(--rank-2); font-size: 1.5rem; }
         .user-card[data-rank="3"] .rank-number { color: var(--rank-3); font-size: 1.4rem; }
 
-        .avatar-wrapper { position: relative; margin-left: 15px; width: 55px; height: 55px; flex-shrink: 0; }
-        .avatar {
-            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
-            background-color: var(--secondary-hover); transition: transform 0.3s;
+        .avatar-wrapper {
+            position: relative;
+            margin-left: 15px;
+            width: 55px;
+            height: 55px;
+            flex-shrink: 0;
         }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: var(--secondary-hover);
+            border: 2px solid transparent;
+            transition: transform 0.3s;
+        }
+        .user-card:hover .avatar { transform: scale(1.05); }
+        .user-card.is-me .avatar { border-color: var(--gold-color); }
+
         .status-dot {
-            position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px;
-            border-radius: 50%; border: 2px solid var(--secondary-color); z-index: 2;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid var(--secondary-color);
+            z-index: 2;
         }
         .status-dot.online { background-color: var(--online-color); box-shadow: 0 0 4px var(--online-color); }
         .status-dot.offline { background-color: var(--offline-color); }
 
         .user-info { flex-grow: 1; min-width: 0; }
-        
-        .display-name-row { display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; }
-        .display-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; }
-        
+        .display-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
         .username { font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px; }
         
-        /* Badges */
-        .badge-me { background-color: var(--gold-color); color: #000; font-size: 0.65rem; padding: 2px 6px; border-radius: 8px; font-weight: 800; }
-        .verified-tick { width: 16px; height: 16px; vertical-align: middle; }
-        
-        /* Admin Badge */
-        .admin-badge-icon {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: var(--admin-gradient); border-radius: 50%;
-            width: 18px; height: 18px; margin-right: 2px;
-            box-shadow: 0 0 8px var(--admin-glow);
-            animation: pulse-admin 2s infinite;
-        }
-        .admin-badge-icon svg { width: 10px; height: 10px; color: white; }
-        
-        @keyframes pulse-admin { 
-            0% { box-shadow: 0 0 0 0 rgba(118, 75, 162, 0.7); }
-            70% { box-shadow: 0 0 0 6px rgba(118, 75, 162, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(118, 75, 162, 0); }
-        }
+        .badge-me { display: inline-block; background-color: var(--gold-color); color: #000; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: 800; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         .follower-count { text-align: center; padding-right: 10px; min-width: 70px; }
         .count-value { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); }
-        .user-card.is-admin .count-value { color: #a78bfa; }
+        .user-card.is-me .count-value { color: var(--gold-color); }
+        .user-card.is-admin .count-value { color: var(--admin-color); text-shadow: 0 0 5px rgba(255, 71, 87, 0.4); }
+        .count-label { font-size: 0.7rem; color: var(--text-secondary); display: block; }
 
-        /* --- Skeleton & Empty State --- */
-        .empty-state { text-align: center; margin-top: 50px; color: var(--text-secondary); display: none; }
-        .skeleton-container {
-            display: flex; flex-direction: column; gap: 12px;
-            width: 100%; position: absolute; top: 145px; padding: 15px; z-index: 40;
+        /* --- Empty State --- */
+        .empty-state {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-secondary);
+            animation: fadeIn 0.5s;
+            display: none;
         }
-        .skeleton-card {
-            height: 80px; background-color: var(--secondary-color); border-radius: 16px;
-            animation: shimmer 1.5s infinite linear;
-            background: linear-gradient(90deg, #2C2F33 0%, #3a3f45 50%, #2C2F33 100%); background-size: 200% 100%;
-        }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .empty-state svg { width: 60px; height: 60px; margin-bottom: 15px; opacity: 0.5; }
+        .empty-state p { font-size: 1rem; margin: 0; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* --- Find Me Button --- */
         .find-me-btn {
             position: absolute; bottom: 25px; right: 25px;
             background: linear-gradient(135deg, var(--gold-color), #FFA500);
             color: #1a1a1a; border: none; border-radius: 50px; padding: 12px 20px;
-            font-weight: 700; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-            cursor: pointer; display: flex; align-items: center; gap: 8px; z-index: 20;
-            opacity: 0; pointer-events: none; transition: all 0.3s;
+            font-family: 'Vazirmatn', sans-serif; font-weight: 700; font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); cursor: pointer;
+            display: flex; align-items: center; gap: 8px; z-index: 20;
+            transition: transform 0.2s; opacity: 0; pointer-events: none;
         }
-        .find-me-btn.visible { opacity: 1; pointer-events: auto; transform: scale(1); }
+        .find-me-btn.visible { opacity: 1; pointer-events: auto; animation: popIn 0.5s; }
+        .find-me-btn:active { transform: scale(0.95); }
+        .find-me-btn svg { width: 20px; height: 20px; }
 
-        /* --- Profile Modal --- */
+        /* --- Skeleton Loading --- */
+        .skeleton-container {
+            display: flex; flex-direction: column; gap: 12px;
+            width: 100%; height: 100%; position: absolute; top: 0; left: 0;
+            padding: 15px; background: var(--background-color); z-index: 40; margin-top: 145px;
+        }
+        .skeleton-card {
+            display: flex; align-items: center; padding: 12px 15px;
+            background-color: var(--secondary-color); border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+        .sk-rank { width: 30px; height: 20px; background: #2C2F33; border-radius: 4px; margin-left: 10px; }
+        .sk-avatar { width: 55px; height: 55px; border-radius: 50%; background: #2C2F33; margin-left: 15px; flex-shrink: 0; }
+        .sk-info { flex-grow: 1; }
+        .sk-line-1 { width: 60%; height: 14px; background: #2C2F33; border-radius: 4px; margin-bottom: 8px; }
+        .sk-line-2 { width: 40%; height: 10px; background: #2C2F33; border-radius: 4px; }
+        .sk-count { width: 40px; height: 30px; background: #2C2F33; border-radius: 4px; }
+
+        .sk-rank, .sk-avatar, .sk-line-1, .sk-line-2, .sk-count {
+            animation: shimmer 1.5s infinite linear;
+            background: linear-gradient(90deg, #2C2F33 0%, #3a3f45 50%, #2C2F33 100%);
+            background-size: 200% 100%;
+        }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+        .verified-tick { width: 16px; height: 16px; vertical-align: middle; }
+
+        /* --- Profile Modal (Bottom Sheet) --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7); z-index: 100; opacity: 0; visibility: hidden;
-            transition: all 0.3s; display: flex; align-items: flex-end; justify-content: center;
-            backdrop-filter: blur(3px);
+            background-color: rgba(0,0,0,0.6); z-index: 100; opacity: 0;
+            visibility: hidden; transition: opacity 0.3s;
+            display: flex; align-items: flex-end; justify-content: center;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         
         .profile-modal {
             background-color: var(--modal-bg); width: 100%; max-width: 480px;
             border-top-left-radius: 24px; border-top-right-radius: 24px;
-            padding: 25px 20px; transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-            box-shadow: 0 -5px 30px rgba(0,0,0,0.6);
+            padding: 25px 20px;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative; box-shadow: 0 -5px 30px rgba(0,0,0,0.5);
+            max-height: 85vh; overflow-y: auto;
         }
         .modal-overlay.active .profile-modal { transform: translateY(0); }
-
-        /* Admin Modal Theme */
-        .profile-modal.admin-theme {
-            background: radial-gradient(circle at top, #231a33 0%, var(--modal-bg) 50%);
-            border-top: 1px solid var(--admin-border);
+        .profile-modal.is-admin-modal {
+            border-top: 2px solid var(--admin-color);
+            background: linear-gradient(to bottom, #251010, var(--modal-bg) 20%);
         }
-        .profile-modal.admin-theme .profile-avatar { border-color: #764ba2; box-shadow: 0 0 20px rgba(118, 75, 162, 0.5); }
 
-        .modal-handle { width: 50px; height: 5px; background: var(--border-color); border-radius: 10px; margin: 0 auto 20px; }
-        
+        .modal-handle {
+            width: 50px; height: 5px; background-color: var(--border-color);
+            border-radius: 10px; margin: 0 auto 20px;
+        }
+
         .profile-header { display: flex; flex-direction: column; align-items: center; text-align: center; }
         .profile-avatar {
             width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary-color);
-            padding: 2px; background: var(--secondary-color); object-fit: cover; margin-bottom: 15px;
+            padding: 2px; background-color: var(--secondary-color); object-fit: cover;
+            margin-bottom: 15px;
         }
+        .profile-modal.is-admin-modal .profile-avatar { border-color: var(--admin-color); box-shadow: 0 0 15px var(--admin-glow); }
         
-        .profile-name { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 6px; justify-content: center; }
-        .admin-tag {
-            font-size: 0.75rem; background: var(--admin-gradient); color: white;
-            padding: 2px 8px; border-radius: 4px; margin-top: 5px; font-weight: 600; display: none;
+        .profile-name { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 6px; }
+        .profile-username { font-size: 0.95rem; color: var(--text-secondary); margin-top: 5px; }
+        
+        .profile-stats {
+            display: flex; justify-content: center; gap: 30px; margin: 20px 0;
+            padding: 15px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
         }
-        
-        .profile-stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; padding: 15px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
-        .stat-value { font-size: 1.2rem; font-weight: 700; display: block; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); display: block; }
         .stat-label { font-size: 0.8rem; color: var(--text-secondary); }
-        .profile-bio { text-align: center; margin-bottom: 25px; font-size: 0.95rem; opacity: 0.9; line-height: 1.5; }
 
-        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; display: flex; justify-content: center; gap: 8px; align-items: center; font-family: 'Vazirmatn'; }
-        .btn-message { background: var(--secondary-hover); color: white; }
-        .btn-follow { background: var(--primary-color); color: white; }
-        .btn-follow.action-unfollow { background: transparent; border: 1px solid #ff4d4d; color: #ff4d4d; }
+        .profile-bio {
+            color: var(--text-primary); text-align: center; font-size: 0.95rem;
+            line-height: 1.5; margin-bottom: 25px; opacity: 0.9;
+        }
 
+        /* Action Buttons Grid */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .btn {
+            width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 1rem;
+            cursor: pointer; transition: all 0.2s; border: none; font-family: 'Vazirmatn', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        
+        .btn-message {
+            background-color: var(--secondary-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-message:hover { background-color: var(--border-color); }
+        .btn-message svg { width: 20px; height: 20px; }
+
+        .btn-follow { background-color: var(--primary-color); color: white; }
+        .btn-follow.action-unfollow { background-color: transparent; border: 1px solid var(--danger-color); color: var(--danger-color); }
+        .btn-follow:disabled { opacity: 0.6; cursor: wait; }
+
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <!-- Header -->
+        <!-- Fixed Header Area -->
         <div class="header-area">
             <div class="header-top">
                 <button class="back-btn" onclick="window.history.back()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 </button>
-                <h1>برترین‌ها</h1>
+                <h1>جدول برترین‌ها</h1>
                 <div style="width: 24px;"></div>
             </div>
 
+            <!-- Animated Search Bar -->
             <div class="search-container">
                 <div class="search-box">
                     <input type="text" id="search-input" placeholder="جستجوی کاربر...">
@@ -286,6 +462,7 @@
                 </div>
             </div>
 
+            <!-- Tabs -->
             <div class="tabs-container">
                 <button class="tab-btn active" data-tab="all" onclick="switchTab('all')">کل کاربران</button>
                 <button class="tab-btn" data-tab="friends" onclick="switchTab('friends')">دوستان من</button>
@@ -293,22 +470,30 @@
             </div>
         </div>
 
-        <!-- Skeleton -->
+        <!-- Skeleton Loading -->
         <div class="skeleton-container" id="skeleton-loading">
-            <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>
-            <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
+            <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
         </div>
 
-        <!-- List Container -->
+        <!-- List -->
         <div class="list-container" id="list-container">
+            <!-- Empty State -->
             <div class="empty-state" id="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                 <p id="empty-text">کاربری یافت نشد.</p>
             </div>
         </div>
 
-        <!-- FAB -->
+        <!-- FAB Button -->
         <button class="find-me-btn" id="find-me-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
             پیدا کردن من
         </button>
     </div>
@@ -320,16 +505,15 @@
             <div class="profile-header">
                 <img src="" id="p-avatar" class="profile-avatar" alt="Avatar">
                 <h2 id="p-name" class="profile-name"></h2>
-                <div id="p-admin-tag" class="admin-tag">مدیر سیستم</div>
-                <div id="p-username" class="username" style="font-size: 1rem; margin-top:5px;"></div>
+                <div id="p-username" class="profile-username"></div>
             </div>
             
             <div class="profile-stats">
-                <div class="stat-item" style="text-align: center;">
+                <div class="stat-item">
                     <span id="p-followers" class="stat-value">0</span>
                     <span class="stat-label">دنبال‌کننده</span>
                 </div>
-                <div class="stat-item" style="text-align: center;">
+                <div class="stat-item">
                     <span id="p-following" class="stat-value">0</span>
                     <span class="stat-label">دنبال‌شونده</span>
                 </div>
@@ -339,7 +523,7 @@
 
             <div class="action-buttons">
                 <button id="p-message-btn" class="btn btn-message">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                     پیام
                 </button>
                 <button id="p-follow-btn" class="btn btn-follow">دنبال کردن</button>
@@ -352,30 +536,25 @@
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
         const VERIFIED_TICK_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
+        
+        // Admin Badge SVG Icon
+        const ADMIN_SHIELD_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
 
-        /* 
-           SECURITY NOTE: 
-           برای امنیت بالا بدون بک‌اند، ما نام‌های کاربری ادمین را اینجا هم چک می‌کنیم.
-           این کار مانع می‌شود کسی صرفاً با اینجکت کردن HTML خودش را ادمین جا بزند.
-           اگر دیتابیس شما فیلد role: 'admin' دارد، آن را هم بررسی می‌کنیم.
-        */
-        const KNOWN_ADMINS = ['admin', 'support', 'manager']; // نام‌های کاربری ادمین را اینجا اضافه کنید (اختیاری برای امنیت بیشتر)
-
-        // --- Elements ---
+        // --- DOM Elements ---
         const listContainer = document.getElementById('list-container');
         const skeletonLoading = document.getElementById('skeleton-loading');
         const findMeBtn = document.getElementById('find-me-btn');
         const profileOverlay = document.getElementById('profile-overlay');
+        const profileModalContent = document.getElementById('profile-modal-content');
         const searchInput = document.getElementById('search-input');
         const tabIndicator = document.getElementById('tab-indicator');
         const emptyState = document.getElementById('empty-state');
+        const emptyText = document.getElementById('empty-text');
         
-        // Profile Elements
-        const modalContent = document.getElementById('profile-modal-content');
+        // Profile Modal Elements
         const pAvatar = document.getElementById('p-avatar');
         const pName = document.getElementById('p-name');
         const pUsername = document.getElementById('p-username');
-        const pAdminTag = document.getElementById('p-admin-tag');
         const pFollowers = document.getElementById('p-followers');
         const pFollowing = document.getElementById('p-following');
         const pBio = document.getElementById('p-bio');
@@ -388,23 +567,29 @@
         let usersCache = {}; 
         let followersCache = {}; 
         let followingCache = {}; 
-        let globalLeaderboard = [];
-        let currentTab = 'all';
+        
+        let globalLeaderboard = []; 
+        let currentTab = 'all'; 
 
-        // --- Init ---
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
-                window.location.href = 'login.html'; // Redirect if not logged in
+                window.location.href = 'login.html';
                 return;
             }
             currentUser = JSON.parse(storedUser);
 
+            // Close modal events
             profileOverlay.addEventListener('click', (e) => {
                 if (e.target === profileOverlay) closeProfileModal();
             });
             document.querySelector('.modal-handle').addEventListener('click', closeProfileModal);
-            searchInput.addEventListener('input', (e) => renderCurrentView(e.target.value));
+
+            // Search Listener
+            searchInput.addEventListener('input', (e) => {
+                renderCurrentView(e.target.value);
+            });
 
             try {
                 await refreshClientToken();
@@ -412,35 +597,37 @@
             } catch (error) {
                 console.error(error);
                 skeletonLoading.style.display = 'none';
-                emptyState.style.display = 'block';
-                document.getElementById('empty-text').innerHTML = 'خطا در بارگذاری اطلاعات.<br>لطفا اتصال خود را بررسی کنید.';
+                listContainer.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">خطا در بارگذاری.<br>${error.message}</div>`;
             }
         });
 
-        // --- Tabs ---
+        // --- Tabs Logic ---
         function switchTab(tab) {
             if (currentTab === tab) return;
             currentTab = tab;
-            
+
+            // Update UI Tabs
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
-            
-            // Adjust indicator based on tab count (2 tabs = 50% each roughly)
-            // Simplified for CSS calc logic
+
+            // Animate Indicator
             if (tab === 'friends') {
-                tabIndicator.style.transform = 'translateX(-110%)'; // Adjust based on RTL
+                tabIndicator.style.transform = 'translateX(-100%)';
             } else {
                 tabIndicator.style.transform = 'translateX(0)';
             }
-            
+
+            // Reset scroll
             listContainer.scrollTop = 0;
+
+            // Re-render list
             renderCurrentView(searchInput.value);
         }
 
-        // --- API ---
+        // --- API & Logic ---
         async function refreshClientToken() {
             const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-            if (!response.ok) throw new Error('Token Error');
+            if (!response.ok) throw new Error('خطا در دریافت توکن.');
             const data = await response.json();
             clientToken = data.token;
         }
@@ -457,54 +644,63 @@
                 options.headers['Content-Type'] = 'application/json';
                 options.body = JSON.stringify(body);
             }
+
             const response = await fetch(`${PROXY_URL}?path=${path}`, options);
             if (!response.ok) return null;
             if (method === 'DELETE' || response.status === 204) return true;
             return response.json();
         }
 
-        // --- Logic ---
-        // تابع بررسی ادمین: ترکیب دیتای سرور و لیست سفید
-        function isUserAdmin(user) {
-            const serverSaysAdmin = (user.role === 'admin' || user.isAdmin === true);
-            const whitelistSaysAdmin = KNOWN_ADMINS.includes(user.username);
-            
-            // اگر تیک آبی داشته باشد و یکی از شرط‌های بالا برقرار باشد = ادمین معتبر
-            // یا اگر صرفا در دیتابیس فلگ ادمین داشته باشد (بسته به استراتژی شما)
-            // برای امنیت بالا: فقط کسانی که هم تیک آبی دارند هم نقش ادمین
-            return (serverSaysAdmin || whitelistSaysAdmin) && user.verified;
-        }
-
         async function loadAndProcessData() {
+            // Data fetching
             const [usersData, followersData, followingData] = await Promise.all([
                 proxyRequest('users'),
                 proxyRequest('followers'),
                 proxyRequest('following')
             ]);
 
-            if (!usersData) throw new Error('No data');
+            if (!usersData) throw new Error('لیست کاربران دریافت نشد.');
 
             usersCache = usersData;
             followersCache = followersData || {};
             followingCache = followingData || {};
 
+            // Process Global Leaderboard
             const leaderboard = [];
-            Object.keys(usersData).forEach(userId => {
+            const allUserIds = Object.keys(usersData);
+
+            allUserIds.forEach(userId => {
                 const user = usersData[userId];
                 if (!user) return;
 
                 const count = followersCache[userId] ? Object.keys(followersCache[userId]).length : 0;
                 
+                // Security Check for Admin status based on DB data
+                const isAdmin = (user.isAdmin === true || user.role === 'admin');
+
                 leaderboard.push({
-                    ...user, // Spread all user props including role, verified etc.
+                    username: user.username,
+                    displayName: user.displayName || user.username,
+                    profilePicUrl: user.profilePicUrl,
+                    verified: user.verified || false,
+                    isAdmin: isAdmin, // Store admin status
+                    isOnline: user.isOnline || false,
+                    bio: user.bio,
                     followerCount: count
                 });
             });
 
+            // Sort globally based on follower count
             leaderboard.sort((a, b) => b.followerCount - a.followerCount);
-            leaderboard.forEach((user, index) => user.globalRank = index + 1);
             
+            // Assign Global Rank
+            leaderboard.forEach((user, index) => {
+                user.globalRank = index + 1;
+            });
+
             globalLeaderboard = leaderboard;
+
+            // Hide skeleton and render
             skeletonLoading.style.display = 'none';
             renderCurrentView();
         }
@@ -512,66 +708,89 @@
         function renderCurrentView(searchQuery = '') {
             listContainer.innerHTML = '';
             findMeBtn.classList.remove('visible');
-
-            let data = currentTab === 'all' ? globalLeaderboard : [];
             
-            if (currentTab === 'friends') {
+            // Filter based on Tab
+            let dataToRender = [];
+            if (currentTab === 'all') {
+                dataToRender = globalLeaderboard;
+            } else {
                 const myFollowing = followingCache[currentUser.username] || {};
-                data = globalLeaderboard.filter(u => myFollowing[u.username] && u.username !== currentUser.username);
+                dataToRender = globalLeaderboard.filter(user => myFollowing[user.username] || user.username === currentUser.username);
+                dataToRender = dataToRender.filter(user => user.username !== currentUser.username);
             }
 
-            if (searchQuery.trim()) {
-                const q = searchQuery.toLowerCase();
-                data = data.filter(u => u.username.toLowerCase().includes(q) || (u.displayName && u.displayName.toLowerCase().includes(q)));
+            // Filter based on Search
+            if (searchQuery.trim() !== '') {
+                const lowerQ = searchQuery.toLowerCase();
+                dataToRender = dataToRender.filter(user => 
+                    user.username.toLowerCase().includes(lowerQ) || 
+                    user.displayName.toLowerCase().includes(lowerQ)
+                );
             }
 
-            if (data.length === 0) {
+            // Handle Empty States
+            if (dataToRender.length === 0) {
+                listContainer.appendChild(emptyState);
                 emptyState.style.display = 'block';
+                if (currentTab === 'friends' && searchQuery === '') {
+                    emptyText.textContent = 'شما هنوز کسی را دنبال نکرده‌اید.';
+                } else {
+                    emptyText.textContent = 'نتیجه‌ای یافت نشد.';
+                }
                 return;
             } else {
                 emptyState.style.display = 'none';
             }
 
-            let myIdInDom = null;
+            let myElementId = null;
 
-            data.forEach((user, i) => {
+            // Render List
+            dataToRender.forEach((user, index) => {
+                const rank = user.globalRank; 
                 const isMe = user.username === currentUser.username;
-                const isAdmin = isUserAdmin(user);
+                const isAdmin = user.isAdmin;
+                const avatarUrl = user.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=161B22&color=fff&size=100`;
                 
-                // Admin badge HTML
-                const adminBadgeHtml = isAdmin ? `
-                    <span class="admin-badge-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6c1.4 0 2.8 1.1 2.8 2.5V11c.6 0 1.2.6 1.2 1.2v3.5c0 .7-.6 1.3-1.2 1.3H9.2c-.6 0-1.2-.6-1.2-1.2v-3.5c0-.7.6-1.3 1.2-1.3V9.5C9.2 8.1 10.6 7 12 7z"/></svg>
-                    </span>
-                ` : '';
-
-                const verifiedHtml = user.verified ? `<img src="${VERIFIED_TICK_URL}" class="verified-tick" alt="v">` : '';
-                const avatarUrl = user.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=161B22&color=fff`;
+                // Badges
+                const verifiedHtml = user.verified ? `<img src="${VERIFIED_TICK_URL}" class="verified-tick" alt="verified">` : '';
+                const adminBadgeHtml = isAdmin ? `<span class="admin-badge-icon">${ADMIN_SHIELD_ICON} مدیر</span>` : '';
+                
                 const statusClass = user.isOnline ? 'online' : 'offline';
-                const elId = `u-${user.username}`;
-                if (isMe) myIdInDom = elId;
+                
+                const elementId = `user-row-${user.username}`;
+                if (isMe) myElementId = elementId;
 
-                // Add specific class for admin styling
-                const cardClass = `user-card ${isMe ? 'is-me' : ''} ${isAdmin ? 'is-admin' : ''}`;
+                const animationDelay = index < 10 ? index * 0.05 : 0;
+                
+                // Dynamic Classes
+                let cardClasses = 'user-card';
+                if (isMe) cardClasses += ' is-me';
+                if (isAdmin) cardClasses += ' is-admin';
 
                 const html = `
-                    <div class="${cardClass}" id="${elId}" onclick="openUserProfile('${user.username}')" style="animation-delay: ${i < 15 ? i * 0.05 : 0}s">
-                        <div class="rank-number">${user.globalRank}</div>
+                    <div class="${cardClasses}" 
+                         id="${elementId}" 
+                         data-rank="${rank}" 
+                         onclick="openUserProfile('${user.username}')"
+                         style="animation-delay: ${animationDelay}s">
+                        <div class="rank-number">${rank}</div>
                         <div class="avatar-wrapper">
-                            <img src="${avatarUrl}" class="avatar" loading="lazy">
+                            <img src="${avatarUrl}" class="avatar" alt="${user.displayName}" loading="lazy">
                             <div class="status-dot ${statusClass}"></div>
                         </div>
                         <div class="user-info">
-                            <div class="display-name-row">
-                                ${adminBadgeHtml}
-                                <span class="display-name">${user.displayName || user.username}</span>
+                            <div class="display-name">
+                                ${user.displayName} 
                                 ${verifiedHtml}
                                 ${isMe ? '<span class="badge-me">شما</span>' : ''}
                             </div>
-                            <div class="username">@${user.username}</div>
+                            <div class="username">
+                                ${adminBadgeHtml}
+                                @${user.username}
+                            </div>
                         </div>
                         <div class="follower-count">
-                            <span class="count-value">${formatNum(user.followerCount)}</span>
+                            <span class="count-value">${formatNumber(user.followerCount)}</span>
                             <span class="count-label">دنبال‌کننده</span>
                         </div>
                     </div>
@@ -579,98 +798,80 @@
                 listContainer.insertAdjacentHTML('beforeend', html);
             });
 
-            if (myIdInDom && currentTab === 'all' && !searchQuery) {
+            // Show 'Find Me' button
+            if (myElementId && currentTab === 'all' && searchQuery === '') {
                 findMeBtn.classList.add('visible');
                 findMeBtn.onclick = () => {
-                    document.getElementById(myIdInDom).scrollIntoView({behavior: 'smooth', block: 'center'});
-                    const el = document.getElementById(myIdInDom);
-                    el.style.transition = 'transform 0.3s';
-                    el.style.transform = 'scale(1.05)';
-                    setTimeout(() => el.style.transform = 'scale(1)', 400);
+                    const el = document.getElementById(myElementId);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        el.style.transition = 'transform 0.3s';
+                        el.style.transform = 'scale(1.02)';
+                        setTimeout(() => el.style.transform = 'scale(1)', 300);
+                    }
                 };
             }
         }
 
-        // --- Profile Modal ---
+        // --- Profile Modal Logic ---
         async function openUserProfile(username) {
-            const user = usersCache[username];
+            // Find user from global list to get pre-calculated admin status
+            const user = globalLeaderboard.find(u => u.username === username) || usersCache[username];
             if (!user) return;
-            
-            const isAdmin = isUserAdmin(user);
-            const isMe = username === currentUser.username;
 
-            // Apply Admin Theme to Modal
+            const isMe = username === currentUser.username;
+            const isAdmin = user.isAdmin || user.role === 'admin';
+            
+            // Populate Data
+            const avatarUrl = user.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.username)}&background=161B22&color=fff&size=150`;
+            pAvatar.src = avatarUrl;
+            
+            // Handle Admin Styles in Modal
             if (isAdmin) {
-                modalContent.classList.add('admin-theme');
-                pAdminTag.style.display = 'inline-block';
+                profileModalContent.classList.add('is-admin-modal');
             } else {
-                modalContent.classList.remove('admin-theme');
-                pAdminTag.style.display = 'none';
+                profileModalContent.classList.remove('is-admin-modal');
             }
 
-            const verifiedHtml = user.verified ? `<img src="${VERIFIED_TICK_URL}" class="verified-tick" style="width:20px;height:20px;">` : '';
+            const verifiedHtml = user.verified ? `<img src="${VERIFIED_TICK_URL}" class="verified-tick" alt="verified">` : '';
+            const adminBadgeHtml = isAdmin ? `<span class="admin-badge-icon">${ADMIN_SHIELD_ICON} مدیر</span>` : '';
             
-            // Admin Badge in Modal
-            const adminIcon = isAdmin ? `
-                <span class="admin-badge-icon" style="width:24px;height:24px; margin-left:5px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-                </span>` : '';
-
-            pAvatar.src = user.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=161B22&color=fff&size=150`;
-            pName.innerHTML = adminIcon + (user.displayName || user.username) + " " + verifiedHtml;
-            pUsername.textContent = `@${user.username}`;
+            pName.innerHTML = (user.displayName || user.username) + " " + verifiedHtml;
+            pUsername.innerHTML = adminBadgeHtml + " @" + user.username;
             pBio.textContent = user.bio || "بدون بیوگرافی";
 
-            const fCount = followersCache[username] ? Object.keys(followersCache[username]).length : 0;
-            const ingCount = followingCache[username] ? Object.keys(followingCache[username]).length : 0;
-            pFollowers.textContent = formatNum(fCount);
-            pFollowing.textContent = formatNum(ingCount);
+            // Stats
+            const followerCnt = followersCache[username] ? Object.keys(followersCache[username]).length : 0;
+            const followingCnt = followingCache[username] ? Object.keys(followingCache[username]).length : 0;
+            pFollowers.textContent = formatNumber(followerCnt);
+            pFollowing.textContent = formatNumber(followingCnt);
+
+            // --- Button Logic ---
+            pFollowBtn.onclick = null;
+            pMessageBtn.onclick = null;
 
             if (isMe) {
+                pFollowBtn.style.display = 'none';
+                pMessageBtn.style.display = 'none';
                 document.querySelector('.action-buttons').style.display = 'none';
             } else {
                 document.querySelector('.action-buttons').style.display = 'grid';
-                pMessageBtn.onclick = () => window.location.href = `pivi.html?uid=${username}`;
-                
-                const isFollowing = followingCache[currentUser.username] && followingCache[currentUser.username][username];
-                updateFollowBtn(isFollowing);
-                
-                pFollowBtn.onclick = async () => {
-                    pFollowBtn.disabled = true;
-                    const currentStatus = pFollowBtn.classList.contains('action-unfollow');
-                    const newVal = currentStatus ? null : true;
-                    
-                    try {
-                        await proxyRequest('', 'PATCH', {
-                            [`following/${currentUser.username}/${username}`]: newVal,
-                            [`followers/${username}/${currentUser.username}`]: newVal
-                        });
-                        
-                        // Local Update
-                        if (!followingCache[currentUser.username]) followingCache[currentUser.username] = {};
-                        if (!followersCache[username]) followersCache[username] = {};
-                        
-                        if (currentStatus) {
-                            delete followingCache[currentUser.username][username];
-                            delete followersCache[username][currentUser.username];
-                        } else {
-                            followingCache[currentUser.username][username] = true;
-                            followersCache[username][currentUser.username] = true;
-                        }
+                pFollowBtn.style.display = 'block';
+                pMessageBtn.style.display = 'flex';
 
-                        updateFollowBtn(!currentStatus);
-                        pFollowers.textContent = formatNum(Object.keys(followersCache[username]).length);
-                        
-                        // Live update list count
-                        const listCnt = document.querySelector(`#u-${username} .count-value`);
-                        if (listCnt) listCnt.textContent = formatNum(Object.keys(followersCache[username]).length);
-
-                    } catch (e) {
-                        alert('خطا در ارتباط');
-                    } finally {
-                        pFollowBtn.disabled = false;
-                    }
+                pMessageBtn.onclick = () => {
+                    window.location.href = `pivi.html?uid=${username}`;
                 };
+
+                pFollowBtn.disabled = true;
+                pFollowBtn.textContent = '...';
+                pFollowBtn.className = 'btn btn-follow';
+                
+                const isFollowing = await checkFollowStatus(username);
+                updateFollowButtonUI(isFollowing);
+                
+                pFollowBtn.disabled = false;
+                pFollowBtn.onclick = () => toggleFollow(username);
             }
 
             profileOverlay.classList.add('active');
@@ -680,7 +881,14 @@
             profileOverlay.classList.remove('active');
         }
 
-        function updateFollowBtn(isFollowing) {
+        async function checkFollowStatus(targetUsername) {
+            if (followingCache[currentUser.username] && followingCache[currentUser.username][targetUsername]) {
+                return true;
+            }
+            return false;
+        }
+
+        function updateFollowButtonUI(isFollowing) {
             if (isFollowing) {
                 pFollowBtn.textContent = 'لغو دنبال کردن';
                 pFollowBtn.className = 'btn btn-follow action-unfollow';
@@ -690,11 +898,52 @@
             }
         }
 
-        function formatNum(num) {
+        async function toggleFollow(targetUsername) {
+            const isFollowing = pFollowBtn.classList.contains('action-unfollow');
+            pFollowBtn.disabled = true;
+            
+            try {
+                const valueToSet = isFollowing ? null : true;
+                const payload = {
+                    [`following/${currentUser.username}/${targetUsername}`]: valueToSet,
+                    [`followers/${targetUsername}/${currentUser.username}`]: valueToSet
+                };
+
+                await proxyRequest('', 'PATCH', payload);
+
+                // Update Cache
+                if (!followingCache[currentUser.username]) followingCache[currentUser.username] = {};
+                if (!followersCache[targetUsername]) followersCache[targetUsername] = {};
+
+                if (isFollowing) {
+                    delete followingCache[currentUser.username][targetUsername];
+                    delete followersCache[targetUsername][currentUser.username];
+                } else {
+                    followingCache[currentUser.username][targetUsername] = true;
+                    followersCache[targetUsername][currentUser.username] = true;
+                }
+
+                updateFollowButtonUI(!isFollowing);
+                pFollowers.textContent = formatNumber(Object.keys(followersCache[targetUsername]).length);
+
+                // Update List UI
+                const listRow = document.querySelector(`#user-row-${targetUsername} .count-value`);
+                if (listRow) listRow.textContent = formatNumber(Object.keys(followersCache[targetUsername]).length);
+
+            } catch (error) {
+                console.error("Follow error:", error);
+                alert("خطا در انجام عملیات.");
+            } finally {
+                pFollowBtn.disabled = false;
+            }
+        }
+
+        function formatNumber(num) {
             if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
             if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
             return num;
         }
+
     </script>
 </body>
 </html>
