@@ -125,7 +125,7 @@
             border-radius: 20px;
             overflow: hidden;
             opacity: 0; /* Hidden initially until loaded */
-            transition: opacity 0.5s ease;
+            transition: opacity 0.5s ease, transform 0.4s ease; /* Modified for animation */
         }
         .app-container.visible { opacity: 1; }
 
@@ -1091,9 +1091,14 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 <span>چت‌ها</span>
             </button>
-             <button class="nav-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                <span>خانه</span>
+            <!-- Modified RUBINO Button -->
+             <button class="nav-btn" id="nav-rubino-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+                <span>روبینو</span>
             </button>
         </footer>
 
@@ -1286,6 +1291,27 @@
             // EVENT LISTENERS
             const navPeopleBtn = document.getElementById('nav-people-btn');
             
+            // --- NEW: Rubino Button Listener ---
+            const rubinoBtn = document.getElementById('nav-rubino-btn');
+            if (rubinoBtn) {
+                rubinoBtn.addEventListener('click', () => {
+                    // Update visual state
+                    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                    rubinoBtn.classList.add('active');
+
+                    // Animation Effect: Fade out and shrink slightly
+                    const appContainer = document.getElementById('app-container');
+                    appContainer.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    appContainer.style.opacity = '0';
+                    appContainer.style.transform = 'scale(0.95)';
+
+                    // Redirect after animation completes
+                    setTimeout(() => {
+                        window.location.href = 'Rubino.html';
+                    }, 400); 
+                });
+            }
+
             searchInput.addEventListener('input', handleSearch);
             searchTabsContainer.addEventListener('click', handleTabSwitch);
             openProfileBtn.addEventListener('click', () => openUserProfile(currentUser.username));
