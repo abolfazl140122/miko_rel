@@ -1,3 +1,89 @@
+<?php
+// =========================================================
+//  بخش منطق (PHP) - کنترل امنیت و بررسی رمز عبور
+// =========================================================
+session_start();
+
+// مسیر فایل پسورد (یک پوشه عقب‌تر از فایل جاری)
+$password_file_path = __DIR__ . '/../password_mikorel.php';
+
+$error_message = '';
+$show_loading_page = false;
+
+// 1. بررسی آیا کاربر قبلاً وارد شده است؟
+if (isset($_SESSION['auth_granted']) && $_SESSION['auth_granted'] === true) {
+    $show_loading_page = true;
+} 
+// 2. بررسی درخواست ورود (زمانی که دکمه فرم زده می‌شود)
+else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['app_password'])) {
+    
+    // بررسی وجود فایل پسورد
+    if (file_exists($password_file_path)) {
+        // خواندن هش از فایل بیرونی
+        $real_hash = include $password_file_path;
+        
+        // مقایسه رمز وارد شده با هش
+        if (password_verify($_POST['app_password'], $real_hash)) {
+            // رمز صحیح است
+            $_SESSION['auth_granted'] = true;
+            // رفرش صفحه برای جلوگیری از ارسال مجدد فرم
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit;
+        } else {
+            $error_message = 'رمز عبور اشتباه است!';
+        }
+    } else {
+        $error_message = 'خطا: فایل پسورد یافت نشد (' . $password_file_path . ')';
+    }
+}
+
+// اگر کاربر لاگین نکرده باشد، کد همینجا متوقف شده و فرم ورود را نشان می‌دهد
+// اگر لاگین کرده باشد، متغیر $show_loading_page true می‌شود
+?>
+
+<?php if (!$show_loading_page): ?>
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود امن به همیار</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa; font-family: 'Vazirmatn', sans-serif; }
+        .login-card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; width: 90%; max-width: 350px; }
+        .logo-img { width: 80px; margin-bottom: 1rem; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .inp-pass { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; text-align: center; box-sizing: border-box; }
+        .btn-login { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 1rem; transition: 0.3s; }
+        .btn-login:hover { background: #0056b3; }
+        .error { color: #dc3545; font-size: 0.9rem; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/c767edd7cb23c2f1a0314b935c515aa6b43c1905/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85%20%D8%A8%D8%AF%D9%88%D9%86%20%D9%BE%D8%B3%20%D8%B2%D9%85%DB%8C%D9%86%D9%87.png" class="logo-img" alt="Logo">
+        <h3 style="margin: 0 0 15px 0; color: #333;">ورود امن</h3>
+        
+        <?php if ($error_message): ?>
+            <div class="error"><?php echo $error_message; ?></div>
+        <?php endif; ?>
+
+        <form method="post">
+            <input type="password" name="app_password" class="inp-pass" placeholder="رمز عبور را وارد کنید..." required autofocus>
+            <button type="submit" class="btn-login">تایید و ورود</button>
+        </form>
+    </div>
+</body>
+</html>
+<?php exit; // توقف اجرا تا لودینگ اصلی لود نشود ?>
+<?php endif; ?>
+
+<!-- 
+    =========================================================
+    بخش نمایش (HTML) - صفحه لودینگ اصلی
+    (این بخش فقط زمانی اجرا می‌شود که رمز صحیح باشد)
+    =========================================================
+-->
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
