@@ -1,3 +1,5 @@
+--- START OF FILE روبینو.txt ---
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -16,11 +18,12 @@
             --text-secondary: #8b949e;
             --primary-color: #00A3FF; /* هم‌رنگ با همیار */
             --like-color: #ED4956;
-            --blue-accent: #0095f6;
             --modal-bg: #1C2128;
             --skeleton-base: #161B22;
             --skeleton-highlight: #21262d;
             --danger-color: #FF4D4D;
+            --toast-bg: rgba(40, 167, 69, 0.9);
+            --toast-error: rgba(220, 53, 69, 0.9);
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -32,7 +35,6 @@
             margin: 0; padding: 0;
             height: 100vh; overflow: hidden;
             user-select: none; -webkit-tap-highlight-color: transparent;
-            /* گرادینت مشابه صفحه اصلی */
             background: radial-gradient(circle at top left, #1a202c 0%, var(--background-color) 70%);
         }
 
@@ -55,7 +57,6 @@
             font-size: 1.4rem; 
             font-weight: 900;
             margin: 0;
-            /* استایل همیار */
             color: var(--primary-color);
             text-shadow: 0 0 8px rgba(0, 163, 255, 0.4);
             letter-spacing: 0.5px;
@@ -70,31 +71,22 @@
 
         /* --- PULL TO REFRESH --- */
         .pull-indicator {
-            position: absolute;
-            top: 60px; /* Just below header */
-            left: 0; right: 0;
-            height: 50px;
+            position: absolute; top: 60px; left: 0; right: 0; height: 50px;
             display: flex; justify-content: center; align-items: center;
-            pointer-events: none;
-            transition: transform 0.2s;
-            z-index: 10;
-            opacity: 0;
+            pointer-events: none; transition: transform 0.2s; z-index: 10; opacity: 0;
         }
         .pull-spinner {
             width: 25px; height: 25px;
-            border: 3px solid var(--secondary-hover);
-            border-top-color: var(--primary-color);
+            border: 3px solid var(--secondary-hover); border-top-color: var(--primary-color);
             border-radius: 50%;
         }
-        .pull-spinner.spinning {
-            animation: spin 0.8s linear infinite;
-        }
+        .pull-spinner.spinning { animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* --- MAIN FEED --- */
         .feed-container {
             flex-grow: 1; overflow-y: auto; 
-            padding-bottom: 20px; /* No footer space needed */
+            padding-bottom: 20px;
             scrollbar-width: none;
             position: relative;
             transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -105,12 +97,12 @@
         .post-card {
             background-color: var(--background-color);
             border-bottom: 1px solid var(--border-color);
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+            margin-bottom: 15px; padding-bottom: 10px;
+            animation: fadeIn 0.5s ease;
         }
-        .post-header {
-            padding: 10px 15px; display: flex; align-items: center; justify-content: space-between;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .post-header { padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; }
         .user-info { display: flex; align-items: center; gap: 10px; }
         .user-avatar {
             width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
@@ -123,14 +115,11 @@
         .verified-tick {
             width: 16px; height: 16px;
             filter: drop-shadow(0 0 2px rgba(0, 163, 255, 0.5));
+            vertical-align: middle;
         }
         
         .post-options { 
-            color: var(--text-secondary); 
-            cursor: pointer; 
-            padding: 5px;
-            border-radius: 50%;
-            transition: background 0.2s;
+            color: var(--text-secondary); cursor: pointer; padding: 5px; border-radius: 50%; transition: background 0.2s;
         }
         .post-options.disabled { opacity: 0.3; cursor: default; }
         .post-options:not(.disabled):hover { background-color: var(--secondary-hover); color: var(--text-primary); }
@@ -141,7 +130,7 @@
         }
         .post-media { width: 100%; height: auto; max-height: 550px; object-fit: contain; }
         
-        /* Heart Animation Overlay */
+        /* Heart Animation */
         .heart-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
             color: rgba(255, 255, 255, 0.9); font-size: 80px; pointer-events: none;
@@ -161,11 +150,11 @@
 
         .post-likes { 
             padding: 0 15px; font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; 
-            cursor: pointer; width: fit-content;
+            cursor: pointer; width: fit-content; transition: opacity 0.2s;
         }
         .post-likes:active { opacity: 0.7; }
 
-        .post-caption { padding: 0 15px 5px; font-size: 0.9rem; line-height: 1.5; }
+        .post-caption { padding: 0 15px 5px; font-size: 0.9rem; line-height: 1.5; word-wrap: break-word; }
         .caption-username { font-weight: 700; margin-left: 5px; }
         .post-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px; display: block; padding: 0 15px; }
 
@@ -180,7 +169,6 @@
         .sk-name { width: 100px; height: 14px; border-radius: 4px; background: var(--skeleton-base); }
         .sk-image { width: 100%; height: 350px; background: var(--skeleton-base); }
         .sk-actions { height: 30px; margin: 10px; width: 40%; background: var(--skeleton-base); border-radius: 4px; }
-        
         .skeleton-animate {
             animation: shimmer 1.5s infinite linear;
             background: linear-gradient(90deg, var(--skeleton-base) 0%, var(--skeleton-highlight) 50%, var(--skeleton-base) 100%);
@@ -188,7 +176,7 @@
         }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
-        /* --- CREATE & OPTION MODALS --- */
+        /* --- MODALS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 1000; opacity: 0; visibility: hidden;
@@ -196,16 +184,15 @@
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         
-        /* Bottom Sheet Style for Options */
-        .bottom-sheet {
-            align-items: flex-end;
-        }
+        /* Bottom Sheet (Options & Likes) */
+        .bottom-sheet { align-items: flex-end; }
         .sheet-card {
             background: var(--modal-bg); width: 100%; max-width: 480px; 
             border-top-left-radius: 20px; border-top-right-radius: 20px;
             transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             padding: 20px 0 10px 0;
             box-shadow: 0 -5px 25px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
         }
         .modal-overlay.active .sheet-card { transform: translateY(0); }
 
@@ -222,12 +209,8 @@
         .sheet-option.danger svg { color: var(--danger-color); }
 
         /* Toggle Switch */
-        .toggle-container {
-            display: flex; justify-content: space-between; align-items: center; width: 100%;
-        }
-        .switch {
-            position: relative; display: inline-block; width: 44px; height: 24px;
-        }
+        .toggle-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
@@ -240,7 +223,7 @@
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* Standard Modal (Create Post) */
+        /* Create Modal */
         .modal-card {
             background: var(--modal-bg); width: 90%; max-width: 400px; border-radius: 12px;
             overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.3s;
@@ -249,43 +232,71 @@
         
         .modal-header {
             padding: 12px 15px; border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
         }
-        .modal-title { font-weight: 700; margin: 0; }
+        .modal-title { font-weight: 700; margin: 0; font-size: 1rem; }
         .share-btn { color: var(--primary-color); font-weight: 700; background: none; border: none; cursor: pointer; font-size: 1rem; }
         .share-btn:disabled { opacity: 0.5; cursor: wait; }
-        .close-modal { color: var(--text-primary); background: none; border: none; cursor: pointer; }
+        .close-modal { color: var(--text-primary); background: none; border: none; cursor: pointer; font-size: 1.2rem; }
         
         .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .upload-area {
             border: 2px dashed var(--border-color); border-radius: 8px;
-            padding: 40px 20px; text-align: center; cursor: pointer; transition: border-color 0.3s;
+            padding: 30px 20px; text-align: center; cursor: pointer; transition: border-color 0.3s;
         }
         .upload-area:hover { border-color: var(--text-secondary); }
-        .upload-area svg { width: 40px; height: 40px; color: var(--text-primary); margin-bottom: 10px; }
-        .upload-preview {
-            width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; display: none; background: #000;
-        }
+        .upload-preview { width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; display: none; background: #000; }
         .caption-input {
             width: 100%; background: var(--secondary-color); border: none; color: var(--text-primary);
             padding: 10px; border-radius: 8px; font-family: 'Vazirmatn'; resize: none; min-height: 80px;
         }
         .caption-input:focus { outline: none; box-shadow: 0 0 0 1px var(--primary-color); }
-        
         .progress-bar-container { width: 100%; height: 4px; background: var(--secondary-color); border-radius: 2px; margin-top: 10px; display: none; }
         .progress-bar { width: 0%; height: 100%; background: var(--primary-color); border-radius: 2px; transition: width 0.2s; }
 
-        /* User List Modal (Likes) */
-        .user-list-content { max-height: 60vh; overflow-y: auto; padding: 0; }
+        /* --- USER LIST MODAL (LIKES) STYLE --- */
+        .user-list-content { 
+            max-height: 60vh; 
+            overflow-y: auto; 
+            padding: 0; 
+            flex-grow: 1;
+        }
+        /* Custom Scrollbar for User List */
+        .user-list-content::-webkit-scrollbar { width: 5px; }
+        .user-list-content::-webkit-scrollbar-track { background: var(--modal-bg); }
+        .user-list-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        .user-list-content::-webkit-scrollbar-thumb:hover { background: var(--secondary-hover); }
+
         .user-list-item { 
             display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border-color); 
+            transition: background 0.2s;
         }
         .user-list-item:last-child { border-bottom: none; }
-        .user-list-item img { width: 40px; height: 40px; border-radius: 50%; margin-left: 12px; }
-        .user-list-info h4 { margin: 0; font-size: 0.95rem; }
+        .user-list-item:hover { background-color: var(--secondary-hover); }
+        .user-list-item img { width: 40px; height: 40px; border-radius: 50%; margin-left: 12px; object-fit: cover; }
+        .user-list-info { display: flex; flex-direction: column; justify-content: center; }
+        
+        /* Updated Tick Style for List */
+        .user-list-info h4 { 
+            margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 4px; color: var(--text-primary);
+        }
+        .user-list-info h4 .verified-tick {
+            width: 16px; height: 16px; 
+            filter: drop-shadow(0 0 2px rgba(0, 163, 255, 0.5));
+        }
         .user-list-info p { margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
 
         .empty-state { text-align: center; padding: 50px 20px; color: var(--text-secondary); }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--toast-bg); color: white; padding: 10px 20px; border-radius: 20px;
+            font-size: 0.9rem; z-index: 2000; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 8px;
+        }
+        .toast.error { background: var(--toast-error); }
+        .toast.active { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
@@ -330,9 +341,9 @@
         <div class="modal-overlay" id="create-modal">
             <div class="modal-card">
                 <div class="modal-header">
-                    <button class="close-modal" id="close-modal-btn">لغو</button>
+                    <button class="close-modal" id="close-modal-btn">&times;</button>
                     <h3 class="modal-title">پست جدید</h3>
-                    <button class="share-btn" id="share-post-btn">اشتراک‌گذاری</button>
+                    <button class="share-btn" id="share-post-btn">انتشار</button>
                 </div>
                 <div class="modal-body">
                     <input type="file" id="file-input" accept="image/*,video/*" style="display: none;">
@@ -347,6 +358,15 @@
 
                     <textarea class="caption-input" id="caption-input" placeholder="کپشن خود را بنویسید..."></textarea>
                     
+                    <!-- NEW OPTION IN CREATE MODAL -->
+                    <div class="toggle-container" style="padding: 0 5px;">
+                        <span style="font-size: 0.9rem; color: var(--text-secondary);">نمایش لیست لایک‌ها به دیگران</span>
+                        <label class="switch">
+                            <input type="checkbox" id="create-privacy-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
                     <div class="progress-bar-container" id="upload-progress-container">
                         <div class="progress-bar" id="upload-progress"></div>
                     </div>
@@ -389,14 +409,14 @@
                  <div class="modal-body">
                      <textarea class="caption-input" id="edit-caption-input"></textarea>
                      <button class="share-btn" id="save-caption-btn" style="background: var(--primary-color); color: white; padding: 10px; border-radius: 8px;">ذخیره تغییرات</button>
-                     <button class="close-modal" id="cancel-caption-btn" style="margin-top: 10px;">لغو</button>
+                     <button class="close-modal" id="cancel-caption-btn" style="margin-top: 10px; font-size: 0.9rem;">لغو</button>
                  </div>
              </div>
         </div>
 
         <!-- Likes List Modal (Bottom Sheet) -->
         <div class="modal-overlay bottom-sheet" id="likes-modal">
-            <div class="sheet-card" style="max-height: 70vh;">
+            <div class="sheet-card" style="max-height: 80vh;">
                 <div class="modal-header">
                     <h3 class="modal-title" style="font-size: 1rem;">پسندها</h3>
                     <button class="close-modal" id="close-likes-btn">&times;</button>
@@ -406,19 +426,25 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Toast Element -->
+        <div class="toast" id="toast">پیام سیستم</div>
 
     </div>
 
     <script>
-        // --- CONFIG ---
+        // --- CONFIGURATION ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const UPLOAD_PHP_ENDPOINT = 'https://miko.freehost.io/upload_to_parspack.php';
         const SHARED_SECRET = 'miko1234';
         const VERIFIED_ICON_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
+        const LIVE_UPDATE_INTERVAL = 3000; // Check every 3 seconds
 
-        // --- DOM ELEMENTS ---
+        // --- DOM REFERENCES ---
         const feedContainer = document.getElementById('feed-container');
         const skeletonLoader = document.getElementById('skeleton-loader');
+        
+        // Modals
         const createModal = document.getElementById('create-modal');
         const optionsModal = document.getElementById('options-modal');
         const likesModal = document.getElementById('likes-modal');
@@ -445,24 +471,26 @@
         const progressBarContainer = document.getElementById('upload-progress-container');
         const progressBar = document.getElementById('upload-progress');
         const privacyToggle = document.getElementById('privacy-toggle');
+        const createPrivacyToggle = document.getElementById('create-privacy-toggle');
 
-        // Pull to Refresh
+        // Refresh
         const pullIndicator = document.getElementById('pull-indicator');
         const pullSpinner = document.getElementById('pull-spinner');
+        const toast = document.getElementById('toast');
 
-        // --- STATE ---
+        // --- APP STATE ---
         let currentUser = null;
         let clientToken = null;
         let selectedFile = null;
         let allUsersCache = {};
-        let currentOptionsPostId = null; // ID of post currently in options menu
-        
-        // Touch state for Pull-to-Refresh
-        let startY = 0;
-        let isPulling = false;
-        let currentTranslate = 0;
+        let currentOptionsPostId = null; 
+        let currentViewingLikesPostId = null; // Track which likes list is open
+        let postsDataCache = {}; // Cache for detecting changes
 
-        // --- INIT ---
+        // Touch vars
+        let startY = 0; let isPulling = false; let currentTranslate = 0;
+
+        // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) { window.location.href = 'login.html'; return; }
@@ -475,122 +503,74 @@
                 await fetchUsersCache(); 
                 await fetchPosts();
                 
-                // Start Live Timer
-                setInterval(updateLiveTimestamps, 60000); // Update every minute
+                // Start Timers
+                setInterval(updateLiveTimestamps, 60000); // 1 min for "Time Ago"
+                setInterval(startRealtimeUpdates, LIVE_UPDATE_INTERVAL); // 3 sec for Data Sync
             } catch (error) {
                 console.error(error);
-                feedContainer.innerHTML = '<div class="empty-state">خطا در بارگذاری. اینترنت خود را چک کنید.</div>';
+                feedContainer.innerHTML = '<div class="empty-state">خطا در اتصال به سرور.</div>';
                 skeletonLoader.style.display = 'none';
             }
         });
 
         // --- EVENT LISTENERS ---
         function setupEventListeners() {
+            // Create Post
             openCreateBtn.addEventListener('click', () => { resetModal(); createModal.classList.add('active'); });
             closeModalBtn.addEventListener('click', () => createModal.classList.remove('active'));
-            
-            // File Upload
             uploadTrigger.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', (e) => {
                 if (e.target.files && e.target.files[0]) handleFileSelect(e.target.files[0]);
             });
             sharePostBtn.addEventListener('click', handleUploadAndPost);
 
-            // Modals Close logic
+            // Options Modal
             optionsModal.addEventListener('click', (e) => { if(e.target === optionsModal) closeOptions(); });
             closeOptionsBtn.addEventListener('click', closeOptions);
-            likesModal.addEventListener('click', (e) => { if(e.target === likesModal) likesModal.classList.remove('active'); });
-            closeLikesBtn.addEventListener('click', () => likesModal.classList.remove('active'));
+            
+            // Likes Modal
+            likesModal.addEventListener('click', (e) => { 
+                if(e.target === likesModal) {
+                    likesModal.classList.remove('active'); 
+                    currentViewingLikesPostId = null;
+                }
+            });
+            closeLikesBtn.addEventListener('click', () => {
+                likesModal.classList.remove('active');
+                currentViewingLikesPostId = null;
+            });
 
-            // Post Options Logic
+            // Post Actions
             deletePostBtn.addEventListener('click', handleDeletePost);
             editPostBtn.addEventListener('click', () => {
                 closeOptions();
-                // We need to fetch current caption. It's stored in DOM or we fetch again.
-                // For simplicity, let's grab it from DOM if possible, or assume empty if not loaded.
-                // Better: we have the ID, we can find it in the feed logic, but here let's just show empty or previous value.
-                const postCaptionEl = document.querySelector(`#post-${currentOptionsPostId} .post-caption`);
-                // Remove username from text
-                let text = postCaptionEl ? postCaptionEl.innerHTML.split('</span>')[1] || '' : '';
-                editCaptionInput.value = text.trim();
+                const post = postsDataCache[currentOptionsPostId];
+                editCaptionInput.value = post ? post.caption : '';
                 editCaptionModal.classList.add('active');
             });
 
             cancelCaptionBtn.addEventListener('click', () => editCaptionModal.classList.remove('active'));
             saveCaptionBtn.addEventListener('click', handleSaveCaption);
             
-            // Privacy Toggle
+            // Privacy Toggles
             privacyToggle.addEventListener('change', handlePrivacyChange);
 
-            // Pull to Refresh Events
+            // Pull to Refresh
             feedContainer.addEventListener('touchstart', touchStart, {passive: true});
             feedContainer.addEventListener('touchmove', touchMove, {passive: false});
             feedContainer.addEventListener('touchend', touchEnd);
         }
 
-        // --- PULL TO REFRESH LOGIC ---
-        function touchStart(e) {
-            if (feedContainer.scrollTop === 0) {
-                startY = e.touches[0].clientY;
-                isPulling = true;
-            }
-        }
-
-        function touchMove(e) {
-            if (!isPulling) return;
-            const y = e.touches[0].clientY;
-            const diff = y - startY;
-            
-            if (diff > 0 && feedContainer.scrollTop === 0) {
-                e.preventDefault(); // Prevent browser refresh
-                currentTranslate = Math.min(diff * 0.5, 80); // Resistance
-                feedContainer.style.transform = `translateY(${currentTranslate}px)`;
-                pullIndicator.style.opacity = Math.min(diff / 50, 1);
-                pullIndicator.style.transform = `translateY(${Math.min(diff * 0.2, 20)}px)`;
-            }
-        }
-
-        async function touchEnd() {
-            if (!isPulling) return;
-            isPulling = false;
-            
-            if (currentTranslate > 60) {
-                // Trigger Refresh
-                pullSpinner.classList.add('spinning');
-                feedContainer.style.transform = `translateY(60px)`;
-                
-                try {
-                    await fetchPosts();
-                } catch(e) { console.log(e); }
-                
-                setTimeout(() => {
-                    resetPull();
-                }, 500);
-            } else {
-                resetPull();
-            }
-        }
-
-        function resetPull() {
-            feedContainer.style.transform = '';
-            pullIndicator.style.opacity = 0;
-            pullIndicator.style.transform = '';
-            pullSpinner.classList.remove('spinning');
-            currentTranslate = 0;
-        }
-
-        // --- FILE HANDLING ---
+        // --- FILE & MODAL LOGIC ---
         function handleFileSelect(file) {
             selectedFile = file;
             const reader = new FileReader();
             uploadTrigger.style.display = 'none';
             if (file.type.startsWith('video/')) {
-                imagePreview.style.display = 'none';
-                videoPreview.style.display = 'block';
+                imagePreview.style.display = 'none'; videoPreview.style.display = 'block';
                 videoPreview.src = URL.createObjectURL(file);
             } else {
-                videoPreview.style.display = 'none';
-                imagePreview.style.display = 'block';
+                videoPreview.style.display = 'none'; imagePreview.style.display = 'block';
                 reader.onload = (e) => imagePreview.src = e.target.result;
                 reader.readAsDataURL(file);
             }
@@ -598,19 +578,25 @@
 
         function resetModal() {
             selectedFile = null;
-            fileInput.value = '';
-            captionInput.value = '';
+            fileInput.value = ''; captionInput.value = '';
             imagePreview.src = ''; videoPreview.src = '';
             imagePreview.style.display = 'none'; videoPreview.style.display = 'none';
             uploadTrigger.style.display = 'block';
             progressBarContainer.style.display = 'none'; progressBar.style.width = '0%';
-            sharePostBtn.disabled = false; sharePostBtn.textContent = 'اشتراک‌گذاری';
+            sharePostBtn.disabled = false; sharePostBtn.textContent = 'انتشار';
+            createPrivacyToggle.checked = false; // Default: DISABLED
         }
 
-        // --- NETWORKING HELPERS ---
+        function showToast(msg, type = 'success') {
+            toast.textContent = msg;
+            toast.className = `toast ${type} active`;
+            setTimeout(() => toast.classList.remove('active'), 3000);
+        }
+
+        // --- NETWORK CORE ---
         async function refreshClientToken() {
             const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-            if (!response.ok) throw new Error('Token Error');
+            if (!response.ok) throw new Error('Auth Failed');
             const data = await response.json();
             clientToken = data.token;
         }
@@ -622,9 +608,9 @@
             if (response.ok) allUsersCache = await response.json() || {};
         }
 
-        // --- UPLOAD & POST ---
+        // --- UPLOAD & CREATE POST ---
         async function handleUploadAndPost() {
-            if (!selectedFile) { alert('لطفاً فایل انتخاب کنید.'); return; }
+            if (!selectedFile) { showToast('فایلی انتخاب نشده است', 'error'); return; }
             sharePostBtn.disabled = true; sharePostBtn.textContent = 'در حال آپلود...';
             progressBarContainer.style.display = 'block';
 
@@ -644,8 +630,8 @@
                         if (result.success && result.url) {
                             await createPostRecord(result.url, selectedFile.type.startsWith('video/') ? 'video' : 'image');
                         } else throw new Error(result.error);
-                    } catch (err) { alert('خطا: ' + err.message); sharePostBtn.disabled = false; }
-                } else { alert('خطای سرور'); sharePostBtn.disabled = false; }
+                    } catch (err) { showToast(err.message, 'error'); sharePostBtn.disabled = false; }
+                } else { showToast('خطای سرور', 'error'); sharePostBtn.disabled = false; }
             };
             xhr.send(formData);
         }
@@ -659,7 +645,7 @@
                 caption: captionInput.value.trim(),
                 timestamp: new Date().toISOString(),
                 likes: {},
-                show_likes: true // Default visibility
+                show_likes: createPrivacyToggle.checked // Uses the checkbox value (Default false)
             };
 
             try {
@@ -670,56 +656,70 @@
                 });
                 createModal.classList.remove('active');
                 await fetchPosts();
-            } catch (err) { alert('خطا در ذخیره'); sharePostBtn.disabled = false; }
+                showToast('پست منتشر شد');
+            } catch (err) { showToast('خطا در انتشار', 'error'); sharePostBtn.disabled = false; }
         }
 
-        // --- FEED LOGIC ---
+        // --- FEED & REALTIME LOGIC ---
         async function fetchPosts() {
             const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
                 headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
             });
             skeletonLoader.style.display = 'none';
-            if (!response.ok) {
-                 if (response.status === 404) { feedContainer.innerHTML = '<div class="empty-state">هنوز پستی نیست.</div>'; return; }
-                 throw new Error('Fail');
-            }
-            const data = await response.json();
-            const posts = Object.entries(data || {}).map(([key, val]) => ({ id: key, ...val }))
+            
+            if (!response.ok && response.status !== 404) return;
+            
+            const data = await response.json() || {};
+            postsDataCache = data; // Update Cache
+
+            const posts = Object.entries(data).map(([key, val]) => ({ id: key, ...val }))
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            renderFeed(posts);
+            
+            if (posts.length === 0) {
+                feedContainer.innerHTML = '<div class="empty-state">هیچ پستی وجود ندارد.</div>';
+            } else {
+                renderFeed(posts);
+            }
         }
 
         function renderFeed(posts) {
+            // Important: We only render full list on load or refresh. 
+            // Realtime updates will manipulate existing DOM to avoid flickering.
+            // But if feed is empty or totally diff, we rebuild.
+            
+            // Simple approach for this demo: clear and rebuild initially.
             feedContainer.innerHTML = '';
+            
             posts.forEach(post => {
+                const isOwner = post.sender_username === currentUser.username;
                 const user = allUsersCache[post.sender_username] || { displayName: post.sender_username };
                 const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${post.sender_username}&background=random`;
                 const isLiked = post.likes && post.likes[currentUser.username];
                 const likeCount = post.likes ? Object.keys(post.likes).length : 0;
-                
-                // Verified Logic
                 const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
 
-                // Post Options Availability
-                const isOwner = post.sender_username === currentUser.username;
-                const optionsClass = isOwner ? 'post-options' : 'post-options disabled';
-                const optionsClick = isOwner ? `onclick="openPostOptions('${post.id}', ${post.show_likes !== false})"` : '';
-
-                // Media
-                let mediaHtml = post.type === 'video' 
-                    ? `<video class="post-media" src="${post.media_url}" controls playsinline></video>`
-                    : `<img class="post-media" src="${post.media_url}" loading="lazy" ondblclick="triggerLike('${post.id}')">`;
+                // Visibility of likes button text logic
+                // If I am owner: always see count.
+                // If not owner: see count ONLY IF show_likes is true.
+                const canSeeLikes = isOwner || (post.show_likes !== false); 
+                const likesText = canSeeLikes ? `${likeCount} پسند` : '';
+                const likesClickAction = canSeeLikes ? `onclick="showLikesList('${post.id}', ${isOwner}, ${post.show_likes !== false})"` : '';
 
                 const postEl = document.createElement('div');
                 postEl.className = 'post-card';
                 postEl.id = `post-${post.id}`;
+                
+                let mediaHtml = post.type === 'video' 
+                    ? `<video class="post-media" src="${post.media_url}" controls playsinline></video>`
+                    : `<img class="post-media" src="${post.media_url}" loading="lazy" ondblclick="triggerLike('${post.id}')">`;
+
                 postEl.innerHTML = `
                     <div class="post-header">
                         <div class="user-info">
                             <img src="${avatar}" class="user-avatar" alt="Avatar">
                             <span class="username">${user.displayName || post.sender_username} ${verifiedHtml}</span>
                         </div>
-                        <div class="${optionsClass}" ${optionsClick}>
+                        <div class="post-options ${isOwner ? '' : 'disabled'}" ${isOwner ? `onclick="openPostOptions('${post.id}', ${post.show_likes !== false})"` : ''}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
                         </div>
                     </div>
@@ -735,12 +735,12 @@
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                         </button>
                     </div>
-                    <div class="post-likes" id="likes-count-${post.id}" onclick="showLikesList('${post.id}', ${isOwner}, ${post.show_likes !== false})">
-                        ${likeCount} پسند
+                    <div class="post-likes" id="likes-count-${post.id}" ${likesClickAction}>
+                        ${likesText}
                     </div>
                     <div class="post-caption">
                         <span class="caption-username">${user.displayName || post.sender_username}</span>
-                        ${post.caption}
+                        <span class="caption-text">${post.caption}</span>
                     </div>
                     <span class="post-time" data-timestamp="${post.timestamp}">${timeAgo(post.timestamp)}</span>
                 `;
@@ -748,10 +748,75 @@
             });
         }
 
-        // --- POST OPTIONS LOGIC ---
+        // --- REALTIME UPDATER ---
+        async function startRealtimeUpdates() {
+            try {
+                // 1. Fetch new data
+                const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                });
+                if (!response.ok) return;
+                const newData = await response.json() || {};
+
+                // 2. Iterate existing DOM posts
+                const domPosts = document.querySelectorAll('.post-card');
+                
+                // Remove deleted posts
+                domPosts.forEach(el => {
+                    const pid = el.id.replace('post-', '');
+                    if (!newData[pid]) {
+                        el.remove(); // Delete animation could be added here
+                    }
+                });
+
+                // Update existing posts & Check for current Viewing Likes
+                Object.keys(newData).forEach(key => {
+                    const post = newData[key];
+                    const el = document.getElementById(`post-${key}`);
+                    
+                    if (el) {
+                        // Check Privacy Force Close Logic
+                        const isOwner = post.sender_username === currentUser.username;
+                        // If I am looking at THIS post's likes, and it became private, and I am not owner
+                        if (currentViewingLikesPostId === key && post.show_likes === false && !isOwner) {
+                            likesModal.classList.remove('active');
+                            currentViewingLikesPostId = null;
+                            showToast('مالک پست نمایش لیست پسندها را غیرفعال کرد.', 'error');
+                        }
+
+                        // Update Caption
+                        const capEl = el.querySelector('.caption-text');
+                        if (capEl && capEl.textContent !== post.caption) {
+                            capEl.textContent = post.caption;
+                        }
+
+                        // Update Like Visibility in UI
+                        const likeCountEl = el.querySelector('.post-likes');
+                        const canSee = isOwner || (post.show_likes !== false);
+                        const likeCount = post.likes ? Object.keys(post.likes).length : 0;
+                        
+                        if (canSee) {
+                            likeCountEl.textContent = `${likeCount} پسند`;
+                            likeCountEl.setAttribute('onclick', `showLikesList('${key}', ${isOwner}, true)`);
+                            likeCountEl.style.display = 'block';
+                        } else {
+                            likeCountEl.style.display = 'none'; // Hide completely if disabled
+                            likeCountEl.removeAttribute('onclick');
+                        }
+                    } else {
+                        // New Post found (could prepend it if we want full sync, 
+                        // but let's just leave it for pull-to-refresh to avoid jumps)
+                    }
+                });
+                
+                postsDataCache = newData;
+
+            } catch (e) { console.warn("Sync error", e); }
+        }
+
+        // --- POST ACTIONS ---
         function openPostOptions(postId, isPublic) {
             currentOptionsPostId = postId;
-            // Set toggle state based on post data
             privacyToggle.checked = isPublic;
             optionsModal.classList.add('active');
         }
@@ -762,15 +827,15 @@
         }
 
         async function handleDeletePost() {
-            if(!confirm('آیا از حذف این پست مطمئن هستید؟')) return;
+            if(!confirm('حذف شود؟')) return;
             try {
                 await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                    method: 'DELETE', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                 });
                 document.getElementById(`post-${currentOptionsPostId}`).remove();
                 closeOptions();
-            } catch(e) { alert('خطا در حذف'); }
+                showToast('پست حذف شد');
+            } catch(e) { showToast('خطا در حذف', 'error'); }
         }
 
         async function handleSaveCaption() {
@@ -782,13 +847,10 @@
                     headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ caption: newCaption })
                 });
-                // Update UI
-                const postCaptionEl = document.querySelector(`#post-${currentOptionsPostId} .post-caption`);
-                const usernameSpan = postCaptionEl.querySelector('.caption-username').outerHTML;
-                postCaptionEl.innerHTML = usernameSpan + ' ' + newCaption;
-                
+                document.querySelector(`#post-${currentOptionsPostId} .caption-text`).textContent = newCaption;
                 editCaptionModal.classList.remove('active');
-            } catch(e) { alert('خطا در ویرایش'); }
+                showToast('ویرایش شد');
+            } catch(e) { showToast('خطا', 'error'); }
             saveCaptionBtn.textContent = 'ذخیره تغییرات';
         }
 
@@ -800,22 +862,18 @@
                     headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ show_likes: isChecked })
                 });
-                // Update UI onclick attribute roughly requires refresh or complex DOM manupulation. 
-                // For now, simpler to refresh or just assume it works. 
-                // Let's update the onclick handler in DOM to reflect new state immediately
-                const likeCountEl = document.getElementById(`likes-count-${currentOptionsPostId}`);
-                likeCountEl.setAttribute('onclick', `showLikesList('${currentOptionsPostId}', true, ${isChecked})`);
-                
+                // UI updates via startRealtimeUpdates automatically
             } catch(e) { 
-                console.error(e); 
                 privacyToggle.checked = !isChecked; // Revert
+                showToast('خطا در تغییر تنظیمات', 'error');
             }
         }
 
-        // --- LIKES LIST LOGIC ---
+        // --- LIKES LIST ---
         async function showLikesList(postId, isOwner, isPublic) {
-            if (!isOwner && !isPublic) return; // Access Denied
+            if (!isOwner && !isPublic) return; 
 
+            currentViewingLikesPostId = postId;
             const listContainer = document.getElementById('likes-list-container');
             listContainer.innerHTML = '<div class="empty-state"><div class="pull-spinner spinning" style="margin:0 auto;"></div></div>';
             likesModal.classList.add('active');
@@ -836,34 +894,39 @@
                 userIds.forEach(uid => {
                     const user = allUsersCache[uid] || { displayName: uid, username: uid };
                     const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${uid}&background=random`;
+                    
                     const div = document.createElement('div');
                     div.className = 'user-list-item';
                     div.innerHTML = `
                         <img src="${avatar}">
                         <div class="user-list-info">
-                            <h4>${user.displayName || uid} ${user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : ''}</h4>
+                            <h4>
+                                ${user.displayName || uid} 
+                                ${user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : ''}
+                            </h4>
                             <p>@${user.username || uid}</p>
                         </div>
                     `;
                     listContainer.appendChild(div);
                 });
-
             } catch(e) {
                 listContainer.innerHTML = '<div class="empty-state">خطا در دریافت لیست.</div>';
             }
         }
 
-        // --- LIKE INTERACTION ---
+        // --- LIKE BUTTON LOGIC ---
         window.toggleLike = async (postId) => {
             const btn = document.getElementById(`like-btn-${postId}`);
             const countEl = document.getElementById(`likes-count-${postId}`);
             const isLiked = btn.classList.contains('liked');
-            let currentCount = parseInt(countEl.textContent);
+            let currentCount = parseInt(countEl.textContent) || 0;
             
+            // Optimistic UI
             if (isLiked) {
                 btn.classList.remove('liked');
                 btn.querySelector('svg').setAttribute('fill', 'none');
-                countEl.innerHTML = `${Math.max(0, currentCount - 1)} پسند`;
+                btn.querySelector('svg').setAttribute('stroke', 'currentColor');
+                countEl.textContent = `${Math.max(0, currentCount - 1)} پسند`;
                 try {
                     await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes/${currentUser.username}`, {
                         method: 'DELETE', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
@@ -871,11 +934,14 @@
                 } catch(e) {}
             } else {
                 btn.classList.add('liked');
-                btn.querySelector('svg').setAttribute('fill', 'currentColor');
-                countEl.innerHTML = `${currentCount + 1} پسند`;
+                btn.querySelector('svg').setAttribute('fill', '#ED4956');
+                btn.querySelector('svg').setAttribute('stroke', '#ED4956');
+                countEl.textContent = `${currentCount + 1} پسند`;
                 try {
                     await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes/${currentUser.username}`, {
-                        method: 'PUT', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' }, body: 'true'
+                        method: 'PUT', 
+                        headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' }, 
+                        body: 'true'
                     });
                 } catch(e) {}
             }
@@ -885,12 +951,47 @@
             const heart = document.getElementById(`heart-anim-${postId}`);
             const btn = document.getElementById(`like-btn-${postId}`);
             heart.classList.remove('active');
-            void heart.offsetWidth;
+            void heart.offsetWidth; // Reflow
             heart.classList.add('active');
             if (!btn.classList.contains('liked')) toggleLike(postId);
         };
 
-        // --- TIME HELPERS ---
+        // --- PULL REFRESH & TIME ---
+        function touchStart(e) {
+            if (feedContainer.scrollTop === 0) {
+                startY = e.touches[0].clientY;
+                isPulling = true;
+            }
+        }
+        function touchMove(e) {
+            if (!isPulling) return;
+            const diff = e.touches[0].clientY - startY;
+            if (diff > 0 && feedContainer.scrollTop === 0) {
+                e.preventDefault();
+                currentTranslate = Math.min(diff * 0.5, 80);
+                feedContainer.style.transform = `translateY(${currentTranslate}px)`;
+                pullIndicator.style.opacity = Math.min(diff / 50, 1);
+            }
+        }
+        async function touchEnd() {
+            if (!isPulling) return;
+            isPulling = false;
+            if (currentTranslate > 60) {
+                pullSpinner.classList.add('spinning');
+                feedContainer.style.transform = `translateY(60px)`;
+                await fetchPosts();
+                setTimeout(resetPull, 500);
+            } else {
+                resetPull();
+            }
+        }
+        function resetPull() {
+            feedContainer.style.transform = '';
+            pullIndicator.style.opacity = 0;
+            pullSpinner.classList.remove('spinning');
+            currentTranslate = 0;
+        }
+
         function updateLiveTimestamps() {
             document.querySelectorAll('.post-time').forEach(el => {
                 const ts = el.getAttribute('data-timestamp');
@@ -910,7 +1011,6 @@
             const days = Math.floor(hours / 24);
             return `${days} روز پیش`;
         }
-
     </script>
 </body>
 </html>
