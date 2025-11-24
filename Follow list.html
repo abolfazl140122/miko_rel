@@ -24,6 +24,8 @@
             --modal-bg: #1C2128;
             --online-color: #28a745;
             --offline-color: #6a737d;
+            --input-bg: #0d1117;
+            --active-tab-bg: #1E90FF;
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -51,27 +53,113 @@
             position: relative;
         }
 
-        /* --- Header --- */
-        .header {
-            padding: 15px 20px;
+        /* --- Header & Search Area --- */
+        .header-area {
             background-color: var(--secondary-color);
             border-bottom: 1px solid var(--border-color);
+            z-index: 20;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+
+        .header-top {
+            padding: 15px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-shrink: 0;
-            z-index: 10;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
-        .header h1 { font-size: 1.1rem; margin: 0; font-weight: 700; }
-        .back-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 5px; display: flex; align-items: center; }
+        .header-top h1 { font-size: 1.2rem; margin: 0; font-weight: 900; color: var(--text-primary); }
+        .back-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 5px; display: flex; align-items: center; transition: transform 0.2s; }
+        .back-btn:active { transform: scale(0.9); }
+
+        /* --- Search Bar --- */
+        .search-container {
+            padding: 0 20px 15px 20px;
+            position: relative;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-box input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 45px 12px 15px;
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(30, 144, 255, 0.15);
+            background-color: #05070a;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .search-box input:focus + .search-icon {
+            color: var(--primary-color);
+        }
+
+        /* --- Tabs --- */
+        .tabs-container {
+            display: flex;
+            padding: 0 20px;
+            gap: 15px;
+            margin-bottom: 0; /* Bottom handled by container padding */
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Vazirmatn', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s;
+            padding-bottom: 15px;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+        }
+
+        .tab-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background-color: var(--primary-color);
+            width: 50%; /* Dynamically updated via JS ideally, simplifying here */
+            transition: transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+            border-radius: 3px 3px 0 0;
+        }
 
         /* --- List Container --- */
         .list-container {
             flex-grow: 1;
             overflow-y: auto;
-            padding: 15px;
+            padding: 20px;
             padding-bottom: 80px;
             scroll-behavior: smooth;
             position: relative;
@@ -83,15 +171,23 @@
             align-items: center;
             background-color: var(--secondary-color);
             padding: 12px 15px;
-            border-radius: 16px;
+            border-radius: 18px;
             margin-bottom: 12px;
             border: 1px solid var(--border-color);
             position: relative;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            animation: slideUp 0.4s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
         }
         
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-card:hover { background-color: var(--secondary-hover); }
         .user-card:active { transform: scale(0.98); }
 
         .user-card.is-me {
@@ -108,15 +204,16 @@
         .rank-number {
             font-size: 1.2rem;
             font-weight: 900;
-            width: 30px;
+            width: 35px;
             text-align: center;
             margin-left: 10px;
             color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
         }
 
-        .user-card[data-rank="1"] .rank-number { color: var(--rank-1); font-size: 1.5rem; }
-        .user-card[data-rank="2"] .rank-number { color: var(--rank-2); font-size: 1.4rem; }
-        .user-card[data-rank="3"] .rank-number { color: var(--rank-3); font-size: 1.3rem; }
+        .user-card[data-rank="1"] .rank-number { color: var(--rank-1); font-size: 1.6rem; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+        .user-card[data-rank="2"] .rank-number { color: var(--rank-2); font-size: 1.5rem; }
+        .user-card[data-rank="3"] .rank-number { color: var(--rank-3); font-size: 1.4rem; }
 
         .avatar-wrapper {
             position: relative;
@@ -133,7 +230,9 @@
             object-fit: cover;
             background-color: var(--secondary-hover);
             border: 2px solid transparent;
+            transition: transform 0.3s;
         }
+        .user-card:hover .avatar { transform: scale(1.05); }
         .user-card.is-me .avatar { border-color: var(--gold-color); }
 
         /* Online/Offline Dot */
@@ -153,12 +252,25 @@
         .user-info { flex-grow: 1; min-width: 0; }
         .display-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
         .username { font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px; }
-        .badge-me { display: inline-block; background-color: var(--gold-color); color: #000; font-size: 0.7rem; padding: 2px 6px; border-radius: 8px; font-weight: 700; }
+        .badge-me { display: inline-block; background-color: var(--gold-color); color: #000; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: 800; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        .follower-count { text-align: center; padding-right: 10px; min-width: 60px; }
+        .follower-count { text-align: center; padding-right: 10px; min-width: 70px; }
         .count-value { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); }
         .user-card.is-me .count-value { color: var(--gold-color); }
         .count-label { font-size: 0.7rem; color: var(--text-secondary); display: block; }
+
+        /* --- Empty State --- */
+        .empty-state {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-secondary);
+            animation: fadeIn 0.5s;
+            display: none;
+        }
+        .empty-state svg { width: 60px; height: 60px; margin-bottom: 15px; opacity: 0.5; }
+        .empty-state p { font-size: 1rem; margin: 0; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* --- Find Me Button --- */
         .find-me-btn {
@@ -178,7 +290,7 @@
         .skeleton-container {
             display: flex; flex-direction: column; gap: 12px;
             width: 100%; height: 100%; position: absolute; top: 0; left: 0;
-            padding: 15px; background: var(--background-color); z-index: 40;
+            padding: 15px; background: var(--background-color); z-index: 40; margin-top: 145px; /* Offset for header */
         }
         .skeleton-card {
             display: flex; align-items: center; padding: 12px 15px;
@@ -281,16 +393,35 @@
 <body>
 
     <div class="app-container">
-        <!-- Header -->
-        <header class="header">
-            <button class="back-btn" onclick="window.history.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            </button>
-            <h1>رتبه‌بندی فالوورها</h1>
-            <div style="width: 24px;"></div>
-        </header>
+        <!-- Fixed Header Area -->
+        <div class="header-area">
+            <div class="header-top">
+                <button class="back-btn" onclick="window.history.back()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <h1>جدول برترین‌ها</h1>
+                <div style="width: 24px;"></div>
+            </div>
 
-        <!-- Skeleton Loading -->
+            <!-- Animated Search Bar -->
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="جستجوی کاربر...">
+                    <div class="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="all" onclick="switchTab('all')">کل کاربران</button>
+                <button class="tab-btn" data-tab="friends" onclick="switchTab('friends')">دوستان من</button>
+                <div class="tab-indicator" id="tab-indicator"></div>
+            </div>
+        </div>
+
+        <!-- Skeleton Loading (Positioned absolutely) -->
         <div class="skeleton-container" id="skeleton-loading">
             <!-- Generating 8 skeleton items -->
             <div class="skeleton-card"><div class="sk-rank"></div><div class="sk-avatar"></div><div class="sk-info"><div class="sk-line-1"></div><div class="sk-line-2"></div></div><div class="sk-count"></div></div>
@@ -304,12 +435,18 @@
         </div>
 
         <!-- List -->
-        <div class="list-container" id="list-container"></div>
+        <div class="list-container" id="list-container">
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                <p id="empty-text">کاربری یافت نشد.</p>
+            </div>
+        </div>
 
         <!-- FAB Button -->
         <button class="find-me-btn" id="find-me-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
-            جستجوی خودم
+            پیدا کردن من
         </button>
     </div>
 
@@ -357,6 +494,10 @@
         const skeletonLoading = document.getElementById('skeleton-loading');
         const findMeBtn = document.getElementById('find-me-btn');
         const profileOverlay = document.getElementById('profile-overlay');
+        const searchInput = document.getElementById('search-input');
+        const tabIndicator = document.getElementById('tab-indicator');
+        const emptyState = document.getElementById('empty-state');
+        const emptyText = document.getElementById('empty-text');
         
         // Profile Modal Elements
         const pAvatar = document.getElementById('p-avatar');
@@ -374,6 +515,9 @@
         let usersCache = {}; 
         let followersCache = {}; 
         let followingCache = {}; 
+        
+        let globalLeaderboard = []; // Holds processed data
+        let currentTab = 'all'; // 'all' or 'friends'
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -390,15 +534,43 @@
             });
             document.querySelector('.modal-handle').addEventListener('click', closeProfileModal);
 
+            // Search Listener
+            searchInput.addEventListener('input', (e) => {
+                renderCurrentView(e.target.value);
+            });
+
             try {
                 await refreshClientToken();
-                await loadAndRenderLeaderboard();
+                await loadAndProcessData();
             } catch (error) {
                 console.error(error);
                 skeletonLoading.style.display = 'none';
                 listContainer.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">خطا در بارگذاری.<br>${error.message}</div>`;
             }
         });
+
+        // --- Tabs Logic ---
+        function switchTab(tab) {
+            if (currentTab === tab) return;
+            currentTab = tab;
+
+            // Update UI Tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+
+            // Animate Indicator
+            if (tab === 'friends') {
+                tabIndicator.style.transform = 'translateX(-100%)';
+            } else {
+                tabIndicator.style.transform = 'translateX(0)';
+            }
+
+            // Reset scroll
+            listContainer.scrollTop = 0;
+
+            // Re-render list
+            renderCurrentView(searchInput.value);
+        }
 
         // --- API & Logic ---
         async function refreshClientToken() {
@@ -427,7 +599,7 @@
             return response.json();
         }
 
-        async function loadAndRenderLeaderboard() {
+        async function loadAndProcessData() {
             // Data fetching
             const [usersData, followersData, followingData] = await Promise.all([
                 proxyRequest('users'),
@@ -441,6 +613,7 @@
             followersCache = followersData || {};
             followingCache = followingData || {};
 
+            // Process Global Leaderboard once
             const leaderboard = [];
             const allUserIds = Object.keys(usersData);
 
@@ -455,26 +628,75 @@
                     displayName: user.displayName || user.username,
                     profilePicUrl: user.profilePicUrl,
                     verified: user.verified || false,
-                    isOnline: user.isOnline || false, // Check online status
+                    isOnline: user.isOnline || false,
                     followerCount: count
                 });
             });
 
-            // Sort
+            // Sort globally based on follower count
             leaderboard.sort((a, b) => b.followerCount - a.followerCount);
             
-            // Artificial delay to show off the skeleton loading (can remove in production)
-            setTimeout(() => {
-                renderList(leaderboard);
-            }, 600);
+            // Assign Global Rank
+            leaderboard.forEach((user, index) => {
+                user.globalRank = index + 1;
+            });
+
+            globalLeaderboard = leaderboard;
+
+            // Hide skeleton and render
+            skeletonLoading.style.display = 'none';
+            renderCurrentView();
         }
 
-        function renderList(data) {
+        function renderCurrentView(searchQuery = '') {
             listContainer.innerHTML = '';
+            findMeBtn.classList.remove('visible');
+            
+            // Filter based on Tab
+            let dataToRender = [];
+            if (currentTab === 'all') {
+                dataToRender = globalLeaderboard;
+            } else {
+                // Show only people I follow (Friends/Following)
+                // Note: We keep their global rank/order
+                const myFollowing = followingCache[currentUser.username] || {};
+                dataToRender = globalLeaderboard.filter(user => myFollowing[user.username] || user.username === currentUser.username); // Optionally include self
+                
+                // Remove self from friends tab if desired, or keep it. 
+                // Usually "Friends" lists don't show self, but for ranking purposes let's see.
+                // Let's remove self to be strictly "Following" list logic
+                dataToRender = dataToRender.filter(user => user.username !== currentUser.username);
+            }
+
+            // Filter based on Search
+            if (searchQuery.trim() !== '') {
+                const lowerQ = searchQuery.toLowerCase();
+                dataToRender = dataToRender.filter(user => 
+                    user.username.toLowerCase().includes(lowerQ) || 
+                    user.displayName.toLowerCase().includes(lowerQ)
+                );
+            }
+
+            // Handle Empty States
+            if (dataToRender.length === 0) {
+                listContainer.appendChild(emptyState);
+                emptyState.style.display = 'block';
+                if (currentTab === 'friends' && searchQuery === '') {
+                    emptyText.textContent = 'شما هنوز کسی را دنبال نکرده‌اید.';
+                } else {
+                    emptyText.textContent = 'نتیجه‌ای یافت نشد.';
+                }
+                return;
+            } else {
+                emptyState.style.display = 'none';
+            }
+
             let myElementId = null;
 
-            data.forEach((user, index) => {
-                const rank = index + 1;
+            // Render List
+            dataToRender.forEach((user, index) => {
+                // We use globalRank for the ranking number to show consistent standing
+                const rank = user.globalRank; 
                 const isMe = user.username === currentUser.username;
                 const avatarUrl = user.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=161B22&color=fff&size=100`;
                 const verifiedHtml = user.verified ? `<img src="${VERIFIED_TICK_URL}" class="verified-tick" alt="verified">` : '';
@@ -485,8 +707,15 @@
                 const elementId = `user-row-${user.username}`;
                 if (isMe) myElementId = elementId;
 
+                // Animation delay for staggered effect
+                const animationDelay = index < 10 ? index * 0.05 : 0;
+
                 const html = `
-                    <div class="user-card ${isMe ? 'is-me' : ''}" id="${elementId}" data-rank="${rank}" onclick="openUserProfile('${user.username}')">
+                    <div class="user-card ${isMe ? 'is-me' : ''}" 
+                         id="${elementId}" 
+                         data-rank="${rank}" 
+                         onclick="openUserProfile('${user.username}')"
+                         style="animation-delay: ${animationDelay}s">
                         <div class="rank-number">${rank}</div>
                         <div class="avatar-wrapper">
                             <img src="${avatarUrl}" class="avatar" alt="${user.displayName}" loading="lazy">
@@ -509,10 +738,8 @@
                 listContainer.insertAdjacentHTML('beforeend', html);
             });
 
-            // Hide skeleton, show list
-            skeletonLoading.style.display = 'none';
-
-            if (myElementId) {
+            // Show 'Find Me' button only in 'All' tab and if searching is empty
+            if (myElementId && currentTab === 'all' && searchQuery === '') {
                 findMeBtn.classList.add('visible');
                 findMeBtn.onclick = () => {
                     const el = document.getElementById(myElementId);
@@ -633,8 +860,13 @@
                 pFollowers.textContent = formatNumber(Object.keys(followersCache[targetUsername]).length);
 
                 // Update List UI
+                // If in friends tab and unfollowing, we might want to remove them, but for UX smoother to keep until refresh
+                // But here we update the count displayed
                 const listRow = document.querySelector(`#user-row-${targetUsername} .count-value`);
                 if (listRow) listRow.textContent = formatNumber(Object.keys(followersCache[targetUsername]).length);
+                
+                // Refresh list if needed (optional, keeps data fresh)
+                // renderCurrentView(searchInput.value); 
 
             } catch (error) {
                 console.error("Follow error:", error);
