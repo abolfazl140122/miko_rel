@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>روبینو همیار</title>
     <style>
+        /* فونت و متغیرهای اصلی */
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
 
         :root {
@@ -14,806 +15,1082 @@
             --border-color: #30363d;
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
-            --primary-color: #00A3FF;
+            --primary-color: #00A3FF; /* آبی همیار */
             --primary-glow: rgba(0, 163, 255, 0.4);
             --like-color: #ED4956;
             --modal-bg: #1C2128;
             --skeleton-base: #161B22;
             --skeleton-highlight: #21262d;
             --danger-color: #FF4D4D;
+            --toast-bg: rgba(40, 44, 52, 0.95);
         }
 
-        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
+        /* استایل‌های عمومی */
         body {
             font-family: 'Vazirmatn', sans-serif;
             background-color: var(--background-color);
             color: var(--text-primary);
-            margin: 0; padding: 0;
-            height: 100vh; overflow: hidden;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
             user-select: none;
-            background: radial-gradient(circle at top left, #1a202c 0%, var(--background-color) 70%);
-        }
-
-        .app-container {
-            width: 100%; max-width: 480px; height: 100%; margin: 0 auto;
-            display: flex; flex-direction: column; position: relative;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
-            background-color: var(--background-color);
-        }
-
-        /* --- HEADER --- */
-        .header-area {
-            background-color: rgba(22, 27, 34, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 12px 20px;
-            height: 60px;
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            position: relative;
-        }
-        .header-title {
-            font-size: 1.5rem; font-weight: 900; margin: 0;
-            color: var(--primary-color);
-            text-shadow: 0 0 15px var(--primary-glow);
-            letter-spacing: 0.5px;
-        }
-        .header-btn {
-            background: none; border: none; color: var(--text-primary);
-            cursor: pointer; padding: 8px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .header-btn svg { width: 28px; height: 28px; stroke-width: 2.5; }
-
-        /* --- PULL TO REFRESH --- */
-        .pull-indicator {
-            position: absolute; top: 70px; left: 0; right: 0; height: 50px;
-            display: flex; justify-content: center; align-items: center;
-            pointer-events: none; transition: transform 0.2s, opacity 0.2s; z-index: 10; opacity: 0;
-        }
-        .pull-spinner {
-            width: 30px; height: 30px;
-            border: 3px solid var(--secondary-hover); 
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary-glow);
-        }
-        .pull-spinner.spinning { animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* --- MAIN FEED --- */
-        .feed-container {
-            flex-grow: 1; overflow-y: auto; 
-            padding-bottom: 20px; scrollbar-width: none;
-            position: relative;
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .feed-container::-webkit-scrollbar { display: none; }
-
-        /* --- POST CARD --- */
-        .post-card {
-            background-color: var(--background-color);
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 10px; padding-bottom: 10px;
-            animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .post-header { padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .user-avatar {
-            width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
-            border: 2px solid var(--border-color);
-            transition: border-color 0.3s;
-        }
-        .username { 
-            font-weight: 700; font-size: 0.95rem; color: var(--text-primary); 
-            display: flex; align-items: center; gap: 4px;
-        }
-        /* تیک آبی استاندارد */
-        .verified-tick {
-            width: 16px; height: 16px;
-            filter: drop-shadow(0 0 4px var(--primary-glow));
-            vertical-align: middle;
-            display: inline-block;
         }
         
-        .post-options { 
-            color: var(--text-secondary); cursor: pointer; padding: 8px; border-radius: 50%; 
-            transition: background-color 0.2s ease;
+        /* استایل‌های هدر */
+        header {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--secondary-color);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.25rem;
         }
-        .post-options:hover { background-color: var(--secondary-hover); }
 
-        /* --- MEDIA CONTAINER & CONTROLS --- */
-        .post-media-container {
-            width: 100%; position: relative;
-            background-color: #000; min-height: 300px; 
-            display: flex; align-items: center; justify-content: center;
+        /* کانتینر اصلی فید */
+        .feed-container {
+            width: 100%;
+            max-width: 600px;
+            padding-bottom: 50px;
+            transition: transform 0.3s ease-out;
+            touch-action: pan-y; /* بهبود عملکرد کشیدن برای رفرش */
+        }
+        
+        /* استایل‌های پست */
+        .post {
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 1.5rem 0.5rem;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* هدر پست (اطلاعات کاربر) */
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+        }
+
+        .user-info {
+            margin-right: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .username {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* استایل تیک آبی ادمین/تأیید شده (بسیار کوچک و استاندارد) */
+        .admin-badge, .verified-badge {
+            width: 14px;
+            height: 14px;
+            color: var(--primary-color);
+            fill: var(--primary-color);
+            margin-right: 4px;
+            margin-top: 1px;
+            display: inline-block;
+        }
+
+        .post-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* کانتینر مدیا (عکس/ویدیو) */
+        .media-container {
+            width: 100%;
+            position: relative;
+            background-color: var(--skeleton-base);
+            min-height: 200px;
             overflow: hidden;
         }
         
-        /* Blur Loading Overlay */
-        .media-loader-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(20, 20, 20, 0.8);
-            backdrop-filter: blur(15px);
-            z-index: 2;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            transition: opacity 0.5s ease;
+        /* استایل‌های لودینگ/بلور */
+        .media-container.loading .media-content {
+            filter: blur(10px);
+            transition: filter 0.5s ease-out;
         }
-        .media-loader-overlay.hidden { opacity: 0; pointer-events: none; }
-        .loader-spinner {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s infinite linear;
-            margin-bottom: 10px;
-        }
-        .loader-text { font-size: 0.8rem; color: var(--text-secondary); }
 
-        .post-media { width: 100%; height: auto; max-height: 580px; object-fit: contain; display: block; opacity: 0; transition: opacity 0.3s; }
-        .post-media.loaded { opacity: 1; }
-        video.post-media { object-fit: contain; max-height: 600px; }
-        
-        /* Video Controls */
-        .video-control-btn {
-            position: absolute; bottom: 15px; right: 15px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            border-radius: 50%;
-            width: 32px; height: 32px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 4;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            transition: transform 0.2s;
-        }
-        .video-control-btn:active { transform: scale(0.9); }
-        .video-control-btn svg { width: 16px; height: 16px; }
-
-        .play-overlay {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.4);
-            border-radius: 50%;
-            width: 70px; height: 70px;
-            display: flex; align-items: center; justify-content: center;
+        .media-container .skeleton-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            z-index: 10;
             pointer-events: none;
-            opacity: 0; transition: opacity 0.2s;
-            z-index: 3;
-            backdrop-filter: blur(2px);
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex-direction: column;
         }
-        .play-overlay.show { opacity: 1; }
-        .play-overlay svg { width: 35px; height: 35px; fill: white; margin-left: 4px; } /* Play icon offset */
 
-        /* Heart Animation */
-        .heart-overlay {
-            position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%) scale(0);
-            color: #fff; font-size: 90px; pointer-events: none;
-            z-index: 5; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        .media-container.loading .skeleton-overlay {
+            opacity: 1;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .media-content {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* استایل اختصاصی ویدیو */
+        .media-container video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* کنترل‌های ویدیو */
+        .video-controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 20;
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+
+        /* بخش اکشن‌ها (لایک، کامنت، اشتراک) */
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem 0.5rem;
+        }
+
+        .main-actions, .share-action {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .action-button {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: transform 0.1s;
+            padding: 0.5rem;
+        }
+
+        .action-button:hover {
+            transform: scale(1.1);
+        }
+
+        .action-button.liked {
+            color: var(--like-color);
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* بخش اطلاعات (تعداد لایک، کپشن) */
+        .post-info {
+            padding: 0 1rem 1rem;
+        }
+
+        .likes-count {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .caption-text {
+            line-height: 1.5;
+        }
+
+        .caption-username {
+            font-weight: 700;
+            margin-right: 5px;
+        }
+
+        /* استایل‌های حالت لودینگ اصلی */
+        .initial-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* پاپ‌آپ لیست پسندها (Likes Modal) */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--modal-bg);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .likes-list {
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .like-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .like-item:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .like-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .like-username {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* استایل تیک آبی در لیست پسندها (اصلاح شده) */
+        .like-username .verified-badge {
+            width: 12px; /* کمی کوچکتر از تیک اصلی پست */
+            height: 12px;
+            margin-right: 4px;
+            margin-top: 2px;
+        }
+
+        /* پاپ‌آپ پیام (Toast) */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--toast-bg);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(20px);
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* استایل‌های کشیدن برای رفرش */
+        .pull-to-refresh {
+            position: absolute;
+            top: -50px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-secondary);
+            transition: opacity 0.3s;
             opacity: 0;
         }
-        .heart-overlay.active { animation: heartPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes heartPop { 
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 
-            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 
-            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 
+
+        .pull-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            margin-left: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
-        .post-actions { padding: 12px 15px 8px; display: flex; gap: 18px; align-items: center; }
-        .action-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 0; }
-        .action-btn svg { width: 28px; height: 28px; stroke-width: 1.7; transition: all 0.2s; }
-        .action-btn.liked svg { 
-            fill: var(--like-color); stroke: var(--like-color); 
-            animation: likePulse 0.4s; 
+        .pull-spinner.spinning {
+            animation: spin 1s linear infinite;
+            opacity: 1;
         }
-        @keyframes likePulse { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
-
-        .post-likes { 
-            padding: 0 15px; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; 
-            width: fit-content; transition: opacity 0.2s;
-        }
-        .post-likes.clickable { cursor: pointer; }
-        .post-likes.clickable:active { opacity: 0.6; }
-        .post-caption { padding: 0 15px 5px; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word; }
-        .caption-username { font-weight: 700; margin-left: 5px; }
-        .post-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px; display: block; padding: 0 15px; }
-
-        /* --- SKELETON --- */
-        #skeleton-loader {
-            position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
-            background: var(--background-color); z-index: 15; overflow: hidden;
-        }
-        .sk-post { margin-bottom: 20px; background: var(--background-color); padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
-        .sk-header { display: flex; align-items: center; padding: 15px; gap: 10px; }
-        .sk-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--skeleton-base); }
-        .sk-name { width: 120px; height: 16px; border-radius: 4px; background: var(--skeleton-base); }
-        .sk-image { width: 100%; height: 380px; background: var(--skeleton-base); }
-        .sk-actions { height: 20px; margin: 15px; width: 40%; background: var(--skeleton-base); border-radius: 4px; }
-        .skeleton-animate::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-
-        /* --- MODALS --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 1000; opacity: 0; visibility: hidden;
-            transition: all 0.3s ease-in-out; 
-            display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(3px);
-        }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        
-        .bottom-sheet { align-items: flex-end; }
-        .sheet-card {
-            background: var(--modal-bg); width: 100%; max-width: 480px; 
-            border-top-left-radius: 24px; border-top-right-radius: 24px;
-            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            padding: 20px 0 15px 0; display: flex; flex-direction: column;
-        }
-        .modal-overlay.active .sheet-card { transform: translateY(0); }
-        .sheet-drag-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 0 auto 15px; }
-        .sheet-option {
-            width: 100%; padding: 16px 25px; text-align: right; background: none; border: none;
-            color: var(--text-primary); font-size: 1rem; font-family: 'Vazirmatn';
-            display: flex; align-items: center; gap: 15px; cursor: pointer;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .sheet-option:active { background-color: var(--secondary-hover); }
-        
-        /* Create Modal */
-        .modal-card {
-            background: var(--modal-bg); width: 85%; max-width: 400px; border-radius: 16px;
-            overflow: hidden; transform: scale(0.9); opacity: 0; transition: all 0.3s;
-        }
-        .modal-overlay.active .modal-card { transform: scale(1); opacity: 1; }
-        .modal-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .upload-area { border: 2px dashed var(--border-color); border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; }
-        .upload-preview { width: 100%; max-height: 300px; object-fit: contain; display: none; background: #000; }
-        .caption-input { width: 100%; background: var(--secondary-color); border: 1px solid var(--border-color); color: var(--text-primary); padding: 12px; border-radius: 10px; font-family: 'Vazirmatn'; resize: none; min-height: 90px; }
-
-        /* --- USER LIST MODAL (LIKES) --- */
-        .user-list-content { max-height: 60vh; overflow-y: auto; padding: 0; }
-        .user-list-item { 
-            display: flex; align-items: center; padding: 12px 20px; 
-            border-bottom: 1px solid rgba(255,255,255,0.05); 
-        }
-        .user-list-item img { width: 44px; height: 44px; border-radius: 50%; margin-left: 12px; object-fit: cover; border: 1px solid var(--border-color); }
-        .user-list-info h4 { 
-            margin: 0; font-size: 0.95rem; 
-            display: flex; align-items: center; gap: 4px; /* این خط باعث تراز شدن متن و تیک میشه */
-            color: var(--text-primary); 
-        }
-        .user-list-info p { margin: 3px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
-        
-        /* اصلاح تیک آبی در لیست لایک‌ها */
-        .user-list-info .verified-tick {
-            width: 14px; height: 14px; /* سایز فیکس و کوچک */
-            min-width: 14px;
-            margin-right: 2px;
-            vertical-align: middle;
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translate(-50%, 100px);
-            background: var(--text-primary); color: var(--background-color); padding: 12px 24px; border-radius: 50px;
-            font-size: 0.95rem; font-weight: 700; z-index: 2000; 
-            transition: transform 0.4s;
-        }
-        .toast.active { transform: translate(-50%, 0); }
-
-        /* Toggle Switch */
-        .toggle-container { display: flex; justify-content: space-between; align-items: center; }
-        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--secondary-hover); transition: .4s; border-radius: 26px; border: 1px solid var(--border-color); }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <!-- Header -->
-        <header class="header-area">
-            <button class="header-btn" onclick="window.location.href='safe_asli.html'">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
-            </button>
-            <h1 class="header-title">روبینو همیار</h1>
-            <button class="header-btn" id="open-create-modal">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            </button>
-        </header>
-        
-        <div class="pull-indicator" id="pull-indicator"><div class="pull-spinner" id="pull-spinner"></div></div>
+    <header>روبینو</header>
 
-        <div id="skeleton-loader">
-            <div class="sk-post"><div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div><div class="sk-image skeleton-animate"></div><div class="sk-actions skeleton-animate"></div></div>
-            <div class="sk-post"><div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div><div class="sk-image skeleton-animate"></div><div class="sk-actions skeleton-animate"></div></div>
-        </div>
-
-        <!-- Feed -->
-        <div class="feed-container" id="feed-container"></div>
-
-        <!-- Create Post Modal -->
-        <div class="modal-overlay" id="create-modal">
-            <div class="modal-card">
-                <div class="modal-header">
-                    <button class="header-btn" id="close-modal-btn">&times;</button>
-                    <h3 style="margin:0">پست جدید</h3>
-                    <button class="header-btn" id="share-post-btn" style="color:var(--primary-color); font-weight:700;">انتشار</button>
-                </div>
-                <div class="modal-body">
-                    <input type="file" id="file-input" accept="image/*,video/*" style="display: none;">
-                    <div class="upload-area" id="upload-trigger">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                        <p>انتخاب عکس یا ویدیو</p>
-                    </div>
-                    <img id="image-preview" class="upload-preview" />
-                    <video id="video-preview" class="upload-preview" controls></video>
-                    <textarea class="caption-input" id="caption-input" placeholder="کپشن..."></textarea>
-                    <div class="toggle-container">
-                        <span style="font-size:0.9rem;">نمایش لیست لایک‌ها</span>
-                        <label class="switch"><input type="checkbox" id="create-privacy-toggle" checked><span class="slider"></span></label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Options Modal -->
-        <div class="modal-overlay bottom-sheet" id="options-modal">
-            <div class="sheet-card">
-                <div class="sheet-drag-handle"></div>
-                <div class="sheet-option">
-                    <div class="toggle-container" style="width:100%"><span>نمایش لایک‌ها</span><label class="switch"><input type="checkbox" id="privacy-toggle"><span class="slider"></span></label></div>
-                </div>
-                <button class="sheet-option" id="edit-post-btn">ویرایش کپشن</button>
-                <button class="sheet-option" style="color:var(--danger-color)" id="delete-post-btn">حذف پست</button>
-            </div>
-        </div>
-        
-        <!-- Edit Caption Modal -->
-        <div class="modal-overlay" id="edit-caption-modal">
-             <div class="modal-card">
-                 <div class="modal-header"><h3>ویرایش متن</h3></div>
-                 <div class="modal-body">
-                     <textarea class="caption-input" id="edit-caption-input"></textarea>
-                     <button class="header-btn" id="save-caption-btn" style="background:var(--primary-color); width:100%; border-radius:8px; padding:10px;">ذخیره</button>
-                     <button class="header-btn" id="cancel-caption-btn" style="width:100%; font-size:0.9rem;">لغو</button>
-                 </div>
-             </div>
-        </div>
-
-        <!-- Likes Modal -->
-        <div class="modal-overlay bottom-sheet" id="likes-modal">
-            <div class="sheet-card" style="max-height: 80vh;">
-                <div class="sheet-drag-handle"></div>
-                <div class="modal-header" style="border:none; padding: 0 20px 15px;">
-                    <h3 style="margin:0">پسندها</h3>
-                    <button class="header-btn" id="close-likes-btn">&times;</button>
-                </div>
-                <div class="user-list-content" id="likes-list-container"></div>
-            </div>
-        </div>
-        
-        <div class="toast" id="toast">پیام</div>
+    <div id="initial-loading" class="initial-loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 15px;">در حال بارگذاری فید...</p>
     </div>
 
-    <script>
-        /* --- CONFIGURATION & CACHING (SERVICE WORKER) --- */
-        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
-        const UPLOAD_PHP_ENDPOINT = 'https://miko.freehost.io/upload_to_parspack.php';
-        const SHARED_SECRET = 'miko1234';
-        const VERIFIED_ICON_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
+    <div class="modal" id="likes-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>پسندها</span>
+                <button class="close-btn" onclick="closeLikesModal()">&times;</button>
+            </div>
+            <div class="likes-list" id="modal-likes-list">
+                <!-- لیست پسندها اینجا قرار می‌گیرد -->
+            </div>
+        </div>
+    </div>
+
+    <div class="feed-container" id="feed-container" style="display: none;">
+        <div id="pull-indicator" class="pull-to-refresh">
+            <div id="pull-spinner" class="pull-spinner"></div>
+            <span>برای بارگذاری مجدد، رها کنید</span>
+        </div>
+        <!-- پست‌ها اینجا اضافه می‌شوند -->
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+        // داده‌های شبیه‌سازی شده
+        const FAKE_USERS = [
+            { id: 1, username: 'ali_rezaei', avatar: 'https://placehold.co/100x100/1C2128/E4E6EB?text=A', isVerified: true },
+            { id: 2, username: 'sara_ahmadi', avatar: 'https://placehold.co/100x100/30363d/E4E6EB?text=S', isVerified: false },
+            { id: 3, username: 'admin_test', avatar: 'https://placehold.co/100x100/00A3FF/FFFFFF?text=Ad', isVerified: true, isAdmin: true },
+            { id: 4, username: 'behnam_k', avatar: 'https://placehold.co/100x100/161B22/E4E6EB?text=B', isVerified: false },
+            { id: 5, username: 'zohreh_m', avatar: 'https://placehold.co/100x100/8b949e/0D1117?text=Z', isVerified: true },
+        ];
+
+        let POST_ID_COUNTER = 1;
         
-        // Register Internal Service Worker for Media Caching
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'rubino-media-cache-v1';
-                self.addEventListener('install', e => self.skipWaiting());
-                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-                self.addEventListener('fetch', event => {
-                    const url = new URL(event.request.url);
-                    // کش کردن فایل‌های تصویری و ویدیویی
-                    if (event.request.destination === 'image' || event.request.destination === 'video' || url.pathname.match(/\.(mp4|jpg|jpeg|png|gif)$/)) {
-                        event.respondWith(
-                            caches.match(event.request).then(response => {
-                                if (response) return response; // بازگشت از کش
-                                return fetch(event.request).then(networkResponse => {
-                                    if(!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') return networkResponse;
-                                    const responseToCache = networkResponse.clone();
-                                    caches.open(CACHE_NAME).then(cache => {
-                                        cache.put(event.request, responseToCache);
-                                    });
-                                    return networkResponse;
-                                });
-                            })
-                        );
+        // شبیه‌سازی API کی (در محیط واقعی باید به صورت امن مدیریت شود)
+        const apiKey = ""; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        // ===============================================
+        // بخش IndexedDB برای کشینگ (صرفه‌جویی اینترنت)
+        // ===============================================
+        let db;
+        const DB_NAME = 'MediaCacheDB';
+        const STORE_NAME = 'mediaStore';
+
+        /**
+         * @description اتصال به IndexedDB یا ایجاد آن در صورت عدم وجود
+         * @returns {Promise<IDBDatabase>}
+         */
+        function setupDb() {
+            return new Promise((resolve, reject) => {
+                // درخواست باز کردن دیتابیس با ورژن 1
+                const request = indexedDB.open(DB_NAME, 1);
+
+                // در صورت نیاز به ایجاد یا آپدیت ساختار دیتابیس
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    // ایجاد یک Object Store جدید برای ذخیره مدیا
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'url' });
                     }
-                });
-            `;
-            const blob = new Blob([swCode], {type: 'application/javascript'});
-            navigator.serviceWorker.register(URL.createObjectURL(blob))
-                .then(() => console.log('SW Registered for Caching'))
-                .catch(err => console.log('SW Error:', err));
+                };
+
+                // در صورت موفقیت
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    console.log('IndexedDB با موفقیت آماده شد.');
+                    resolve(db);
+                };
+
+                // در صورت خطا
+                request.onerror = (event) => {
+                    console.error('خطا در باز کردن IndexedDB:', event.target.error);
+                    reject(event.target.error);
+                };
+            });
         }
 
-        /* --- APP LOGIC --- */
-        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (!currentUser) window.location.href = 'login.html';
-
-        let clientToken = null;
-        let selectedFile = null;
-        let allUsersCache = {};
-        let videoObserver = null;
-        let postsDataCache = {};
-        
-        // Touch Vars
-        let startY = 0; let isPulling = false; const feedContainer = document.getElementById('feed-container');
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            setupEventListeners();
-            initVideoObserver();
+        /**
+         * @description ذخیره فایل مدیا (Blob) در IndexedDB
+         * @param {string} url - کلید ذخیره‌سازی (URL مدیا)
+         * @param {Blob} data - داده‌های فایل مدیا
+         */
+        function saveMediaToCache(url, data) {
+            if (!db) return;
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
             try {
-                await refreshClientToken();
-                await fetchUsersCache(); 
-                await fetchPosts();
-                setInterval(startRealtimeUpdates, 4000);
-            } catch (e) { console.error(e); }
-        });
-
-        function setupEventListeners() {
-            // Modal Toggles
-            document.getElementById('open-create-modal').onclick = () => document.getElementById('create-modal').classList.add('active');
-            document.getElementById('close-modal-btn').onclick = () => document.getElementById('create-modal').classList.remove('active');
-            
-            // Upload
-            const fileInput = document.getElementById('file-input');
-            document.getElementById('upload-trigger').onclick = () => fileInput.click();
-            fileInput.onchange = (e) => {
-                if(e.target.files[0]) {
-                    selectedFile = e.target.files[0];
-                    document.getElementById('upload-trigger').style.display = 'none';
-                    if(selectedFile.type.startsWith('video')) {
-                        const vid = document.getElementById('video-preview');
-                        vid.src = URL.createObjectURL(selectedFile);
-                        vid.style.display = 'block';
-                    } else {
-                        const img = document.getElementById('image-preview');
-                        img.src = URL.createObjectURL(selectedFile);
-                        img.style.display = 'block';
-                    }
-                }
-            };
-            document.getElementById('share-post-btn').onclick = handleUploadAndPost;
-
-            // Options & Likes Modals
-            document.getElementById('options-modal').onclick = (e) => { if(e.target === document.getElementById('options-modal')) closeOptions(); };
-            document.getElementById('likes-modal').onclick = (e) => { if(e.target === document.getElementById('likes-modal')) document.getElementById('likes-modal').classList.remove('active'); };
-            document.getElementById('close-likes-btn').onclick = () => document.getElementById('likes-modal').classList.remove('active');
-            
-            document.getElementById('delete-post-btn').onclick = handleDeletePost;
-            document.getElementById('edit-post-btn').onclick = () => {
-                closeOptions();
-                const post = postsDataCache[window.currentOptionsPostId];
-                document.getElementById('edit-caption-input').value = post.caption;
-                document.getElementById('edit-caption-modal').classList.add('active');
-            };
-            document.getElementById('save-caption-btn').onclick = handleSaveCaption;
-            document.getElementById('cancel-caption-btn').onclick = () => document.getElementById('edit-caption-modal').classList.remove('active');
-            document.getElementById('privacy-toggle').onchange = handlePrivacyChange;
-
-            // Pull Refresh
-            feedContainer.addEventListener('touchstart', e => { if(feedContainer.scrollTop===0) { startY=e.touches[0].clientY; isPulling=true; } }, {passive:true});
-            feedContainer.addEventListener('touchmove', e => {
-                if(!isPulling) return;
-                const diff = e.touches[0].clientY - startY;
-                if(diff > 0 && feedContainer.scrollTop===0) {
-                    e.preventDefault();
-                    document.getElementById('pull-indicator').style.opacity = Math.min(diff/50,1);
-                    document.getElementById('pull-spinner').style.transform = `rotate(${diff*2}deg)`;
-                    feedContainer.style.transform = `translateY(${Math.min(diff*0.5, 80)}px)`;
-                }
-            }, {passive:false});
-            feedContainer.addEventListener('touchend', async () => {
-                if(!isPulling) return; isPulling=false;
-                feedContainer.style.transform = '';
-                if(document.getElementById('pull-indicator').style.opacity > 0.8) {
-                    document.getElementById('pull-spinner').classList.add('spinning');
-                    await fetchPosts();
-                    document.getElementById('pull-spinner').classList.remove('spinning');
-                }
-                document.getElementById('pull-indicator').style.opacity = 0;
-            });
-        }
-
-        async function refreshClientToken() {
-            const res = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-            const data = await res.json();
-            clientToken = data.token;
-        }
-
-        async function fetchUsersCache() {
-            const res = await fetch(`${PROXY_URL}?path=users`, { headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username } });
-            if(res.ok) allUsersCache = await res.json() || {};
-        }
-
-        async function handleUploadAndPost() {
-            if(!selectedFile) return showToast('فایل انتخاب نشده', 'error');
-            const btn = document.getElementById('share-post-btn');
-            btn.textContent = 'درحال آپلود...'; btn.disabled = true;
-
-            const formData = new FormData(); formData.append('file', selectedFile);
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', UPLOAD_PHP_ENDPOINT, true);
-            xhr.onload = async () => {
-                try {
-                    const res = JSON.parse(xhr.responseText);
-                    if(res.success) {
-                        await createPostRecord(res.url, selectedFile.type.startsWith('video') ? 'video':'image');
-                    } else throw new Error('Upload Failed');
-                } catch(e) { showToast('خطا در آپلود', 'error'); btn.disabled=false; }
-            };
-            xhr.send(formData);
-        }
-
-        async function createPostRecord(url, type) {
-            const data = {
-                sender_username: currentUser.username, media_url: url, type: type,
-                caption: document.getElementById('caption-input').value,
-                timestamp: new Date().toISOString(), likes: {},
-                show_likes: document.getElementById('create-privacy-toggle').checked
-            };
-            await fetch(`${PROXY_URL}?path=rubino_posts`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            window.location.reload();
-        }
-
-        async function fetchPosts() {
-            const res = await fetch(`${PROXY_URL}?path=rubino_posts`, { headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username } });
-            document.getElementById('skeleton-loader').style.display = 'none';
-            if(!res.ok) return;
-            const data = await res.json() || {};
-            postsDataCache = data;
-            const posts = Object.entries(data).map(([k,v])=>({id:k,...v})).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-            
-            feedContainer.innerHTML = '';
-            posts.forEach(renderPost);
-            attachVideoObserver();
-        }
-
-        function renderPost(post) {
-            const isOwner = post.sender_username === currentUser.username;
-            const user = allUsersCache[post.sender_username] || { displayName: post.sender_username };
-            const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${post.sender_username}&background=random`;
-            const isLiked = post.likes && post.likes[currentUser.username];
-            const likesCount = post.likes ? Object.keys(post.likes).length : 0;
-            const verified = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
-            
-            // Media Logic with Loading & Controls
-            let mediaHtml = '';
-            if(post.type === 'video') {
-                mediaHtml = `
-                    <div class="media-loader-overlay" id="loader-${post.id}">
-                        <div class="loader-spinner"></div>
-                        <span class="loader-text">درحال دانلود...</span>
-                    </div>
-                    <video class="post-media" id="media-${post.id}" src="${post.media_url}" loop playsinline preload="metadata" 
-                           oncanplay="handleMediaLoad('${post.id}')" onclick="toggleVideoPlay('${post.id}')"></video>
-                    
-                    <div class="play-overlay" id="play-icon-${post.id}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
-                    <button class="video-control-btn" onclick="toggleVideoMute(event, '${post.id}')">
-                         <svg id="mute-icon-${post.id}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
-                    </button>
-                `;
-            } else {
-                mediaHtml = `
-                    <div class="media-loader-overlay" id="loader-${post.id}">
-                        <div class="loader-spinner"></div>
-                    </div>
-                    <img class="post-media" id="media-${post.id}" src="${post.media_url}" loading="lazy" onload="handleMediaLoad('${post.id}')" ondblclick="triggerLike('${post.id}')">
-                `;
-            }
-
-            const div = document.createElement('div');
-            div.className = 'post-card'; div.id = `post-${post.id}`;
-            div.innerHTML = `
-                <div class="post-header">
-                    <div class="user-info">
-                        <img src="${avatar}" class="user-avatar">
-                        <span class="username">${user.displayName || post.sender_username} ${verified}</span>
-                    </div>
-                    <div class="post-options" onclick="${isOwner?`openOptions('${post.id}', ${post.show_likes!==false})`:''}">${isOwner?'●●●':''}</div>
-                </div>
-                <div class="post-media-container" ondblclick="triggerLike('${post.id}')">
-                    ${mediaHtml}
-                    <div class="heart-overlay" id="heart-${post.id}">❤</div>
-                </div>
-                <div class="post-actions">
-                    <button class="action-btn ${isLiked?'liked':''}" id="btn-${post.id}" onclick="toggleLike('${post.id}')">
-                        <svg viewBox="0 0 24 24" fill="${isLiked?'currentColor':'none'}" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                    </button>
-                </div>
-                <div class="post-likes ${(isOwner || post.show_likes!==false)?'clickable':''}" 
-                     onclick="${(isOwner || post.show_likes!==false)?`showLikes('${post.id}')`:''}">
-                    ${likesCount} پسند
-                </div>
-                <div class="post-caption"><span class="caption-username">${user.displayName}</span> ${post.caption}</div>
-                <span class="post-time">${timeAgo(post.timestamp)}</span>
-            `;
-            feedContainer.appendChild(div);
-        }
-
-        /* --- MEDIA HANDLERS --- */
-        function handleMediaLoad(id) {
-            const loader = document.getElementById(`loader-${id}`);
-            const media = document.getElementById(`media-${id}`);
-            if(loader) loader.classList.add('hidden');
-            if(media) media.classList.add('loaded');
-        }
-
-        function toggleVideoPlay(id) {
-            const v = document.getElementById(`media-${id}`);
-            const icon = document.getElementById(`play-icon-${id}`);
-            if(v.paused) {
-                v.play();
-                icon.classList.remove('show');
-            } else {
-                v.pause();
-                icon.classList.add('show');
+                store.put({ url: url, data: data, timestamp: Date.now() });
+            } catch (error) {
+                console.warn('هشدار: عدم موفقیت در ذخیره سازی در IndexedDB (ممکن است فضای دیسک پر باشد).', error);
             }
         }
 
-        function toggleVideoMute(e, id) {
-            e.stopPropagation(); // Prevent play toggle
-            const v = document.getElementById(`media-${id}`);
-            const icon = document.getElementById(`mute-icon-${id}`);
-            v.muted = !v.muted;
-            
-            if(v.muted) {
-                // Muted Icon
-                icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>';
-            } else {
-                // Sound On Icon
-                icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
-            }
-        }
+        /**
+         * @description دریافت فایل مدیا (Blob) از IndexedDB
+         * @param {string} url - کلید ذخیره‌سازی (URL مدیا)
+         * @returns {Promise<Blob | null>}
+         */
+        function getMediaFromCache(url) {
+            return new Promise((resolve) => {
+                if (!db) return resolve(null);
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(url);
 
-        function initVideoObserver() {
-            videoObserver = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    const vid = entry.target;
-                    const id = vid.id.replace('media-', '');
-                    const playIcon = document.getElementById(`play-icon-${id}`);
-                    
-                    if(entry.isIntersecting) {
-                        vid.muted = true; // Auto-play usually requires mute
-                        vid.play().then(() => {
-                            if(playIcon) playIcon.classList.remove('show');
-                        }).catch(() => {
-                            if(playIcon) playIcon.classList.add('show');
-                        });
-                    } else {
-                        vid.pause();
-                        if(playIcon) playIcon.classList.add('show');
-                    }
-                });
-            }, { threshold: 0.7 });
-        }
+                request.onsuccess = (event) => {
+                    const result = event.target.result;
+                    resolve(result ? result.data : null);
+                };
 
-        function attachVideoObserver() {
-            document.querySelectorAll('video').forEach(v => videoObserver.observe(v));
-        }
-
-        /* --- LIKES & ACTIONS --- */
-        async function toggleLike(id) {
-            const btn = document.getElementById(`btn-${id}`);
-            const isLiked = btn.classList.contains('liked');
-            
-            // Optimistic UI Update
-            btn.classList.toggle('liked');
-            const svg = btn.querySelector('svg');
-            svg.setAttribute('fill', isLiked ? 'none' : '#ED4956');
-            
-            const method = isLiked ? 'DELETE' : 'PUT';
-            await fetch(`${PROXY_URL}?path=rubino_posts/${id}/likes/${currentUser.username}`, {
-                method: method,
-                headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
-                body: isLiked ? undefined : 'true'
+                request.onerror = () => {
+                    resolve(null);
+                };
             });
         }
-
-        function triggerLike(id) {
-            const heart = document.getElementById(`heart-${id}`);
-            heart.classList.remove('active');
-            void heart.offsetWidth; 
-            heart.classList.add('active');
-            if(!document.getElementById(`btn-${id}`).classList.contains('liked')) toggleLike(id);
-        }
-
-        async function showLikes(postId) {
-            const modal = document.getElementById('likes-modal');
-            const container = document.getElementById('likes-list-container');
-            modal.classList.add('active');
-            container.innerHTML = '<div style="text-align:center; padding:20px;"><div class="pull-spinner spinning" style="display:inline-block"></div></div>';
-            
-            const res = await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes`, { headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }});
-            const likes = await res.json();
-            container.innerHTML = '';
-            
-            if(!likes) { container.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">هنوز لایکی نیست.</p>'; return; }
-
-            Object.keys(likes).forEach(uid => {
-                const u = allUsersCache[uid] || { displayName: uid };
-                const verified = u.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
-                container.innerHTML += `
-                    <div class="user-list-item">
-                        <img src="${u.profilePicUrl || 'https://ui-avatars.com/api/?background=random'}" >
-                        <div class="user-list-info">
-                            <h4>${u.displayName || uid} ${verified}</h4>
-                            <p>@${uid}</p>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        /* --- OPTIONS --- */
-        window.currentOptionsPostId = null;
-        function openOptions(id, isPublic) {
-            window.currentOptionsPostId = id;
-            document.getElementById('privacy-toggle').checked = isPublic;
-            document.getElementById('options-modal').classList.add('active');
-        }
-        function closeOptions() { document.getElementById('options-modal').classList.remove('active'); }
         
-        async function handleDeletePost() {
-            if(!confirm('حذف شود؟')) return;
-            await fetch(`${PROXY_URL}?path=rubino_posts/${window.currentOptionsPostId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }});
-            closeOptions(); fetchPosts();
+        // ===============================================
+        // بخش توابع کمکی و اصلی
+        // ===============================================
+
+        /**
+         * @description مدیریت لودینگ مدیا با اولویت کش (صرفه‌جویی اینترنت)
+         * @param {string} mediaUrl - آدرس مدیا برای دانلود/کش
+         * @param {HTMLElement} mediaElement - المان <img> یا <video>
+         */
+        async function loadMediaWithCache(mediaUrl, mediaElement) {
+            const container = mediaElement.closest('.media-container');
+            if (!container) return;
+
+            // 1. نمایش حالت لودینگ (بلور و اسکلتون)
+            container.classList.add('loading');
+            mediaElement.style.opacity = '0'; // پنهان کردن مدیا واقعی تا آماده شود
+
+            let mediaBlob = null;
+            let objectUrl = null;
+            let loadedFromCache = false;
+
+            try {
+                // 2. تلاش برای خواندن از کش (IndexedDB)
+                mediaBlob = await getMediaFromCache(mediaUrl);
+
+                if (mediaBlob) {
+                    // از کش لود شد
+                    objectUrl = URL.createObjectURL(mediaBlob);
+                    loadedFromCache = true;
+                } else {
+                    // 3. لود کردن از شبکه و ذخیره در کش
+                    const response = await fetch(mediaUrl);
+                    if (!response.ok) throw new Error('دانلود مدیا با شکست مواجه شد');
+
+                    mediaBlob = await response.blob();
+                    objectUrl = URL.createObjectURL(mediaBlob);
+                    saveMediaToCache(mediaUrl, mediaBlob); // ذخیره در کش برای استفاده‌های بعدی
+                }
+
+                // 4. تنظیم آدرس مدیا
+                mediaElement.src = objectUrl;
+
+                // 5. نمایش مدیا پس از بارگذاری کامل
+                mediaElement.onload = mediaElement.onloadeddata = () => {
+                    container.classList.remove('loading');
+                    mediaElement.style.opacity = '1';
+                    // حذف آبجکت URL پس از استفاده (مهم برای مدیریت حافظه)
+                    if (objectUrl) URL.revokeObjectURL(objectUrl);
+                    
+                    if (mediaElement.tagName === 'VIDEO') {
+                         // تنظیم اولیه ویدیو
+                        mediaElement.volume = 0; // شروع با صدای قطع
+                        mediaElement.muted = true;
+                        mediaElement.play().catch(e => console.log("پخش خودکار امکان پذیر نبود.", e)); // تلاش برای پخش خودکار
+                    }
+                    
+                    showToast(loadedFromCache ? 'مدیا از کش محلی بارگذاری شد' : 'مدیا با موفقیت دانلود و ذخیره شد', 3000);
+                };
+
+                // در صورت وجود خطا در بارگذاری مدیا
+                mediaElement.onerror = () => {
+                    container.classList.remove('loading');
+                    container.querySelector('.skeleton-overlay').textContent = 'خطا در بارگذاری مدیا';
+                };
+
+            } catch (error) {
+                console.error('خطا در لودینگ مدیا:', error);
+                container.classList.remove('loading');
+                container.querySelector('.skeleton-overlay').innerHTML = 'خطا در لودینگ <br> (اینترنت خود را بررسی کنید)';
+            }
         }
 
-        async function handleSaveCaption() {
-            const val = document.getElementById('edit-caption-input').value;
-            await fetch(`${PROXY_URL}?path=rubino_posts/${window.currentOptionsPostId}`, {
-                method: 'PATCH', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ caption: val })
+
+        /**
+         * @description تبدیل تاریخ به فرمت "چند لحظه پیش"
+         * @param {string} dateString
+         * @returns {string}
+         */
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            if (seconds < 60) return 'همین الان';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes} دقیقه پیش`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours} ساعت پیش`;
+            const days = Math.floor(hours / 24);
+            if (days < 30) return `${days} روز پیش`;
+            return date.toLocaleDateString('fa-IR');
+        }
+
+        /**
+         * @description نمایش پیام Toast
+         * @param {string} message - متن پیام
+         * @param {number} duration - مدت نمایش بر حسب میلی‌ثانیه
+         */
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+        
+        /**
+         * @description هندلر کلیک روی دکمه لایک
+         * @param {Event} e 
+         */
+        function handleLikeClick(e) {
+            const button = e.currentTarget;
+            const postId = button.closest('.post').id;
+            const liked = button.classList.toggle('liked');
+
+            // شبیه‌سازی به‌روزرسانی تعداد لایک‌ها
+            const countElement = document.getElementById(`likes-count-${postId}`);
+            let currentCount = parseInt(countElement.getAttribute('data-count'));
+            
+            if (liked) {
+                currentCount++;
+                showToast('پست پسندیده شد!');
+            } else {
+                currentCount--;
+                showToast('لایک برداشته شد.');
+            }
+            
+            countElement.setAttribute('data-count', currentCount);
+            countElement.textContent = `${currentCount} پسند`;
+            button.innerHTML = liked ? `
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            ` : `
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            `;
+        }
+
+        /**
+         * @description باز کردن مدال لیست پسندها و نمایش کاربران
+         * @param {Event} e
+         */
+        function openLikesModal(e) {
+            const postId = e.currentTarget.closest('.post').id;
+            // در حالت واقعی، اینجا باید لیست پسندها از سرور لود شود.
+            // شبیه‌سازی: نمایش کاربران تصادفی
+            const users = Array.from({length: Math.floor(Math.random() * 8) + 3}, () => FAKE_USERS[Math.floor(Math.random() * FAKE_USERS.length)]);
+
+            const listContainer = document.getElementById('modal-likes-list');
+            listContainer.innerHTML = '';
+
+            users.forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'like-item';
+                item.innerHTML = `
+                    <img src="${user.avatar}" alt="${user.username}" class="like-avatar">
+                    <div class="like-username">
+                        ${user.username}
+                        ${user.isVerified ? `
+                            <svg class="verified-badge" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+                            </svg>
+                        ` : ''}
+                    </div>
+                `;
+                listContainer.appendChild(item);
             });
-            document.getElementById('edit-caption-modal').classList.remove('active');
+
+            document.getElementById('likes-modal').style.display = 'flex';
+        }
+
+        /**
+         * @description بستن مدال لیست پسندها
+         */
+        function closeLikesModal() {
+            document.getElementById('likes-modal').style.display = 'none';
+        }
+
+        /**
+         * @description مدیریت دکمه‌های کنترل ویدیو (قطع/وصل، پخش/مکث)
+         * @param {string} action - 'toggleMute' یا 'togglePlay'
+         * @param {HTMLElement} button - دکمه‌ای که کلیک شده
+         */
+        function toggleVideoControls(action, button) {
+            const video = button.closest('.media-container').querySelector('video');
+            if (!video) return;
+
+            if (action === 'toggleMute') {
+                video.muted = !video.muted;
+                video.volume = video.muted ? 0 : 1;
+                // تغییر آیکون صدا
+                button.innerHTML = video.muted ? `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93A10 10 0 0 0 16 12c0 1.54-.48 3.01-1.35 4.31m-1.21-1.21L12 12"/></svg>
+                ` : `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                `;
+                showToast(video.muted ? 'صدا قطع شد' : 'صدا وصل شد');
+
+            } else if (action === 'togglePlay') {
+                if (video.paused || video.ended) {
+                    video.play().then(() => {
+                        button.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                        `;
+                        showToast('پخش ادامه یافت');
+                    }).catch(e => {
+                        console.error('خطا در پخش ویدیو:', e);
+                        showToast('خطا در پخش ویدیو', 2000);
+                    });
+                } else {
+                    video.pause();
+                    button.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    `;
+                    showToast('پخش متوقف شد');
+                }
+            }
+        }
+
+
+        /**
+         * @description ایجاد یک المان پست جدید در DOM
+         * @param {object} postData
+         * @returns {HTMLElement}
+         */
+        function createPostElement(postData) {
+            const post = document.createElement('div');
+            const postId = `post-${POST_ID_COUNTER++}`;
+            post.className = 'post';
+            post.id = postId;
+
+            const isVideo = postData.type === 'video';
+            const mediaTag = isVideo ? 'video' : 'img';
+            
+            // تعیین ارتفاع شبیه‌سازی شده برای مدیا
+            const mediaHeight = postData.height || '350px';
+
+            post.innerHTML = `
+                <div class="post-header">
+                    <img src="${postData.user.avatar}" alt="${postData.user.username}" class="avatar">
+                    <div class="user-info">
+                        <div class="username">
+                            ${postData.user.username}
+                            ${postData.user.isAdmin ? `
+                                <!-- تیک آبی ادمین/ناشر -->
+                                <svg class="admin-badge" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+                                </svg>
+                            ` : ''}
+                        </div>
+                        <span class="post-time" data-timestamp="${postData.timestamp}">${timeAgo(postData.timestamp)}</span>
+                    </div>
+                </div>
+
+                <div class="media-container" style="min-height: ${mediaHeight};">
+                    <${mediaTag} class="media-content" style="height: ${mediaHeight}; object-fit: cover; opacity: 0;" ${isVideo ? 'controls loop playsinline preload="auto"' : ''}></${mediaTag}>
+                    
+                    <!-- حالت بلور و اسکلتون (Placeholder) -->
+                    <div class="skeleton-overlay">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 10px;">در حال بارگذاری ${isVideo ? 'ویدیو' : 'تصویر'} (صرفه‌جویی در اینترنت)...</p>
+                    </div>
+
+                    ${isVideo ? `
+                        <div class="video-controls">
+                            <!-- دکمه مکث/پخش -->
+                            <button class="control-btn" onclick="toggleVideoControls('togglePlay', this)">
+                                <!-- آیکون پخش (به صورت پیش‌فرض) -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <!-- دکمه قطع/وصل صدا -->
+                            <button class="control-btn" onclick="toggleVideoControls('toggleMute', this)">
+                                <!-- آیکون قطع صدا (به صورت پیش‌فرض) -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93A10 10 0 0 0 16 12c0 1.54-.48 3.01-1.35 4.31m-1.21-1.21L12 12"/></svg>
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="post-actions">
+                    <div class="main-actions">
+                        <button class="action-button" data-action="like" onclick="handleLikeClick(event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        </button>
+                        <button class="action-button" data-action="comment">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </button>
+                    </div>
+                    <div class="share-action">
+                        <button class="action-button" data-action="share">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="post-info">
+                    <div class="likes-count" id="likes-count-${postId}" data-count="${postData.likes}" onclick="openLikesModal(event)">
+                        ${postData.likes} پسند
+                    </div>
+                    <div class="caption-text">
+                        <span class="caption-username">${postData.user.username}</span>
+                        ${postData.caption}
+                    </div>
+                </div>
+            `;
+            
+            // پس از افزودن به DOM، مدیا را با استفاده از کش لود کن
+            const mediaElement = post.querySelector('.media-content');
+            if (mediaElement) {
+                loadMediaWithCache(postData.mediaUrl, mediaElement);
+            }
+
+            return post;
+        }
+
+        /**
+         * @description شبیه‌سازی تولید پست‌ها از LLM برای محتوای زنده
+         * @returns {Promise<object[]>}
+         */
+        async function generatePosts() {
+            // شبیه‌سازی تولید پست با استفاده از مدل زبانی
+            const postQuery = `ایجاد یک آرایه JSON شامل 5 پست شبیه‌سازی شده برای یک فید شبکه اجتماعی (شبیه به اینستاگرام/روبینو). هر پست دارای:
+            1. user (یک آبجکت شامل username و isVerified و isAdmin: boolean) که از لیست کاربران زیر انتخاب شود.
+            2. mediaUrl (آدرس یک تصویر یا ویدیو به عنوان placeholder - از https://placehold.co/ استفاده کنید).
+            3. type (به صورت تصادفی 'image' یا 'video').
+            4. caption (یک توضیح کوتاه و جذاب به زبان فارسی).
+            5. likes (یک عدد تصادفی بین 50 تا 5000).
+            6. timestamp (تاریخ و زمان ایجاد به فرمت ISO String).
+            
+            **لیست کاربران**: ${JSON.stringify(FAKE_USERS.map(u => u.username))}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: postQuery }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                "user": { "type": "OBJECT", properties: {
+                                    "username": { "type": "STRING" },
+                                    "isVerified": { "type": "BOOLEAN" },
+                                    "isAdmin": { "type": "BOOLEAN" }
+                                }},
+                                "mediaUrl": { "type": "STRING" },
+                                "type": { "type": "STRING", "enum": ["image", "video"] },
+                                "caption": { "type": "STRING" },
+                                "likes": { "type": "NUMBER" },
+                                "timestamp": { "type": "STRING" },
+                                "height": { "type": "STRING" }
+                            }
+                        }
+                    }
+                },
+                systemInstruction: {
+                    parts: [{ text: "شما یک موتور تولید محتوا برای شبیه‌سازی فید هستید. فقط آرایه JSON را برگردانید. از آدرس‌های placeholder برای mediaUrl استفاده کنید." }]
+                }
+            };
+
+            // تعریف تابع retry با Backoff نمایی
+            const maxRetries = 3;
+            let currentDelay = 1000;
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`خطای HTTP: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (jsonText) {
+                         // تطبیق با ساختار کاربر شبیه‌سازی شده
+                        const parsedPosts = JSON.parse(jsonText);
+                        
+                        return parsedPosts.map(post => {
+                            // پیدا کردن اطلاعات کامل کاربر از لیست FAKE_USERS
+                            const userMatch = FAKE_USERS.find(u => u.username === post.user.username) || FAKE_USERS[0];
+                            
+                            // ساخت آدرس Placeholder
+                            const isVideo = post.type === 'video';
+                            const width = 600;
+                            const height = isVideo ? 400 : (Math.random() < 0.5 ? 400 : 600);
+                            const mediaUrl = `https://placehold.co/${width}x${height}/161B22/8b949e?text=${isVideo ? 'Video' : 'Image'}`;
+
+                            return {
+                                ...post,
+                                user: userMatch, // استفاده از اطلاعات کامل کاربر شبیه‌سازی شده
+                                mediaUrl: mediaUrl,
+                                height: `${height}px`
+                            };
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed:`, error);
+                    if (i < maxRetries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, currentDelay));
+                        currentDelay *= 2; // Backoff نمایی
+                    } else {
+                        showToast('بارگذاری محتوا با شکست مواجه شد. (API خطا)', 5000);
+                        // در صورت شکست نهایی، داده‌های بازگشتی پیش‌فرض را برمی‌گردانیم
+                        return [
+                            { user: FAKE_USERS[2], mediaUrl: "https://placehold.co/600x400/161B22/8b949e?text=Video+Placeholder", type: "video", caption: "این یک پست ویدیویی تستی است. کنترل‌های پخش و صدا را امتحان کنید.", likes: 1200, timestamp: new Date(Date.now() - 3600000).toISOString(), height: "400px" },
+                            { user: FAKE_USERS[0], mediaUrl: "https://placehold.co/600x600/161B22/8b949e?text=Image+Placeholder", type: "image", caption: "این یک پست تصویری تستی است. کشینگ محلی برای بارگذاری مجدد فعال است.", likes: 3500, timestamp: new Date(Date.now() - 7200000).toISOString(), height: "600px" },
+                        ];
+                    }
+                }
+            }
+        }
+
+
+        /**
+         * @description بارگذاری پست‌ها و افزودن به فید
+         */
+        async function fetchPosts() {
+            const feedContainer = document.getElementById('feed-container');
+            if (feedContainer.innerHTML !== '') {
+                // پاکسازی فقط در صورت کشیدن برای رفرش
+                feedContainer.innerHTML = '';
+            }
+
+            // نمایش لودینگ اولیه
+            document.getElementById('initial-loading').style.display = 'flex';
+            feedContainer.style.display = 'none';
+
+            // تولید پست‌ها
+            const posts = await generatePosts();
+            
+            // مخفی کردن لودینگ
+            document.getElementById('initial-loading').style.display = 'none';
+            feedContainer.style.display = 'block';
+
+            // افزودن به فید
+            posts.forEach(postData => {
+                const postElement = createPostElement(postData);
+                feedContainer.appendChild(postElement);
+            });
+
+            // به‌روزرسانی زمان‌ها
+            updateLiveTimestamps();
+            setInterval(updateLiveTimestamps, 60000); // هر دقیقه به‌روزرسانی
+        }
+        
+        // ===============================================
+        // بخش رفرش با کشیدن انگشت (Pull to Refresh)
+        // ===============================================
+        const feedContainer = document.getElementById('feed-container');
+        const pullIndicator = document.getElementById('pull-indicator');
+        const pullSpinner = document.getElementById('pull-spinner');
+        
+        let isPulling = false;
+        let startY = 0;
+        let currentTranslate = 0;
+
+        feedContainer.addEventListener('touchstart', touchStart, { passive: true });
+        feedContainer.addEventListener('touchmove', touchMove, { passive: false });
+        feedContainer.addEventListener('touchend', touchEnd);
+
+        function touchStart(e) {
+            startY = e.touches[0].clientY;
+            // فقط اگر در بالای صفحه بود، قابلیت کشیدن را فعال کن
+            if (window.scrollY === 0) {
+                isPulling = true;
+            }
+        }
+
+        function touchMove(e) {
+            if (!isPulling) return;
+
+            const currentY = e.touches[0].clientY;
+            let distance = currentY - startY;
+
+            // اجازه نده فاصله منفی شود (به سمت بالا کشیده شود)
+            if (distance < 0) {
+                distance = 0;
+            }
+
+            currentTranslate = Math.min(distance, 120); // حداکثر کشش 120 پیکسل
+            
+            if (currentTranslate > 0) {
+                 e.preventDefault(); // جلوگیری از اسکرول مرورگر
+                 feedContainer.style.transform = `translateY(${currentTranslate}px)`;
+                 pullIndicator.style.opacity = Math.min(currentTranslate / 60, 1);
+            }
+        }
+
+        async function touchEnd() {
+            if (!isPulling) return;
+            isPulling = false;
+            
+            // آستانه رفرش: 60 پیکسل
+            if (currentTranslate > 60) {
+                pullSpinner.classList.add('spinning');
+                feedContainer.style.transform = `translateY(60px)`;
+                await fetchPosts();
+                showToast('فید به‌روز شد!', 2000);
+                setTimeout(resetPull, 500);
+            } else {
+                resetPull();
+            }
+        }
+
+        function resetPull() {
+            feedContainer.style.transform = '';
+            pullIndicator.style.opacity = 0;
+            pullSpinner.classList.remove('spinning');
+            currentTranslate = 0;
+        }
+
+        function updateLiveTimestamps() {
+            document.querySelectorAll('.post-time').forEach(el => {
+                const ts = el.getAttribute('data-timestamp');
+                if (ts) el.textContent = timeAgo(ts);
+            });
+        }
+        
+        // اتصال توابع جدید به window برای دسترسی در HTML inline
+        window.openLikesModal = openLikesModal;
+        window.closeLikesModal = closeLikesModal;
+        window.handleLikeClick = handleLikeClick;
+        window.toggleVideoControls = toggleVideoControls;
+
+
+        // ===============================================
+        // راه‌اندازی اولیه اپلیکیشن
+        // ===============================================
+        window.onload = async () => {
+             // 1. راه‌اندازی IndexedDB برای کشینگ
+            await setupDb().catch(() => {
+                showToast('خطا در راه‌اندازی ذخیره‌سازی محلی.', 3000);
+            });
+            
+            // 2. بارگذاری پست‌ها
             fetchPosts();
-        }
+        };
 
-        async function handlePrivacyChange() {
-             await fetch(`${PROXY_URL}?path=rubino_posts/${window.currentOptionsPostId}`, {
-                method: 'PATCH', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ show_likes: document.getElementById('privacy-toggle').checked })
-            });
-        }
-
-        /* --- UTILS --- */
-        function startRealtimeUpdates() { fetchPosts(); } // Simplified for demo
-        function showToast(msg) { const t = document.getElementById('toast'); t.textContent=msg; t.classList.add('active'); setTimeout(()=>t.classList.remove('active'),3000); }
-        function timeAgo(date) {
-            const s = Math.floor((new Date() - new Date(date))/1000);
-            if(s<60) return 'همین الان';
-            if(s<3600) return `${Math.floor(s/60)} دقیقه پیش`;
-            if(s<86400) return `${Math.floor(s/3600)} ساعت پیش`;
-            return `${Math.floor(s/86400)} روز پیش`;
-        }
     </script>
 </body>
 </html>
