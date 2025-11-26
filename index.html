@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>همیار - در حال بارگذاری</title>
+    <title>همیار - دانلود و پخش از حافظه</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
 
@@ -25,37 +25,35 @@
             color: var(--text-color);
         }
 
-        /* --- کانتینر مدیا (مشترک برای عکس و ویدیو) --- */
+        /* --- مدیا (پس‌زمینه) --- */
         .media-background {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1;
+            opacity: 0; /* ابتدا مخفی است تا زمانی که دانلود تمام شود */
+            transition: opacity 1s ease-in;
         }
 
-        /* استایل مخصوص عکس */
         #bg-image {
             background-size: cover;
             background-position: center;
-            display: none; /* پیش‌فرض مخفی */
         }
 
-        /* استایل مخصوص ویدیو */
         #bg-video {
-            object-fit: cover; /* باعث می‌شود ویدیو کل صفحه را پر کند بدون دفرمه شدن */
-            display: none; /* پیش‌فرض مخفی */
+            object-fit: cover;
         }
 
-        /* --- لایه دایمر (تاریک‌کننده) هوشمند --- */
+        /* --- لایه دایمر (پوشش تاریک) --- */
         #smart-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--bg-color);
             z-index: 2;
             pointer-events: none;
-            transition: opacity 0.1s linear; 
+            transition: opacity 0.8s ease-out; /* ترنزیشن نرم برای محو شدن */
         }
 
-        /* گرادینت پایین صفحه */
+        /* گرادینت پایین */
         #text-protection-gradient {
             position: fixed;
             bottom: 0; left: 0; width: 100%; height: 40%;
@@ -67,31 +65,24 @@
         /* --- کانتینر لودینگ --- */
         #loader-container {
             position: fixed;
-            bottom: 50px;
-            left: 50%;
+            bottom: 50px; left: 50%;
             transform: translateX(-50%);
-            width: 85%;
-            max-width: 400px;
+            width: 85%; max-width: 400px;
             z-index: 10;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            display: flex; flex-direction: column; gap: 12px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
         }
 
         .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             font-size: 0.95rem;
         }
 
-        #status-text { font-weight: 500; opacity: 1; transition: opacity 0.3s; }
+        #status-text { font-weight: 500; }
         #percent-text { font-weight: 700; color: var(--primary-color); direction: ltr; }
 
         .progress-track {
-            width: 100%;
-            height: 8px;
+            width: 100%; height: 8px;
             background: var(--bar-bg);
             border-radius: 10px;
             overflow: hidden;
@@ -100,8 +91,7 @@
         }
 
         .progress-fill {
-            height: 100%;
-            width: 0%;
+            height: 100%; width: 0%;
             background: var(--primary-color);
             border-radius: 10px;
             box-shadow: 0 0 20px var(--primary-glow);
@@ -110,8 +100,7 @@
         }
 
         .progress-fill::after {
-            content: '';
-            position: absolute;
+            content: ''; position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
             transform: translateX(-100%);
@@ -120,32 +109,25 @@
 
         @keyframes shine { 100% { transform: translateX(100%); } }
 
+        /* استایل خروج */
         body.exiting #loader-container { opacity: 0; transition: opacity 0.5s; }
         body.exiting #text-protection-gradient { opacity: 0; transition: opacity 0.5s; }
-        body.exiting { transition: opacity 0.8s ease; }
-
     </style>
 </head>
 <body>
 
-    <!-- کانتینر عکس -->
+    <!-- کانتینرها -->
     <div id="bg-image" class="media-background"></div>
+    <video id="bg-video" class="media-background" muted loop playsinline></video>
     
-    <!-- کانتینر ویدیو (ویژگی‌ها: بی‌صدا، پخش خودکار، تکرار) -->
-    <video id="bg-video" class="media-background" muted autoplay loop playsinline>
-        Your browser does not support the video tag.
-    </video>
-    
-    <!-- لایه تاریک‌کننده -->
+    <!-- لایه تاریک -->
     <div id="smart-overlay"></div>
-    
-    <!-- گرادینت پایین -->
     <div id="text-protection-gradient"></div>
 
-    <!-- نوار لودینگ -->
+    <!-- لودینگ -->
     <div id="loader-container">
         <div class="info-row">
-            <span id="status-text">در حال راه‌اندازی...</span>
+            <span id="status-text">شروع دریافت فایل...</span>
             <span id="percent-text">0%</span>
         </div>
         <div class="progress-track">
@@ -158,11 +140,11 @@
         // تنظیمات
         // ==========================================
         const CONFIG = {
-            // لینک فایل (می‌تواند عکس jpg/png یا ویدیو mp4/webm باشد)
-            // لینک نمونه ویدیو شما:
+            // لینک فایل (ویدیو یا عکس)
             mediaUrl: 'https://cdn.imgurl.ir/uploads/q6997_vidu-video-3053216940160551.mp4', 
             
-            stayDelay: 1200 // مکث نهایی وقتی ۱۰۰٪ شد (میلی‌ثانیه)
+            // زمان مکث بعد از تکمیل دانلود و قبل از رفتن به صفحه بعد
+            stayDelay: 2000 
         };
 
         // --- DOM Elements ---
@@ -173,135 +155,122 @@
         const percentText = document.getElementById('percent-text');
         const progressFill = document.getElementById('progress-fill');
 
-        // متغیرهای وضعیت
-        let loadProgress = 0;
-        let isMediaLoaded = false; // آیا مدیا (عکس یا ویدیو) دانلود شده؟
-        let simulationInterval;
-
-        // --- 1. تشخیص نوع فایل (ویدیو یا عکس) ---
+        // --- 1. تشخیص نوع فایل ---
         function getMediaType(url) {
             const extension = url.split('.').pop().toLowerCase().split('?')[0];
             const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'm4v'];
-            if (videoExts.includes(extension)) {
-                return 'video';
-            }
-            return 'image';
+            return videoExts.includes(extension) ? 'video' : 'image';
         }
 
-        // --- 2. شروع فرآیند ---
-        function startLoading() {
-            const type = getMediaType(CONFIG.mediaUrl);
-            
-            if (type === 'video') {
-                handleVideoLoading();
-            } else {
-                handleImageLoading();
-            }
+        // --- 2. شروع دانلود واقعی (XHR) ---
+        function downloadAndCacheMedia() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', CONFIG.mediaUrl, true);
+            xhr.responseType = 'blob'; // درخواست به صورت باینری (Blob)
 
-            // شروع نوار پیشرفت همزمان با لود شدن مدیا
-            simulateProgress();
-        }
-
-        // --- الف: لود کردن ویدیو ---
-        function handleVideoLoading() {
-            // نمایش تگ ویدیو و مخفی کردن عکس
-            bgVideoEl.style.display = 'block';
-            bgImageDiv.style.display = 'none';
-
-            bgVideoEl.src = CONFIG.mediaUrl;
-            
-            // وقتی دیتای کافی برای پخش ویدیو دانلود شد
-            bgVideoEl.onloadeddata = () => {
-                isMediaLoaded = true;
-                bgVideoEl.play().catch(e => console.log("Autoplay prevented:", e));
+            // الف: رویداد پیشرفت دانلود
+            xhr.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    const percentComplete = (event.loaded / event.total) * 100;
+                    updateVisuals(percentComplete);
+                } else {
+                    // اگر سرور حجم فایل را نگوید، یک پیشرفت تقریبی نشان میدهیم
+                    statusText.textContent = "در حال بارگیری...";
+                }
             };
 
-            bgVideoEl.onerror = () => {
-                console.warn("خطا در بارگذاری ویدیو.");
-                isMediaLoaded = true; // جلوگیری از گیر کردن نوار
-            };
-        }
-
-        // --- ب: لود کردن عکس ---
-        function handleImageLoading() {
-            // نمایش تگ عکس و مخفی کردن ویدیو
-            bgImageDiv.style.display = 'block';
-            bgVideoEl.style.display = 'none';
-
-            const img = new Image();
-            img.src = CONFIG.mediaUrl;
-
-            img.onload = () => {
-                isMediaLoaded = true;
-                bgImageDiv.style.backgroundImage = `url(${CONFIG.mediaUrl})`;
-            };
-
-            img.onerror = () => {
-                console.warn("عکس لود نشد.");
-                isMediaLoaded = true;
-            };
-        }
-
-        // --- 3. موتور شبیه‌سازی و آپدیت گرافیک ---
-        function simulateProgress() {
-            simulationInterval = setInterval(() => {
-                // اگر مدیا هنوز دانلود نشده است:
-                if (!isMediaLoaded) {
-                    if (loadProgress < 60) {
-                        loadProgress += 2;
-                    } else if (loadProgress < 85) {
-                        loadProgress += 0.5;
-                    } else if (loadProgress < 95) {
-                        loadProgress += 0.1;
-                    }
+            // ب: اتمام دانلود
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    // تبدیل فایل دانلود شده به یک URL داخلی
+                    const blob = xhr.response;
+                    const objectUrl = URL.createObjectURL(blob);
                     
-                    // متن‌های وضعیت
-                    if(loadProgress < 30) statusText.textContent = "اتصال به سرور...";
-                    else if(loadProgress < 70) statusText.textContent = "در حال دریافت فایل گرافیکی...";
-                    else statusText.textContent = "پردازش رسانه...";
-                } 
-                // اگر مدیا دانلود شده است:
-                else {
-                    loadProgress += 4;
+                    // پر کردن نوار تا 100%
+                    updateVisuals(100);
+                    
+                    // نمایش فایل از حافظه
+                    renderMedia(objectUrl);
+                } else {
+                    statusText.textContent = "خطا در دانلود فایل.";
+                    statusText.style.color = "red";
                 }
+            };
 
-                updateVisuals(loadProgress);
+            // ج: مدیریت خطا
+            xhr.onerror = () => {
+                statusText.textContent = "خطا در اتصال به اینترنت.";
+            };
 
-                if (loadProgress >= 100) {
-                    clearInterval(simulationInterval);
-                    finishLoading();
-                }
-            }, 40);
+            xhr.send();
         }
 
-        // --- 4. بروزرسانی ویژوال ---
+        // --- 3. بروزرسانی گرافیک نوار ---
         function updateVisuals(percent) {
             const safePercent = Math.min(100, Math.max(0, percent));
             
-            // آپدیت نوار و عدد
             progressFill.style.width = `${safePercent}%`;
             percentText.textContent = `${Math.floor(safePercent)}%`;
 
-            // آپدیت شفافیت لایه تاریک (نکته کلیدی: هر چه درصد بیشتر، شفاف‌تر)
-            const opacity = 1 - (safePercent / 100);
-            overlay.style.opacity = opacity;
+            // تغییر متن بر اساس درصد
+            if (safePercent < 30) statusText.textContent = "دانلود داده‌ها...";
+            else if (safePercent < 70) statusText.textContent = "ذخیره در حافظه موقت...";
+            else if (safePercent < 100) statusText.textContent = "پردازش نهایی...";
+            else statusText.textContent = "تکمیل شد.";
+            
+            // نکته مهم: اینجا اوپاسیتی را کم نمیکنیم چون هنوز ویدیو آماده پخش نیست
+            // ویدیو وقتی پخش شد، دایمر را برمیداریم
         }
 
-        // --- 5. پایان بارگذاری ---
-        function finishLoading() {
+        // --- 4. نمایش مدیا (رندر کردن از Blob) ---
+        function renderMedia(blobUrl) {
+            const type = getMediaType(CONFIG.mediaUrl);
+
+            if (type === 'video') {
+                bgVideoEl.src = blobUrl;
+                bgVideoEl.load(); // بارگذاری از حافظه
+                
+                // وقتی ویدیو آماده پخش شد
+                bgVideoEl.oncanplay = () => {
+                    bgVideoEl.play()
+                        .then(() => {
+                            revealContent(bgVideoEl); // نمایش
+                        })
+                        .catch(err => {
+                            console.log("Auto-play blocked, playing muted");
+                            bgVideoEl.muted = true;
+                            bgVideoEl.play();
+                            revealContent(bgVideoEl);
+                        });
+                };
+            } else {
+                // اگر عکس بود
+                bgImageDiv.style.backgroundImage = `url(${blobUrl})`;
+                // یک تاخیر کوتاه برای رندر عکس
+                setTimeout(() => {
+                    revealContent(bgImageDiv);
+                }, 100);
+            }
+        }
+
+        // --- 5. برداشتن پرده تاریک (انیمیشن نهایی) ---
+        function revealContent(elementToShow) {
+            // 1. المان مدیا را مرئی کن (زیر پرده تاریک)
+            elementToShow.style.opacity = '1';
+
+            // 2. پرده تاریک را به آرامی محو کن
             overlay.style.opacity = '0';
-            statusText.textContent = "تکمیل شد.";
             
+            // 3. آغاز شمارش معکوس برای رفتن به صفحه بعد
             setTimeout(() => {
-                statusText.textContent = "خوش آمدید";
+                statusText.textContent = "آماده‌سازی ورود...";
                 setTimeout(handleNavigation, 800);
             }, CONFIG.stayDelay);
         }
 
-        // --- 6. ناوبری ---
+        // --- 6. نویگیشن ---
         function handleNavigation() {
             document.body.classList.add('exiting');
-
             setTimeout(() => {
                 const storedUser = localStorage.getItem('currentUser');
                 if (storedUser) {
@@ -318,7 +287,8 @@
             }, 600);
         }
 
-        window.addEventListener('load', startLoading);
+        // اجرا هنگام لود صفحه
+        window.addEventListener('load', downloadAndCacheMedia);
 
     </script>
 </body>
