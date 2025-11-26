@@ -51,7 +51,7 @@
         }
 
         /* =========================================
-           --- SKELETON LOADING STYLES (NEW) ---
+           --- SKELETON LOADING STYLES ---
            ========================================= */
         #skeleton-loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -124,8 +124,8 @@
             position: relative;
             border-radius: 20px;
             overflow: hidden;
-            opacity: 0; /* Hidden initially until loaded */
-            transition: opacity 0.5s ease, transform 0.4s ease; /* Modified for animation */
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.4s ease;
         }
         .app-container.visible { opacity: 1; }
 
@@ -735,7 +735,7 @@
         }
 
         /* ==============================================
-           --- Edit Profile Modal STYLES --- 
+           --- Edit Profile & Settings Modal STYLES --- 
            ==============================================
         */
         .edit-profile-modal {
@@ -870,28 +870,28 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        #save-edit-btn {
+        .btn-primary {
             background-color: var(--primary-color);
             color: white;
             box-shadow: 0 4px 10px rgba(0, 163, 255, 0.3);
         }
-        #save-edit-btn:hover {
+        .btn-primary:hover {
             background-color: #00baff;
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 163, 255, 0.4);
         }
-        #save-edit-btn:disabled {
+        .btn-primary:disabled {
             background-color: var(--secondary-hover);
             cursor: wait;
             opacity: 0.7;
             transform: none;
             box-shadow: none;
         }
-        #cancel-edit-btn {
+        .btn-secondary {
             background-color: var(--secondary-hover);
             color: var(--text-primary);
         }
-        #cancel-edit-btn:hover {
+        .btn-secondary:hover {
             background-color: #3f454f;
         }
 
@@ -978,14 +978,13 @@
 </head>
 <body id="page-body">
 
-    <!-- Skeleton Loader (Replaces simple spinner) -->
+    <!-- Skeleton Loader -->
     <div id="skeleton-loader">
         <div class="sk-header">
             <div class="skeleton-animate sk-title"></div>
             <div class="skeleton-animate sk-search"></div>
         </div>
         <div class="sk-list">
-            <!-- Repeated Items to simulate list -->
             <div class="sk-item">
                 <div class="skeleton-animate sk-avatar"></div>
                 <div class="sk-info">
@@ -997,16 +996,6 @@
                 </div>
             </div>
             <div class="sk-item">
-                <div class="skeleton-animate sk-avatar"></div>
-                <div class="sk-info">
-                    <div style="display:flex; justify-content: space-between; align-items:center;">
-                        <div class="skeleton-animate sk-name"></div>
-                        <div class="skeleton-animate sk-time"></div>
-                    </div>
-                    <div class="skeleton-animate sk-msg"></div>
-                </div>
-            </div>
-             <div class="sk-item">
                 <div class="skeleton-animate sk-avatar"></div>
                 <div class="sk-info">
                     <div style="display:flex; justify-content: space-between; align-items:center;">
@@ -1154,7 +1143,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         <span>ویرایش پروفایل</span>
                     </li>
-                    <li>
+                    <li id="settings-btn"> <!-- Added ID for Settings Button -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                         <span>تنظیمات</span>
                     </li>
@@ -1191,8 +1180,36 @@
                 </div>
 
                 <div class="modal-actions">
-                    <button type="button" id="cancel-edit-btn">انصراف</button>
-                    <button type="submit" id="save-edit-btn">ذخیره تغییرات</button>
+                    <button type="button" id="cancel-edit-btn" class="btn-secondary">انصراف</button>
+                    <button type="submit" id="save-edit-btn" class="btn-primary">ذخیره تغییرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- [NEW] Settings Modal for Password Change -->
+    <div class="edit-profile-modal" id="settings-modal">
+        <div class="modal-content">
+            <h2>تغییر رمز عبور</h2>
+            <form id="change-password-form" novalidate>
+                <div class="form-group">
+                    <label for="current-password">رمز عبور فعلی</label>
+                    <input type="password" id="current-password" placeholder="رمز فعلی خود را وارد کنید" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="new-password">رمز عبور جدید</label>
+                    <input type="password" id="new-password" placeholder="حداقل ۸ کاراکتر" required minlength="8">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password">تکرار رمز عبور جدید</label>
+                    <input type="password" id="confirm-password" placeholder="تکرار رمز جدید" required minlength="8">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancel-settings-btn" class="btn-secondary">انصراف</button>
+                    <button type="submit" id="save-password-btn" class="btn-primary">تغییر رمز</button>
                 </div>
             </form>
         </div>
@@ -1257,6 +1274,15 @@
         const editDisplayNameInput = document.getElementById('edit-display-name');
         const editUsernameInput = document.getElementById('edit-username');
 
+        // Settings Modal Elements
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const changePasswordForm = document.getElementById('change-password-form');
+        const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+        const currentPasswordInput = document.getElementById('current-password');
+        const newPasswordInput = document.getElementById('new-password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+
         // User List Modal Elements
         const userListOverlay = document.getElementById('user-list-overlay');
         const userListTitle = document.getElementById('user-list-title');
@@ -1291,21 +1317,16 @@
             // EVENT LISTENERS
             const navPeopleBtn = document.getElementById('nav-people-btn');
             
-            // --- NEW: Rubino Button Listener ---
+            // --- Rubino Button Listener ---
             const rubinoBtn = document.getElementById('nav-rubino-btn');
             if (rubinoBtn) {
                 rubinoBtn.addEventListener('click', () => {
-                    // Update visual state
                     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
                     rubinoBtn.classList.add('active');
-
-                    // Animation Effect: Fade out and shrink slightly
                     const appContainer = document.getElementById('app-container');
                     appContainer.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
                     appContainer.style.opacity = '0';
                     appContainer.style.transform = 'scale(0.95)';
-
-                    // Redirect after animation completes
                     setTimeout(() => {
                         window.location.href = 'Rubino.html';
                     }, 400); 
@@ -1332,6 +1353,7 @@
                 });
             }
             
+            // Edit Profile Listeners
             editProfileBtn.addEventListener('click', showEditProfileModal);
             cancelEditBtn.addEventListener('click', hideEditProfileModal);
             editProfileModal.addEventListener('click', (e) => {
@@ -1341,6 +1363,17 @@
             });
             pfpUploadInput.addEventListener('change', handleImagePreview);
             editProfileForm.addEventListener('submit', handleProfileUpdate);
+
+            // Settings / Change Password Listeners
+            settingsBtn.addEventListener('click', showSettingsModal);
+            cancelSettingsBtn.addEventListener('click', hideSettingsModal);
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target === settingsModal) {
+                    hideSettingsModal();
+                }
+            });
+            changePasswordForm.addEventListener('submit', handlePasswordChange);
+
 
             profileFollowBtn.addEventListener('click', toggleFollow);
 
@@ -1622,25 +1655,19 @@
 
         function addClickListenersToItems() {
             document.querySelectorAll('.chat-item, .search-result-item, .user-list-item').forEach(item => {
-                // Prevent duplicate listeners (though re-rendering handles this by destroying elements)
                 item.addEventListener('click', () => {
                     const targetUid = item.dataset.uid;
                     const targetChannelId = item.dataset.channelId;
 
-                    // If inside user-list-modal, close it first
                     if(item.classList.contains('user-list-item')) {
                         hideUserListModal();
-                        // Small delay to let modal close
                         setTimeout(() => openUserProfile(targetUid), 300);
                         return;
                     }
 
                     if (targetUid) {
-                        // MODIFIED LOGIC: Always navigate to PV, even for search results
-                        console.log(`Navigating to chat with user: ${targetUid}`);
                         window.location.href = `pivi.html?uid=${targetUid}`;
                     } else if (targetChannelId) {
-                        console.log(`Navigating to channel: ${targetChannelId}`);
                         window.location.href = `Channel.html?id=${targetChannelId}`;
                     }
                 });
@@ -1667,22 +1694,21 @@
             profileDisplayName.innerHTML = `${userData.displayName || userData.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${userData.username}`;
             
-            // Apply Blur effect immediately
             profileFollowersCount.classList.add('loading-blur');
             profileFollowingCount.classList.add('loading-blur');
-            profileFollowersCount.textContent = '0'; // Placeholder
-            profileFollowingCount.textContent = '0'; // Placeholder
+            profileFollowersCount.textContent = '0';
+            profileFollowingCount.textContent = '0';
 
             profileFollowBtn.disabled = true;
 
             const isMyProfile = username === currentUser.username;
             profileFollowBtn.style.display = isMyProfile ? 'none' : 'block';
             editProfileBtn.style.display = isMyProfile ? 'flex' : 'none';
+            settingsBtn.style.display = isMyProfile ? 'flex' : 'none'; // Settings button logic
             logoutBtn.style.display = isMyProfile ? 'flex' : 'none';
 
             profileOverlay.classList.add('active');
 
-            // Fetch data
             getFollowCounts(username);
             if (!isMyProfile) {
                 await checkFollowStatus(username);
@@ -1697,7 +1723,7 @@
 
         function handleLogoutConfirmed() {
             localStorage.removeItem('currentUser');
-            if (pollingTimeoutId) clearTimeout(pollingTimeoutId); // Stop polling on logout
+            if (pollingTimeoutId) clearTimeout(pollingTimeoutId); 
             window.location.href = 'login.html'; 
         }
 
@@ -1726,7 +1752,7 @@
         function handleImagePreview(event) {
             const file = event.target.files[0];
             if (file) {
-                if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                if (file.size > 2 * 1024 * 1024) { 
                     showToast('حجم عکس پروفایل باید کمتر از ۲ مگابایت باشد.', 'error');
                     return;
                 }
@@ -1786,6 +1812,82 @@
             }
         }
 
+        // --- NEW: Settings Modal Functions (Password Change) ---
+        function showSettingsModal() {
+            changePasswordForm.reset();
+            settingsModal.classList.add('active');
+        }
+
+        function hideSettingsModal() {
+            settingsModal.classList.remove('active');
+        }
+
+        async function handlePasswordChange(event) {
+            event.preventDefault();
+
+            // 1. Basic Form Validation
+            if (!changePasswordForm.checkValidity()) {
+                changePasswordForm.reportValidity();
+                return;
+            }
+
+            const currentPass = currentPasswordInput.value;
+            const newPass = newPasswordInput.value;
+            const confirmPass = confirmPasswordInput.value;
+
+            // 2. Local Validation Logic
+            if (newPass.length < 8) {
+                showToast('رمز عبور جدید باید حداقل ۸ کاراکتر باشد.', 'error');
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                showToast('رمز عبور جدید و تکرار آن مطابقت ندارند.', 'error');
+                return;
+            }
+
+            // 3. Verify Current Password
+            // Note: In a production app with hashing, this should be done server-side.
+            // Since we are using a direct proxy with user object on client, we check locally.
+            if (currentPass !== currentUser.password) {
+                showToast('رمز عبور فعلی اشتباه است.', 'error');
+                return;
+            }
+
+            if (currentPass === newPass) {
+                showToast('رمز عبور جدید نمی‌تواند همان رمز قبلی باشد.', 'error');
+                return;
+            }
+
+            // 4. Update on Server
+            const saveBtn = document.getElementById('save-password-btn');
+            const originalBtnText = saveBtn.textContent;
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'در حال انجام...';
+
+            try {
+                const path = `users/${currentUser.username}`;
+                const payload = { password: newPass };
+
+                await updateUserDataOnServer(path, payload);
+
+                // Update Local User Object
+                currentUser.password = newPass;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                hideSettingsModal();
+                showToast('رمز عبور با موفقیت تغییر کرد.', 'success');
+
+            } catch (error) {
+                console.error('Password Update Failed:', error);
+                showToast(`خطا در تغییر رمز عبور: ${error.message}`, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalBtnText;
+            }
+        }
+
+
         // --- SECTION: Follow System & Lists ---
         async function getFollowCounts(targetUsername) {
             try {
@@ -1797,17 +1899,14 @@
                 const followersCount = followersData ? Object.keys(followersData).length : 0;
                 const followingCount = followingData ? Object.keys(followingData).length : 0;
 
-                // Update Text
                 profileFollowersCount.textContent = followersCount;
                 profileFollowingCount.textContent = followingCount;
 
-                // Remove Blur effect graphically
                 profileFollowersCount.classList.remove('loading-blur');
                 profileFollowingCount.classList.remove('loading-blur');
 
             } catch (error) {
                 console.error("Error fetching follow counts:", error);
-                // Even on error, remove blur
                 profileFollowersCount.textContent = '0';
                 profileFollowingCount.textContent = '0';
                 profileFollowersCount.classList.remove('loading-blur');
@@ -1891,7 +1990,6 @@
             userListOverlay.classList.add('active');
 
             try {
-                // 1. Fetch the list of IDs (keys)
                 const path = `${type}/${targetUsername}`;
                 const listData = await fetchProxyData(path);
 
@@ -1901,13 +1999,9 @@
                 }
 
                 const userIds = Object.keys(listData);
-
-                // 2. Fetch details for each user
-                // Optimization: We can use Promise.all to fetch user details in parallel
                 const userPromises = userIds.map(uid => fetchProxyData(`users/${uid}`));
                 const users = await Promise.all(userPromises);
 
-                // 3. Render
                 let html = '';
                 users.forEach(user => {
                     if(user) {
@@ -1944,7 +2038,6 @@
                     fetchProxyData('channels')
                 ]);
                 
-                // If we reach here, the connection was successful. Reset the error counter.
                 pollingErrorCount = 0;
 
                 let needsUIRefresh = false;
@@ -1975,19 +2068,17 @@
                 if (needsUIRefresh && searchInput.value.trim() === '') {
                     renderChatList();
                 }
-                // Note: We generally don't refresh the profile modal live to avoid UX jitter, unless necessary.
 
             } catch (error) {
-                pollingErrorCount++; // Increment error count on failure
+                pollingErrorCount++; 
                 console.error(`Polling Error (Attempt ${pollingErrorCount}):`, error.message);
                 
                 if (error.message.includes('Token') || error.message.includes('احراز هویت')) {
                     console.warn("Stopping polling due to authentication error.");
-                    if(pollingTimeoutId) clearTimeout(pollingTimeoutId); // Stop future attempts
-                    return; // Exit the function
+                    if(pollingTimeoutId) clearTimeout(pollingTimeoutId); 
+                    return; 
                 }
             } finally {
-                // Schedule the next poll regardless of success or failure
                 scheduleNextUpdate();
             }
         }
@@ -1995,19 +2086,15 @@
         function scheduleNextUpdate() {
             if (pollingTimeoutId) clearTimeout(pollingTimeoutId);
 
-            // Calculate delay using exponential backoff
             const delay = Math.min(
                 BASE_POLLING_INTERVAL * Math.pow(2, pollingErrorCount),
                 MAX_POLLING_INTERVAL
             );
-
-            console.log(`Next update scheduled in ${delay / 1000} seconds.`);
             pollingTimeoutId = setTimeout(checkForUpdates, delay);
         }
 
         function startRealtimeUpdates() {
             if (pollingTimeoutId) clearTimeout(pollingTimeoutId);
-            // Start the first check immediately, then schedule subsequent ones
             checkForUpdates();
         }
 
