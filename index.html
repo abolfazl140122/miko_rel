@@ -3,139 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>همیار - در حال بارگذاری...</title>
+    <title>همیار - در حال بارگذاری</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            overflow: hidden;
-            direction: rtl;
+        :root {
+            /* تنظیمات رنگی متناسب با تم همیار (تاریک و آبی) */
+            --bg-dark: #0D1117;
+            --panel-bg: rgba(22, 27, 34, 0.85);
+            --text-primary: #E4E6EB;
+            --text-secondary: #8b949e;
+            --accent-color: #00A3FF; /* آبی همیار */
+            --accent-glow: rgba(0, 163, 255, 0.4);
+            
+            /* تنظیمات نوار پیشرفت مشابه فایل مرجع */
+            --progress-bar-bg: rgba(0,0,0,0.6);
+            --progress-bar-fill-start: #0077c2;
+            --progress-bar-fill-end: #00A3FF;
+            
+            --vh: 1vh; 
         }
 
-        #loading-container {
+        @keyframes panel-intro { 
+            from { opacity: 0; transform: translateY(50px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+        
+        @keyframes pulse-logo {
+            0% { transform: scale(0.95); filter: drop-shadow(0 0 10px rgba(0, 163, 255, 0.3)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(0, 163, 255, 0.6)); }
+            100% { transform: scale(0.95); filter: drop-shadow(0 0 10px rgba(0, 163, 255, 0.3)); }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body { 
+            width: 100%;
+            height: 100%; 
+            overflow: hidden; 
+        }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--bg-dark);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: var(--text-primary);
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* لایه پوشاننده اولیه */
+        #preloader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: calc(var(--vh, 1vh) * 100);
+            background-color: var(--bg-dark);
+            z-index: 9999;
+            transition: opacity 0.8s ease-in-out;
+            display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        /* بخش پایین صفحه (نوار لودینگ) */
+        #bottom-loader {
+            position: fixed;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            height: 100%;
-            background-color: #f8f9fa;
-            color: #343a40;
-            text-align: center;
+            padding: 20px 40px 40px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
             transition: opacity 0.5s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        }
+        
+        /* کانتینر نوار پیشرفت */
+        #bottom-loader #progress-bar-container {
+            width: 100%;
+            max-width: 480px;
+            height: 10px;
+            background-color: var(--progress-bar-bg);
+            border-radius: 6px;
+            overflow: hidden;
+            padding: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        /* پر کننده نوار پیشرفت */
+        #bottom-loader #progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--progress-bar-fill-start), var(--progress-bar-fill-end));
+            transition: width 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        
+        /* متن وضعیت و درصد */
+        #status-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 480px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            opacity: 0.9;
+            min-height: 1.2em;
+        }
+        
+        #status-percentage {
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            direction: ltr;
+            color: var(--accent-color);
+        }
+        
+        /* پنل اصلی وسط صفحه */
+        .panel {
+            width: 90%;
+            max-width: 400px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            text-align: center;
+            animation: panel-intro 1s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         #logo {
-            width: 140px;
+            width: 120px;
             height: auto;
-            margin-bottom: 30px;
-            animation: pulse 2.5s infinite ease-in-out;
+            margin-bottom: 20px;
+            animation: pulse-logo 3s infinite ease-in-out;
             border-radius: 50%;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
-        @keyframes pulse {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            }
-            50% {
-                transform: scale(1);
-                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            }
+        #main-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+        
+        #sub-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
         }
 
-        #status-message {
-            font-size: 1.2em;
-            font-weight: 500;
-            color: #495057;
-        }
-        
-        .spinner {
-            border: 4px solid #dee2e6;
-            border-radius: 50%;
-            border-top: 4px solid #007bff;
-            width: 35px;
-            height: 35px;
-            animation: spin 1s linear infinite;
-            margin-top: 25px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
 
-    <div id="loading-container">
-        <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/c767edd7cb23c2f1a0314b935c515aa6b43c1905/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85%20%D8%A8%D8%AF%D9%88%D9%86%20%D9%BE%D8%B3%20%D8%B2%D9%85%DB%8C%D9%86%D9%87.png" alt="لوگو اپلیکیشن همیار" id="logo">
-        <p id="status-message">در حال بررسی وضعیت ورود...</p>
-        <div id="spinner" class="spinner"></div>
+    <!-- لایه پوشاننده اولیه برای جلوگیری از پرش تصویر -->
+    <div id="preloader-overlay"></div>
+
+    <!-- نوار پیشرفت و وضعیت در پایین صفحه -->
+    <div id="bottom-loader" style="display: flex;">
+        <div id="progress-bar-container">
+            <div id="progress-bar-fill"></div>
+        </div>
+        <div id="status-container">
+            <span id="status-message">در حال راه‌اندازی...</span>
+            <span id="status-percentage">0%</span>
+        </div>
+    </div>
+
+    <!-- پنل اصلی (لوگو و خوش آمدگویی) -->
+    <div id="main-panel" class="panel">
+        <img src="https://raw.githubusercontent.com/abolfazl140122/miko_rel/c767edd7cb23c2f1a0314b935c515aa6b43c1905/%D9%84%D9%88%DA%AF%D9%88%20%D8%A7%D8%B3%DA%A9%D9%88%D8%B1%D8%AA%20%DA%AF%DB%8C%D9%85%20%D8%A8%D8%AF%D9%88%D9%86%20%D9%BE%D8%B3%20%D8%B2%D9%85%DB%8C%D9%86%D9%87.png" alt="لوگو" id="logo">
+        <h1 id="main-title">همیار</h1>
+        <p id="sub-title">دستیار هوشمند ارتباطات</p>
     </div>
 
     <script>
-        // --- CONFIG ---
-        const REDIRECT_DELAY = 2000; // 2 ثانیه تاخیر قبل از هدایت کاربر
+        // --- تنظیمات ---
+        // تصویر پس زمینه (می‌توانید لینک را تغییر دهید)
+        const BACKGROUND_IMAGE_URL = 'https://cdn.imgurl.ir/uploads/q9812_file_6917756f1e1d68.57033147.jpg';
+        
+        // المان‌های DOM
+        const progressBarFill = document.getElementById('progress-bar-fill');
+        const statusMessageEl = document.getElementById('status-message');
+        const statusPercentageEl = document.getElementById('status-percentage');
+        const preloaderOverlay = document.getElementById('preloader-overlay');
+        const body = document.body;
 
-        // --- DOM Elements ---
-        const statusMessageElement = document.getElementById('status-message');
-        const spinnerElement = document.getElementById('spinner');
+        // تنظیم ارتفاع برای موبایل
+        const setVh = () => {
+            document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+        };
+        window.addEventListener('resize', setVh);
+        setVh();
 
-        // --- Main Logic ---
-        function checkLoginStatus() {
-            // از localStorage برای بررسی وجود اطلاعات کاربر استفاده می‌کنیم
-            const storedUser = localStorage.getItem('currentUser');
+        // --- توابع کمکی ---
+        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-            if (storedUser) {
-                // کاربر قبلا با موفقیت وارد شده است
-                try {
-                    const user = JSON.parse(storedUser);
-                    
-                    // پیام خوش‌آمدگویی مجدد را نمایش می‌دهیم
-                    statusMessageElement.textContent = `خوش آمدید مجدد، ${user.displayName || user.username}!`;
-                    spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
+        const updateTaskStatus = (message, percentage) => {
+            if (message) statusMessageEl.textContent = message;
+            if (percentage !== null && percentage !== undefined) {
+                const percentVal = Math.min(Math.round(percentage), 100);
+                statusPercentageEl.textContent = `${percentVal}%`;
+                progressBarFill.style.width = `${percentVal}%`;
+            }
+        };
 
-                    // پس از تاخیر، کاربر را به صفحه اصلی هدایت می‌کنیم
-                    setTimeout(() => {
-                        window.location.href = 'safe_asli.html';
-                    }, REDIRECT_DELAY);
-
-                } catch (e) {
-                    // اگر اطلاعات ذخیره شده معتبر نبود، آن را پاک کرده و به صفحه ثبت‌نام هدایت می‌کنیم
-                    localStorage.removeItem('currentUser');
-                    redirectToRegister();
+        // --- شبیه‌سازی پیشرفت برای کارهای سریع ---
+        async function withSimulatedProgress(actionPromise, startPercent, endPercent, updateFn) {
+            let current = startPercent;
+            const step = (endPercent - startPercent) / 10;
+            
+            const interval = setInterval(() => {
+                if (current < endPercent - 5) {
+                    current += Math.random() * step;
+                    updateFn(null, current);
                 }
+            }, 100);
 
-            } else {
-                // کاربر وارد نشده یا برای اولین بار است که اپ را باز می‌کند
-                redirectToRegister();
+            try {
+                const result = await actionPromise();
+                clearInterval(interval);
+                updateFn(null, endPercent);
+                return result;
+            } catch (e) {
+                clearInterval(interval);
+                throw e;
             }
         }
-        
-        function redirectToRegister() {
-            // پیام خوش‌آمدگویی اولیه را نمایش می‌دهیم
-            statusMessageElement.textContent = 'به همیار خوش آمدید!';
-            spinnerElement.style.display = 'none'; // اسپینر را مخفی می‌کنیم
 
-            // پس از تاخیر، کاربر را به صفحه ثبت‌نام هدایت می‌کنیم
-            setTimeout(() => {
-                window.location.href = 'register.html'; 
-            }, REDIRECT_DELAY);
+        // --- منطق اصلی بارگذاری (Task Runner) ---
+        async function runLoadingSequence() {
+            try {
+                // مرحله 1: تنظیم تصویر پس زمینه (مخفیانه)
+                updateTaskStatus('در حال بارگذاری منابع...', 10);
+                await new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = BACKGROUND_IMAGE_URL;
+                    img.onload = () => {
+                        body.style.backgroundImage = `url(${BACKGROUND_IMAGE_URL})`;
+                        resolve();
+                    };
+                    img.onerror = () => {
+                        // در صورت خطا، رنگ ساده نمایش داده شود
+                        console.warn('تصویر پس‌زمینه لود نشد.');
+                        resolve(); 
+                    };
+                });
+                
+                // نمایش صفحه (محو شدن پرلودر)
+                preloaderOverlay.style.opacity = '0';
+                setTimeout(() => preloaderOverlay.style.display = 'none', 800);
+
+                // مرحله 2: بررسی وضعیت حافظه (منطق اصلی فایل قبلی شما)
+                await withSimulatedProgress(async () => {
+                    updateTaskStatus('بررسی وضعیت احراز هویت...', 30);
+                    await delay(800); // تاخیر مصنوعی برای زیبایی انیمیشن
+                    
+                    const storedUser = localStorage.getItem('currentUser');
+                    return storedUser ? JSON.parse(storedUser) : null;
+                }, 30, 60, updateTaskStatus).then(async (user) => {
+                    
+                    // مرحله 3: تصمیم‌گیری و هدایت
+                    if (user) {
+                        updateTaskStatus(`خوش آمدید، ${user.displayName || user.username}!`, 80);
+                        await delay(1000);
+                        updateTaskStatus('در حال انتقال به برنامه...', 100);
+                        await delay(500);
+                        window.location.href = 'safe_asli.html';
+                    } else {
+                        updateTaskStatus('کاربر جدید شناسایی شد...', 80);
+                        await delay(800);
+                        updateTaskStatus('انتقال به صفحه ثبت نام...', 100);
+                        await delay(500);
+                        window.location.href = 'register.html';
+                    }
+                });
+
+            } catch (error) {
+                console.error("خطا در بارگذاری:", error);
+                updateTaskStatus('خطا در بارگذاری. لطفاً صفحه را رفرش کنید.', 100);
+                progressBarFill.style.background = '#e74c3c'; // قرمز شدن نوار در صورت خطا
+            }
         }
 
-        // اجرای تابع پس از بارگذاری کامل صفحه
-        window.onload = checkLoginStatus;
+        // شروع برنامه
+        window.addEventListener('load', () => {
+            runLoadingSequence();
+        });
+
     </script>
 </body>
 </html>
