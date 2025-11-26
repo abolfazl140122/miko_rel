@@ -2083,6 +2083,47 @@
         styleSheet.type = "text/css";
         styleSheet.innerText += `@keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } } @keyframes popIn { 0% { transform: scale(0.3); opacity: 0; } 80% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); } }`;
         document.head.appendChild(styleSheet);
+        
+        // ==========================================
+    // --- کدهای مخصوص دریافت نوتیفیکیشن ---
+    // ==========================================
+
+    // 1. این تابع را اسکچ‌ور صدا می‌زند
+    function saveDeviceToken(token) {
+        console.log("FCM Token received:", token);
+        // ذخیره در حافظه مرورگر که گم نشود
+        localStorage.setItem('fcm_token', token);
+
+        // اگر کاربر لاگین کرده، همین الان بفرست سمت سرور
+        if (typeof currentUser !== 'undefined' && currentUser && currentUser.username) {
+             updateFCMTokenOnServer(token);
+        }
+    }
+
+    // 2. تابع فرستادن توکن به دیتابیس (با استفاده از توابع موجود شما)
+    async function updateFCMTokenOnServer(token) {
+        try {
+            // از همان تابع آپدیت که در کدتان داشتید استفاده می‌کنیم
+            const path = `users/${currentUser.username}`;
+            await updateUserDataOnServer(path, { fcmToken: token });
+            console.log("توکن نوتیفیکیشن در دیتابیس ذخیره شد.");
+        } catch (e) {
+            console.error("خطا در ذخیره توکن:", e);
+        }
+    }
+
+    // 3. محض اطمینان: وقتی صفحه لود شد، اگر توکن داشتیم بفرست
+    // (چون ممکنه اسکچ‌ور توکن رو زودتر از لود شدن کامل سایت بفرسته)
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const savedToken = localStorage.getItem('fcm_token');
+            // بررسی می‌کنیم کاربر لاگین هست یا نه
+            if (savedToken && typeof currentUser !== 'undefined' && currentUser) {
+                 updateFCMTokenOnServer(savedToken);
+            }
+        }, 5000); // 5 ثانیه صبر می‌کنیم تا clientToken آماده شود
+    });
+        
     </script>
 </body>
 </html>
