@@ -8,7 +8,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
 
         :root {
-            --bg-color: #0D1117; /* رنگ پایه مشکی/سرمه‌ای */
+            --bg-color: #0D1117;
             --primary-color: #00A3FF;
             --primary-glow: rgba(0, 163, 255, 0.6);
             --text-color: #ffffff;
@@ -25,29 +25,37 @@
             color: var(--text-color);
         }
 
-        /* --- 1. لایه عکس پس‌زمینه --- */
-        #bg-image {
+        /* --- کانتینر مدیا (مشترک برای عکس و ویدیو) --- */
+        .media-background {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover;
-            background-position: center;
             z-index: 1;
-            /* عکس از همان ابتدا هست، اما زیر لایه تاریک پنهان است */
         }
 
-        /* --- 2. لایه دایمر (تاریک‌کننده) هوشمند --- */
-        /* این لایه روی عکس قرار می‌گیرد و شفافیتش با جاوااسکریپت کم می‌شود */
+        /* استایل مخصوص عکس */
+        #bg-image {
+            background-size: cover;
+            background-position: center;
+            display: none; /* پیش‌فرض مخفی */
+        }
+
+        /* استایل مخصوص ویدیو */
+        #bg-video {
+            object-fit: cover; /* باعث می‌شود ویدیو کل صفحه را پر کند بدون دفرمه شدن */
+            display: none; /* پیش‌فرض مخفی */
+        }
+
+        /* --- لایه دایمر (تاریک‌کننده) هوشمند --- */
         #smart-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color); /* شروع با رنگ کاملا تاریک */
+            background-color: var(--bg-color);
             z-index: 2;
             pointer-events: none;
-            /* ترنزیشن نرم برای تغییر روشنایی */
             transition: opacity 0.1s linear; 
         }
 
-        /* یک لایه گرادینت ثابت برای خوانایی متن پایین */
+        /* گرادینت پایین صفحه */
         #text-protection-gradient {
             position: fixed;
             bottom: 0; left: 0; width: 100%; height: 40%;
@@ -56,7 +64,7 @@
             pointer-events: none;
         }
 
-        /* --- 3. کانتینر لودینگ --- */
+        /* --- کانتینر لودینگ --- */
         #loader-container {
             position: fixed;
             bottom: 50px;
@@ -68,7 +76,6 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            /* سایه متن برای خوانایی بهتر روی هر عکسی */
             text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
         }
 
@@ -84,7 +91,7 @@
 
         .progress-track {
             width: 100%;
-            height: 8px; /* کمی ضخیم‌تر */
+            height: 8px;
             background: var(--bar-bg);
             border-radius: 10px;
             overflow: hidden;
@@ -98,11 +105,10 @@
             background: var(--primary-color);
             border-radius: 10px;
             box-shadow: 0 0 20px var(--primary-glow);
-            transition: width 0.1s linear; /* حرکت همزمان با روشنایی */
+            transition: width 0.1s linear;
             position: relative;
         }
 
-        /* افکت برق زدن نوار */
         .progress-fill::after {
             content: '';
             position: absolute;
@@ -114,7 +120,6 @@
 
         @keyframes shine { 100% { transform: translateX(100%); } }
 
-        /* استایل خروج از صفحه */
         body.exiting #loader-container { opacity: 0; transition: opacity 0.5s; }
         body.exiting #text-protection-gradient { opacity: 0; transition: opacity 0.5s; }
         body.exiting { transition: opacity 0.8s ease; }
@@ -123,13 +128,18 @@
 </head>
 <body>
 
-    <!-- عکس پس‌زمینه -->
-    <div id="bg-image"></div>
+    <!-- کانتینر عکس -->
+    <div id="bg-image" class="media-background"></div>
     
-    <!-- لایه‌ای که با پر شدن نوار، شفاف می‌شود -->
+    <!-- کانتینر ویدیو (ویژگی‌ها: بی‌صدا، پخش خودکار، تکرار) -->
+    <video id="bg-video" class="media-background" muted autoplay loop playsinline>
+        Your browser does not support the video tag.
+    </video>
+    
+    <!-- لایه تاریک‌کننده -->
     <div id="smart-overlay"></div>
     
-    <!-- گرادینت پایین برای خوانایی متن -->
+    <!-- گرادینت پایین -->
     <div id="text-protection-gradient"></div>
 
     <!-- نوار لودینگ -->
@@ -148,12 +158,16 @@
         // تنظیمات
         // ==========================================
         const CONFIG = {
-            bgUrl: 'https://cdn.imgurl.ir/uploads/q6997_vidu-video-3053216940160551.mp4',
-            stayDelay: 1200 // مکث نهایی وقتی ۱۰۰٪ شد
+            // لینک فایل (می‌تواند عکس jpg/png یا ویدیو mp4/webm باشد)
+            // لینک نمونه ویدیو شما:
+            mediaUrl: 'https://cdn.imgurl.ir/uploads/q6997_vidu-video-3053216940160551.mp4', 
+            
+            stayDelay: 1200 // مکث نهایی وقتی ۱۰۰٪ شد (میلی‌ثانیه)
         };
 
         // --- DOM Elements ---
-        const bgDiv = document.getElementById('bg-image');
+        const bgImageDiv = document.getElementById('bg-image');
+        const bgVideoEl = document.getElementById('bg-video');
         const overlay = document.getElementById('smart-overlay');
         const statusText = document.getElementById('status-text');
         const percentText = document.getElementById('percent-text');
@@ -161,102 +175,130 @@
 
         // متغیرهای وضعیت
         let loadProgress = 0;
-        let isImageLoaded = false;
+        let isMediaLoaded = false; // آیا مدیا (عکس یا ویدیو) دانلود شده؟
         let simulationInterval;
 
-        // --- 1. شروع فرآیند ---
+        // --- 1. تشخیص نوع فایل (ویدیو یا عکس) ---
+        function getMediaType(url) {
+            const extension = url.split('.').pop().toLowerCase().split('?')[0];
+            const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'm4v'];
+            if (videoExts.includes(extension)) {
+                return 'video';
+            }
+            return 'image';
+        }
+
+        // --- 2. شروع فرآیند ---
         function startLoading() {
-            // شروع دانلود عکس در حافظه (بدون مشکل CORS)
-            const img = new Image();
-            img.src = CONFIG.bgUrl;
+            const type = getMediaType(CONFIG.mediaUrl);
+            
+            if (type === 'video') {
+                handleVideoLoading();
+            } else {
+                handleImageLoading();
+            }
 
-            // وقتی عکس کامل دانلود شد
-            img.onload = () => {
-                isImageLoaded = true;
-                // ست کردن عکس در پس‌زمینه
-                bgDiv.style.backgroundImage = `url(${CONFIG.bgUrl})`;
-            };
-
-            // هندل کردن خطا (اگر عکس نبود، صفحه مشکی نماند)
-            img.onerror = () => {
-                console.warn("عکس لود نشد.");
-                isImageLoaded = true; // فرض می‌کنیم لود شده تا نوار گیر نکند
-            };
-
-            // شروع نوار پیشرفت
+            // شروع نوار پیشرفت همزمان با لود شدن مدیا
             simulateProgress();
         }
 
-        // --- 2. موتور شبیه‌سازی و آپدیت گرافیک ---
+        // --- الف: لود کردن ویدیو ---
+        function handleVideoLoading() {
+            // نمایش تگ ویدیو و مخفی کردن عکس
+            bgVideoEl.style.display = 'block';
+            bgImageDiv.style.display = 'none';
+
+            bgVideoEl.src = CONFIG.mediaUrl;
+            
+            // وقتی دیتای کافی برای پخش ویدیو دانلود شد
+            bgVideoEl.onloadeddata = () => {
+                isMediaLoaded = true;
+                bgVideoEl.play().catch(e => console.log("Autoplay prevented:", e));
+            };
+
+            bgVideoEl.onerror = () => {
+                console.warn("خطا در بارگذاری ویدیو.");
+                isMediaLoaded = true; // جلوگیری از گیر کردن نوار
+            };
+        }
+
+        // --- ب: لود کردن عکس ---
+        function handleImageLoading() {
+            // نمایش تگ عکس و مخفی کردن ویدیو
+            bgImageDiv.style.display = 'block';
+            bgVideoEl.style.display = 'none';
+
+            const img = new Image();
+            img.src = CONFIG.mediaUrl;
+
+            img.onload = () => {
+                isMediaLoaded = true;
+                bgImageDiv.style.backgroundImage = `url(${CONFIG.mediaUrl})`;
+            };
+
+            img.onerror = () => {
+                console.warn("عکس لود نشد.");
+                isMediaLoaded = true;
+            };
+        }
+
+        // --- 3. موتور شبیه‌سازی و آپدیت گرافیک ---
         function simulateProgress() {
             simulationInterval = setInterval(() => {
-                // اگر عکس هنوز دانلود نشده است:
-                if (!isImageLoaded) {
-                    // تا حدود 85% سریع برو، اما اگر عکس نیامد کند شو
+                // اگر مدیا هنوز دانلود نشده است:
+                if (!isMediaLoaded) {
                     if (loadProgress < 60) {
                         loadProgress += 2;
                     } else if (loadProgress < 85) {
                         loadProgress += 0.5;
                     } else if (loadProgress < 95) {
-                        loadProgress += 0.1; // خیلی کند منتظر دانلود می‌ماند
+                        loadProgress += 0.1;
                     }
                     
-                    // تغییر متن‌ها بر اساس درصد
+                    // متن‌های وضعیت
                     if(loadProgress < 30) statusText.textContent = "اتصال به سرور...";
-                    else if(loadProgress < 70) statusText.textContent = "در حال دریافت منابع گرافیکی...";
-                    else statusText.textContent = "بارگذاری تصویر...";
+                    else if(loadProgress < 70) statusText.textContent = "در حال دریافت فایل گرافیکی...";
+                    else statusText.textContent = "پردازش رسانه...";
                 } 
-                // اگر عکس دانلود شده است (یا خطا داده):
+                // اگر مدیا دانلود شده است:
                 else {
-                    // با سرعت زیاد به سمت ۱۰۰ برو
                     loadProgress += 4;
                 }
 
-                // بروزرسانی گرافیکی
                 updateVisuals(loadProgress);
 
-                // پایان کار
                 if (loadProgress >= 100) {
                     clearInterval(simulationInterval);
                     finishLoading();
                 }
-            }, 40); // سرعت رفرش انیمیشن
+            }, 40);
         }
 
-        // --- 3. بروزرسانی ویژوال (جادوی اصلی) ---
+        // --- 4. بروزرسانی ویژوال ---
         function updateVisuals(percent) {
-            // اطمینان از اینکه از ۱۰۰ رد نشود
             const safePercent = Math.min(100, Math.max(0, percent));
             
-            // 1. آپدیت عرض نوار
+            // آپدیت نوار و عدد
             progressFill.style.width = `${safePercent}%`;
-            
-            // 2. آپدیت عدد درصد
             percentText.textContent = `${Math.floor(safePercent)}%`;
 
-            // 3. آپدیت شفافیت لایه تاریک (نکته کلیدی درخواست شما)
-            // فرمول: درصد 0 -> شفافیت 1 (سیاه)
-            // فرمول: درصد 100 -> شفافیت 0 (روشن)
+            // آپدیت شفافیت لایه تاریک (نکته کلیدی: هر چه درصد بیشتر، شفاف‌تر)
             const opacity = 1 - (safePercent / 100);
             overlay.style.opacity = opacity;
         }
 
-        // --- 4. پایان بارگذاری ---
+        // --- 5. پایان بارگذاری ---
         function finishLoading() {
-            // اطمینان حاصل می‌کنیم که لایه تاریک کاملاً حذف شده باشد
             overlay.style.opacity = '0';
             statusText.textContent = "تکمیل شد.";
             
-            // مکث کوتاه برای لذت بردن از تصویر کامل شده
             setTimeout(() => {
-                statusText.textContent = "بررسی هویت کاربر...";
-                
-                // هدایت به صفحه بعد
+                statusText.textContent = "خوش آمدید";
                 setTimeout(handleNavigation, 800);
             }, CONFIG.stayDelay);
         }
 
-        // --- 5. ناوبری ---
+        // --- 6. ناوبری ---
         function handleNavigation() {
             document.body.classList.add('exiting');
 
@@ -276,7 +318,6 @@
             }, 600);
         }
 
-        // اجرا
         window.addEventListener('load', startLoading);
 
     </script>
