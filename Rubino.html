@@ -1,3 +1,4 @@
+<!-- START OF FILE روبینو_با_کامنت.html -->
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -272,13 +273,14 @@
             border-top-left-radius: 24px; border-top-right-radius: 24px;
             transform: translateY(100%); 
             transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            padding: 20px 0 15px 0;
+            padding: 20px 0 0 0; /* Adjusted padding */
             box-shadow: 0 -5px 40px rgba(0,0,0,0.6);
             display: flex; flex-direction: column;
+            max-height: 85vh; /* Limit height */
         }
         .modal-overlay.active .sheet-card { transform: translateY(0); }
 
-        .sheet-drag-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 0 auto 15px; }
+        .sheet-drag-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 0 auto 15px; flex-shrink: 0; }
 
         .sheet-option {
             width: 100%; padding: 16px 25px; text-align: right; background: none; border: none;
@@ -363,6 +365,57 @@
         /* Blue Tick Fix in Modal */
         .user-list-info .verified-tick { width: 14px; height: 14px; vertical-align: middle; }
 
+        /* --- COMMENTS MODAL STYLES --- */
+        .comments-list-content {
+            flex-grow: 1; overflow-y: auto; padding: 0 0 70px 0; /* padding for input area */
+            min-height: 200px;
+        }
+        .comment-item {
+            display: flex; gap: 12px; padding: 12px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            animation: fadeIn 0.3s ease;
+        }
+        .comment-avatar {
+            width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+            border: 1px solid var(--border-color); flex-shrink: 0;
+        }
+        .comment-content { flex: 1; font-size: 0.9rem; line-height: 1.4; }
+        .comment-header { margin-bottom: 2px; display: flex; align-items: center; gap: 5px; }
+        .comment-username { font-weight: 700; color: var(--text-primary); font-size: 0.85rem; }
+        .comment-text { color: var(--text-primary); font-weight: 400; font-size: 0.9rem; word-break: break-word; }
+        .comment-time { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; display: block; }
+        
+        /* Comment Input Area */
+        .comment-input-area {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background-color: var(--modal-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 10px 15px;
+            display: flex; align-items: center; gap: 10px;
+            z-index: 20;
+        }
+        .comment-input-field {
+            flex-grow: 1; background: var(--secondary-color); border: 1px solid var(--border-color);
+            color: var(--text-primary); padding: 10px 15px; border-radius: 20px;
+            font-family: 'Vazirmatn'; font-size: 0.9rem; outline: none;
+            transition: border-color 0.2s;
+        }
+        .comment-input-field:focus { border-color: var(--primary-color); }
+        .send-comment-btn {
+            background: none; border: none; color: var(--primary-color);
+            font-weight: 700; cursor: pointer; padding: 5px;
+            opacity: 0.5; transition: opacity 0.2s;
+        }
+        .send-comment-btn.active { opacity: 1; }
+        .send-comment-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; transform: rotate(180deg); }
+
+        /* Comment Skeleton */
+        .comment-skeleton { display: flex; gap: 12px; padding: 12px 15px; }
+        .sk-c-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--skeleton-base); flex-shrink: 0; }
+        .sk-c-content { flex: 1; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+        .sk-c-line1 { width: 30%; height: 10px; background: var(--skeleton-base); border-radius: 4px; }
+        .sk-c-line2 { width: 80%; height: 10px; background: var(--skeleton-base); border-radius: 4px; }
+
         .empty-state { text-align: center; padding: 50px 20px; color: var(--text-secondary); }
         
         /* Toast Notification */
@@ -401,7 +454,7 @@
             <div class="pull-spinner" id="pull-spinner"></div>
         </div>
 
-        <!-- Skeleton Loader -->
+        <!-- Skeleton Loader (Main Feed) -->
         <div id="skeleton-loader">
             <div class="sk-post">
                 <div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div>
@@ -511,6 +564,29 @@
                 <div class="user-list-content" id="likes-list-container"></div>
             </div>
         </div>
+
+        <!-- Comments Modal (New) -->
+        <div class="modal-overlay bottom-sheet" id="comments-modal">
+            <div class="sheet-card" style="height: 75vh;">
+                <div class="sheet-drag-handle"></div>
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding: 5px 20px 15px;">
+                    <h3 class="modal-title" style="font-size: 1.1rem;">نظرات</h3>
+                    <button class="close-modal" id="close-comments-btn">&times;</button>
+                </div>
+                
+                <div class="comments-list-content" id="comments-list-container">
+                    <!-- Comments will load here -->
+                </div>
+                
+                <div class="comment-input-area">
+                    <img id="current-user-comment-avatar" src="" class="comment-avatar" style="width: 36px; height: 36px; border: none;">
+                    <input type="text" id="comment-input-field" class="comment-input-field" placeholder="نظر خود را بنویسید..." autocomplete="off">
+                    <button id="send-comment-btn" class="send-comment-btn">
+                        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
         
         <!-- Toast -->
         <div class="toast" id="toast">پیام سیستم</div>
@@ -532,6 +608,7 @@
         const createModal = document.getElementById('create-modal');
         const optionsModal = document.getElementById('options-modal');
         const likesModal = document.getElementById('likes-modal');
+        const commentsModal = document.getElementById('comments-modal');
         const editCaptionModal = document.getElementById('edit-caption-modal');
         
         // Buttons & Inputs
@@ -540,6 +617,7 @@
         const sharePostBtn = document.getElementById('share-post-btn');
         const closeOptionsBtn = document.getElementById('close-options-btn');
         const closeLikesBtn = document.getElementById('close-likes-btn');
+        const closeCommentsBtn = document.getElementById('close-comments-btn');
         const deletePostBtn = document.getElementById('delete-post-btn');
         const editPostBtn = document.getElementById('edit-post-btn');
         const saveCaptionBtn = document.getElementById('save-caption-btn');
@@ -557,6 +635,12 @@
         const pullIndicator = document.getElementById('pull-indicator');
         const pullSpinner = document.getElementById('pull-spinner');
         const toast = document.getElementById('toast');
+        
+        // Comment Refs
+        const commentsListContainer = document.getElementById('comments-list-container');
+        const commentInputField = document.getElementById('comment-input-field');
+        const sendCommentBtn = document.getElementById('send-comment-btn');
+        const currentUserCommentAvatar = document.getElementById('current-user-comment-avatar');
 
         // --- APP STATE ---
         let currentUser = null;
@@ -565,6 +649,7 @@
         let allUsersCache = {};
         let currentOptionsPostId = null; 
         let currentViewingLikesPostId = null; 
+        let currentCommentsPostId = null; // Track which post's comments are open
         let postsDataCache = {}; 
         let videoObserver = null; 
         let startY = 0; let isPulling = false; let currentTranslate = 0;
@@ -577,6 +662,9 @@
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) { window.location.href = 'login.html'; return; }
             currentUser = JSON.parse(storedUser);
+
+            // Set current user avatar in comment bar
+            currentUserCommentAvatar.src = currentUser.profilePicUrl || `https://ui-avatars.com/api/?name=${currentUser.username}&background=random&color=fff`;
 
             setupEventListeners();
             initVideoObserver();
@@ -718,6 +806,23 @@
                 likesModal.classList.remove('active');
                 currentViewingLikesPostId = null;
             });
+            
+            // Comments Listeners
+            commentsModal.addEventListener('click', (e) => {
+                if(e.target === commentsModal) {
+                    commentsModal.classList.remove('active');
+                    currentCommentsPostId = null;
+                }
+            });
+            closeCommentsBtn.addEventListener('click', () => {
+                commentsModal.classList.remove('active');
+                currentCommentsPostId = null;
+            });
+            commentInputField.addEventListener('input', (e) => {
+                if(e.target.value.trim().length > 0) sendCommentBtn.classList.add('active');
+                else sendCommentBtn.classList.remove('active');
+            });
+            sendCommentBtn.addEventListener('click', handleSendComment);
 
             deletePostBtn.addEventListener('click', handleDeletePost);
             editPostBtn.addEventListener('click', () => {
@@ -946,7 +1051,7 @@
                             <button class="action-btn ${isLiked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                             </button>
-                            <button class="action-btn">
+                            <button class="action-btn" onclick="openComments('${post.id}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                             </button>
                         </div>
@@ -1018,6 +1123,133 @@
                     if (capEl.textContent !== post.caption) capEl.textContent = post.caption;
                 });
             } catch (e) { console.warn("Sync error", e); }
+        }
+
+        // --- COMMENTS LOGIC ---
+        async function openComments(postId) {
+            currentCommentsPostId = postId;
+            commentsModal.classList.add('active');
+            
+            // Show Skeleton Loading for comments
+            commentsListContainer.innerHTML = '';
+            for(let i=0; i<4; i++) {
+                commentsListContainer.innerHTML += `
+                    <div class="comment-skeleton skeleton-animate">
+                        <div class="sk-c-avatar"></div>
+                        <div class="sk-c-content">
+                            <div class="sk-c-line1"></div>
+                            <div class="sk-c-line2"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            try {
+                // Fetch comments (assuming structure: rubino_posts/{postId}/comments)
+                // Note: If your structure is different, adjust path here.
+                const response = await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/comments`, {
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                });
+                
+                const data = await response.json();
+                renderComments(data);
+            } catch(e) {
+                commentsListContainer.innerHTML = '<div class="empty-state">خطا در دریافت نظرات.</div>';
+            }
+        }
+
+        function renderComments(commentsData) {
+            commentsListContainer.innerHTML = '';
+            
+            if (!commentsData || Object.keys(commentsData).length === 0) {
+                commentsListContainer.innerHTML = `
+                    <div class="empty-state" style="padding-top:80px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary); margin-bottom:10px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <p>هنوز نظری ثبت نشده است.<br>اولین نفر باشید!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const commentsArray = Object.entries(commentsData)
+                .map(([key, val]) => ({ id: key, ...val }))
+                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // Oldest first for comments
+
+            commentsArray.forEach(comment => {
+                const user = allUsersCache[comment.sender_username] || { displayName: comment.sender_username, username: comment.sender_username };
+                const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${comment.sender_username}&background=random&color=fff`;
+                const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
+
+                const div = document.createElement('div');
+                div.className = 'comment-item';
+                div.innerHTML = `
+                    <img src="${avatar}" class="comment-avatar">
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-username">${user.displayName || comment.sender_username} ${verifiedHtml}</span>
+                            <span class="comment-text">${comment.text}</span>
+                        </div>
+                        <span class="comment-time">${timeAgo(comment.timestamp)}</span>
+                    </div>
+                `;
+                commentsListContainer.appendChild(div);
+            });
+            
+            // Scroll to bottom to see latest comments
+            commentsListContainer.scrollTop = commentsListContainer.scrollHeight;
+        }
+
+        async function handleSendComment() {
+            const text = commentInputField.value.trim();
+            if (!text || !currentCommentsPostId) return;
+
+            // Optimistic Update: Show immediately
+            const fakeComment = {
+                sender_username: currentUser.username,
+                text: text,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Remove empty state if exists
+            if(commentsListContainer.querySelector('.empty-state')) commentsListContainer.innerHTML = '';
+
+            const user = currentUser; // We have current user data
+            const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${user.username}&background=random&color=fff`;
+            
+            const div = document.createElement('div');
+            div.className = 'comment-item';
+            div.style.opacity = '0.5'; // Indicate sending
+            div.innerHTML = `
+                <img src="${avatar}" class="comment-avatar">
+                <div class="comment-content">
+                    <div class="comment-header">
+                        <span class="comment-username">${user.displayName || user.username}</span>
+                        <span class="comment-text">${text}</span>
+                    </div>
+                    <span class="comment-time">درحال ارسال...</span>
+                </div>
+            `;
+            commentsListContainer.appendChild(div);
+            commentsListContainer.scrollTop = commentsListContainer.scrollHeight;
+            
+            commentInputField.value = '';
+            sendCommentBtn.classList.remove('active');
+
+            try {
+                await fetch(`${PROXY_URL}?path=rubino_posts/${currentCommentsPostId}/comments`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fakeComment)
+                });
+                
+                div.style.opacity = '1';
+                div.querySelector('.comment-time').textContent = 'همین الان';
+            } catch(e) {
+                div.style.opacity = '1';
+                div.querySelector('.comment-time').textContent = 'خطا در ارسال';
+                div.querySelector('.comment-time').style.color = 'var(--danger-color)';
+                showToast('خطا در ارسال نظر', 'error');
+            }
         }
 
         // --- POST ACTIONS ---
