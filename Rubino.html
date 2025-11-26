@@ -14,15 +14,13 @@
             --border-color: #30363d;
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
-            --primary-color: #00A3FF; /* آبی همیار */
+            --primary-color: #00A3FF;
             --primary-glow: rgba(0, 163, 255, 0.4);
             --like-color: #ED4956;
             --modal-bg: #1C2128;
             --skeleton-base: #161B22;
             --skeleton-highlight: #21262d;
             --danger-color: #FF4D4D;
-            --toast-bg: rgba(40, 167, 69, 0.9);
-            --toast-error: rgba(220, 53, 69, 0.9);
         }
 
         *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -57,20 +55,18 @@
         }
         .header-title {
             font-size: 1.5rem; 
-            font-weight: 900;
-            margin: 0;
+            font-weight: 900; margin: 0;
             color: var(--primary-color);
             text-shadow: 0 0 15px var(--primary-glow);
             letter-spacing: 0.5px;
         }
         .header-btn {
             background: none; border: none; color: var(--text-primary);
-            cursor: pointer; padding: 8px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer; padding: 8px; transition: transform 0.2s;
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
         }
         .header-btn:active { transform: scale(0.85); background-color: var(--secondary-hover); }
-        /* استایل جدید آیکون‌ها */
         .header-btn svg { width: 28px; height: 28px; stroke-width: 2.5; }
 
         /* --- PULL TO REFRESH --- */
@@ -124,34 +120,82 @@
         .verified-tick {
             width: 16px; height: 16px;
             filter: drop-shadow(0 0 4px var(--primary-glow));
-            vertical-align: middle;
+            vertical-align: sub; /* Adjusted for better alignment */
         }
         
-        /* استایل جدید دکمه سه نقطه - بدون چرخش، با انیمیشن مدرن */
         .post-options { 
             color: var(--text-secondary); cursor: pointer; padding: 8px; border-radius: 50%; 
-            transition: background-color 0.2s ease, transform 0.1s ease, color 0.2s;
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
         .post-options:hover { background-color: var(--secondary-hover); color: var(--text-primary); }
-        .post-options:active { transform: scale(0.9); background-color: rgba(255,255,255,0.1); }
+        .post-options:active { transform: scale(0.9); }
         .post-options.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
 
-        /* Media Container */
+        /* --- MEDIA CONTAINER & LOADING BLUR --- */
         .post-media-container {
             width: 100%; position: relative;
             background-color: #000; min-height: 300px; 
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
         }
-        .post-media { width: 100%; height: auto; max-height: 580px; object-fit: contain; display: block; }
-        video.post-media { object-fit: contain; max-height: 600px; }
         
-        /* Heart Animation */
+        /* Loading Placeholder with Blur */
+        .media-loader-placeholder {
+            position: absolute; inset: 0;
+            background-color: var(--secondary-color);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2; transition: opacity 0.5s ease;
+        }
+        .media-loader-placeholder.loaded { opacity: 0; pointer-events: none; }
+        .loading-spinner {
+            width: 30px; height: 30px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .post-media { 
+            width: 100%; height: auto; max-height: 580px; object-fit: contain; display: block;
+            opacity: 0; transition: opacity 0.5s ease-in; 
+        }
+        .post-media.loaded { opacity: 1; }
+        
+        video.post-media { object-fit: contain; max-height: 600px; }
+
+        /* --- VIDEO CONTROLS --- */
+        .video-overlay-controls {
+            position: absolute; bottom: 15px; right: 15px;
+            display: flex; gap: 10px; z-index: 6;
+            transition: opacity 0.3s;
+        }
+        .control-btn {
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white; border-radius: 50%; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; padding: 6px;
+        }
+        .control-btn svg { width: 100%; height: 100%; }
+        
+        .play-pause-overlay {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.4); border-radius: 50%;
+            width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5; pointer-events: none; opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .play-pause-overlay.visible { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        .play-pause-overlay svg { width: 30px; height: 30px; fill: white; }
+
+        /* --- HEART ANIMATION --- */
         .heart-overlay {
             position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%) scale(0);
             color: #fff; font-size: 90px; pointer-events: none;
-            z-index: 5; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+            z-index: 7; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
             opacity: 0;
         }
         .heart-overlay.active { animation: heartPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -175,11 +219,9 @@
         }
         @keyframes likePulse { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
 
-        /* استایل نمایش لایک‌ها */
         .post-likes { 
             padding: 0 15px; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; 
             width: fit-content; transition: opacity 0.2s;
-            /* نشانگر موس بر اساس وضعیت تغییر میکند */
         }
         .post-likes.clickable { cursor: pointer; }
         .post-likes.clickable:active { opacity: 0.6; }
@@ -201,9 +243,7 @@
         .sk-image { width: 100%; height: 380px; background: var(--skeleton-base); }
         .sk-actions { height: 20px; margin: 15px; width: 40%; background: var(--skeleton-base); border-radius: 4px; }
         
-        .skeleton-animate {
-            position: relative; overflow: hidden;
-        }
+        .skeleton-animate { position: relative; overflow: hidden; }
         .skeleton-animate::after {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
@@ -305,9 +345,7 @@
         .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary-color), #00C6FF); border-radius: 3px; transition: width 0.2s ease-out; }
 
         /* --- USER LIST MODAL --- */
-        .user-list-content { 
-            max-height: 60vh; overflow-y: auto; padding: 0; flex-grow: 1;
-        }
+        .user-list-content { max-height: 60vh; overflow-y: auto; padding: 0; flex-grow: 1; }
         .user-list-item { 
             display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
             transition: background 0.2s;
@@ -316,6 +354,9 @@
         .user-list-item img { width: 44px; height: 44px; border-radius: 50%; margin-left: 12px; object-fit: cover; border: 1px solid var(--border-color); }
         .user-list-info h4 { margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 4px; color: var(--text-primary); }
         .user-list-info p { margin: 3px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
+        
+        /* Blue Tick Fix in Modal */
+        .user-list-info .verified-tick { width: 14px; height: 14px; vertical-align: middle; }
 
         .empty-state { text-align: center; padding: 50px 20px; color: var(--text-secondary); }
         
@@ -342,7 +383,6 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
             </button>
             <h1 class="header-title">روبینو همیار</h1>
-            <!-- New Post Button: Modern Plus Icon -->
             <button class="header-btn" id="open-create-modal">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -351,7 +391,7 @@
             </button>
         </header>
         
-        <!-- Pull to Refresh Spinner -->
+        <!-- Pull to Refresh -->
         <div class="pull-indicator" id="pull-indicator">
             <div class="pull-spinner" id="pull-spinner"></div>
         </div>
@@ -371,9 +411,7 @@
         </div>
 
         <!-- Feed -->
-        <div class="feed-container" id="feed-container">
-            <!-- Posts will be injected here -->
-        </div>
+        <div class="feed-container" id="feed-container"></div>
 
         <!-- Create Post Modal -->
         <div class="modal-overlay" id="create-modal">
@@ -411,7 +449,7 @@
             </div>
         </div>
 
-        <!-- Post Options Modal (Bottom Sheet) -->
+        <!-- Post Options Modal -->
         <div class="modal-overlay bottom-sheet" id="options-modal">
             <div class="sheet-card">
                 <div class="sheet-drag-handle"></div>
@@ -438,7 +476,7 @@
             </div>
         </div>
         
-        <!-- Edit Caption Sub-Modal -->
+        <!-- Edit Caption Modal -->
         <div class="modal-overlay" id="edit-caption-modal">
              <div class="modal-card">
                  <div class="modal-header">
@@ -452,7 +490,7 @@
              </div>
         </div>
 
-        <!-- Likes List Modal (Bottom Sheet) -->
+        <!-- Likes List Modal -->
         <div class="modal-overlay bottom-sheet" id="likes-modal">
             <div class="sheet-card" style="max-height: 80vh;">
                 <div class="sheet-drag-handle"></div>
@@ -460,13 +498,11 @@
                     <h3 class="modal-title" style="font-size: 1.1rem;">پسندها</h3>
                     <button class="close-modal" id="close-likes-btn">&times;</button>
                 </div>
-                <div class="user-list-content" id="likes-list-container">
-                    <!-- Users injected here -->
-                </div>
+                <div class="user-list-content" id="likes-list-container"></div>
             </div>
         </div>
         
-        <!-- Toast Element -->
+        <!-- Toast -->
         <div class="toast" id="toast">پیام سیستم</div>
 
     </div>
@@ -477,19 +513,18 @@
         const UPLOAD_PHP_ENDPOINT = 'https://miko.freehost.io/upload_to_parspack.php';
         const SHARED_SECRET = 'miko1234';
         const VERIFIED_ICON_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
-        const LIVE_UPDATE_INTERVAL = 4000; 
+        const LIVE_UPDATE_INTERVAL = 4000;
+        const CACHE_KEY_FEED = 'rubino_cached_feed';
 
         // --- DOM REFERENCES ---
         const feedContainer = document.getElementById('feed-container');
         const skeletonLoader = document.getElementById('skeleton-loader');
-        
-        // Modals
         const createModal = document.getElementById('create-modal');
         const optionsModal = document.getElementById('options-modal');
         const likesModal = document.getElementById('likes-modal');
         const editCaptionModal = document.getElementById('edit-caption-modal');
         
-        // Buttons
+        // Buttons & Inputs
         const openCreateBtn = document.getElementById('open-create-modal');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const sharePostBtn = document.getElementById('share-post-btn');
@@ -499,8 +534,6 @@
         const editPostBtn = document.getElementById('edit-post-btn');
         const saveCaptionBtn = document.getElementById('save-caption-btn');
         const cancelCaptionBtn = document.getElementById('cancel-caption-btn');
-
-        // Inputs
         const fileInput = document.getElementById('file-input');
         const uploadTrigger = document.getElementById('upload-trigger');
         const imagePreview = document.getElementById('image-preview');
@@ -511,8 +544,6 @@
         const progressBar = document.getElementById('upload-progress');
         const privacyToggle = document.getElementById('privacy-toggle');
         const createPrivacyToggle = document.getElementById('create-privacy-toggle');
-
-        // Refresh & Toast
         const pullIndicator = document.getElementById('pull-indicator');
         const pullSpinner = document.getElementById('pull-spinner');
         const toast = document.getElementById('toast');
@@ -526,8 +557,6 @@
         let currentViewingLikesPostId = null; 
         let postsDataCache = {}; 
         let videoObserver = null; 
-
-        // Touch vars
         let startY = 0; let isPulling = false; let currentTranslate = 0;
 
         // --- INITIALIZATION ---
@@ -537,8 +566,16 @@
             currentUser = JSON.parse(storedUser);
 
             setupEventListeners();
-            initVideoObserver(); 
+            initVideoObserver();
             
+            // 1. Load from Cache Immediately (Offline Support / Speed)
+            const cachedFeed = localStorage.getItem(CACHE_KEY_FEED);
+            if (cachedFeed) {
+                skeletonLoader.style.display = 'none';
+                postsDataCache = JSON.parse(cachedFeed);
+                renderFeed(preparePostsArray(postsDataCache), false); // False means don't force full re-render if unnecessary
+            }
+
             try {
                 await refreshClientToken();
                 await fetchUsersCache(); 
@@ -548,38 +585,79 @@
                 setInterval(startRealtimeUpdates, LIVE_UPDATE_INTERVAL);
             } catch (error) {
                 console.error(error);
-                feedContainer.innerHTML = '<div class="empty-state">خطا در اتصال به سرور.</div>';
-                skeletonLoader.style.display = 'none';
+                if (!postsDataCache || Object.keys(postsDataCache).length === 0) {
+                    feedContainer.innerHTML = '<div class="empty-state">خطا در اتصال به سرور.</div>';
+                    skeletonLoader.style.display = 'none';
+                }
             }
         });
 
-        // --- VIDEO AUTOPLAY LOGIC (WITH SOUND) ---
+        // --- CACHE & DATA HELPERS ---
+        function preparePostsArray(data) {
+             return Object.entries(data)
+                .map(([key, val]) => ({ id: key, ...val }))
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+
+        // --- VIDEO & INTERSECTION OBSERVER ---
         function initVideoObserver() {
             const options = { root: null, rootMargin: '0px', threshold: 0.65 };
             
             videoObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     const video = entry.target;
+                    const overlay = document.getElementById(`play-icon-${video.dataset.id}`);
+                    
                     if (entry.isIntersecting) {
-                        // Play if visible - Try to play with sound
-                        // Note: Browsers block unmuted autoplay without interaction.
-                        // If it fails, we catch the error.
-                        video.play().catch(e => console.log('Autoplay prevented by browser policy'));
+                        // Play if visible - Start Muted to ensure autoplay policy compliance if needed,
+                        // but logic below attempts to play with current state.
+                        if (video.paused && !video.dataset.manualPause) {
+                            video.play().catch(e => {
+                                // If blocked, ensure it's muted
+                                video.muted = true;
+                                video.play().catch(e => console.log('Autoplay prevented'));
+                            });
+                        }
                         
-                        // Pause all other videos
+                        // Pause others
                         document.querySelectorAll('video').forEach(v => {
                             if (v !== video && !v.paused) v.pause();
                         });
                     } else {
-                        if (!video.paused) video.pause();
+                        if (!video.paused) {
+                            video.pause();
+                            // Don't set manualPause here, this is scrolling logic
+                        }
                     }
                 });
             }, options);
         }
 
-        function attachVideoObserver(container) {
-            const videos = container.querySelectorAll('video');
-            videos.forEach(v => videoObserver.observe(v));
+        function toggleVideoPlay(vidId) {
+            const video = document.getElementById(`video-${vidId}`);
+            const overlay = document.getElementById(`play-icon-${vidId}`);
+            
+            if (video.paused) {
+                video.dataset.manualPause = ""; // Clear manual pause
+                video.play();
+                overlay.classList.remove('visible');
+            } else {
+                video.dataset.manualPause = "true"; // Set manual pause
+                video.pause();
+                overlay.classList.add('visible');
+            }
+        }
+
+        function toggleMute(vidId, btn) {
+            const video = document.getElementById(`video-${vidId}`);
+            video.muted = !video.muted;
+            // Update Icon
+            btn.innerHTML = video.muted 
+                ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>` // Muted Icon
+                : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`; // Sound Icon
+            
+            // Prevent bubbling to play toggle
+            window.event.stopPropagation();
         }
 
         // --- EVENT LISTENERS ---
@@ -725,7 +803,7 @@
             } catch (err) { showToast('خطا در انتشار', 'error'); sharePostBtn.disabled = false; }
         }
 
-        // --- FEED & REALTIME LOGIC ---
+        // --- FEED LOGIC ---
         async function fetchPosts() {
             const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
                 headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
@@ -735,15 +813,18 @@
             if (!response.ok && response.status !== 404) return;
             
             const data = await response.json() || {};
-            postsDataCache = data; 
-
-            const posts = Object.entries(data).map(([key, val]) => ({ id: key, ...val }))
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
-            if (posts.length === 0) {
-                feedContainer.innerHTML = '<div class="empty-state">هیچ پستی وجود ندارد.</div>';
-            } else {
-                renderFeed(posts);
+            // Cache Update
+            if (JSON.stringify(data) !== JSON.stringify(postsDataCache)) {
+                localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(data));
+                postsDataCache = data;
+                const posts = preparePostsArray(data);
+                
+                if (posts.length === 0) {
+                    feedContainer.innerHTML = '<div class="empty-state">هیچ پستی وجود ندارد.</div>';
+                } else {
+                    renderFeed(posts);
+                }
             }
         }
 
@@ -758,22 +839,39 @@
                 const likeCount = post.likes ? Object.keys(post.likes).length : 0;
                 const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
 
-                // NEW LOGIC: Likes count is ALWAYS shown text-wise.
-                // But clicking it is disabled if privacy is set.
                 const canOpenList = isOwner || (post.show_likes !== false); 
                 const likesText = `${likeCount} پسند`;
                 const likesClass = canOpenList ? 'clickable' : 'private';
                 const likesClickAction = canOpenList ? `onclick="showLikesList('${post.id}', ${isOwner}, ${post.show_likes !== false})"` : '';
 
+                // Media & Loading Logic
+                let mediaHtml = '';
+                const loadingOverlay = `<div class="media-loader-placeholder" id="loader-${post.id}"><div class="loading-spinner"></div></div>`;
+
+                if (post.type === 'video') {
+                    mediaHtml = `
+                        ${loadingOverlay}
+                        <video class="post-media" id="video-${post.id}" data-id="${post.id}" src="${post.media_url}" loop playsinline muted onloadeddata="document.getElementById('loader-${post.id}').classList.add('loaded'); this.classList.add('loaded')"></video>
+                        <div class="play-pause-overlay" id="play-icon-${post.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        </div>
+                        <div class="video-overlay-controls">
+                            <button class="control-btn" onclick="toggleMute('${post.id}', this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    mediaHtml = `
+                        ${loadingOverlay}
+                        <img class="post-media" src="${post.media_url}" loading="lazy" onload="document.getElementById('loader-${post.id}').classList.add('loaded'); this.classList.add('loaded')" ondblclick="triggerLike('${post.id}')">
+                    `;
+                }
+
                 const postEl = document.createElement('div');
                 postEl.className = 'post-card';
                 postEl.id = `post-${post.id}`;
                 
-                // NEW LOGIC: Video without 'muted' attribute to enable sound
-                let mediaHtml = post.type === 'video' 
-                    ? `<video class="post-media" src="${post.media_url}" loop playsinline></video>`
-                    : `<img class="post-media" src="${post.media_url}" loading="lazy" ondblclick="triggerLike('${post.id}')">`;
-
                 postEl.innerHTML = `
                     <div class="post-header">
                         <div class="user-info">
@@ -784,7 +882,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
                         </div>
                     </div>
-                    <div class="post-media-container" id="media-container-${post.id}" ondblclick="triggerLike('${post.id}')">
+                    <div class="post-media-container" id="media-container-${post.id}" onclick="${post.type === 'video' ? `toggleVideoPlay('${post.id}')` : ''}" ondblclick="triggerLike('${post.id}')">
                         ${mediaHtml}
                         <div class="heart-overlay" id="heart-anim-${post.id}">❤</div>
                     </div>
@@ -808,7 +906,8 @@
                 feedContainer.appendChild(postEl);
             });
 
-            attachVideoObserver(feedContainer);
+            // Re-observe videos after rendering
+            document.querySelectorAll('video').forEach(v => videoObserver.observe(v));
         }
 
         // --- REALTIME UPDATER ---
@@ -820,58 +919,47 @@
                 if (!response.ok) return;
                 const newData = await response.json() || {};
 
-                const domPosts = document.querySelectorAll('.post-card');
+                // Only update if there are significant changes to avoid resetting media playback
+                if (JSON.stringify(newData) === JSON.stringify(postsDataCache)) return;
+
+                postsDataCache = newData;
+                // Update Local Cache
+                localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(newData));
+
+                // In a full SPA we would diff the DOM, here we simplify:
+                // Only update text content, likes, or remove deleted posts. 
+                // Adding new posts requires complex logic to not break scroll, skipping for basic realtime.
                 
-                // Remove deleted
+                const domPosts = document.querySelectorAll('.post-card');
                 domPosts.forEach(el => {
                     const pid = el.id.replace('post-', '');
-                    if (!newData[pid]) el.remove(); 
-                });
-
-                Object.keys(newData).forEach(key => {
-                    const post = newData[key];
-                    const el = document.getElementById(`post-${key}`);
-                    
-                    if (el) {
-                        const isOwner = post.sender_username === currentUser.username;
-                        
-                        // Close modal if privacy changed while open
-                        if (currentViewingLikesPostId === key && post.show_likes === false && !isOwner) {
-                            likesModal.classList.remove('active');
-                            currentViewingLikesPostId = null;
-                            showToast('مالک پست دسترسی به لیست را بست.', 'error');
-                        }
-
-                        // Update Caption
-                        const capEl = el.querySelector('.caption-text');
-                        if (capEl && capEl.textContent !== post.caption) capEl.textContent = post.caption;
-
-                        // Update Like UI - NUMBER ALWAYS VISIBLE
-                        const likeCountEl = el.querySelector('.post-likes');
-                        const canOpenList = isOwner || (post.show_likes !== false);
-                        const likeCount = post.likes ? Object.keys(post.likes).length : 0;
-                        
-                        // Always set text
-                        likeCountEl.textContent = `${likeCount} پسند`;
-                        
-                        // Toggle Clickability
-                        if (canOpenList) {
-                            likeCountEl.classList.add('clickable');
-                            likeCountEl.classList.remove('private');
-                            likeCountEl.setAttribute('onclick', `showLikesList('${key}', ${isOwner}, true)`);
-                        } else {
-                            likeCountEl.classList.remove('clickable');
-                            likeCountEl.classList.add('private');
-                            likeCountEl.removeAttribute('onclick');
-                        }
-                        likeCountEl.style.display = 'block'; // Always visible now
-
-                    } else {
-                         // New post logic omitted to prevent jumps
+                    if (!newData[pid]) {
+                        el.remove(); // Removed remotely
+                        return;
                     }
-                });
-                postsDataCache = newData;
+                    const post = newData[pid];
+                    
+                    // Likes
+                    const likeCountEl = el.querySelector('.post-likes');
+                    const isOwner = post.sender_username === currentUser.username;
+                    const canOpenList = isOwner || (post.show_likes !== false);
+                    const likeCount = post.likes ? Object.keys(post.likes).length : 0;
+                    likeCountEl.textContent = `${likeCount} پسند`;
+                    
+                    if (canOpenList) {
+                        likeCountEl.classList.add('clickable');
+                        likeCountEl.classList.remove('private');
+                        likeCountEl.setAttribute('onclick', `showLikesList('${pid}', ${isOwner}, true)`);
+                    } else {
+                        likeCountEl.classList.remove('clickable');
+                        likeCountEl.classList.add('private');
+                        likeCountEl.removeAttribute('onclick');
+                    }
 
+                    // Caption
+                    const capEl = el.querySelector('.caption-text');
+                    if (capEl.textContent !== post.caption) capEl.textContent = post.caption;
+                });
             } catch (e) { console.warn("Sync error", e); }
         }
 
@@ -896,6 +984,7 @@
                 document.getElementById(`post-${currentOptionsPostId}`).remove();
                 closeOptions();
                 showToast('پست حذف شد');
+                await fetchPosts(); // Sync cache
             } catch(e) { showToast('خطا در حذف', 'error'); }
         }
 
@@ -911,6 +1000,11 @@
                 document.querySelector(`#post-${currentOptionsPostId} .caption-text`).textContent = newCaption;
                 editCaptionModal.classList.remove('active');
                 showToast('ویرایش شد');
+                // Update cache locally
+                if(postsDataCache[currentOptionsPostId]) {
+                    postsDataCache[currentOptionsPostId].caption = newCaption;
+                    localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(postsDataCache));
+                }
             } catch(e) { showToast('خطا', 'error'); }
             saveCaptionBtn.textContent = 'ذخیره تغییرات';
         }
