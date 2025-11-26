@@ -8,16 +8,14 @@
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
 
         :root {
-            --bg-color: #0D1117;
+            --bg-color: #0D1117; /* رنگ پایه مشکی/سرمه‌ای */
             --primary-color: #00A3FF;
-            --primary-glow: rgba(0, 163, 255, 0.5);
-            --text-color: #E4E6EB;
-            --bar-bg: rgba(255, 255, 255, 0.1);
+            --primary-glow: rgba(0, 163, 255, 0.6);
+            --text-color: #ffffff;
+            --bar-bg: rgba(255, 255, 255, 0.15);
         }
 
-        *, *::before, *::after {
-            margin: 0; padding: 0; box-sizing: border-box;
-        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         body, html {
             width: 100%; height: 100%;
@@ -27,31 +25,41 @@
             color: var(--text-color);
         }
 
-        /* --- پس‌زمینه --- */
+        /* --- 1. لایه عکس پس‌زمینه --- */
         #bg-image {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover;
             background-position: center;
-            opacity: 0; /* مخفی تا زمانی که لود شود */
-            transition: opacity 1.2s ease-in-out;
             z-index: 1;
+            /* عکس از همان ابتدا هست، اما زیر لایه تاریک پنهان است */
         }
 
-        /* لایه تاریک */
-        #overlay {
+        /* --- 2. لایه دایمر (تاریک‌کننده) هوشمند --- */
+        /* این لایه روی عکس قرار می‌گیرد و شفافیتش با جاوااسکریپت کم می‌شود */
+        #smart-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to top, rgba(13, 17, 23, 1) 0%, rgba(13, 17, 23, 0.4) 100%);
+            background-color: var(--bg-color); /* شروع با رنگ کاملا تاریک */
             z-index: 2;
             pointer-events: none;
-            transition: opacity 1s ease;
+            /* ترنزیشن نرم برای تغییر روشنایی */
+            transition: opacity 0.1s linear; 
         }
 
-        /* --- کانتینر لودینگ --- */
+        /* یک لایه گرادینت ثابت برای خوانایی متن پایین */
+        #text-protection-gradient {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%; height: 40%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* --- 3. کانتینر لودینگ --- */
         #loader-container {
             position: fixed;
-            bottom: 60px;
+            bottom: 50px;
             left: 50%;
             transform: translateX(-50%);
             width: 85%;
@@ -59,69 +67,75 @@
             z-index: 10;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            transition: opacity 0.5s ease;
+            gap: 12px;
+            /* سایه متن برای خوانایی بهتر روی هر عکسی */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
         }
 
         .info-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
+            font-size: 0.95rem;
         }
 
-        #status-text { font-weight: 500; opacity: 0.9; }
+        #status-text { font-weight: 500; opacity: 1; transition: opacity 0.3s; }
         #percent-text { font-weight: 700; color: var(--primary-color); direction: ltr; }
 
         .progress-track {
             width: 100%;
-            height: 6px;
+            height: 8px; /* کمی ضخیم‌تر */
             background: var(--bar-bg);
-            border-radius: 20px;
+            border-radius: 10px;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(4px);
         }
 
         .progress-fill {
             height: 100%;
             width: 0%;
             background: var(--primary-color);
-            border-radius: 20px;
-            box-shadow: 0 0 15px var(--primary-glow);
-            transition: width 0.3s ease-out; /* نرم برای حرکت */
+            border-radius: 10px;
+            box-shadow: 0 0 20px var(--primary-glow);
+            transition: width 0.1s linear; /* حرکت همزمان با روشنایی */
             position: relative;
         }
 
-        /* افکت شاین روی نوار */
+        /* افکت برق زدن نوار */
         .progress-fill::after {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
             transform: translateX(-100%);
-            animation: shine 1.5s infinite;
+            animation: shine 2s infinite;
         }
 
         @keyframes shine { 100% { transform: translateX(100%); } }
 
-        /* کلاس خروج */
-        body.exiting #loader-container { opacity: 0; }
-        body.exiting #overlay { opacity: 0; } /* حذف لایه تاریک هنگام خروج */
-        body.exiting {
-            transition: opacity 0.8s ease;
-        }
+        /* استایل خروج از صفحه */
+        body.exiting #loader-container { opacity: 0; transition: opacity 0.5s; }
+        body.exiting #text-protection-gradient { opacity: 0; transition: opacity 0.5s; }
+        body.exiting { transition: opacity 0.8s ease; }
 
     </style>
 </head>
 <body>
 
+    <!-- عکس پس‌زمینه -->
     <div id="bg-image"></div>
-    <div id="overlay"></div>
+    
+    <!-- لایه‌ای که با پر شدن نوار، شفاف می‌شود -->
+    <div id="smart-overlay"></div>
+    
+    <!-- گرادینت پایین برای خوانایی متن -->
+    <div id="text-protection-gradient"></div>
 
+    <!-- نوار لودینگ -->
     <div id="loader-container">
         <div class="info-row">
-            <span id="status-text">اتصال به سرور...</span>
+            <span id="status-text">در حال راه‌اندازی...</span>
             <span id="percent-text">0%</span>
         </div>
         <div class="progress-track">
@@ -130,14 +144,17 @@
     </div>
 
     <script>
-        // --- تنظیمات ---
+        // ==========================================
+        // تنظیمات
+        // ==========================================
         const CONFIG = {
             bgUrl: 'https://cdn.imgurl.ir/uploads/q9812_file_6917756f1e1d68.57033147.jpg',
-            stayDelay: 1500 // زمان توقف روی عکس قبل از رفتن به صفحه بعد (میلی ثانیه)
+            stayDelay: 1200 // مکث نهایی وقتی ۱۰۰٪ شد
         };
 
         // --- DOM Elements ---
         const bgDiv = document.getElementById('bg-image');
+        const overlay = document.getElementById('smart-overlay');
         const statusText = document.getElementById('status-text');
         const percentText = document.getElementById('percent-text');
         const progressFill = document.getElementById('progress-fill');
@@ -147,75 +164,90 @@
         let isImageLoaded = false;
         let simulationInterval;
 
-        // --- 1. شروع بارگذاری ---
+        // --- 1. شروع فرآیند ---
         function startLoading() {
-            // الف: شروع دانلود واقعی عکس توسط مرورگر
+            // شروع دانلود عکس در حافظه (بدون مشکل CORS)
             const img = new Image();
             img.src = CONFIG.bgUrl;
 
-            // ب: وقتی عکس واقعاً دانلود شد
+            // وقتی عکس کامل دانلود شد
             img.onload = () => {
                 isImageLoaded = true;
-                // تصویر را در پس‌زمینه ست می‌کنیم (هنوز مخفی است)
+                // ست کردن عکس در پس‌زمینه
                 bgDiv.style.backgroundImage = `url(${CONFIG.bgUrl})`;
             };
 
-            // ج: مدیریت خطا (اگر عکس لود نشد)
+            // هندل کردن خطا (اگر عکس نبود، صفحه مشکی نماند)
             img.onerror = () => {
-                console.warn("عکس لود نشد، ادامه بدون عکس");
-                isImageLoaded = true; // می‌گوییم لود شد تا برنامه گیر نکند
+                console.warn("عکس لود نشد.");
+                isImageLoaded = true; // فرض می‌کنیم لود شده تا نوار گیر نکند
             };
 
-            // د: شروع شبیه‌سازی نوار پیشرفت همزمان با دانلود
+            // شروع نوار پیشرفت
             simulateProgress();
         }
 
-        // --- 2. شبیه‌سازی پیشرفت ---
+        // --- 2. موتور شبیه‌سازی و آپدیت گرافیک ---
         function simulateProgress() {
             simulationInterval = setInterval(() => {
-                // اگر عکس هنوز لود نشده، تا ۹۰٪ پیش برو و صبر کن
+                // اگر عکس هنوز دانلود نشده است:
                 if (!isImageLoaded) {
+                    // تا حدود 85% سریع برو، اما اگر عکس نیامد کند شو
                     if (loadProgress < 60) {
-                        loadProgress += Math.random() * 3; // سرعت اولیه خوب
+                        loadProgress += 2;
                     } else if (loadProgress < 85) {
-                        loadProgress += Math.random() * 1; // کند شدن
-                    } else if (loadProgress < 92) {
-                        loadProgress += 0.1; // خیلی کند شدن در انتها (انتظار برای دانلود)
+                        loadProgress += 0.5;
+                    } else if (loadProgress < 95) {
+                        loadProgress += 0.1; // خیلی کند منتظر دانلود می‌ماند
                     }
-                    // آپدیت متن‌ها
-                    if (loadProgress > 20 && loadProgress < 50) statusText.textContent = "در حال دریافت منابع...";
-                    else if (loadProgress > 50) statusText.textContent = "بارگذاری تصویر پس‌زمینه...";
+                    
+                    // تغییر متن‌ها بر اساس درصد
+                    if(loadProgress < 30) statusText.textContent = "اتصال به سرور...";
+                    else if(loadProgress < 70) statusText.textContent = "در حال دریافت منابع گرافیکی...";
+                    else statusText.textContent = "بارگذاری تصویر...";
                 } 
-                // اگر عکس لود شده است (isImageLoaded == true)
+                // اگر عکس دانلود شده است (یا خطا داده):
                 else {
-                    // سرعت را زیاد کن تا به ۱۰۰ برسد
-                    loadProgress += 5;
+                    // با سرعت زیاد به سمت ۱۰۰ برو
+                    loadProgress += 4;
                 }
 
-                updateUI(loadProgress);
+                // بروزرسانی گرافیکی
+                updateVisuals(loadProgress);
 
                 // پایان کار
                 if (loadProgress >= 100) {
                     clearInterval(simulationInterval);
                     finishLoading();
                 }
-            }, 50); // آپدیت هر 50 میلی‌ثانیه
+            }, 40); // سرعت رفرش انیمیشن
         }
 
-        function updateUI(val) {
-            const p = Math.min(100, Math.round(val));
-            progressFill.style.width = `${p}%`;
-            percentText.textContent = `${p}%`;
+        // --- 3. بروزرسانی ویژوال (جادوی اصلی) ---
+        function updateVisuals(percent) {
+            // اطمینان از اینکه از ۱۰۰ رد نشود
+            const safePercent = Math.min(100, Math.max(0, percent));
+            
+            // 1. آپدیت عرض نوار
+            progressFill.style.width = `${safePercent}%`;
+            
+            // 2. آپدیت عدد درصد
+            percentText.textContent = `${Math.floor(safePercent)}%`;
+
+            // 3. آپدیت شفافیت لایه تاریک (نکته کلیدی درخواست شما)
+            // فرمول: درصد 0 -> شفافیت 1 (سیاه)
+            // فرمول: درصد 100 -> شفافیت 0 (روشن)
+            const opacity = 1 - (safePercent / 100);
+            overlay.style.opacity = opacity;
         }
 
-        // --- 3. پایان بارگذاری و نمایش ---
+        // --- 4. پایان بارگذاری ---
         function finishLoading() {
+            // اطمینان حاصل می‌کنیم که لایه تاریک کاملاً حذف شده باشد
+            overlay.style.opacity = '0';
             statusText.textContent = "تکمیل شد.";
             
-            // نمایش عکس پس‌زمینه (Fade In)
-            bgDiv.style.opacity = '1';
-            
-            // مکث برای دیدن عکس
+            // مکث کوتاه برای لذت بردن از تصویر کامل شده
             setTimeout(() => {
                 statusText.textContent = "بررسی هویت کاربر...";
                 
@@ -224,9 +256,9 @@
             }, CONFIG.stayDelay);
         }
 
-        // --- 4. منطق هدایت (Navigation) ---
+        // --- 5. ناوبری ---
         function handleNavigation() {
-            document.body.classList.add('exiting'); // انیمیشن خروج
+            document.body.classList.add('exiting');
 
             setTimeout(() => {
                 const storedUser = localStorage.getItem('currentUser');
@@ -241,10 +273,10 @@
                 } else {
                     window.location.href = 'register.html';
                 }
-            }, 800);
+            }, 600);
         }
 
-        // اجرا هنگام باز شدن صفحه
+        // اجرا
         window.addEventListener('load', startLoading);
 
     </script>
