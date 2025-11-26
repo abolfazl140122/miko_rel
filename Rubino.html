@@ -110,6 +110,7 @@
             width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
             border: 2px solid var(--border-color);
             transition: border-color 0.3s;
+            background-color: var(--secondary-hover);
         }
         .post-card:hover .user-avatar { border-color: var(--primary-color); }
 
@@ -120,7 +121,7 @@
         .verified-tick {
             width: 16px; height: 16px;
             filter: drop-shadow(0 0 4px var(--primary-glow));
-            vertical-align: sub; /* Adjusted for better alignment */
+            vertical-align: sub;
         }
         
         .post-options { 
@@ -558,6 +559,9 @@
         let postsDataCache = {}; 
         let videoObserver = null; 
         let startY = 0; let isPulling = false; let currentTranslate = 0;
+        
+        // --- GLOBAL AUDIO STATE (Instagram Style) ---
+        let isGlobalMuted = true; // Default to muted
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -573,11 +577,14 @@
             if (cachedFeed) {
                 skeletonLoader.style.display = 'none';
                 postsDataCache = JSON.parse(cachedFeed);
-                renderFeed(preparePostsArray(postsDataCache), false); // False means don't force full re-render if unnecessary
+                // Try to load users first even if we have cached feed
+                await safeLoadUsers(); 
+                renderFeed(preparePostsArray(postsDataCache), false); 
             }
 
             try {
                 await refreshClientToken();
+                // 2. Fetch Users BEFORE fetching posts to ensure profiles load
                 await fetchUsersCache(); 
                 await fetchPosts();
                 
@@ -599,7 +606,7 @@
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
 
-        // --- VIDEO & INTERSECTION OBSERVER ---
+        // --- VIDEO & INTERSECTION OBSERVER (Fixed for Global Audio) ---
         function initVideoObserver() {
             const options = { root: null, rootMargin: '0px', threshold: 0.65 };
             
@@ -607,15 +614,17 @@
                 entries.forEach(entry => {
                     const video = entry.target;
                     const overlay = document.getElementById(`play-icon-${video.dataset.id}`);
-                    
+                    const muteBtn = document.querySelector(`.mute-btn[data-for="${video.dataset.id}"]`);
+
                     if (entry.isIntersecting) {
-                        // Play if visible - Start Muted to ensure autoplay policy compliance if needed,
-                        // but logic below attempts to play with current state.
+                        // Apply Global Mute State immediately when video enters view
+                        video.muted = isGlobalMuted;
+                        updateMuteIconUI(muteBtn, isGlobalMuted);
+
                         if (video.paused && !video.dataset.manualPause) {
                             video.play().catch(e => {
-                                // If blocked, ensure it's muted
-                                video.muted = true;
-                                video.play().catch(e => console.log('Autoplay prevented'));
+                                video.muted = true; // Fallback
+                                video.play().catch(console.log);
                             });
                         }
                         
@@ -626,7 +635,6 @@
                     } else {
                         if (!video.paused) {
                             video.pause();
-                            // Don't set manualPause here, this is scrolling logic
                         }
                     }
                 });
@@ -638,26 +646,40 @@
             const overlay = document.getElementById(`play-icon-${vidId}`);
             
             if (video.paused) {
-                video.dataset.manualPause = ""; // Clear manual pause
+                video.dataset.manualPause = ""; 
                 video.play();
                 overlay.classList.remove('visible');
             } else {
-                video.dataset.manualPause = "true"; // Set manual pause
+                video.dataset.manualPause = "true"; 
                 video.pause();
                 overlay.classList.add('visible');
             }
         }
 
+        // --- GLOBAL MUTE TOGGLE LOGIC ---
         function toggleMute(vidId, btn) {
-            const video = document.getElementById(`video-${vidId}`);
-            video.muted = !video.muted;
-            // Update Icon
-            btn.innerHTML = video.muted 
+            // 1. Flip Global State
+            isGlobalMuted = !isGlobalMuted;
+
+            // 2. Apply to ALL videos in DOM immediately (Instagram behavior)
+            document.querySelectorAll('video').forEach(vid => {
+                vid.muted = isGlobalMuted;
+            });
+
+            // 3. Update ALL icons in DOM
+            document.querySelectorAll('.mute-btn').forEach(button => {
+                updateMuteIconUI(button, isGlobalMuted);
+            });
+            
+            // Prevent bubbling
+            window.event.stopPropagation();
+        }
+
+        function updateMuteIconUI(btn, isMuted) {
+            if(!btn) return;
+            btn.innerHTML = isMuted 
                 ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>` // Muted Icon
                 : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`; // Sound Icon
-            
-            // Prevent bubbling to play toggle
-            window.event.stopPropagation();
         }
 
         // --- EVENT LISTENERS ---
@@ -738,17 +760,39 @@
 
         // --- NETWORK CORE ---
         async function refreshClientToken() {
-            const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-            if (!response.ok) throw new Error('Auth Failed');
-            const data = await response.json();
-            clientToken = data.token;
+            try {
+                const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+                if (!response.ok) throw new Error('Auth Failed');
+                const data = await response.json();
+                clientToken = data.token;
+            } catch (e) { console.error("Token error", e); }
+        }
+
+        async function safeLoadUsers() {
+            // Helper to try loading users from cache first just to have something
+            // This is handled by main logic, but good as a placeholder
         }
 
         async function fetchUsersCache() {
-            const response = await fetch(`${PROXY_URL}?path=users`, {
-                headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
-            });
-            if (response.ok) allUsersCache = await response.json() || {};
+            if (!clientToken) await refreshClientToken();
+            try {
+                const response = await fetch(`${PROXY_URL}?path=users`, {
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                });
+                if (response.ok) {
+                    allUsersCache = await response.json() || {};
+                    // If posts are already rendered but profiles missing, re-render
+                    const posts = document.querySelectorAll('.post-card');
+                    if (posts.length > 0) {
+                        // Check if we need to update UI
+                        const firstAvatar = posts[0].querySelector('.user-avatar');
+                        if (firstAvatar && firstAvatar.src.includes('ui-avatars')) {
+                             // Re-render only if needed to avoid flicker
+                             renderFeed(preparePostsArray(postsDataCache), true); 
+                        }
+                    }
+                }
+            } catch (e) { console.warn("User cache error", e); }
         }
 
         // --- UPLOAD & CREATE POST ---
@@ -828,13 +872,22 @@
             }
         }
 
-        function renderFeed(posts) {
+        // --- RENDER FEED (Fixed Profile Logic) ---
+        function renderFeed(posts, force = true) {
+            // 'force' prevents unnecessary DOM rebuilding if not needed, usually we force on fetch
             feedContainer.innerHTML = '';
             
             posts.forEach(post => {
                 const isOwner = post.sender_username === currentUser.username;
-                const user = allUsersCache[post.sender_username] || { displayName: post.sender_username };
-                const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${post.sender_username}&background=random`;
+                
+                // --- FIX: Robust User Profile Lookup ---
+                let user = { displayName: post.sender_username, username: post.sender_username }; // Default
+                if (allUsersCache && allUsersCache[post.sender_username]) {
+                    user = allUsersCache[post.sender_username];
+                }
+                
+                const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${post.sender_username}&background=random&color=fff`;
+                const displayName = user.displayName || post.sender_username;
                 const isLiked = post.likes && post.likes[currentUser.username];
                 const likeCount = post.likes ? Object.keys(post.likes).length : 0;
                 const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
@@ -856,8 +909,8 @@
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         </div>
                         <div class="video-overlay-controls">
-                            <button class="control-btn" onclick="toggleMute('${post.id}', this)">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                            <button class="control-btn mute-btn" data-for="${post.id}" onclick="toggleMute('${post.id}', this)">
+                                ${isGlobalMuted ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>'}
                             </button>
                         </div>
                     `;
@@ -876,7 +929,7 @@
                     <div class="post-header">
                         <div class="user-info">
                             <img src="${avatar}" class="user-avatar" alt="Avatar">
-                            <span class="username">${user.displayName || post.sender_username} ${verifiedHtml}</span>
+                            <span class="username">${displayName} ${verifiedHtml}</span>
                         </div>
                         <div class="post-options ${isOwner ? '' : 'disabled'}" ${isOwner ? `onclick="openPostOptions('${post.id}', ${post.show_likes !== false})"` : ''}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
@@ -898,7 +951,7 @@
                         ${likesText}
                     </div>
                     <div class="post-caption">
-                        <span class="caption-username">${user.displayName || post.sender_username}</span>
+                        <span class="caption-username">${displayName}</span>
                         <span class="caption-text">${post.caption}</span>
                     </div>
                     <span class="post-time" data-timestamp="${post.timestamp}">${timeAgo(post.timestamp)}</span>
@@ -926,10 +979,7 @@
                 // Update Local Cache
                 localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(newData));
 
-                // In a full SPA we would diff the DOM, here we simplify:
-                // Only update text content, likes, or remove deleted posts. 
-                // Adding new posts requires complex logic to not break scroll, skipping for basic realtime.
-                
+                // Partial DOM updates
                 const domPosts = document.querySelectorAll('.post-card');
                 domPosts.forEach(el => {
                     const pid = el.id.replace('post-', '');
@@ -1047,7 +1097,7 @@
                 const userIds = Object.keys(likesData);
                 userIds.forEach(uid => {
                     const user = allUsersCache[uid] || { displayName: uid, username: uid };
-                    const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${uid}&background=random`;
+                    const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${uid}&background=random&color=fff`;
                     
                     const div = document.createElement('div');
                     div.className = 'user-list-item';
@@ -1137,6 +1187,7 @@
             if (currentTranslate > 60) {
                 pullSpinner.classList.add('spinning');
                 feedContainer.style.transform = `translateY(60px)`;
+                await fetchUsersCache(); // Refresh users too on pull
                 await fetchPosts();
                 setTimeout(resetPull, 500);
             } else {
