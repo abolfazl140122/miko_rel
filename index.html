@@ -3,289 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>همیار - در حال بارگذاری</title>
+    <title>همیار - بارگذاری منابع</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
 
         :root {
-            /* پالت رنگی هماهنگ با safe_asli و pivi */
-            --background-dark: #0D1117;
-            --background-secondary: #161B22;
-            --primary-color: #00A3FF; /* آبی همیار */
-            --primary-glow: rgba(0, 163, 255, 0.4);
-            --text-primary: #E4E6EB;
-            --text-secondary: #8b949e;
-            --progress-bg: rgba(255, 255, 255, 0.1);
-            --glass-bg: rgba(22, 27, 34, 0.85);
+            --bg-color: #0D1117; /* رنگ پایه تا قبل از لود شدن عکس */
+            --primary-color: #00A3FF;
+            --primary-glow: rgba(0, 163, 255, 0.5);
+            --text-color: #E4E6EB;
+            --bar-bg: rgba(255, 255, 255, 0.1);
         }
 
         *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0; box-sizing: border-box;
         }
 
         body, html {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             overflow: hidden;
+            background-color: var(--bg-color);
             font-family: 'Vazirmatn', sans-serif;
-            background-color: var(--background-dark);
-            color: var(--text-primary);
+            color: var(--text-color);
         }
 
         /* --- پس‌زمینه --- */
-        #bg-container {
+        #bg-image {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at top left, #1a202c 0%, var(--background-dark) 80%);
+            top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover;
             background-position: center;
-            transition: opacity 1s ease;
+            opacity: 0; /* در ابتدا مخفی */
+            transition: opacity 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); /* انیمیشن نرم برای ظهور */
+            z-index: 1;
         }
 
-        /* لایه تاریک روی عکس پس‌زمینه برای خوانایی بهتر */
-        #bg-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(13, 17, 23, 0.4); 
-            backdrop-filter: blur(2px);
-        }
-
-        /* --- کانتینر اصلی لودینگ (پایین صفحه) --- */
-        #bottom-loader-area {
+        /* لایه تاریک روی عکس */
+        #overlay {
             position: fixed;
-            bottom: 40px; /* فاصله از پایین */
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, rgba(13, 17, 23, 0.9) 0%, rgba(13, 17, 23, 0.3) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* --- کانتینر لودینگ پایین صفحه --- */
+        #loader-container {
+            position: fixed;
+            bottom: 50px;
             left: 50%;
             transform: translateX(-50%);
             width: 85%;
-            max-width: 450px;
+            max-width: 400px;
             z-index: 10;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            opacity: 0; /* در ابتدا مخفی برای انیمیشن ورود */
-            animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.3s;
+            gap: 10px;
         }
 
-        /* --- نوار پیشرفت --- */
-        .progress-track {
-            width: 100%;
-            height: 6px;
-            background-color: var(--progress-bg);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
-        }
-
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: var(--primary-color);
-            border-radius: 10px;
-            box-shadow: 0 0 10px var(--primary-glow);
-            transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* افکت براق روی نوار پیشرفت */
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(255, 255, 255, 0.4),
-                transparent
-            );
-            transform: translateX(-100%);
-            animation: shimmer 2s infinite;
-        }
-
-        /* --- متن وضعیت و درصد --- */
-        .status-container {
+        .info-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 0.9rem;
-            color: var(--text-primary);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-            padding: 0 5px;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        #status-message {
+        #status-text {
             font-weight: 500;
             opacity: 0.9;
-            transition: opacity 0.3s;
         }
 
-        #percentage {
+        #percent-text {
             font-weight: 700;
-            font-variant-numeric: tabular-nums;
             color: var(--primary-color);
             direction: ltr;
         }
 
-        /* --- انیمیشن‌ها --- */
-        @keyframes slideUpFade {
-            from {
-                opacity: 0;
-                transform: translate(-50%, 20px);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0);
-            }
+        /* نوار پیشرفت */
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background: var(--bar-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        @keyframes shimmer {
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary-color);
+            border-radius: 20px;
+            box-shadow: 0 0 15px var(--primary-glow);
+            transition: width 0.2s linear; /* انیمیشن خطی برای دانلود واقعی */
+            position: relative;
+        }
+
+        /* افکت نور روی نوار */
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            transform: translateX(-100%);
+            animation: shine 1.5s infinite;
+        }
+
+        @keyframes shine {
             100% { transform: translateX(100%); }
         }
 
-        /* کلاس برای محو شدن صفحه هنگام خروج */
-        body.fade-out {
+        /* کلاس برای فید اوت کردن کل بادی هنگام خروج */
+        body.exiting {
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s ease;
         }
-
     </style>
 </head>
 <body>
 
-    <!-- کانتینر پس‌زمینه -->
-    <div id="bg-container">
-        <div id="bg-overlay"></div>
-    </div>
+    <!-- المان پس‌زمینه (خالی است، با JS پر می‌شود) -->
+    <div id="bg-image"></div>
+    
+    <!-- لایه تاریک -->
+    <div id="overlay"></div>
 
-    <!-- بخش لودر پایین صفحه -->
-    <div id="bottom-loader-area">
-        <div class="status-container">
-            <span id="status-message">در حال راه‌اندازی...</span>
-            <span id="percentage">0%</span>
+    <!-- بخش لودینگ -->
+    <div id="loader-container">
+        <div class="info-row">
+            <span id="status-text">در حال دریافت اطلاعات...</span>
+            <span id="percent-text">0%</span>
         </div>
         <div class="progress-track">
-            <div id="progress-bar" class="progress-bar"></div>
+            <div id="progress-fill" class="progress-fill"></div>
         </div>
     </div>
 
     <script>
-        // --- تنظیمات ---
+        // ==========================================
+        // تنظیمات (لینک عکس را اینجا قرار دهید)
+        // ==========================================
         const CONFIG = {
-            redirectDelay: 800, // تاخیر کوتاه بعد از 100 درصد شدن
-            bgImage: 'https://cdn.imgurl.ir/uploads/q9812_file_6917756f1e1d68.57033147.jpg' // همان تصویر پس‌زمینه دارک شما
+            // لینک مستقیم عکس پس‌زمینه (ترجیحاً لینک مستقیم و پرسرعت)
+            bgUrl: 'https://cdn.imgurl.ir/uploads/q9812_file_6917756f1e1d68.57033147.jpg',
+            
+            // مدت زمان مکث بعد از لود شدن عکس (به میلی ثانیه)
+            // این زمان باعث می‌شود کاربر عکس را ببیند قبل از اینکه وارد صفحه بعد شود
+            stayDelay: 1500 
         };
 
-        // --- عناصر DOM ---
-        const progressBar = document.getElementById('progress-bar');
-        const statusMsg = document.getElementById('status-message');
-        const percentText = document.getElementById('percentage');
-        const bgContainer = document.getElementById('bg-container');
+        // --- DOM Elements ---
+        const bgDiv = document.getElementById('bg-image');
+        const statusText = document.getElementById('status-text');
+        const percentText = document.getElementById('percent-text');
+        const progressFill = document.getElementById('progress-fill');
 
-        // --- بارگذاری تصویر پس‌زمینه ---
-        function loadBackground() {
-            // اگر تصویری تعریف شده باشد آن را ست می‌کند، در غیر این صورت از گرادینت CSS استفاده می‌شود
-            if (CONFIG.bgImage) {
-                const img = new Image();
-                img.src = CONFIG.bgImage;
-                img.onload = () => {
-                    bgContainer.style.backgroundImage = `url(${CONFIG.bgImage})`;
-                };
-            }
+        // --- توابع رابط کاربری ---
+        function updateProgress(percent, message) {
+            const safePercent = Math.min(100, Math.max(0, percent));
+            progressFill.style.width = `${safePercent}%`;
+            percentText.textContent = `${Math.floor(safePercent)}%`;
+            if (message) statusText.textContent = message;
         }
 
-        // --- شبیه‌سازی مراحل بارگذاری (Task Runner) ---
-        async function runLoadingSequence() {
-            const steps = [
-                { msg: "اتصال به سرور...", duration: 600, progress: 20 },
-                { msg: "بررسی هویت کاربر...", duration: 800, progress: 45 },
-                { msg: "دریافت اطلاعات کاربری...", duration: 700, progress: 70 },
-                { msg: "آماده‌سازی رابط کاربری...", duration: 500, progress: 90 },
-                { msg: "تکمیل شد.", duration: 300, progress: 100 }
-            ];
-
-            let currentProgress = 0;
-
-            for (const step of steps) {
-                // بروزرسانی متن
-                statusMsg.style.opacity = '0';
-                await delay(150);
-                statusMsg.textContent = step.msg;
-                statusMsg.style.opacity = '1';
-
-                // شبیه‌سازی پر شدن نرم درصد
-                const increment = step.progress - currentProgress;
-                const stepDuration = step.duration;
-                const intervalTime = 20;
-                const stepsCount = stepDuration / intervalTime;
-                const valuePerStep = increment / stepsCount;
-
-                for (let i = 0; i < stepsCount; i++) {
-                    currentProgress += valuePerStep;
-                    // جلوگیری از رد شدن از 100
-                    if (currentProgress > 100) currentProgress = 100;
-                    
-                    updateUI(currentProgress);
-                    await delay(intervalTime);
-                }
-                
-                // اطمینان از فیکس شدن روی عدد نهایی مرحله
-                currentProgress = step.progress;
-                updateUI(currentProgress);
-            }
-
-            // اتمام پروسه
-            await delay(CONFIG.redirectDelay);
-            handleRedirection();
+        function showBackground(blobUrl) {
+            bgDiv.style.backgroundImage = `url(${blobUrl})`;
+            // کمی صبر می‌کنیم تا رندر شود سپس Opacity را 1 می‌کنیم
+            requestAnimationFrame(() => {
+                bgDiv.style.opacity = '1';
+            });
         }
 
-        // --- توابع کمکی ---
-        function updateUI(progress) {
-            const rounded = Math.round(progress);
-            progressBar.style.width = `${progress}%`;
-            percentText.textContent = `${rounded}%`;
-        }
+        // --- تابع اصلی دانلود واقعی (XHR) ---
+        function downloadAndLoadBackground(url) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'blob'; // دریافت به صورت فایل باینری
 
-        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-        // --- منطق هدایت کاربر (Logic) ---
-        function handleRedirection() {
-            document.body.classList.add('fade-out');
-            
-            setTimeout(() => {
-                const storedUser = localStorage.getItem('currentUser');
-                if (storedUser) {
-                    try {
-                        // چک کردن صحت جیسون
-                        JSON.parse(storedUser);
-                        // هدایت به صفحه اصلی (چت)
-                        window.location.href = 'safe_asli.html';
-                    } catch (e) {
-                        // دیتای خراب
-                        localStorage.removeItem('currentUser');
-                        window.location.href = 'register.html'; 
+                // رویداد پیشرفت دانلود
+                xhr.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = (event.loaded / event.total) * 100;
+                        updateProgress(percentComplete, "در حال دانلود منابع...");
+                    } else {
+                        // اگر سرور حجم فایل را نگوید، به صورت فیک جلو می‌بریم اما تمام نمی‌کنیم
+                        updateProgress(50, "در حال بارگذاری...");
                     }
-                } else {
-                    // کاربر لاگین نیست
-                    window.location.href = 'register.html';
-                }
-            }, 500); // صبر برای انیمیشن fade-out
+                };
+
+                // پایان دانلود
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        updateProgress(100, "تکمیل شد.");
+                        const blob = xhr.response;
+                        const objectUrl = URL.createObjectURL(blob);
+                        resolve(objectUrl);
+                    } else {
+                        reject(`خطا در دانلود: ${xhr.status}`);
+                    }
+                };
+
+                xhr.onerror = () => reject("خطای شبکه در بارگذاری تصویر.");
+                
+                xhr.send();
+            });
+        }
+
+        // --- منطق هدایت (Navigation) ---
+        function handleNavigation() {
+            statusText.textContent = "بررسی هویت...";
+            
+            // کمی مکث مصنوعی برای خواندن متن
+            setTimeout(() => {
+                document.body.classList.add('exiting'); // فید اوت کردن صفحه
+
+                setTimeout(() => {
+                    const storedUser = localStorage.getItem('currentUser');
+                    if (storedUser) {
+                        try {
+                            JSON.parse(storedUser);
+                            window.location.href = 'safe_asli.html'; // صفحه اصلی
+                        } catch (e) {
+                            localStorage.removeItem('currentUser');
+                            window.location.href = 'register.html';
+                        }
+                    } else {
+                        window.location.href = 'register.html'; // صفحه ثبت نام
+                    }
+                }, 800); // زمان انیمیشن خروج CSS
+            }, 1000);
         }
 
         // --- شروع برنامه ---
-        window.addEventListener('load', () => {
-            loadBackground();
-            // یک تاخیر خیلی کوتاه برای اینکه انیمیشن‌های CSS درست اجرا شوند
-            setTimeout(() => {
-                runLoadingSequence();
-            }, 100);
-        });
+        async function init() {
+            try {
+                // 1. شروع دانلود عکس
+                const bgObjectUrl = await downloadAndLoadBackground(CONFIG.bgUrl);
+                
+                // 2. نمایش عکس پس از اتمام دانلود
+                showBackground(bgObjectUrl);
+
+                // 3. تغییر متن وضعیت
+                statusText.textContent = "آماده‌سازی محیط...";
+
+                // 4. مکث برای اینکه کاربر عکس پس‌زمینه را ببیند
+                setTimeout(() => {
+                    handleNavigation();
+                }, CONFIG.stayDelay);
+
+            } catch (error) {
+                console.error(error);
+                // در صورت خطا، بدون عکس ادامه می‌دهیم
+                statusText.textContent = "خطا در بارگذاری، ادامه...";
+                statusText.style.color = "#ff4d4d";
+                setTimeout(handleNavigation, 2000);
+            }
+        }
+
+        // اجرا
+        window.addEventListener('load', init);
 
     </script>
 </body>
