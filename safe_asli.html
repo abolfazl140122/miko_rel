@@ -2083,67 +2083,6 @@
         styleSheet.type = "text/css";
         styleSheet.innerText += `@keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } } @keyframes popIn { 0% { transform: scale(0.3); opacity: 0; } 80% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); } }`;
         document.head.appendChild(styleSheet);
-        
-// ==========================================
-    // --- کدهای مخصوص دریافت نوتیفیکیشن (FCM) ---
-    // ==========================================
-
-    // 1. این تابع را اسکچ‌ور بلافاصله بعد از باز شدن برنامه صدا می‌زند
-    function saveDeviceToken(token) {
-        // >>> نمایش هشدار برای تست (بعد از اطمینان می‌توانید این خط را پاک کنید) <<<
-        alert("FCM Token Recived:\n" + token);
-        
-        console.log("FCM Token received:", token);
-        
-        // ذخیره توکن در حافظه مرورگر تا اگر صفحه رفرش شد گم نشود
-        localStorage.setItem('fcm_token', token);
-
-        // اگر کاربر لاگین کرده است، تلاش برای ارسال به سرور
-        if (typeof currentUser !== 'undefined' && currentUser && currentUser.username) {
-             updateFCMTokenOnServer(token);
-        }
-    }
-
-    // 2. تابع فرستادن توکن به دیتابیس فایربیس
-    async function updateFCMTokenOnServer(token) {
-        try {
-            // اطمینان از اینکه کلاینت‌توکن برای ارسال درخواست آماده است
-            if (!clientToken) {
-                console.log("Client token not ready yet, waiting...");
-                return; 
-            }
-
-            console.log("Sending token to server for user:", currentUser.username);
-            
-            // استفاده از تابع آپدیت موجود در برنامه برای ذخیره فیلد fcmToken
-            const path = `users/${currentUser.username}`;
-            
-            // نکته: اگر تابع updateUserDataOnServer در کدتان نیست، از fetch مستقیم استفاده کنید
-            // اما چون قبلا در کد بود، از همان استفاده می‌کنیم:
-            await updateUserDataOnServer(path, { fcmToken: token });
-            
-            console.log("توکن نوتیفیکیشن با موفقیت در دیتابیس ذخیره شد.");
-            
-        } catch (e) {
-            console.error("خطا در ذخیره توکن در دیتابیس:", e);
-            // نمایش خطا برای عیب‌یابی
-            // alert("Error saving token: " + e.message); 
-        }
-    }
-
-    // 3. چک کردن مجدد هنگام لود شدن کامل صفحه
-    // این بخش برای زمانی است که اسکچ‌ور توکن را زودتر از لود شدن کامل سایت فرستاده باشد
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            const savedToken = localStorage.getItem('fcm_token');
-            
-            // اگر توکن در حافظه هست و کاربر هم لاگین است، دوباره ارسال کن (محکم کاری)
-            if (savedToken && typeof currentUser !== 'undefined' && currentUser) {
-                 updateFCMTokenOnServer(savedToken);
-            }
-        }, 4000); // 4 ثانیه صبر می‌کنیم تا توکن امنیتی و اطلاعات کاربر کامل لود شود
-    });
-        
     </script>
 </body>
 </html>
