@@ -1,4 +1,4 @@
-<!-- START OF FILE روبینو_fixed.html -->
+<!-- START OF FILE روبینو_اصلاح_شده.html -->
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -93,7 +93,10 @@
             scrollbar-width: none;
             position: relative;
             transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity: 0; 
+            animation: feedFadeIn 0.5s ease forwards;
         }
+        @keyframes feedFadeIn { to { opacity: 1; } }
         .feed-container::-webkit-scrollbar { display: none; }
 
         /* --- POST CARD --- */
@@ -237,7 +240,7 @@
         #skeleton-loader {
             position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
             background: var(--background-color); z-index: 15; overflow: hidden;
-            display: block; /* Force show initially */
+            display: block; /* Default visible */
         }
         .sk-post { margin-bottom: 20px; background: var(--background-color); padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
         .sk-header { display: flex; align-items: center; padding: 15px; gap: 10px; }
@@ -411,7 +414,7 @@
                 <div class="sk-image skeleton-animate"></div>
                 <div class="sk-actions skeleton-animate"></div>
             </div>
-            <div class="sk-post">
+             <div class="sk-post">
                 <div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div>
                 <div class="sk-image skeleton-animate"></div>
                 <div class="sk-actions skeleton-animate"></div>
@@ -579,43 +582,49 @@
             setupEventListeners();
             initVideoObserver();
             
-            // --- FIX: Unified Loading Strategy ---
-            // 1. Show Skeleton immediately (defined in HTML)
-            // 2. Load cached data into memory but DO NOT render yet.
-            const cachedFeed = localStorage.getItem(CACHE_KEY_FEED);
-            if (cachedFeed) {
-                postsDataCache = JSON.parse(cachedFeed);
-            }
+            // --- UPDATED LOADING LOGIC: Wait for everything ---
+            await initializeAppUnified();
+        });
+
+        // --- NEW UNIFIED LOADER ---
+        async function initializeAppUnified() {
+            skeletonLoader.style.display = 'block';
+            feedContainer.style.opacity = '0';
 
             try {
-                // 3. Authenticate
+                // 1. Get Token
                 await refreshClientToken();
 
-                // 4. Fetch Users AND Posts in parallel to be faster
-                // We do NOT render inside these functions, just return data.
+                // 2. Fetch Users AND Posts simultaneously
+                // We do NOT render inside fetchPosts anymore during init
                 await Promise.all([
-                    fetchUsersCache(false), // false = don't auto update UI yet
-                    fetchPostsInternal()
+                    fetchUsersCache(),
+                    fetchPosts(false) // false means "do not render yet"
                 ]);
 
-                // 5. Initial Render with FRESH data
-                renderFeed(preparePostsArray(postsDataCache), true);
+                // 3. Render Everything Once
+                renderFeed(preparePostsArray(postsDataCache));
 
-                // 6. Start Live Updates
+                // 4. Start Live Updates
                 setInterval(updateLiveTimestamps, 60000);
                 setInterval(startRealtimeUpdates, LIVE_UPDATE_INTERVAL);
 
             } catch (error) {
-                console.error("Init Error:", error);
-                // Fallback to cache if network fails
-                if (postsDataCache && Object.keys(postsDataCache).length > 0) {
-                    renderFeed(preparePostsArray(postsDataCache), true);
+                console.error("Initialization failed:", error);
+                
+                // Fallback: If network fails, TRY cache
+                const cachedFeed = localStorage.getItem(CACHE_KEY_FEED);
+                if (cachedFeed) {
+                    postsDataCache = JSON.parse(cachedFeed);
+                    renderFeed(preparePostsArray(postsDataCache));
+                    showToast('درحال نمایش نسخه آفلاین', 'error');
                 } else {
                     feedContainer.innerHTML = '<div class="empty-state">خطا در اتصال به سرور.</div>';
                     skeletonLoader.style.display = 'none';
+                    feedContainer.style.opacity = '1';
                 }
             }
-        });
+        }
 
         // --- CACHE & DATA HELPERS ---
         function preparePostsArray(data) {
@@ -634,7 +643,6 @@
                     const muteBtn = document.querySelector(`.mute-btn[data-for="${video.dataset.id}"]`);
 
                     if (entry.isIntersecting) {
-                        // Apply Global Mute State immediately when video enters view
                         video.muted = isGlobalMuted;
                         updateMuteIconUI(muteBtn, isGlobalMuted);
 
@@ -676,19 +684,15 @@
         // --- GLOBAL MUTE TOGGLE LOGIC ---
         function toggleMute(vidId, btn) {
             isGlobalMuted = !isGlobalMuted;
-            document.querySelectorAll('video').forEach(vid => {
-                vid.muted = isGlobalMuted;
-            });
-            document.querySelectorAll('.mute-btn').forEach(button => {
-                updateMuteIconUI(button, isGlobalMuted);
-            });
+            document.querySelectorAll('video').forEach(vid => { vid.muted = isGlobalMuted; });
+            document.querySelectorAll('.mute-btn').forEach(button => { updateMuteIconUI(button, isGlobalMuted); });
             window.event.stopPropagation();
         }
 
         function updateMuteIconUI(btn, isMuted) {
             if(!btn) return;
             btn.innerHTML = isMuted 
-                ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>` 
+                ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`
                 : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
         }
 
@@ -775,10 +779,10 @@
                 if (!response.ok) throw new Error('Auth Failed');
                 const data = await response.json();
                 clientToken = data.token;
-            } catch (e) { console.error("Token error", e); }
+            } catch (e) { console.error("Token error", e); throw e; }
         }
 
-        async function fetchUsersCache(shouldRenderUpdate = false) {
+        async function fetchUsersCache() {
             if (!clientToken) await refreshClientToken();
             try {
                 const response = await fetch(`${PROXY_URL}?path=users`, {
@@ -786,12 +790,9 @@
                 });
                 if (response.ok) {
                     allUsersCache = await response.json() || {};
-                    // If rendering is requested (e.g. pull refresh or later update)
-                    if (shouldRenderUpdate && document.querySelectorAll('.post-card').length > 0) {
-                         // Only re-render if we suspect missing avatars, otherwise live update handles it
-                    }
                 }
-            } catch (e) { console.warn("User cache error", e); }
+                return allUsersCache;
+            } catch (e) { console.warn("User cache error", e); return {}; }
         }
 
         // --- UPLOAD & CREATE POST ---
@@ -841,128 +842,134 @@
                     body: JSON.stringify(postData)
                 });
                 createModal.classList.remove('active');
-                await fetchPostsInternal();
-                renderFeed(preparePostsArray(postsDataCache), true);
+                await fetchPosts(true); // Force render on new post
                 showToast('پست منتشر شد');
             } catch (err) { showToast('خطا در انتشار', 'error'); sharePostBtn.disabled = false; }
         }
 
-        // --- FEED FETCHING (Internal) ---
-        async function fetchPostsInternal() {
+        // --- FEED LOGIC (Updated for Unified Loading) ---
+        async function fetchPosts(shouldRender = true) {
             const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
                 headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
             });
             
-            if (!response.ok && response.status !== 404) return;
-            const data = await response.json() || {};
+            if (!response.ok && response.status !== 404) throw new Error("Fetch posts failed");
             
-            if (JSON.stringify(data) !== JSON.stringify(postsDataCache)) {
-                postsDataCache = data;
-                localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(data));
+            const data = await response.json() || {};
+            postsDataCache = data;
+            
+            // Only update Cache Key, do not render if not asked
+            localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(data));
+            
+            if (shouldRender) {
+                renderFeed(preparePostsArray(data));
             }
             return data;
         }
 
-        // --- RENDER FEED (Clean & Unified) ---
-        function renderFeed(posts, force = true) {
-            // FIX: Explicit Video Cleanup to prevent audio ghosts
-            videoObserver.disconnect();
-            document.querySelectorAll('video').forEach(v => {
+        // --- RENDER FEED (Fixed Media Cleanup) ---
+        function renderFeed(posts) {
+            // CRITICAL FIX: Clean up existing videos to prevent ghost audio
+            const existingVideos = document.querySelectorAll('video');
+            existingVideos.forEach(v => {
                 v.pause();
-                v.removeAttribute('src'); 
-                v.load(); 
+                v.src = "";
+                v.load();
+                v.remove();
             });
 
             feedContainer.innerHTML = '';
             
             if (posts.length === 0) {
                 feedContainer.innerHTML = '<div class="empty-state">هیچ پستی وجود ندارد.</div>';
-                skeletonLoader.style.display = 'none';
-                return;
-            }
+            } else {
+                posts.forEach(post => {
+                    const isOwner = post.sender_username === currentUser.username;
+                    
+                    let user = { displayName: post.sender_username, username: post.sender_username }; 
+                    if (allUsersCache && allUsersCache[post.sender_username]) {
+                        user = allUsersCache[post.sender_username];
+                    }
+                    
+                    const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${post.sender_username}&background=random&color=fff`;
+                    const displayName = user.displayName || post.sender_username;
+                    const isLiked = post.likes && post.likes[currentUser.username];
+                    const likeCount = post.likes ? Object.keys(post.likes).length : 0;
+                    const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
 
-            posts.forEach(post => {
-                const isOwner = post.sender_username === currentUser.username;
-                let user = { displayName: post.sender_username, username: post.sender_username }; 
-                if (allUsersCache && allUsersCache[post.sender_username]) {
-                    user = allUsersCache[post.sender_username];
-                }
-                
-                const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${post.sender_username}&background=random&color=fff`;
-                const displayName = user.displayName || post.sender_username;
-                const isLiked = post.likes && post.likes[currentUser.username];
-                const likeCount = post.likes ? Object.keys(post.likes).length : 0;
-                const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
+                    const canOpenList = isOwner || (post.show_likes !== false); 
+                    const likesText = `${likeCount} پسند`;
+                    const likesClass = canOpenList ? 'clickable' : 'private';
+                    const likesClickAction = canOpenList ? `onclick="showLikesList('${post.id}', ${isOwner}, ${post.show_likes !== false})"` : '';
 
-                const canOpenList = isOwner || (post.show_likes !== false); 
-                const likesText = `${likeCount} پسند`;
-                const likesClass = canOpenList ? 'clickable' : 'private';
-                const likesClickAction = canOpenList ? `onclick="showLikesList('${post.id}', ${isOwner}, ${post.show_likes !== false})"` : '';
+                    let mediaHtml = '';
+                    const loadingOverlay = `<div class="media-loader-placeholder" id="loader-${post.id}"><div class="loading-spinner"></div></div>`;
 
-                let mediaHtml = '';
-                const loadingOverlay = `<div class="media-loader-placeholder" id="loader-${post.id}"><div class="loading-spinner"></div></div>`;
+                    if (post.type === 'video') {
+                        mediaHtml = `
+                            ${loadingOverlay}
+                            <video class="post-media" id="video-${post.id}" data-id="${post.id}" src="${post.media_url}" loop playsinline muted onloadeddata="document.getElementById('loader-${post.id}').classList.add('loaded'); this.classList.add('loaded')"></video>
+                            <div class="play-pause-overlay" id="play-icon-${post.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            </div>
+                            <div class="video-overlay-controls">
+                                <button class="control-btn mute-btn" data-for="${post.id}" onclick="toggleMute('${post.id}', this)">
+                                    ${isGlobalMuted ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>'}
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        mediaHtml = `
+                            ${loadingOverlay}
+                            <img class="post-media" src="${post.media_url}" loading="lazy" onload="document.getElementById('loader-${post.id}').classList.add('loaded'); this.classList.add('loaded')" ondblclick="triggerLike('${post.id}')">
+                        `;
+                    }
 
-                if (post.type === 'video') {
-                    mediaHtml = `
-                        ${loadingOverlay}
-                        <video class="post-media" id="video-${post.id}" data-id="${post.id}" src="${post.media_url}" loop playsinline muted onloadeddata="document.getElementById('loader-${post.id}').classList.add('loaded'); this.classList.add('loaded')"></video>
-                        <div class="play-pause-overlay" id="play-icon-${post.id}">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    const postEl = document.createElement('div');
+                    postEl.className = 'post-card';
+                    postEl.id = `post-${post.id}`;
+                    
+                    postEl.innerHTML = `
+                        <div class="post-header">
+                            <div class="user-info">
+                                <img src="${avatar}" class="user-avatar" alt="Avatar">
+                                <span class="username">${displayName} ${verifiedHtml}</span>
+                            </div>
+                            <div class="post-options ${isOwner ? '' : 'disabled'}" ${isOwner ? `onclick="openPostOptions('${post.id}', ${post.show_likes !== false})"` : ''}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                            </div>
                         </div>
-                        <div class="video-overlay-controls">
-                            <button class="control-btn mute-btn" data-for="${post.id}" onclick="toggleMute('${post.id}', this)">
-                                ${isGlobalMuted ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>'}
+                        <div class="post-media-container" id="media-container-${post.id}" onclick="${post.type === 'video' ? `toggleVideoPlay('${post.id}')` : ''}" ondblclick="triggerLike('${post.id}')">
+                            ${mediaHtml}
+                            <div class="heart-overlay" id="heart-anim-${post.id}">❤</div>
+                        </div>
+                        <div class="post-actions">
+                            <button class="action-btn ${isLiked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            </button>
+                            <button class="action-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                             </button>
                         </div>
+                        <div class="post-likes ${likesClass}" id="likes-count-${post.id}" ${likesClickAction}>
+                            ${likesText}
+                        </div>
+                        <div class="post-caption">
+                            <span class="caption-username">${displayName}</span>
+                            <span class="caption-text">${post.caption}</span>
+                        </div>
+                        <span class="post-time" data-timestamp="${post.timestamp}">${timeAgo(post.timestamp)}</span>
                     `;
-                } else {
-                    mediaHtml = `
-                        ${loadingOverlay}
-                        <img class="post-media" src="${post.media_url}" loading="lazy" onload="document.getElementById('loader-${post.id}').classList.add('loaded'); this.classList.add('loaded')" ondblclick="triggerLike('${post.id}')">
-                    `;
-                }
-
-                const postEl = document.createElement('div');
-                postEl.className = 'post-card';
-                postEl.id = `post-${post.id}`;
+                    feedContainer.appendChild(postEl);
+                });
                 
-                postEl.innerHTML = `
-                    <div class="post-header">
-                        <div class="user-info">
-                            <img src="${avatar}" class="user-avatar" alt="Avatar">
-                            <span class="username">${displayName} ${verifiedHtml}</span>
-                        </div>
-                        <div class="post-options ${isOwner ? '' : 'disabled'}" ${isOwner ? `onclick="openPostOptions('${post.id}', ${post.show_likes !== false})"` : ''}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-                        </div>
-                    </div>
-                    <div class="post-media-container" id="media-container-${post.id}" onclick="${post.type === 'video' ? `toggleVideoPlay('${post.id}')` : ''}" ondblclick="triggerLike('${post.id}')">
-                        ${mediaHtml}
-                        <div class="heart-overlay" id="heart-anim-${post.id}">❤</div>
-                    </div>
-                    <div class="post-actions">
-                        <button class="action-btn ${isLiked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                        </button>
-                        <button class="action-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                        </button>
-                    </div>
-                    <div class="post-likes ${likesClass}" id="likes-count-${post.id}" ${likesClickAction}>
-                        ${likesText}
-                    </div>
-                    <div class="post-caption">
-                        <span class="caption-username">${displayName}</span>
-                        <span class="caption-text">${post.caption}</span>
-                    </div>
-                    <span class="post-time" data-timestamp="${post.timestamp}">${timeAgo(post.timestamp)}</span>
-                `;
-                feedContainer.appendChild(postEl);
-            });
+                // Done loading UI
+                skeletonLoader.style.display = 'none';
+                feedContainer.style.opacity = '1';
 
-            // Re-observe and Hide Skeleton only after full render
-            document.querySelectorAll('video').forEach(v => videoObserver.observe(v));
-            skeletonLoader.style.display = 'none';
+                // Re-observe videos after rendering
+                document.querySelectorAll('video').forEach(v => videoObserver.observe(v));
+            }
         }
 
         // --- REALTIME UPDATER ---
@@ -974,12 +981,13 @@
                 if (!response.ok) return;
                 const newData = await response.json() || {};
 
+                // Only update if there are significant changes to avoid resetting media playback
                 if (JSON.stringify(newData) === JSON.stringify(postsDataCache)) return;
 
                 postsDataCache = newData;
                 localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(newData));
 
-                // Partial DOM updates (Likes/Captions) - avoids re-rendering whole list
+                // Partial DOM updates (Do NOT re-render everything)
                 const domPosts = document.querySelectorAll('.post-card');
                 domPosts.forEach(el => {
                     const pid = el.id.replace('post-', '');
@@ -989,6 +997,7 @@
                     }
                     const post = newData[pid];
                     
+                    // Likes
                     const likeCountEl = el.querySelector('.post-likes');
                     const isOwner = post.sender_username === currentUser.username;
                     const canOpenList = isOwner || (post.show_likes !== false);
@@ -1005,6 +1014,7 @@
                         likeCountEl.removeAttribute('onclick');
                     }
 
+                    // Caption
                     const capEl = el.querySelector('.caption-text');
                     if (capEl.textContent !== post.caption) capEl.textContent = post.caption;
                 });
@@ -1032,7 +1042,7 @@
                 document.getElementById(`post-${currentOptionsPostId}`).remove();
                 closeOptions();
                 showToast('پست حذف شد');
-                await fetchPostsInternal();
+                await fetchPosts(false); // Sync cache only
             } catch(e) { showToast('خطا در حذف', 'error'); }
         }
 
@@ -1158,7 +1168,7 @@
             if (!btn.classList.contains('liked')) toggleLike(postId);
         };
 
-        // --- PULL REFRESH ---
+        // --- PULL REFRESH & TIME ---
         function touchStart(e) {
             if (feedContainer.scrollTop === 0) {
                 startY = e.touches[0].clientY;
@@ -1182,8 +1192,11 @@
             if (currentTranslate > 60) {
                 pullSpinner.classList.add('spinning');
                 feedContainer.style.transform = `translateY(60px)`;
-                await Promise.all([fetchUsersCache(true), fetchPostsInternal()]);
-                renderFeed(preparePostsArray(postsDataCache), true);
+                try {
+                    // Update: Wait for both on pull too
+                    await Promise.all([fetchUsersCache(), fetchPosts(false)]);
+                    renderFeed(preparePostsArray(postsDataCache));
+                } catch(e) { console.log(e); }
                 setTimeout(resetPull, 500);
             } else {
                 resetPull();
