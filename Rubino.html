@@ -234,8 +234,9 @@
 
         /* --- SKELETON LOADER --- */
         #skeleton-loader {
-            position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--background-color); z-index: 15; overflow: hidden;
+            padding-top: 0;
         }
         .sk-post { margin-bottom: 20px; background: var(--background-color); padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
         .sk-header { display: flex; align-items: center; padding: 15px; gap: 10px; }
@@ -356,7 +357,6 @@
         .user-list-info h4 { margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 4px; color: var(--text-primary); }
         .user-list-info p { margin: 3px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
         
-        /* Blue Tick Fix in Modal */
         .user-list-info .verified-tick { width: 14px; height: 14px; vertical-align: middle; }
 
         .empty-state { text-align: center; padding: 50px 20px; color: var(--text-secondary); }
@@ -397,17 +397,19 @@
             <div class="pull-spinner" id="pull-spinner"></div>
         </div>
 
-        <!-- Skeleton Loader -->
+        <!-- Skeleton Loader (Only initial load) -->
         <div id="skeleton-loader">
-            <div class="sk-post">
-                <div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div>
-                <div class="sk-image skeleton-animate"></div>
-                <div class="sk-actions skeleton-animate"></div>
-            </div>
-            <div class="sk-post">
-                <div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div>
-                <div class="sk-image skeleton-animate"></div>
-                <div class="sk-actions skeleton-animate"></div>
+            <div style="padding-top: 60px;"> <!-- Spacer for header -->
+                <div class="sk-post">
+                    <div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div>
+                    <div class="sk-image skeleton-animate"></div>
+                    <div class="sk-actions skeleton-animate"></div>
+                </div>
+                <div class="sk-post">
+                    <div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div>
+                    <div class="sk-image skeleton-animate"></div>
+                    <div class="sk-actions skeleton-animate"></div>
+                </div>
             </div>
         </div>
 
@@ -514,8 +516,9 @@
         const UPLOAD_PHP_ENDPOINT = 'https://miko.freehost.io/upload_to_parspack.php';
         const SHARED_SECRET = 'miko1234';
         const VERIFIED_ICON_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
-        const LIVE_UPDATE_INTERVAL = 4000;
+        const LIVE_UPDATE_INTERVAL = 5000;
         const CACHE_KEY_FEED = 'rubino_cached_feed';
+        const CACHE_KEY_USERS = 'rubino_users_cache'; // New cache for users
 
         // --- DOM REFERENCES ---
         const feedContainer = document.getElementById('feed-container');
@@ -560,8 +563,8 @@
         let videoObserver = null; 
         let startY = 0; let isPulling = false; let currentTranslate = 0;
         
-        // --- GLOBAL AUDIO STATE (Instagram Style) ---
-        let isGlobalMuted = true; // Default to muted
+        // --- GLOBAL AUDIO STATE ---
+        let isGlobalMuted = true;
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -570,62 +573,122 @@
             currentUser = JSON.parse(storedUser);
 
             setupEventListeners();
+            
+            // Unified Data Loading Logic
+            await loadInitialData();
+            
+            // After render is complete, init observer
             initVideoObserver();
             
-            // 1. Load from Cache Immediately (Offline Support / Speed)
-            const cachedFeed = localStorage.getItem(CACHE_KEY_FEED);
-            if (cachedFeed) {
-                skeletonLoader.style.display = 'none';
-                postsDataCache = JSON.parse(cachedFeed);
-                // Try to load users first even if we have cached feed
-                await safeLoadUsers(); 
-                renderFeed(preparePostsArray(postsDataCache), false); 
+            setInterval(updateLiveTimestamps, 60000);
+            setInterval(startRealtimeUpdates, LIVE_UPDATE_INTERVAL);
+        });
+
+        // --- DATA LOADING ORCHESTRATOR ---
+        async function loadInitialData() {
+            // 1. Try to load completely from cache first for instant UI
+            const cachedPosts = localStorage.getItem(CACHE_KEY_FEED);
+            const cachedUsers = localStorage.getItem(CACHE_KEY_USERS);
+
+            if (cachedUsers) allUsersCache = JSON.parse(cachedUsers);
+            if (cachedPosts) {
+                postsDataCache = JSON.parse(cachedPosts);
+                renderFeed(preparePostsArray(postsDataCache), true); 
+                skeletonLoader.style.display = 'none'; // Hide loader immediately if cache exists
             }
 
             try {
                 await refreshClientToken();
-                // 2. Fetch Users BEFORE fetching posts to ensure profiles load
-                await fetchUsersCache(); 
-                await fetchPosts();
                 
-                setInterval(updateLiveTimestamps, 60000);
-                setInterval(startRealtimeUpdates, LIVE_UPDATE_INTERVAL);
+                // 2. Fetch BOTH users and posts in parallel from network
+                // We wait for both to finish before processing to prevent partial renders
+                const [usersData, postsData] = await Promise.all([
+                    fetchUsersRaw(),
+                    fetchPostsRaw()
+                ]);
+
+                // 3. Process Network Data
+                let hasChanges = false;
+
+                if (usersData) {
+                    allUsersCache = usersData;
+                    localStorage.setItem(CACHE_KEY_USERS, JSON.stringify(usersData));
+                }
+
+                if (postsData) {
+                    // Check if data actually changed to avoid re-rendering (prevents video glitch)
+                    if (JSON.stringify(postsData) !== JSON.stringify(postsDataCache)) {
+                        postsDataCache = postsData;
+                        localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(postsData));
+                        hasChanges = true;
+                    }
+                }
+
+                // 4. Render only if cache was empty OR if network has new data
+                // If we already rendered cache and data is same, DO NOTHING (Smooth!)
+                if (hasChanges || !cachedPosts) {
+                    const posts = preparePostsArray(postsDataCache);
+                    if (posts.length > 0) {
+                        renderFeed(posts);
+                    } else {
+                        feedContainer.innerHTML = '<div class="empty-state">هیچ پستی وجود ندارد.</div>';
+                    }
+                }
+
+                skeletonLoader.style.display = 'none';
+
             } catch (error) {
-                console.error(error);
+                console.error("Data load error", error);
+                // Fallback if cache exists but network failed is already handled by step 1
                 if (!postsDataCache || Object.keys(postsDataCache).length === 0) {
                     feedContainer.innerHTML = '<div class="empty-state">خطا در اتصال به سرور.</div>';
                     skeletonLoader.style.display = 'none';
                 }
             }
-        });
+        }
 
-        // --- CACHE & DATA HELPERS ---
+        async function fetchUsersRaw() {
+            try {
+                const response = await fetch(`${PROXY_URL}?path=users`, {
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                });
+                return response.ok ? await response.json() : null;
+            } catch (e) { return null; }
+        }
+
+        async function fetchPostsRaw() {
+            try {
+                const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                });
+                return (response.ok || response.status === 404) ? (await response.json() || {}) : null;
+            } catch (e) { return null; }
+        }
+
         function preparePostsArray(data) {
              return Object.entries(data)
                 .map(([key, val]) => ({ id: key, ...val }))
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
 
-        // --- VIDEO & INTERSECTION OBSERVER (Fixed for Global Audio) ---
+        // --- VIDEO & INTERSECTION OBSERVER ---
         function initVideoObserver() {
+            if (videoObserver) videoObserver.disconnect();
+            
             const options = { root: null, rootMargin: '0px', threshold: 0.65 };
             
             videoObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     const video = entry.target;
-                    const overlay = document.getElementById(`play-icon-${video.dataset.id}`);
                     const muteBtn = document.querySelector(`.mute-btn[data-for="${video.dataset.id}"]`);
 
                     if (entry.isIntersecting) {
-                        // Apply Global Mute State immediately when video enters view
+                        // Sync with global mute state
                         video.muted = isGlobalMuted;
                         updateMuteIconUI(muteBtn, isGlobalMuted);
 
                         if (video.paused && !video.dataset.manualPause) {
-                            video.play().catch(e => {
-                                video.muted = true; // Fallback
-                                video.play().catch(console.log);
-                            });
+                            video.play().catch(() => { video.muted = true; video.play(); });
                         }
                         
                         // Pause others
@@ -633,12 +696,13 @@
                             if (v !== video && !v.paused) v.pause();
                         });
                     } else {
-                        if (!video.paused) {
-                            video.pause();
-                        }
+                        if (!video.paused) video.pause();
                     }
                 });
             }, options);
+
+            // Observe existing videos
+            document.querySelectorAll('video').forEach(v => videoObserver.observe(v));
         }
 
         function toggleVideoPlay(vidId) {
@@ -656,30 +720,18 @@
             }
         }
 
-        // --- GLOBAL MUTE TOGGLE LOGIC ---
         function toggleMute(vidId, btn) {
-            // 1. Flip Global State
             isGlobalMuted = !isGlobalMuted;
-
-            // 2. Apply to ALL videos in DOM immediately (Instagram behavior)
-            document.querySelectorAll('video').forEach(vid => {
-                vid.muted = isGlobalMuted;
-            });
-
-            // 3. Update ALL icons in DOM
-            document.querySelectorAll('.mute-btn').forEach(button => {
-                updateMuteIconUI(button, isGlobalMuted);
-            });
-            
-            // Prevent bubbling
+            document.querySelectorAll('video').forEach(vid => vid.muted = isGlobalMuted);
+            document.querySelectorAll('.mute-btn').forEach(button => updateMuteIconUI(button, isGlobalMuted));
             window.event.stopPropagation();
         }
 
         function updateMuteIconUI(btn, isMuted) {
             if(!btn) return;
             btn.innerHTML = isMuted 
-                ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>` // Muted Icon
-                : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`; // Sound Icon
+                ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>` 
+                : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
         }
 
         // --- EVENT LISTENERS ---
@@ -768,33 +820,6 @@
             } catch (e) { console.error("Token error", e); }
         }
 
-        async function safeLoadUsers() {
-            // Helper to try loading users from cache first just to have something
-            // This is handled by main logic, but good as a placeholder
-        }
-
-        async function fetchUsersCache() {
-            if (!clientToken) await refreshClientToken();
-            try {
-                const response = await fetch(`${PROXY_URL}?path=users`, {
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
-                });
-                if (response.ok) {
-                    allUsersCache = await response.json() || {};
-                    // If posts are already rendered but profiles missing, re-render
-                    const posts = document.querySelectorAll('.post-card');
-                    if (posts.length > 0) {
-                        // Check if we need to update UI
-                        const firstAvatar = posts[0].querySelector('.user-avatar');
-                        if (firstAvatar && firstAvatar.src.includes('ui-avatars')) {
-                             // Re-render only if needed to avoid flicker
-                             renderFeed(preparePostsArray(postsDataCache), true); 
-                        }
-                    }
-                }
-            } catch (e) { console.warn("User cache error", e); }
-        }
-
         // --- UPLOAD & CREATE POST ---
         async function handleUploadAndPost() {
             if (!selectedFile) { showToast('فایلی انتخاب نشده است', 'error'); return; }
@@ -842,46 +867,20 @@
                     body: JSON.stringify(postData)
                 });
                 createModal.classList.remove('active');
-                await fetchPosts();
+                await loadInitialData(); // Reload safely
                 showToast('پست منتشر شد');
             } catch (err) { showToast('خطا در انتشار', 'error'); sharePostBtn.disabled = false; }
         }
 
-        // --- FEED LOGIC ---
-        async function fetchPosts() {
-            const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
-                headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
-            });
-            skeletonLoader.style.display = 'none';
-            
-            if (!response.ok && response.status !== 404) return;
-            
-            const data = await response.json() || {};
-            
-            // Cache Update
-            if (JSON.stringify(data) !== JSON.stringify(postsDataCache)) {
-                localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(data));
-                postsDataCache = data;
-                const posts = preparePostsArray(data);
-                
-                if (posts.length === 0) {
-                    feedContainer.innerHTML = '<div class="empty-state">هیچ پستی وجود ندارد.</div>';
-                } else {
-                    renderFeed(posts);
-                }
-            }
-        }
-
-        // --- RENDER FEED (Fixed Profile Logic) ---
-        function renderFeed(posts, force = true) {
-            // 'force' prevents unnecessary DOM rebuilding if not needed, usually we force on fetch
+        // --- RENDER FEED ---
+        function renderFeed(posts) {
             feedContainer.innerHTML = '';
             
             posts.forEach(post => {
                 const isOwner = post.sender_username === currentUser.username;
                 
-                // --- FIX: Robust User Profile Lookup ---
-                let user = { displayName: post.sender_username, username: post.sender_username }; // Default
+                // Lookup user in cache
+                let user = { displayName: post.sender_username, username: post.sender_username };
                 if (allUsersCache && allUsersCache[post.sender_username]) {
                     user = allUsersCache[post.sender_username];
                 }
@@ -897,7 +896,7 @@
                 const likesClass = canOpenList ? 'clickable' : 'private';
                 const likesClickAction = canOpenList ? `onclick="showLikesList('${post.id}', ${isOwner}, ${post.show_likes !== false})"` : '';
 
-                // Media & Loading Logic
+                // Media
                 let mediaHtml = '';
                 const loadingOverlay = `<div class="media-loader-placeholder" id="loader-${post.id}"><div class="loading-spinner"></div></div>`;
 
@@ -959,24 +958,23 @@
                 feedContainer.appendChild(postEl);
             });
 
-            // Re-observe videos after rendering
-            document.querySelectorAll('video').forEach(v => videoObserver.observe(v));
+            // Init observer after render
+            if (window.IntersectionObserver) {
+                document.querySelectorAll('video').forEach(v => videoObserver.observe(v));
+            }
         }
 
-        // --- REALTIME UPDATER ---
+        // --- REALTIME UPDATER (Partial Updates Only) ---
         async function startRealtimeUpdates() {
             try {
-                const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
-                });
-                if (!response.ok) return;
-                const newData = await response.json() || {};
+                const newData = await fetchPostsRaw();
+                if (!newData) return;
 
-                // Only update if there are significant changes to avoid resetting media playback
+                // Deep compare to prevent unnecessary DOM updates
                 if (JSON.stringify(newData) === JSON.stringify(postsDataCache)) return;
 
+                // Save cache
                 postsDataCache = newData;
-                // Update Local Cache
                 localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(newData));
 
                 // Partial DOM updates
@@ -989,27 +987,38 @@
                     }
                     const post = newData[pid];
                     
-                    // Likes
+                    // Update Likes Text Only
                     const likeCountEl = el.querySelector('.post-likes');
                     const isOwner = post.sender_username === currentUser.username;
                     const canOpenList = isOwner || (post.show_likes !== false);
                     const likeCount = post.likes ? Object.keys(post.likes).length : 0;
-                    likeCountEl.textContent = `${likeCount} پسند`;
+                    
+                    if (likeCountEl.textContent !== `${likeCount} پسند`) {
+                        likeCountEl.textContent = `${likeCount} پسند`;
+                    }
                     
                     if (canOpenList) {
-                        likeCountEl.classList.add('clickable');
-                        likeCountEl.classList.remove('private');
-                        likeCountEl.setAttribute('onclick', `showLikesList('${pid}', ${isOwner}, true)`);
+                        if (!likeCountEl.classList.contains('clickable')) {
+                            likeCountEl.classList.add('clickable');
+                            likeCountEl.classList.remove('private');
+                            likeCountEl.setAttribute('onclick', `showLikesList('${pid}', ${isOwner}, true)`);
+                        }
                     } else {
-                        likeCountEl.classList.remove('clickable');
-                        likeCountEl.classList.add('private');
-                        likeCountEl.removeAttribute('onclick');
+                         if (!likeCountEl.classList.contains('private')) {
+                            likeCountEl.classList.remove('clickable');
+                            likeCountEl.classList.add('private');
+                            likeCountEl.removeAttribute('onclick');
+                         }
                     }
 
                     // Caption
                     const capEl = el.querySelector('.caption-text');
                     if (capEl.textContent !== post.caption) capEl.textContent = post.caption;
                 });
+                
+                // If new post count differs significantly, we might need full render, 
+                // but let's rely on pull-to-refresh for major structural changes to avoid video reset
+                
             } catch (e) { console.warn("Sync error", e); }
         }
 
@@ -1034,7 +1043,7 @@
                 document.getElementById(`post-${currentOptionsPostId}`).remove();
                 closeOptions();
                 showToast('پست حذف شد');
-                await fetchPosts(); // Sync cache
+                await loadInitialData(); // Sync cache safely
             } catch(e) { showToast('خطا در حذف', 'error'); }
         }
 
@@ -1118,7 +1127,7 @@
             }
         }
 
-        // --- LIKE LOGIC (With Animation) ---
+        // --- LIKE LOGIC ---
         window.toggleLike = async (postId) => {
             const btn = document.getElementById(`like-btn-${postId}`);
             const countEl = document.getElementById(`likes-count-${postId}`);
@@ -1187,8 +1196,9 @@
             if (currentTranslate > 60) {
                 pullSpinner.classList.add('spinning');
                 feedContainer.style.transform = `translateY(60px)`;
-                await fetchUsersCache(); // Refresh users too on pull
-                await fetchPosts();
+                // Force full reload on pull
+                postsDataCache = {}; 
+                await loadInitialData();
                 setTimeout(resetPull, 500);
             } else {
                 resetPull();
