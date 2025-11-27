@@ -2,172 +2,227 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ایجاد حساب کاربری - همیار</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ثبت‌نام در همیار</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap');
+
         :root {
-            --primary-color: #007BFF;
-            --primary-hover: #0056b3;
+            --background-color: #0D1117;
+            --secondary-color: #161B22;
+            --secondary-hover: #2C2F33;
+            --border-color: #30363d;
+            --text-primary: #E4E6EB;
+            --text-secondary: #8b949e;
+            --primary-color: #00A3FF;
+            --primary-glow: rgba(0, 163, 255, 0.4);
+            --error-color: #ff4d4d;
             --success-color: #28a745;
-            --error-color: #dc3545;
-            --background-color: #f0f2f5;
-            --form-bg-color: #ffffff;
-            --text-primary: #333;
-            --text-secondary: #6c757d;
-            --border-color: #ced4da;
-            --input-bg: #f8f9fa;
+            --input-bg: #0d1117;
         }
 
         *, *::before, *::after {
             box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: 'Vazirmatn', sans-serif;
-            margin: 0;
             background-color: var(--background-color);
+            background-image: radial-gradient(circle at top left, #1a202c 0%, var(--background-color) 70%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px 15px;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px 15px;
         }
 
-        .form-container {
+        /* --- کانتینر اصلی --- */
+        .register-container {
             width: 100%;
             max-width: 480px;
-            background-color: var(--form-bg-color);
-            padding: 35px;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e9ecef;
+            perspective: 1000px;
         }
 
-        .form-header {
+        .register-card {
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 30px 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            animation: cardEntry 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes cardEntry {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* --- هدر --- */
+        .header-text {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
-        .form-header h1 {
-            margin: 0 0 10px;
-            font-size: 2rem;
-            color: var(--text-primary);
-        }
-        .form-header p {
+        .header-text h1 {
             margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 0 0 15px var(--primary-glow);
+        }
+        .header-text p {
+            margin: 8px 0 0;
+            font-size: 0.95rem;
             color: var(--text-secondary);
-            font-size: 1.05rem;
+        }
+
+        /* --- آپلودر پروفایل --- */
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .profile-uploader {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 3px dashed var(--border-color);
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--input-bg);
+        }
+        
+        .profile-uploader:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .profile-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .upload-icon-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 35px;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+            transform: translateY(100%);
+        }
+        
+        .profile-uploader:hover .upload-icon-overlay {
+            transform: translateY(0);
+        }
+
+        .upload-label-text {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .upload-progress {
+            width: 100px;
+            height: 4px;
+            background-color: var(--border-color);
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+            display: none;
+        }
+        .upload-progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        /* --- فرم --- */
+        .register-form {
+            width: 100%;
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+            position: relative;
         }
-        .input-group label {
+
+        .input-label {
             display: block;
             margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
             font-weight: 500;
-            color: #495057;
-            font-size: 0.95rem;
         }
+
         .input-wrapper {
             position: relative;
             display: flex;
             align-items: center;
         }
-        .input-wrapper svg {
-            position: absolute;
-            right: 15px;
-            width: 20px;
-            height: 20px;
-            color: var(--text-secondary);
-            pointer-events: none;
-        }
-        
-        .input-group input, .input-group select, .input-group textarea {
+
+        .input-field {
             width: 100%;
-            padding: 12px 45px 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: 'Vazirmatn', sans-serif;
             background-color: var(--input-bg);
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
-        }
-        .input-group textarea {
-            padding: 12px 15px;
-            resize: vertical;
-            min-height: 90px;
-        }
-        .input-group select {
-            padding-right: 15px;
-            cursor: pointer;
-        }
-        
-        .error-message {
-            color: var(--error-color);
-            font-size: 0.875em;
-            margin-top: 6px;
-            min-height: 1.2em;
-            display: none;
-            font-weight: 500;
-        }
-        
-        .profile-uploader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            padding: 15px;
-            border: 2px dashed var(--border-color);
+            border: 1px solid var(--border-color);
+            padding: 12px 45px 12px 15px; /* فضای خالی برای آیکون راست */
             border-radius: 12px;
-            cursor: pointer;
-            transition: border-color 0.3s, background-color 0.3s;
-        }
-        .profile-uploader:hover {
-            border-color: var(--primary-color);
-            background-color: #f8f9fa;
-        }
-        .profile-uploader .profile-preview {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            background-color: #e9ecef;
-        }
-        .profile-uploader span {
-            font-weight: 500;
-            color: var(--primary-color);
-        }
-        .profile-uploader input[type="file"] {
-            display: none;
+            color: var(--text-primary);
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
         }
         
-        .upload-progress {
-            width: 100%;
-            height: 8px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            overflow: hidden;
-            display: none; /* Initially hidden */
-            margin-top: 10px;
-        }
-        .upload-progress-bar {
-            width: 0%;
-            height: 100%;
-            background-color: var(--success-color);
-            transition: width 0.3s ease-in-out;
+        .input-field select {
+            appearance: none;
+            -webkit-appearance: none;
         }
 
+        .input-field:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 163, 255, 0.15);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: color 0.3s;
+            width: 20px;
+            height: 20px;
+        }
+
+        .input-field:focus + .input-icon {
+            color: var(--primary-color);
+        }
+        
         .form-row {
             display: flex;
             gap: 15px;
@@ -175,137 +230,253 @@
         .form-row .input-group {
             flex: 1;
         }
-        
+
+        /* --- پیام خطا زیر اینپوت --- */
+        .field-error-text {
+            color: var(--error-color);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .input-field.error {
+            border-color: var(--error-color);
+        }
+
+        /* --- چک باکس قوانین --- */
         .terms-group {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-top: 10px;
+            margin: 10px 0 20px;
         }
+        
+        .terms-group input[type="checkbox"] {
+            accent-color: var(--primary-color);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
         .terms-group label {
-            font-weight: 400;
-            margin: 0;
+            font-size: 0.9rem;
             color: var(--text-secondary);
+            cursor: pointer;
         }
         .terms-group a {
             color: var(--primary-color);
             text-decoration: none;
-            font-weight: 500;
+            transition: color 0.2s;
         }
         .terms-group a:hover {
+            color: #4dc3ff;
             text-decoration: underline;
         }
-        
-        #submit-btn {
+
+        /* --- دکمه ثبت نام --- */
+        .submit-btn {
             width: 100%;
             padding: 14px;
             border: none;
-            border-radius: 8px;
-            background-color: var(--primary-color);
+            border-radius: 12px;
+            background: var(--primary-color);
             color: white;
-            font-size: 1.1em;
+            font-size: 1.1rem;
             font-weight: 700;
+            font-family: 'Vazirmatn', sans-serif;
             cursor: pointer;
-            transition: background-color 0.3s, opacity 0.3s, transform 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 163, 255, 0.3);
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
         }
-        #submit-btn:hover:not(:disabled) {
-            background-color: var(--primary-hover);
+
+        .submit-btn:hover:not(:disabled) {
+            background-color: #0091e6;
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 163, 255, 0.4);
         }
-        #submit-btn:disabled {
-            opacity: 0.6;
+
+        .submit-btn:disabled {
+            background-color: var(--secondary-hover);
+            color: var(--text-secondary);
             cursor: not-allowed;
+            box-shadow: none;
         }
-        
+
         .spinner {
             width: 20px;
             height: 20px;
             border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
+            border-top-color: #ffffff;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
             display: none;
         }
-        #submit-btn.loading .spinner { display: block; }
-        #submit-btn.loading span { display: none; }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        #form-status {
-            text-align: center;
-            margin-top: 20px;
+        /* --- پیام وضعیت کلی --- */
+        .status-message {
+            margin-top: 15px;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            text-align: center;
             display: none;
-            font-weight: 500;
+            animation: fadeIn 0.3s ease;
         }
-        #form-status.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .status-message.error {
+            background-color: rgba(255, 77, 77, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(255, 77, 77, 0.3);
         }
-        #form-status.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .status-message.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.3);
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* --- فوتر --- */
         .form-footer {
             margin-top: 25px;
             text-align: center;
-            font-size: 0.95em;
+            font-size: 0.9rem;
             color: var(--text-secondary);
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--border-color);
             padding-top: 20px;
+            width: 100%;
         }
+
         .form-footer a {
             color: var(--primary-color);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 700;
+            transition: text-shadow 0.3s;
         }
+
         .form-footer a:hover {
-            text-decoration: underline;
+            text-shadow: 0 0 8px var(--primary-glow);
         }
+
     </style>
 </head>
 <body>
 
-    <div class="form-container">
-        <div class="form-header">
-            <h1>ایجاد حساب کاربری</h1>
-            <p>به همیار بپیوندید و دوستان جدیدی پیدا کنید!</p>
-        </div>
-        <form id="register-form" novalidate>
-            <label for="profilePicInput" class="profile-uploader">
-                <img id="profile-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjZWQ0ZGEiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yMCAyMXYtMS4zNGMwLTEuMjQtMS4yMy0yLjMtMy0yLjNoLTYuMDRjLTEuNzcgMC0zIDEuMDYtMyAyLjM0VjIxIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSI3IiByPSI0Ii8+PC9zdmc+" alt="Profile Preview" class="profile-preview">
-                <span>انتخاب تصویر پروفایل</span>
-                <div class="upload-progress"><div class="upload-progress-bar"></div></div>
-            </label>
-            <input type="file" id="profilePicInput" accept="image/*" style="display:none;">
+    <div class="register-container">
+        <div class="register-card">
+            
+            <div class="header-text">
+                <h1>ایجاد حساب</h1>
+                <p>به همیار بپیوندید و دوستان جدید پیدا کنید</p>
+            </div>
 
-            <div class="input-group"><label for="displayName">نام نمایشی</label><div class="input-wrapper"><input type="text" id="displayName" placeholder="نامی که دیگران می‌بینند" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg></div><div class="error-message" id="displayName-error"></div></div>
-            <div class="input-group"><label for="username">نام کاربری (انگلیسی)</label><div class="input-wrapper"><input type="text" id="username" placeholder="فقط حروف انگلیسی، اعداد و _" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><div class="error-message" id="username-error"></div></div>
-            <div class="input-group"><label for="mobile">شماره موبایل</label><div class="input-wrapper"><input type="tel" id="mobile" placeholder="مثال: 09123456789" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div><div class="error-message" id="mobile-error"></div></div>
-            <div class="form-row"><div class="input-group"><label for="age">سن</label><input type="number" id="age" required min="18" max="99"><div class="error-message" id="age-error"></div></div><div class="input-group"><label for="gender">جنسیت</label><select id="gender" required><option value="" disabled selected>انتخاب کنید...</option><option value="male">مرد</option><option value="female">زن</option></select><div class="error-message" id="gender-error"></div></div></div>
-            <div class="input-group"><label for="password">رمز عبور</label><div class="input-wrapper"><input type="password" id="password" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div><div class="error-message" id="password-error"></div></div>
-            <div class="input-group"><label for="passwordConfirm">تکرار رمز عبور</label><div class="input-wrapper"><input type="password" id="passwordConfirm" required><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 5-5 4.9 4.9 0 0 1 3.3.8"></path></svg></div><div class="error-message" id="passwordConfirm-error"></div></div>
-            
-            <div class="input-group terms-group"><input type="checkbox" id="terms" required style="width: auto; height: auto;"><label for="terms">با <a href="#" target="_blank">قوانین و مقررات</a> موافقم.</label></div><div class="error-message" id="terms-error"></div>
-            
-            <button type="submit" id="submit-btn" disabled>
-                <div class="spinner"></div>
-                <span>ایجاد حساب</span>
-            </button>
-            <div id="form-status"></div>
-        </form>
-        <div class="form-footer">
-            حساب کاربری دارید؟ <a href="login.html">وارد شوید</a>
+            <form id="register-form" class="register-form" novalidate>
+                
+                <!-- آپلود عکس -->
+                <div class="profile-section">
+                    <label for="profilePicInput" class="profile-uploader">
+                        <img id="profile-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4Yjk0OWUiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yMCAyMXYtMS4zNGMwLTEuMjQtMS4yMy0yLjMtMy0yLjNoLTYuMDRjLTEuNzcgMC0zIDEuMDYtMyAyLjM0VjIxIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSI3IiByPSI0Ii8+PC9zdmc+" alt="Profile Preview" class="profile-preview">
+                        <div class="upload-icon-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        </div>
+                    </label>
+                    <div class="upload-label-text">انتخاب تصویر پروفایل</div>
+                    <div class="upload-progress"><div class="upload-progress-bar"></div></div>
+                    <input type="file" id="profilePicInput" accept="image/*" style="display:none;">
+                </div>
+
+                <!-- نام نمایشی -->
+                <div class="input-group">
+                    <label class="input-label" for="displayName">نام نمایشی</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="displayName" class="input-field" placeholder="نامی که دیگران می‌بینند" required>
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg>
+                    </div>
+                    <div class="field-error-text" id="displayName-error">این فیلد الزامی است</div>
+                </div>
+
+                <!-- نام کاربری -->
+                <div class="input-group">
+                    <label class="input-label" for="username">نام کاربری (انگلیسی)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="username" class="input-field" placeholder="حروف انگلیسی، اعداد و _" required>
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <div class="field-error-text" id="username-error"></div>
+                </div>
+
+                <!-- موبایل -->
+                <div class="input-group">
+                    <label class="input-label" for="mobile">شماره موبایل</label>
+                    <div class="input-wrapper">
+                        <input type="tel" id="mobile" class="input-field" placeholder="مثال: 09123456789" required>
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    </div>
+                    <div class="field-error-text" id="mobile-error"></div>
+                </div>
+
+                <!-- سن و جنسیت (دو ستونه) -->
+                <div class="form-row">
+                    <div class="input-group">
+                        <label class="input-label" for="age">سن</label>
+                        <input type="number" id="age" class="input-field" style="padding-left: 15px;" required min="18" max="99">
+                        <div class="field-error-text" id="age-error"></div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="gender">جنسیت</label>
+                        <select id="gender" class="input-field" style="padding-left: 15px;" required>
+                            <option value="" disabled selected>انتخاب...</option>
+                            <option value="male">مرد</option>
+                            <option value="female">زن</option>
+                        </select>
+                        <div class="field-error-text" id="gender-error"></div>
+                    </div>
+                </div>
+
+                <!-- رمز عبور -->
+                <div class="input-group">
+                    <label class="input-label" for="password">رمز عبور</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" class="input-field" required>
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <div class="field-error-text" id="password-error"></div>
+                </div>
+
+                <!-- تکرار رمز عبور -->
+                <div class="input-group">
+                    <label class="input-label" for="passwordConfirm">تکرار رمز عبور</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="passwordConfirm" class="input-field" required>
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 5-5 4.9 4.9 0 0 1 3.3.8"></path></svg>
+                    </div>
+                    <div class="field-error-text" id="passwordConfirm-error"></div>
+                </div>
+                
+                <!-- قوانین -->
+                <div class="terms-group">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">با <a href="#" target="_blank">قوانین و مقررات</a> موافقم.</label>
+                </div>
+                <div class="field-error-text" id="terms-error"></div>
+                
+                <!-- دکمه ارسال -->
+                <button type="submit" id="submit-btn" class="submit-btn" disabled>
+                    <div class="spinner"></div>
+                    <span>ایجاد حساب</span>
+                </button>
+
+                <!-- پیام وضعیت کلی -->
+                <div id="form-status" class="status-message"></div>
+
+            </form>
+
+            <div class="form-footer">
+                حساب کاربری دارید؟ <a href="login.html">وارد شوید</a>
+            </div>
         </div>
     </div>
 
@@ -348,7 +519,7 @@
             }
             const inputEl = allInputs[fieldId];
             if (inputEl) {
-                inputEl.style.borderColor = 'var(--error-color)';
+                inputEl.classList.add('error');
             }
         }
 
@@ -359,13 +530,13 @@
             }
             const inputEl = allInputs[fieldId];
             if (inputEl) {
-                inputEl.style.borderColor = 'var(--border-color)';
+                inputEl.classList.remove('error');
             }
         }
         
         function setFormStatus(message, type) {
             formStatus.textContent = message;
-            formStatus.className = type; // 'success' or 'error'
+            formStatus.className = `status-message ${type}`; // 'success' or 'error'
             formStatus.style.display = 'block';
         }
 
@@ -525,7 +696,9 @@
         // --- 8. Form Submission Flow ---
         async function submitRegistration() {
             submitBtn.disabled = true;
-            submitBtn.classList.add('loading');
+            // Add loading class to show spinner and hide text
+            submitBtn.querySelector('.spinner').style.display = 'block';
+            submitBtn.querySelector('span').style.display = 'none';
 
             const username = allInputs.username.value.trim().toLowerCase();
             const displayName = allInputs.displayName.value.trim();
@@ -538,7 +711,7 @@
                 if (!tokenResponse.ok) throw new Error('خطا در دریافت توکن احراز هویت.');
                 const { token } = await tokenResponse.json();
 
-                // Step 2: Check if username exists (The CORRECTED logic)
+                // Step 2: Check if username exists
                 const checkUserResponse = await fetch(`${PROXY_URL}?path=users/${username}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -547,11 +720,9 @@
                 });
                 if (!checkUserResponse.ok) throw new Error('خطا در بررسی نام کاربری.');
                 
-                // Handling potentially empty response body
                 const responseText = await checkUserResponse.text();
                 const existingUser = responseText ? JSON.parse(responseText) : null;
                 
-                // *** THE CRITICAL FIX IS HERE ***
                 if (existingUser && Object.keys(existingUser).length > 0 && existingUser.username) {
                     throw new Error('این نام کاربری قبلاً استفاده شده است. لطفاً نام دیگری انتخاب کنید.');
                 }
@@ -601,9 +772,13 @@
 
             } catch (error) {
                 setFormStatus(error.message, 'error');
-            } finally {
                 submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
+            } finally {
+                // Remove loading state only if there was an error, otherwise we are redirecting
+                if (!document.querySelector('.status-message.success')) {
+                    submitBtn.querySelector('.spinner').style.display = 'none';
+                    submitBtn.querySelector('span').style.display = 'block';
+                }
             }
         }
     </script>
