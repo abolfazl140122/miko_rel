@@ -2,315 +2,401 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ورود به حساب کاربری - همیار</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ورود به همیار</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap');
+
         :root {
-            --primary-color: #007BFF;
-            --primary-hover: #0056b3;
+            --background-color: #0D1117;
+            --secondary-color: #161B22;
+            --secondary-hover: #2C2F33;
+            --border-color: #30363d;
+            --text-primary: #E4E6EB;
+            --text-secondary: #8b949e;
+            --primary-color: #00A3FF;
+            --primary-glow: rgba(0, 163, 255, 0.4);
+            --error-color: #ff4d4d;
             --success-color: #28a745;
-            --error-color: #dc3545;
-            --background-color: #f0f2f5;
-            --form-bg-color: #ffffff;
-            --text-primary: #333;
-            --text-secondary: #6c757d;
-            --border-color: #ced4da;
-            --input-bg: #f8f9fa;
+            --input-bg: #0d1117;
         }
 
         *, *::before, *::after {
             box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: 'Vazirmatn', sans-serif;
-            margin: 0;
             background-color: var(--background-color);
+            background-image: radial-gradient(circle at top left, #1a202c 0%, var(--background-color) 70%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px 15px;
+            overflow: hidden;
         }
 
-        .form-container {
+        /* --- کانتینر اصلی --- */
+        .login-container {
             width: 100%;
-            max-width: 420px; /* کمی کوچکتر از ثبت‌نام چون فیلد کمتری دارد */
-            background-color: var(--form-bg-color);
-            padding: 35px;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e9ecef;
+            max-width: 400px;
+            padding: 20px;
+            margin: 0 15px;
+            perspective: 1000px;
         }
 
-        .form-header {
-            text-align: center;
-            margin-bottom: 30px;
+        .login-card {
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            animation: cardEntry 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .form-header h1 {
-            margin: 0 0 10px;
-            font-size: 2rem;
-            color: var(--text-primary);
+
+        @keyframes cardEntry {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .form-header p {
+
+        /* --- لوگو و هدر --- */
+        .brand-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), #0077c2);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px var(--primary-glow);
+            color: white;
+        }
+        .brand-logo svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        .header-text h1 {
             margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+        }
+        .header-text p {
+            margin: 8px 0 30px;
+            font-size: 0.95rem;
             color: var(--text-secondary);
-            font-size: 1.05rem;
+            text-align: center;
+        }
+
+        /* --- فرم --- */
+        .login-form {
+            width: 100%;
         }
 
         .input-group {
             margin-bottom: 20px;
+            position: relative;
         }
-        .input-group label {
+
+        .input-label {
             display: block;
             margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
             font-weight: 500;
-            color: #495057;
-            font-size: 0.95rem;
         }
+
         .input-wrapper {
             position: relative;
             display: flex;
             align-items: center;
         }
-        .input-wrapper .input-icon {
+
+        .input-field {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 2px solid var(--border-color);
+            padding: 14px 45px 14px 15px; /* فضای خالی برای آیکون راست */
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(0, 163, 255, 0.15);
+        }
+
+        .input-icon {
             position: absolute;
             right: 15px;
-            width: 20px;
-            height: 20px;
             color: var(--text-secondary);
             pointer-events: none;
+            transition: color 0.3s;
         }
-        
-        .input-group input {
-            width: 100%;
-            padding: 12px 45px 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: var(--input-bg);
-            transition: border-color 0.3s, box-shadow 0.3s;
+
+        .input-field:focus + .input-icon {
+            color: var(--primary-color);
         }
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
-        }
+
         .password-toggle {
             position: absolute;
-            top: 50%;
             left: 15px;
-            transform: translateY(-50%);
-            cursor: pointer;
             color: var(--text-secondary);
-        }
-        
-        .error-message {
-            color: var(--error-color);
-            font-size: 0.875em;
-            margin-top: 6px;
-            min-height: 1.2em;
-            display: none;
-            font-weight: 500;
-        }
-        
-        #submit-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--primary-color);
-            color: white;
-            font-size: 1.1em;
-            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.3s, opacity 0.3s, transform 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+        .password-toggle:hover {
+            color: var(--text-primary);
+        }
+
+        /* --- دکمه ورود --- */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Vazirmatn', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 163, 255, 0.3);
             margin-top: 10px;
+            position: relative;
+            overflow: hidden;
         }
-        #submit-btn:hover:not(:disabled) {
-            background-color: var(--primary-hover);
+
+        .submit-btn:hover:not(:disabled) {
+            background-color: #0091e6;
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 163, 255, 0.4);
         }
-        #submit-btn:disabled {
-            opacity: 0.6;
+
+        .submit-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background-color: var(--secondary-hover);
+            color: var(--text-secondary);
             cursor: not-allowed;
+            box-shadow: none;
         }
+
+        /* --- لودر دکمه --- */
         .spinner {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
+            border-top-color: #ffffff;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
             display: none;
+            margin: 0 auto;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        #form-status {
-            text-align: center;
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            display: none;
-            font-weight: 500;
+        .btn-text {
+            display: inline-block;
         }
-        #form-status.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        #form-status.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
+
+        /* --- فوتر فرم --- */
         .form-footer {
             margin-top: 25px;
             text-align: center;
-            font-size: 0.95em;
+            font-size: 0.9rem;
             color: var(--text-secondary);
-            border-top: 1px solid #eee;
-            padding-top: 20px;
         }
+
         .form-footer a {
             color: var(--primary-color);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 700;
+            transition: text-shadow 0.3s;
         }
+
         .form-footer a:hover {
-            text-decoration: underline;
+            text-shadow: 0 0 8px var(--primary-glow);
         }
+
+        /* --- پیام خطا --- */
+        .status-message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .status-message.error {
+            background-color: rgba(255, 77, 77, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(255, 77, 77, 0.3);
+        }
+        .status-message.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- ولیدیشن اینپوت --- */
+        .input-field.error {
+            border-color: var(--error-color);
+        }
+        .field-error-text {
+            color: var(--error-color);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="form-container">
-        <div class="form-header">
-            <h1>ورود به حساب</h1>
-            <p>خوشحالیم که دوباره شما را می‌بینیم!</p>
-        </div>
-
-        <form id="login-form" novalidate>
-            <div class="input-group">
-                <label for="identifier">نام کاربری یا موبایل</label>
-                <div class="input-wrapper">
-                    <input type="text" id="identifier" placeholder="نام کاربری یا موبایل خود را وارد کنید" required>
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    </span>
-                </div>
-                <div class="error-message" id="identifier-error"></div>
+    <div class="login-container">
+        <div class="login-card">
+            <!-- لوگو -->
+            <div class="brand-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h6v18h-6M10 17l5-5-5-5M13.8 12H3"/>
+                </svg>
             </div>
 
-            <div class="input-group">
-                <label for="password">رمز عبور</label>
-                <div class="input-wrapper">
-                    <input type="password" id="password" placeholder="رمز عبور خود را وارد کنید" required>
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    </span>
-                    <span class="password-toggle" id="password-toggle">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </span>
-                </div>
-                <div class="error-message" id="password-error"></div>
+            <!-- متن خوش‌آمدگویی -->
+            <div class="header-text">
+                <h1>ورود به حساب</h1>
+                <p>خوشحالیم که دوباره شما را می‌بینیم!</p>
             </div>
-            
-            <button type="submit" id="submit-btn">
-                <span id="btn-text">ورود</span>
-                <div class="spinner" id="btn-spinner"></div>
-            </button>
 
-            <div id="form-status"></div>
-        </form>
+            <!-- فرم -->
+            <form class="login-form" id="login-form" novalidate>
+                
+                <!-- نام کاربری / موبایل -->
+                <div class="input-group">
+                    <label class="input-label" for="identifier">نام کاربری یا موبایل</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="identifier" class="input-field" placeholder="example_user" autocomplete="username" required>
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <div class="field-error-text" id="identifier-error">این فیلد الزامی است</div>
+                </div>
 
-        <div class="form-footer">
-            حساب کاربری ندارید؟ <a href="register.html">ثبت‌نام کنید</a>
+                <!-- رمز عبور -->
+                <div class="input-group">
+                    <label class="input-label" for="password">رمز عبور</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" class="input-field" placeholder="••••••••" autocomplete="current-password" required>
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        
+                        <div class="password-toggle" id="password-toggle">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </div>
+                    </div>
+                    <div class="field-error-text" id="password-error">رمز عبور الزامی است</div>
+                </div>
+
+                <!-- دکمه ارسال -->
+                <button type="submit" id="submit-btn" class="submit-btn">
+                    <span class="btn-text">ورود</span>
+                    <div class="spinner"></div>
+                </button>
+
+                <!-- پیام وضعیت کلی -->
+                <div id="status-message" class="status-message"></div>
+
+            </form>
+
+            <!-- لینک ثبت نام -->
+            <div class="form-footer">
+                حساب کاربری ندارید؟ <a href="register.html">ثبت‌نام کنید</a>
+            </div>
         </div>
     </div>
 
     <script>
+        // --- تنظیمات ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
 
+        // --- المان‌ها ---
         const form = document.getElementById('login-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const btnText = document.getElementById('btn-text');
-        const btnSpinner = document.getElementById('btn-spinner');
-        const formStatus = document.getElementById('form-status');
         const identifierInput = document.getElementById('identifier');
         const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.querySelector('.btn-text');
+        const btnSpinner = document.querySelector('.spinner');
+        const statusMessage = document.getElementById('status-message');
         const passwordToggle = document.getElementById('password-toggle');
 
-        function showError(fieldId, message) {
-            const el = document.getElementById(`${fieldId}-error`);
-            el.textContent = message;
-            el.style.display = 'block';
-            document.getElementById(fieldId).style.borderColor = 'var(--error-color)';
-        }
-
-        function hideError(fieldId) {
-            document.getElementById(`${fieldId}-error`).style.display = 'none';
-            document.getElementById(fieldId).style.borderColor = 'var(--border-color)';
-        }
-
-        function validateForm() {
-            let isFormValid = true;
-            
-            hideError('identifier');
-            if (identifierInput.value.trim().length === 0) {
-                isFormValid = false;
-            }
-
-            hideError('password');
-            if (passwordInput.value.length === 0) {
-                isFormValid = false;
-            }
-
-            submitBtn.disabled = !isFormValid;
-        }
-
-        [identifierInput, passwordInput].forEach(input => input.addEventListener('input', validateForm));
-
+        // --- نمایش/مخفی کردن پسورد ---
         passwordToggle.addEventListener('click', () => {
             const isPassword = passwordInput.type === 'password';
             passwordInput.type = isPassword ? 'text' : 'password';
+            
+            // تغییر آیکون
             passwordToggle.innerHTML = isPassword 
-                ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
-                : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+                ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>` // Eye Off
+                : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`; // Eye
         });
 
+        // --- اعتبارسنجی فوری ---
+        function validateInput(input, errorId) {
+            const errorEl = document.getElementById(errorId);
+            if (input.value.trim() === '') {
+                input.classList.add('error');
+                errorEl.style.display = 'block';
+                return false;
+            } else {
+                input.classList.remove('error');
+                errorEl.style.display = 'none';
+                return true;
+            }
+        }
+
+        identifierInput.addEventListener('input', () => validateInput(identifierInput, 'identifier-error'));
+        passwordInput.addEventListener('input', () => validateInput(passwordInput, 'password-error'));
+
+        // --- مدیریت ارسال فرم ---
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            formStatus.style.display = 'none';
             
-            let isIdentifierValid = true;
-            if (identifierInput.value.trim().length === 0) {
-                showError('identifier', 'این فیلد الزامی است.');
-                isIdentifierValid = false;
-            }
+            // ریست کردن وضعیت
+            statusMessage.style.display = 'none';
+            statusMessage.className = 'status-message';
 
-            let isPasswordValid = true;
-            if (passwordInput.value.length === 0) {
-                showError('password', 'این فیلد الزامی است.');
-                isPasswordValid = false;
-            }
+            const isIdValid = validateInput(identifierInput, 'identifier-error');
+            const isPassValid = validateInput(passwordInput, 'password-error');
 
-            if (isIdentifierValid && isPasswordValid) {
-                await submitLogin();
-            }
+            if (!isIdValid || !isPassValid) return;
+
+            await performLogin();
         });
 
-        async function submitLogin() {
+        async function performLogin() {
+            // حالت لودینگ
             submitBtn.disabled = true;
             btnText.style.display = 'none';
             btnSpinner.style.display = 'block';
@@ -319,7 +405,11 @@
             const password = passwordInput.value;
 
             try {
-                const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
+                // 1. دریافت توکن امنیتی کلاینت
+                const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, { 
+                    headers: { 'X-Proxy-Secret': SHARED_SECRET } 
+                });
+                
                 if (!tokenResponse.ok) throw new Error('خطا در ارتباط با سرور.');
                 const tokenData = await tokenResponse.json();
                 const clientToken = tokenData.token;
@@ -330,54 +420,56 @@
                 };
 
                 let userData = null;
+                // تشخیص شماره موبایل یا نام کاربری
                 const isMobile = /^09\d{9}$/.test(identifier);
 
                 if (isMobile) {
+                    // جستجو با موبایل
                     const queryParams = new URLSearchParams({ orderBy: '"mobile"', equalTo: `"${identifier}"` });
-                    const queryUrl = `${PROXY_URL}?path=users&${queryParams.toString()}`;
-                    const response = await fetch(queryUrl, { headers });
+                    const response = await fetch(`${PROXY_URL}?path=users&${queryParams.toString()}`, { headers });
                     if (!response.ok) throw new Error('خطا در جستجوی کاربر.');
                     const result = await response.json();
                     if (result && Object.keys(result).length > 0) {
                         userData = Object.values(result)[0];
                     }
                 } else {
+                    // جستجو با نام کاربری
                     const response = await fetch(`${PROXY_URL}?path=users/${identifier}`, { headers });
-                    if (response.status === 404) {
-                       userData = null;
-                    } else if (!response.ok) {
-                        throw new Error('خطا در واکشی اطلاعات کاربر.');
-                    } else {
+                    if (response.status === 200) {
                        userData = await response.json();
+                    } else if (response.status !== 404) {
+                        throw new Error('خطا در دریافت اطلاعات کاربر.');
                     }
                 }
 
-                if (userData === null || userData.password !== password) {
+                // بررسی رمز عبور
+                if (!userData || userData.password !== password) {
                     throw new Error('نام کاربری یا رمز عبور اشتباه است.');
                 }
 
+                // ذخیره اطلاعات و انتقال
                 localStorage.setItem('currentUser', JSON.stringify(userData));
 
-                formStatus.textContent = `خوش آمدید، ${userData.displayName}! در حال انتقال...`;
-                formStatus.className = 'success';
-                formStatus.style.display = 'block';
+                showStatus(`خوش آمدید، ${userData.displayName}!`, 'success');
 
                 setTimeout(() => {
                     window.location.href = 'safe_asli.html';
                 }, 1500);
 
             } catch (error) {
-                formStatus.textContent = error.message;
-                formStatus.className = 'error';
-                formStatus.style.display = 'block';
-            } finally {
+                showStatus(error.message, 'error');
                 submitBtn.disabled = false;
-                btnText.style.display = 'inline';
+                btnText.style.display = 'inline-block';
                 btnSpinner.style.display = 'none';
             }
         }
-        
-        validateForm();
+
+        function showStatus(msg, type) {
+            statusMessage.textContent = msg;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.style.display = 'block';
+        }
+
     </script>
 </body>
 </html>
