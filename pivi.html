@@ -771,6 +771,11 @@
             <ul class="profile-info-list">
                 <li>وضعیت: <strong id="profile-card-status">...</strong></li>
                 <li>شناسه کاربری: <strong id="profile-card-uid">...</strong></li>
+                <!-- START: Task 1 HTML Modification -->
+                <li id="p-beliefs" style="display: none;">عقاید: <strong id="p-beliefs-value"></strong></li>
+                <li id="p-education" style="display: none;">تحصیلات: <strong id="p-education-value"></strong></li>
+                <li id="p-location" style="display: none;">منطقه زندگی: <strong id="p-location-value"></strong></li>
+                <!-- END: Task 1 HTML Modification -->
             </ul>
             <button id="profile-follow-btn">دنبال کردن</button>
             <button id="block-user-btn">مسدود کردن کاربر</button>
@@ -1231,13 +1236,12 @@
             try {
                 const partnerData = await apiRequest(`users/${chatPartner.username}`, 'GET');
                 if (partnerData) {
-                    chatPartner.isOnline = partnerData.isOnline;
-                    chatPartner.lastSeen = partnerData.lastSeen;
-                    chatPartner.verified = partnerData.verified;
-                    chatPartner.profilePicUrl = partnerData.profilePicUrl; 
-                    updateStatusUI(partnerData.isOnline, partnerData.lastSeen);
+                    // Merge new data into our existing partner object
+                    Object.assign(chatPartner, partnerData);
+
+                    updateStatusUI(chatPartner.isOnline, chatPartner.lastSeen);
                     partnerNameEl.innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
-                    const newAvatarUrl = partnerData.profilePicUrl ? partnerData.profilePicUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(partnerData.displayName || partnerData.username)}&background=0095FF&color=fff&size=80`;
+                    const newAvatarUrl = chatPartner.profilePicUrl ? chatPartner.profilePicUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=0095FF&color=fff&size=80`;
                     if (partnerAvatarEl.src !== newAvatarUrl) {
                         partnerAvatarEl.src = newAvatarUrl;
                     }
@@ -1748,6 +1752,12 @@
 
         async function showModal(overlayElement) {
             if(overlayElement.id === 'profile-overlay' && chatPartner){
+                // --- [START] New Logic for Task 2 ---
+                const viewLogPath = `profileViews/${chatPartner.username}/${currentUser.username}`;
+                apiRequest(viewLogPath, 'PUT', { viewedAt: new Date().toISOString() })
+                    .catch(err => console.warn("Could not log profile view:", err));
+                // --- [END] New Logic for Task 2 ---
+
                 const profileCardAvatarUrl = chatPartner.profilePicUrl ? chatPartner.profilePicUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(chatPartner.displayName || chatPartner.username)}&background=2C2C2E&color=fff&size=120`;
                 document.getElementById('profile-card-avatar').src = profileCardAvatarUrl;
                 document.getElementById('profile-card-name').innerHTML = createVerifiedNameHTML(chatPartner.displayName, chatPartner.verified);
@@ -1759,6 +1769,41 @@
                 } else {
                     statusEl.textContent = 'آفلاین'; statusEl.style.color = 'var(--text-secondary)';
                 }
+                
+                // --- [START] New Logic for Task 1 ---
+                const pBeliefs = document.getElementById('p-beliefs');
+                const pEducation = document.getElementById('p-education');
+                const pLocation = document.getElementById('p-location');
+                const pBeliefsValue = document.getElementById('p-beliefs-value');
+                const pEducationValue = document.getElementById('p-education-value');
+                const pLocationValue = document.getElementById('p-location-value');
+
+                if (chatPartner.accountType === 'premium') {
+                    if (chatPartner.beliefs) {
+                        pBeliefsValue.textContent = chatPartner.beliefs;
+                        pBeliefs.style.display = 'list-item';
+                    } else {
+                        pBeliefs.style.display = 'none';
+                    }
+                    if (chatPartner.education) {
+                        pEducationValue.textContent = chatPartner.education;
+                        pEducation.style.display = 'list-item';
+                    } else {
+                        pEducation.style.display = 'none';
+                    }
+                    if (chatPartner.location) {
+                        pLocationValue.textContent = chatPartner.location;
+                        pLocation.style.display = 'list-item';
+                    } else {
+                        pLocation.style.display = 'none';
+                    }
+                } else {
+                    pBeliefs.style.display = 'none';
+                    pEducation.style.display = 'none';
+                    pLocation.style.display = 'none';
+                }
+                // --- [END] New Logic for Task 1 ---
+
                 updateBlockUI();
                 await checkFollowStatus(chatPartner.username);
             }
