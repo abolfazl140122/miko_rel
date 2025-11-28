@@ -11,18 +11,20 @@
         :root {
             --background-color: #0D1117;
             --primary-color: #00A3FF;
+            --primary-hover: #008bd9;
             --secondary-color: #161B22;
             --secondary-hover: #2C2F33;
             --border-color: #30363d;
             --text-primary: #E4E6EB;
             --text-secondary: #8b949e;
-            --success-color: #28a745;
-            --error-color: #dc3545;
+            --success-color: #238636;
+            --error-color: #da3633;
             --gold-color: #FFD700;
             --gold-gradient: linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #9E7D08 100%);
             --premium-shadow: rgba(255, 215, 0, 0.3);
             --shadow-dark: rgba(0, 0, 0, 0.6);
             --card-bg: #1B212A;
+            --modal-bg: rgba(22, 27, 34, 0.85); /* Glassmorphism bg */
         }
 
         *, *::before, *::after {
@@ -125,10 +127,10 @@
             padding-bottom: 40px;
         }
 
+        /* Custom Scrollbar */
         main::-webkit-scrollbar { width: 8px; }
         main::-webkit-scrollbar-track { background: var(--background-color); }
         main::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 10px; border: 2px solid var(--background-color); }
-        main::-webkit-scrollbar-thumb:hover { background-color: var(--text-secondary); }
 
         .section-title {
             font-size: 1.2em;
@@ -141,6 +143,7 @@
         }
         .section-title:first-child { margin-top: 0; }
 
+        /* --- Grid Layout --- */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -154,6 +157,7 @@
             }
         }
 
+        /* --- Card Styles --- */
         .store-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -166,7 +170,6 @@
             position: relative;
             overflow: hidden;
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-            cursor: default;
         }
 
         .store-card:hover {
@@ -217,12 +220,11 @@
             margin-top: auto;
         }
 
-        /* --- Coin Cards --- */
+        /* Coin Cards */
         .coin-card .card-icon-container svg {
             color: var(--gold-color);
             filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4));
         }
-        
         .btn-buy-coin {
             background-color: var(--secondary-hover);
             color: var(--primary-color);
@@ -232,15 +234,9 @@
             background-color: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
-            box-shadow: 0 4px 10px rgba(0, 163, 255, 0.3);
-        }
-        .btn-buy-coin:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            filter: grayscale(100%);
         }
 
-        /* --- Subscription Cards --- */
+        /* Subscription Cards */
         .sub-grid {
             grid-template-columns: 1fr;
         }
@@ -248,24 +244,16 @@
             .sub-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
-        /* Special Plan */
         .card-special {
             border: 1px solid var(--primary-color);
             box-shadow: 0 0 15px rgba(0, 163, 255, 0.1);
         }
-        .card-special .card-icon-container svg {
-            color: var(--primary-color);
-        }
+        .card-special .card-icon-container svg { color: var(--primary-color); }
         .btn-sub-special {
             background-color: var(--primary-color);
             color: white;
         }
-        .btn-sub-special:hover {
-            background-color: #00baff;
-            box-shadow: 0 0 15px rgba(0, 163, 255, 0.4);
-        }
 
-        /* Premium Plan */
         .card-premium {
             background: linear-gradient(160deg, #1B212A 60%, #2a2105 100%);
             border: 1px solid #9E7D08;
@@ -275,14 +263,8 @@
             background: var(--gold-gradient);
             box-shadow: 0 0 15px var(--premium-shadow);
         }
-        .card-premium .card-icon-container svg {
-            color: #1a202c;
-            filter: none;
-        }
-        .card-premium .card-title {
-            color: var(--gold-color);
-            text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
-        }
+        .card-premium .card-icon-container svg { color: #1a202c; filter: none; }
+        .card-premium .card-title { color: var(--gold-color); text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
         .premium-badge {
             position: absolute;
             top: 10px;
@@ -293,19 +275,138 @@
             font-weight: 800;
             padding: 3px 8px;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
         .btn-sub-premium {
             background: var(--gold-gradient);
             color: #0D1117;
-            text-shadow: 0 1px 0 rgba(255,255,255,0.2);
-        }
-        .btn-sub-premium:hover {
-            transform: scale(1.02);
-            box-shadow: 0 5px 20px var(--premium-shadow);
         }
 
-        /* --- Toast Notification --- */
+        /* --- New Modern Modal (Dark Mode + Backdrop Blur) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: var(--modal-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 360px;
+            padding: 24px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            margin: 0 auto 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+
+        .modal-title {
+            font-size: 1.3em;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            color: var(--text-primary);
+        }
+
+        .modal-desc {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            margin: 0 0 25px 0;
+            line-height: 1.6;
+        }
+
+        .modal-price-tag {
+            background: rgba(0, 163, 255, 0.1);
+            color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-btn:active { transform: scale(0.95); }
+
+        .btn-cancel {
+            background: var(--secondary-hover);
+            color: var(--text-secondary);
+        }
+        .btn-cancel:hover { background: #3c4046; color: var(--text-primary); }
+
+        .btn-confirm {
+            background: var(--success-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-confirm:hover { background: #2ea043; }
+
+        /* Loading Spinner inside Button */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .btn-confirm.loading .btn-text { display: none; }
+        .btn-confirm.loading .spinner { display: block; }
+        .btn-confirm.loading { pointer-events: none; opacity: 0.8; }
+
+        /* Toast */
         #toast-container {
             position: fixed;
             bottom: 30px;
@@ -331,29 +432,6 @@
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.success { border-color: var(--success-color); color: var(--success-color); }
         .toast.error { border-color: var(--error-color); color: var(--error-color); }
-
-        /* --- Confirmation Modal --- */
-        .confirm-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 100;
-            display: flex; justify-content: center; align-items: center;
-            opacity: 0; visibility: hidden; transition: 0.3s;
-        }
-        .confirm-overlay.active { opacity: 1; visibility: visible; }
-        .confirm-box {
-            background: var(--card-bg); width: 85%; max-width: 320px;
-            padding: 25px; border-radius: 20px; text-align: center;
-            border: 1px solid var(--border-color);
-            transform: scale(0.9); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .confirm-overlay.active .confirm-box { transform: scale(1); }
-        .confirm-box h3 { margin-top: 0; color: var(--primary-color); }
-        .confirm-box p { color: var(--text-secondary); margin-bottom: 25px; line-height: 1.6; }
-        .confirm-actions { display: flex; gap: 10px; }
-        .confirm-actions button { flex: 1; padding: 10px; border-radius: 10px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; }
-        .btn-confirm-yes { background: var(--primary-color); color: white; transition: 0.2s;}
-        .btn-confirm-yes:disabled { background: var(--text-secondary); cursor: wait; }
-        .btn-confirm-no { background: var(--secondary-hover); color: var(--text-primary); }
 
     </style>
 </head>
@@ -383,7 +461,6 @@
         </div>
         
         <div class="cards-grid">
-            <!-- Pack 1 -->
             <div class="store-card coin-card">
                 <div class="card-icon-container">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/><text x="12" y="16" font-size="10" text-anchor="middle" fill="currentColor" font-weight="bold">$</text></svg>
@@ -393,7 +470,6 @@
                 <button class="store-btn btn-buy-coin" onclick="buyCoins(5000, 50000)">خرید</button>
             </div>
 
-            <!-- Pack 2 -->
             <div class="store-card coin-card">
                 <div class="card-icon-container">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 4H3a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-1 14H4V6h16v12z"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
@@ -403,7 +479,6 @@
                 <button class="store-btn btn-buy-coin" onclick="buyCoins(10000, 90000)">خرید</button>
             </div>
 
-            <!-- Pack 3 -->
             <div class="store-card coin-card">
                 <div class="card-icon-container">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2 9h19a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V9zm1-6h15v4H3V3z"/><path d="M12 17a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
@@ -456,14 +531,20 @@
 
     </main>
 
-    <!-- Confirmation Modal -->
-    <div class="confirm-overlay" id="confirm-overlay">
-        <div class="confirm-box">
-            <h3 id="confirm-title">تایید خرید</h3>
-            <p id="confirm-text">آیا مطمئن هستید؟</p>
-            <div class="confirm-actions">
-                <button class="btn-confirm-no" id="btn-cancel">خیر</button>
-                <button class="btn-confirm-yes" id="btn-confirm">بله، خرید</button>
+    <!-- Custom Modal Structure -->
+    <div class="modal-overlay" id="custom-modal">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            </div>
+            <h3 class="modal-title" id="modal-title">تایید خرید</h3>
+            <p class="modal-desc" id="modal-desc">توضیحات خرید</p>
+            <div class="modal-actions">
+                <button class="modal-btn btn-cancel" id="modal-cancel">انصراف</button>
+                <button class="modal-btn btn-confirm" id="modal-confirm">
+                    <span class="btn-text">تایید و پرداخت</span>
+                    <div class="spinner"></div>
+                </button>
             </div>
         </div>
     </div>
@@ -472,7 +553,7 @@
     <div id="toast-container"></div>
 
     <script>
-        // --- Constants & Connection Config ---
+        // --- Constants ---
         const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
         const SHARED_SECRET = 'miko1234';
 
@@ -496,188 +577,188 @@
                 return;
             }
             currentUser = JSON.parse(storedUser);
-            
-            // Defaults
             if (typeof currentUser.coins !== 'number') currentUser.coins = 0;
             if (!currentUser.accountType) currentUser.accountType = 'regular';
-            
             updateUI();
         }
 
         function updateUI() {
-            if (headerCoinDisplay && currentUser) {
-                // Animate number change
-                animateValue(headerCoinDisplay, parseInt(headerCoinDisplay.innerText) || 0, currentUser.coins, 1000);
-            }
+            animateValue(headerCoinDisplay, parseInt(headerCoinDisplay.innerText), currentUser.coins, 1000);
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
 
-        // --- Server Communication Function ---
+        // --- Server Communication (Secure 2-Step) ---
         async function updateUserOnServer(data) {
-            try {
-                // 1. Get Token
-                const tokenData = new FormData();
-                tokenData.append('action', 'get_token');
-                tokenData.append('shared_secret', SHARED_SECRET);
+            const username = currentUser.username;
+            if (!username) throw new Error("نام کاربری یافت نشد");
 
-                const tokenRes = await fetch(PROXY_URL, { method: 'POST', body: tokenData });
-                const tokenJson = await tokenRes.json();
-                
-                if (!tokenJson.success) throw new Error("Server Handshake Failed");
-                const serverToken = tokenJson.token;
+            // Step 1: Get Token
+            const tokenResponse = await fetch(`${PROXY_URL}?auth=token`, {
+                headers: { 'X-Proxy-Secret': SHARED_SECRET }
+            });
+            
+            if (!tokenResponse.ok) throw new Error('خطا در دریافت توکن امنیتی');
+            const { token } = await tokenResponse.json();
 
-                // 2. Write Data (PATCH)
-                const path = `users/${currentUser.username}`;
-                const writeData = new FormData();
-                writeData.append('action', 'write');
-                writeData.append('method', 'PATCH');
-                writeData.append('path', path);
-                writeData.append('data', JSON.stringify(data));
-                writeData.append('auth_token', serverToken);
-                writeData.append('username', currentUser.username);
+            // Step 2: Patch Data
+            const updateUrl = `${PROXY_URL}?path=users/${username}`;
+            const updateResponse = await fetch(updateUrl, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-User-Username': username,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
 
-                const writeRes = await fetch(PROXY_URL, { method: 'POST', body: writeData });
-                const writeJson = await writeRes.json();
-
-                if (!writeJson.success) {
-                    throw new Error(writeJson.error || "Update Failed");
-                }
-                return true;
-
-            } catch (error) {
-                console.error("Server Error:", error);
-                throw error;
+            if (!updateResponse.ok) {
+                const errText = await updateResponse.text();
+                throw new Error(`خطای سرور: ${errText}`);
             }
+            
+            return true; // Success
         }
 
-        // --- Logic: Buy Coins (Simulated Payment -> Server Update) ---
-        async function buyCoins(amount, price) {
-            // 1. Simulate Payment Gateway Connection
-            showToast('در حال اتصال به درگاه پرداخت...', 'normal');
-            
-            // Artificial delay for realism
-            await new Promise(r => setTimeout(r, 1500));
+        // --- Modal Logic ---
+        const modal = {
+            el: document.getElementById('custom-modal'),
+            title: document.getElementById('modal-title'),
+            desc: document.getElementById('modal-desc'),
+            btnConfirm: document.getElementById('modal-confirm'),
+            btnCancel: document.getElementById('modal-cancel'),
+            resolve: null,
 
-            // 2. User confirms payment (Simulation)
-            const confirmed = window.confirm(`شبیه‌سازی پرداخت بانکی:\n\nمبلغ: ${price.toLocaleString()} تومان\nتعداد سکه: ${amount.toLocaleString()}\n\nآیا پرداخت موفق باشد؟`);
-            
-            if (!confirmed) {
-                showToast('پرداخت لغو شد.', 'error');
-                return;
+            open(title, text, confirmText = 'تایید و پرداخت') {
+                this.title.textContent = title;
+                this.desc.innerHTML = text; // Allow HTML for bold text
+                this.btnConfirm.querySelector('.btn-text').textContent = confirmText;
+                this.el.classList.add('active');
+                this.resetLoading();
+
+                return new Promise((resolve) => {
+                    this.resolve = resolve;
+                    
+                    this.btnCancel.onclick = () => {
+                        this.close();
+                        resolve(false);
+                    };
+
+                    this.btnConfirm.onclick = () => {
+                        // Don't close immediately, wait for processing
+                        resolve(true); 
+                    };
+                });
+            },
+
+            close() {
+                this.el.classList.remove('active');
+            },
+
+            setLoading(isLoading) {
+                if (isLoading) {
+                    this.btnConfirm.classList.add('loading');
+                } else {
+                    this.btnConfirm.classList.remove('loading');
+                }
+            },
+
+            resetLoading() {
+                this.btnConfirm.classList.remove('loading');
             }
+        };
 
-            // 3. Update Server
-            showToast('در حال ثبت تراکنش در سرور...', 'normal');
-            
+        // --- Purchase Logic: Coins ---
+        async function buyCoins(amount, price) {
+            const formattedPrice = price.toLocaleString('fa-IR');
+            const formattedAmount = amount.toLocaleString('fa-IR');
+
+            const confirmed = await modal.open(
+                'خرید بسته سکه',
+                `آیا مایلید <b>${formattedAmount} سکه</b> به مبلغ <b style="color:var(--primary-color)">${formattedPrice} تومان</b> خریداری کنید؟`,
+                'پرداخت و شارژ حساب'
+            );
+
+            if (!confirmed) return;
+
+            // Start Loading
+            modal.setLoading(true);
+
             try {
+                // 1. Calculate new coins
                 const newTotal = currentUser.coins + amount;
-                
-                // Send request to server
+
+                // 2. Update Server
                 await updateUserOnServer({ coins: newTotal });
 
-                // 4. On Success: Update Local & UI
+                // 3. On Success: Update Local & UI
                 currentUser.coins = newTotal;
                 updateUI();
-                showToast(`تراکنش موفق! ${amount.toLocaleString()} سکه اضافه شد.`, 'success');
+                
+                modal.close();
+                showToast(`پرداخت موفق! ${formattedAmount} سکه به حساب شما افزوده شد.`, 'success');
 
             } catch (error) {
-                showToast('خطا در ارتباط با سرور. سکه‌ها اضافه نشد.', 'error');
+                console.error(error);
+                modal.close();
+                showToast('خطا در برقراری ارتباط با سرور. لطفا مجدد تلاش کنید.', 'error');
+            } finally {
+                modal.setLoading(false);
             }
         }
 
-        // --- Logic: Buy Subscription ---
-        let pendingPurchase = null;
-
-        function buySubscription(type, cost, durationText) {
+        // --- Purchase Logic: Subscription ---
+        async function buySubscription(type, cost, durationText) {
             const typeName = type === 'premium' ? 'پریمیوم' : 'ویژه';
-            
-            // Check Current Subscription
+            const formattedCost = cost.toLocaleString('fa-IR');
+
             if (currentUser.accountType === type) {
-                showToast(`شما در حال حاضر اشتراک ${typeName} را دارید.`, 'error');
+                showToast(`شما هم‌اکنون اشتراک ${typeName} را دارید.`, 'error');
                 return;
             }
 
-            // Check Balance (Pre-check)
             if (currentUser.coins < cost) {
-                showToast('موجودی سکه کافی نیست. لطفاً ابتدا سکه بخرید.', 'error');
+                showToast('موجودی سکه کافی نیست. لطفا ابتدا سکه خریداری کنید.', 'error');
                 return;
             }
 
-            // Show Confirmation Modal
-            pendingPurchase = { type, cost, typeName, durationText };
-            showConfirm(
+            const confirmed = await modal.open(
                 `خرید اشتراک ${typeName}`,
-                `آیا مایلید اشتراک ${typeName} (${durationText}) را به قیمت ${cost.toLocaleString()} سکه خریداری کنید؟`
+                `آیا مایلید اشتراک ${typeName} (${durationText}) را با پرداخت <b>${formattedCost} سکه</b> فعال کنید؟`,
+                'تایید و فعال‌سازی'
             );
-        }
 
-        // --- Confirmation Modal Logic & Server Sync ---
-        const confirmOverlay = document.getElementById('confirm-overlay');
-        const confirmTitle = document.getElementById('confirm-title');
-        const confirmText = document.getElementById('confirm-text');
-        const btnConfirm = document.getElementById('btn-confirm');
-        const btnCancel = document.getElementById('btn-cancel');
+            if (!confirmed) return;
 
-        function showConfirm(title, text) {
-            confirmTitle.textContent = title;
-            confirmText.textContent = text;
-            confirmOverlay.classList.add('active');
-            btnConfirm.disabled = false;
-        }
-
-        function hideConfirm() {
-            confirmOverlay.classList.remove('active');
-            pendingPurchase = null;
-        }
-
-        btnCancel.addEventListener('click', hideConfirm);
-        
-        btnConfirm.addEventListener('click', async () => {
-            if (!pendingPurchase) return;
-
-            const { type, cost, typeName } = pendingPurchase;
-            
-            // 1. UI Loading State
-            btnConfirm.disabled = true;
-            btnConfirm.textContent = '...';
-            showToast('در حال فعال‌سازی اشتراک...', 'normal');
+            // Start Loading
+            modal.setLoading(true);
 
             try {
-                // 2. Prepare Data
+                // 1. Calculate new state
                 const newCoins = currentUser.coins - cost;
                 
-                // Double check locally just in case
-                if (newCoins < 0) throw new Error("موجودی ناکافی");
-
-                const updateData = {
+                // 2. Update Server (Atomic update preferred, but simple merge works here)
+                await updateUserOnServer({ 
                     coins: newCoins,
                     accountType: type
-                };
+                });
 
-                // 3. Send to Server
-                await updateUserOnServer(updateData);
-
-                // 4. Success: Update Local & UI
+                // 3. On Success: Update Local & UI
                 currentUser.coins = newCoins;
                 currentUser.accountType = type;
                 updateUI();
-                
-                hideConfirm();
+
+                modal.close();
                 showToast(`تبریک! حساب شما به ${typeName} ارتقا یافت.`, 'success');
 
             } catch (error) {
-                hideConfirm();
-                if (error.message === "موجودی ناکافی") {
-                    showToast('خطا: موجودی کافی نیست.', 'error');
-                } else {
-                    showToast('خطا در ارتباط با سرور. عملیات انجام نشد.', 'error');
-                }
+                console.error(error);
+                modal.close();
+                showToast('خطا در فعال‌سازی اشتراک. لطفا مجدد تلاش کنید.', 'error');
             } finally {
-                // Reset Button State
-                btnConfirm.textContent = 'بله، خرید';
-                btnConfirm.disabled = false;
+                modal.setLoading(false);
             }
-        });
+        }
 
         // --- Utilities ---
         function showToast(message, type = 'normal') {
@@ -687,8 +768,6 @@
             toast.textContent = message;
             
             container.appendChild(toast);
-            
-            // Trigger reflow
             void toast.offsetWidth; 
             toast.classList.add('show');
 
