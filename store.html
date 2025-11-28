@@ -207,6 +207,13 @@
             color: var(--text-secondary);
             margin-bottom: 15px;
         }
+        
+        .dynamic-price {
+            color: #ddd !important;
+            font-weight: 500;
+            font-size: 1em;
+            min-height: 20px; /* Prevent layout shift */
+        }
 
         .store-btn {
             width: 100%;
@@ -218,6 +225,32 @@
             cursor: pointer;
             transition: all 0.2s;
             margin-top: auto;
+        }
+        
+        /* NEW: Styles for the duration dropdown */
+        .duration-select {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background-color: var(--secondary-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            font-family: inherit;
+            font-size: 0.95em;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%238b949e' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: left 0.5rem center;
+            background-size: 1.2em;
+            padding-left: 2.5rem; /* Space for the icon */
+        }
+        .duration-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.2);
         }
 
         /* Coin Cards */
@@ -506,26 +539,24 @@
                 <button class="store-btn btn-sub-special" onclick="buySubscription('special', 5000, 'یک ماهه')">فعال‌سازی</button>
             </div>
 
-            <!-- Premium Plan 3 Months -->
+            <!-- NEW: Dynamic Premium Plan -->
             <div class="store-card card-premium">
                 <div class="premium-badge">PREMIUM</div>
                 <div class="card-icon-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-                </div>
-                <h3 class="card-title">پریمیوم (۳ ماهه)</h3>
-                <p class="card-price" style="color:#ddd;">۳۰,۰۰۰ سکه</p>
-                <button class="store-btn btn-sub-premium" onclick="buySubscription('premium', 30000, '۳ ماهه')">خرید طلایی</button>
-            </div>
-            
-             <!-- Premium Plan 6 Months -->
-             <div class="store-card card-premium">
-                <div class="premium-badge">GOLD</div>
-                <div class="card-icon-container">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
                 </div>
-                <h3 class="card-title">پریمیوم (۶ ماهه)</h3>
-                <p class="card-price" style="color:#ddd;">۶۰,۰۰۰ سکه</p>
-                <button class="store-btn btn-sub-premium" onclick="buySubscription('premium', 60000, '۶ ماهه')">خرید طلایی</button>
+                <h3 class="card-title">حساب پریمیوم</h3>
+
+                <select id="premium-duration-select" class="duration-select">
+                    <option value="30000" data-duration-text="۳ ماهه">۳ ماهه</option>
+                    <option value="60000" data-duration-text="۶ ماهه">۶ ماهه</option>
+                    <option value="90000" data-duration-text="۹ ماهه">۹ ماهه</option>
+                    <option value="110000" data-duration-text="۱۲ ماهه">۱۲ ماهه</option>
+                </select>
+                
+                <p class="card-price dynamic-price" id="premium-price-display">۳۰,۰۰۰ سکه</p>
+                
+                <button class="store-btn btn-sub-premium" id="buy-premium-btn">خرید طلایی</button>
             </div>
         </div>
 
@@ -561,6 +592,11 @@
         let currentUser = null;
         const headerCoinDisplay = document.getElementById('header-coin-display');
         
+        // NEW: Element references for the dynamic premium card
+        const premiumSelect = document.getElementById('premium-duration-select');
+        const premiumPriceDisplay = document.getElementById('premium-price-display');
+        const buyPremiumBtn = document.getElementById('buy-premium-btn');
+        
         document.addEventListener('DOMContentLoaded', () => {
             loadUser();
             
@@ -568,6 +604,13 @@
             document.getElementById('back-btn').addEventListener('click', () => {
                 window.location.href = 'safe_asli.html';
             });
+            
+            // NEW: Setup listeners for the dynamic premium card
+            premiumSelect.addEventListener('change', updatePremiumPrice);
+            buyPremiumBtn.addEventListener('click', handlePremiumPurchase);
+            
+            // NEW: Initialize the price display on page load
+            updatePremiumPrice();
         });
 
         function loadUser() {
@@ -583,7 +626,7 @@
         }
 
         function updateUI() {
-            animateValue(headerCoinDisplay, parseInt(headerCoinDisplay.innerText), currentUser.coins, 1000);
+            animateValue(headerCoinDisplay, parseInt(headerCoinDisplay.innerText.replace(/,/g, '')) || 0, currentUser.coins, 1000);
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
 
@@ -645,7 +688,6 @@
                     };
 
                     this.btnConfirm.onclick = () => {
-                        // Don't close immediately, wait for processing
                         resolve(true); 
                     };
                 });
@@ -681,17 +723,11 @@
 
             if (!confirmed) return;
 
-            // Start Loading
             modal.setLoading(true);
 
             try {
-                // 1. Calculate new coins
                 const newTotal = currentUser.coins + amount;
-
-                // 2. Update Server
                 await updateUserOnServer({ coins: newTotal });
-
-                // 3. On Success: Update Local & UI
                 currentUser.coins = newTotal;
                 updateUI();
                 
@@ -730,20 +766,16 @@
 
             if (!confirmed) return;
 
-            // Start Loading
             modal.setLoading(true);
 
             try {
-                // 1. Calculate new state
                 const newCoins = currentUser.coins - cost;
                 
-                // 2. Update Server (Atomic update preferred, but simple merge works here)
                 await updateUserOnServer({ 
                     coins: newCoins,
                     accountType: type
                 });
 
-                // 3. On Success: Update Local & UI
                 currentUser.coins = newCoins;
                 currentUser.accountType = type;
                 updateUI();
@@ -758,6 +790,30 @@
             } finally {
                 modal.setLoading(false);
             }
+        }
+        
+        // --- NEW: Dynamic Premium Card Functions ---
+
+        /**
+         * Updates the price display on the premium card based on the selected duration.
+         */
+        function updatePremiumPrice() {
+            const selectedOption = premiumSelect.options[premiumSelect.selectedIndex];
+            const cost = parseInt(selectedOption.value, 10);
+            premiumPriceDisplay.textContent = `${cost.toLocaleString('fa-IR')} سکه`;
+        }
+        
+        /**
+         * Handles the purchase logic for the dynamic premium card.
+         * It reads the values from the dropdown and calls the main buySubscription function.
+         */
+        function handlePremiumPurchase() {
+            const selectedOption = premiumSelect.options[premiumSelect.selectedIndex];
+            const cost = parseInt(selectedOption.value, 10);
+            const durationText = selectedOption.getAttribute('data-duration-text');
+            
+            // Call the existing generic function with the dynamic values
+            buySubscription('premium', cost, durationText);
         }
 
         // --- Utilities ---
@@ -782,7 +838,7 @@
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+                obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString('fa-IR');
                 if (progress < 1) {
                     window.requestAnimationFrame(step);
                 }
