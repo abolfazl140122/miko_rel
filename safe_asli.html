@@ -23,6 +23,7 @@
             --shadow-light: rgba(45, 50, 56, 0.1);
             --shadow-dark: rgba(0, 0, 0, 0.6);
             --profile-card-bg: #1B212A;
+            --gold-color: #FFD700; /* Added for premium users */
             
             /* Skeleton Variables */
             --skeleton-base: #161B22;
@@ -180,6 +181,17 @@
             margin-right: 5px;
         }
         
+        /* --- [NEW] Reward Banner --- */
+        #reward-banner {
+            background: linear-gradient(90deg, #1E90FF, #00A3FF);
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            font-size: 0.9em;
+            display: none; /* Hidden by default */
+            border-bottom: 1px solid var(--border-color);
+        }
+
         /* --- Search Tabs --- */
         .search-tabs {
             display: none;
@@ -237,6 +249,13 @@
             opacity: 0;
             animation: fadeInRight 0.5s forwards;
         }
+
+        /* --- [NEW] Premium User Highlight Style --- */
+        .premium-user-highlight {
+            border-right: 4px solid var(--gold-color);
+            box-shadow: -5px 0 15px -5px rgba(255, 215, 0, 0.2);
+        }
+
         @keyframes fadeInRight {
             from { opacity: 0; transform: translateX(20px); }
             to { opacity: 1; transform: translateX(0); }
@@ -427,20 +446,6 @@
         .nav-btn.active:hover {
             transform: none;
         }
-
-        /* --- Store Button Special Style (NEW) --- */
-        #nav-store-btn svg {
-            color: #FFD700; /* Gold Color */
-            filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
-            transition: transform 0.3s ease, filter 0.3s ease;
-        }
-        #nav-store-btn:hover svg {
-            transform: scale(1.1);
-            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
-        }
-        #nav-store-btn:hover span {
-             color: #FFD700;
-        }
         
         /* ==============================================
            --- Profile Overlay STYLES --- 
@@ -556,59 +561,6 @@
             margin-top: 5px;
             font-size: 1em;
             color: var(--text-secondary);
-        }
-
-        /* --- [NEW] Profile Extra Info (Coins & Account Type) --- */
-        .profile-extra-info {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-top: 15px;
-            margin-bottom: 5px;
-        }
-        .coin-badge {
-            display: flex;
-            align-items: center;
-            color: #FFD700; /* Gold */
-            font-weight: 700;
-            background: rgba(255, 215, 0, 0.1);
-            padding: 5px 12px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            font-size: 0.95em;
-        }
-        .coin-badge svg {
-            width: 18px;
-            height: 18px;
-            margin-left: 6px;
-            fill: currentColor;
-            filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.6));
-        }
-        .account-type-badge {
-            padding: 6px 14px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            font-weight: 600;
-            color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-            letter-spacing: 0.5px;
-        }
-        /* Account Type Colors */
-        .badge-regular { 
-            background-color: var(--secondary-hover); 
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-        }
-        .badge-special { 
-            background: linear-gradient(135deg, #00b09b, #96c93d); 
-            border: 1px solid #00b09b;
-        }
-        .badge-premium { 
-            background: linear-gradient(135deg, #8A2BE2, #FF00FF);
-            box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
-            border: 1px solid #FF00FF;
         }
 
         /* --- Profile Stats & Blur Effect --- */
@@ -733,7 +685,7 @@
            --- User List Modal (Followers/Following) --- 
            ==============================================
         */
-        .user-list-overlay {
+        .user-list-overlay, .viewers-list-overlay { /* Combined styles for modals */
             position: fixed;
             top: 0;
             left: 0;
@@ -748,11 +700,11 @@
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .user-list-overlay.active {
+        .user-list-overlay.active, .viewers-list-overlay.active {
             opacity: 1;
             visibility: visible;
         }
-        .user-list-modal {
+        .user-list-modal, .viewers-list-modal { /* Combined styles for modals */
             width: 100%;
             max-width: 420px;
             height: 80vh; /* 80% of screen height */
@@ -765,10 +717,10 @@
             transform: translateY(100%);
             transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .user-list-overlay.active .user-list-modal {
+        .user-list-overlay.active .user-list-modal, .viewers-list-overlay.active .viewers-list-modal {
             transform: translateY(0);
         }
-        .user-list-header {
+        .user-list-header, .viewers-list-header { /* Combined styles for modals */
             padding: 15px 20px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
@@ -778,12 +730,12 @@
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
         }
-        .user-list-header h3 {
+        .user-list-header h3, .viewers-list-header h3 { /* Combined styles for modals */
             margin: 0;
             font-size: 1.2em;
             color: var(--text-primary);
         }
-        .user-list-close {
+        .user-list-close, .viewers-list-close { /* Combined styles for modals */
             background: none;
             border: none;
             color: var(--text-secondary);
@@ -791,7 +743,7 @@
             cursor: pointer;
             line-height: 1;
         }
-        .user-list-content {
+        .user-list-content, .viewers-list-content { /* Combined styles for modals */
             flex-grow: 1;
             overflow-y: auto;
             padding: 0;
@@ -1121,6 +1073,9 @@
             </div>
         </header>
 
+        <!-- [NEW] Reward Banner HTML -->
+        <div id="reward-banner"></div>
+
         <!-- Search Tabs -->
         <div class="search-tabs" id="search-tabs">
             <button class="search-tab active" data-mode="accounts">اکانت‌ها</button>
@@ -1143,17 +1098,6 @@
                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 <span>افراد</span>
             </button>
-            
-            <!-- NEW: Store Button -->
-            <button class="nav-btn" id="nav-store-btn">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                </svg>
-                <span>فروشگاه</span>
-            </button>
-
             <button class="nav-btn active" id="nav-chats-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 <span>چت‌ها</span>
@@ -1201,16 +1145,6 @@
                 <h3 id="profile-display-name"></h3>
                 <p id="profile-username"></p>
 
-                <!-- NEW: Coins and Account Type Section -->
-                <div class="profile-extra-info" id="profile-extra-container">
-                    <div class="coin-badge" title="تعداد سکه‌ها">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05 1.18 1.42 2.61 1.42 1.62 0 2.53-.57 2.53-1.61 0-.98-1.01-1.45-2.73-1.8-1.69-.37-3.93-1.07-3.93-3.46 0-1.72 1.35-2.88 3.14-3.23V4h2.67v1.9c1.47.31 2.76 1.34 3.01 3.23h-1.99c-.21-.97-1.12-1.39-2.33-1.39-1.57 0-2.3.69-2.3 1.51 0 .94 1.15 1.31 2.89 1.72 1.8.44 3.77 1.19 3.77 3.52-.01 1.77-1.4 3-3.15 3.39z"></path></svg>
-                        <span id="profile-coin-count">0</span>
-                    </div>
-                    <div class="account-type-badge badge-regular" id="profile-account-label">عادی</div>
-                </div>
-                <!-- END NEW SECTION -->
-
                 <!-- Follow Stats -->
                 <div class="profile-stats">
                     <div class="stat-item" id="stat-followers-btn">
@@ -1234,6 +1168,11 @@
                     <li id="settings-btn"> <!-- Added ID for Settings Button -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                         <span>تنظیمات</span>
+                    </li>
+                    <!-- [NEW] Profile Viewers Button -->
+                    <li id="viewers-btn" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <span>بازدیدکنندگان پروفایل</span>
                     </li>
                      <li id="logout-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -1265,6 +1204,22 @@
                 <div class="form-group">
                     <label for="edit-username">آیدی (Username)</label>
                     <input type="text" id="edit-username" placeholder="آیدی شما" title="آیدی قابل تغییر نیست" readonly disabled>
+                </div>
+
+                <!-- [NEW] Premium-only fields -->
+                <div class="form-group">
+                    <label for="edit-bio-beliefs">عقاید</label>
+                    <input type="text" id="edit-bio-beliefs" placeholder="عقاید خود را بنویسید">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-bio-education">تحصیلات</label>
+                    <input type="text" id="edit-bio-education" placeholder="رشته و مقطع تحصیلی">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-bio-location">منطقه زندگی</label>
+                    <input type="text" id="edit-bio-location" placeholder="شهر یا منطقه زندگی">
                 </div>
 
                 <div class="modal-actions">
@@ -1315,6 +1270,19 @@
             </div>
         </div>
     </div>
+    
+    <!-- [NEW] Profile Viewers Modal -->
+    <div class="viewers-list-overlay" id="viewers-list-overlay">
+        <div class="viewers-list-modal">
+            <div class="viewers-list-header">
+                <h3 id="viewers-list-title">بازدیدکنندگان</h3>
+                <button class="viewers-list-close" id="viewers-list-close">&times;</button>
+            </div>
+            <div class="viewers-list-content" id="viewers-list-content">
+                <!-- Viewers list will be injected here -->
+            </div>
+        </div>
+    </div>
 
 
     <script>
@@ -1328,6 +1296,7 @@
         const mainContent = document.getElementById('main-content');
         const searchInput = document.getElementById('search-input');
         const searchTabsContainer = document.getElementById('search-tabs');
+        const rewardBanner = document.getElementById('reward-banner'); // New Banner
         
         // Skeleton Loader Elements
         const skeletonLoader = document.getElementById('skeleton-loader');
@@ -1348,12 +1317,6 @@
         const statFollowersBtn = document.getElementById('stat-followers-btn');
         const statFollowingBtn = document.getElementById('stat-following-btn');
 
-        // NEW: Profile Extra Elements
-        const profileExtraContainer = document.getElementById('profile-extra-container');
-        const profileCoinCount = document.getElementById('profile-coin-count');
-        const profileAccountLabel = document.getElementById('profile-account-label');
-
-
         const fabContainer = document.getElementById('fab-container');
         const fabMainBtn = document.getElementById('fab-main-btn');
         const newPrivateChatBtn = document.getElementById('fab-new-private-chat');
@@ -1367,6 +1330,11 @@
         const pfpUploadInput = document.getElementById('pfp-upload-input');
         const editDisplayNameInput = document.getElementById('edit-display-name');
         const editUsernameInput = document.getElementById('edit-username');
+        // New Premium Fields
+        const editBioBeliefsInput = document.getElementById('edit-bio-beliefs');
+        const editBioEducationInput = document.getElementById('edit-bio-education');
+        const editBioLocationInput = document.getElementById('edit-bio-location');
+
 
         // Settings Modal Elements
         const settingsBtn = document.getElementById('settings-btn');
@@ -1382,6 +1350,13 @@
         const userListTitle = document.getElementById('user-list-title');
         const userListContent = document.getElementById('user-list-content');
         const userListClose = document.getElementById('user-list-close');
+
+        // New Profile Viewers Modal Elements
+        const viewersBtn = document.getElementById('viewers-btn');
+        const viewersListOverlay = document.getElementById('viewers-list-overlay');
+        const viewersListTitle = document.getElementById('viewers-list-title');
+        const viewersListContent = document.getElementById('viewers-list-content');
+        const viewersListClose = document.getElementById('viewers-list-close');
 
 
         // --- SECTION: App State ---
@@ -1411,14 +1386,6 @@
             // EVENT LISTENERS
             const navPeopleBtn = document.getElementById('nav-people-btn');
             
-            // --- Store Button Listener ---
-            const navStoreBtn = document.getElementById('nav-store-btn');
-            if(navStoreBtn) {
-                navStoreBtn.addEventListener('click', () => {
-                    window.location.href = 'store.html';
-                });
-            }
-
             // --- Rubino Button Listener ---
             const rubinoBtn = document.getElementById('nav-rubino-btn');
             if (rubinoBtn) {
@@ -1486,6 +1453,13 @@
             userListOverlay.addEventListener('click', (e) => {
                 if (e.target === userListOverlay) hideUserListModal();
             });
+            
+            // New Profile Viewers Listeners
+            viewersBtn.addEventListener('click', handleShowProfileViewers);
+            viewersListClose.addEventListener('click', hideViewersListModal);
+            viewersListOverlay.addEventListener('click', (e) => {
+                if (e.target === viewersListOverlay) hideViewersListModal();
+            });
 
             await loadInitialData();
         });
@@ -1535,6 +1509,7 @@
                 }
 
                 renderChatList();
+                updateRewardBanner(); // Call the banner update function
                 startRealtimeUpdates();
 
             } catch (error) {
@@ -1615,6 +1590,16 @@
                 mainContent.innerHTML = '<div class="status-container"><p>کاربری با این مشخصات یافت نشد.</p></div>';
                 return;
             }
+
+            // [MODIFIED] Sort results to show premium users first
+            results.sort((a, b) => {
+                const aIsPremium = a.accountType === 'premium';
+                const bIsPremium = b.accountType === 'premium';
+                if (aIsPremium && !bIsPremium) return -1; // a comes first
+                if (!aIsPremium && bIsPremium) return 1;  // b comes first
+                return 0; // maintain original order
+            });
+
             const resultsHtml = results.map(user => createUserResultHtml(user)).join('');
             mainContent.innerHTML = `<div class="chat-list">${resultsHtml}</div>`;
             addClickListenersToItems();
@@ -1664,8 +1649,11 @@
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
 
             const verifiedTickHtml = userData.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
+            // [MODIFIED] Added conditional class for premium users
+            const premiumClass = userData.accountType === 'premium' ? 'premium-user-highlight' : '';
+
             return `
-                <div class="search-result-item" data-uid="${userData.username}">
+                <div class="search-result-item ${premiumClass}" data-uid="${userData.username}">
                     <div class="profile-picture">
                         <img src="${avatarUrl}" alt="${userData.displayName}">
                         ${userData.isOnline ? '<div class="online-indicator"></div>' : ''}
@@ -1762,7 +1750,9 @@
                     const targetChannelId = item.dataset.channelId;
 
                     if(item.classList.contains('user-list-item')) {
+                        // This handles clicks from followers, following, AND viewers lists
                         hideUserListModal();
+                        hideViewersListModal();
                         setTimeout(() => openUserProfile(targetUid), 300);
                         return;
                     }
@@ -1779,14 +1769,7 @@
         // --- Profile Page Functions ---
         async function openUserProfile(username) {
             currentProfileUsername = username;
-            
-            // Try to find user in allUsers first
-            let userData = allUsers[username];
-
-            // If it's the current user, ensure we use the most up-to-date object from local state
-            if (username === currentUser.username) {
-                userData = currentUser;
-            }
+            const userData = allUsers[username];
 
             if (!userData) {
                 showToast('اطلاعات کاربر یافت نشد.', 'error');
@@ -1803,33 +1786,6 @@
             profileDisplayName.innerHTML = `${userData.displayName || userData.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${userData.username}`;
             
-            // --- NEW: Populate Coins and Account Type ---
-            // Determine logic: Always show for current user. For others, only if data is present.
-            const userCoins = (userData.coins !== undefined) ? userData.coins : 0;
-            const userAccountType = userData.accountType || 'regular';
-
-            profileCoinCount.textContent = userCoins.toLocaleString('fa-IR');
-            
-            // Set Account Type Label and Class
-            profileAccountLabel.className = 'account-type-badge'; // Reset class
-            switch(userAccountType) {
-                case 'premium':
-                    profileAccountLabel.textContent = 'حساب پریمیوم';
-                    profileAccountLabel.classList.add('badge-premium');
-                    break;
-                case 'special':
-                    profileAccountLabel.textContent = 'کاربر ویژه';
-                    profileAccountLabel.classList.add('badge-special');
-                    break;
-                case 'regular':
-                default:
-                    profileAccountLabel.textContent = 'کاربر عادی';
-                    profileAccountLabel.classList.add('badge-regular');
-                    break;
-            }
-            // ---------------------------------------------
-
-
             profileFollowersCount.classList.add('loading-blur');
             profileFollowingCount.classList.add('loading-blur');
             profileFollowersCount.textContent = '0';
@@ -1842,6 +1798,9 @@
             editProfileBtn.style.display = isMyProfile ? 'flex' : 'none';
             settingsBtn.style.display = isMyProfile ? 'flex' : 'none'; // Settings button logic
             logoutBtn.style.display = isMyProfile ? 'flex' : 'none';
+
+            // [MODIFIED] Show/Hide viewers button
+            viewersBtn.style.display = (isMyProfile && currentUser.accountType === 'premium') ? 'flex' : 'none';
 
             profileOverlay.classList.add('active');
 
@@ -1877,6 +1836,28 @@
             editPfpPreview.src = avatarUrl;
             editDisplayNameInput.value = currentUser.displayName || '';
             editUsernameInput.value = currentUser.username || '';
+
+            // [MODIFIED] Handle premium fields
+            const isPremium = currentUser.accountType === 'premium';
+            const premiumInputs = [editBioBeliefsInput, editBioEducationInput, editBioLocationInput];
+            
+            if (isPremium) {
+                premiumInputs.forEach(input => {
+                    input.disabled = false;
+                    input.placeholder = '';
+                    input.title = '';
+                });
+                editBioBeliefsInput.value = currentUser.beliefs || '';
+                editBioEducationInput.value = currentUser.education || '';
+                editBioLocationInput.value = currentUser.location || '';
+            } else {
+                 premiumInputs.forEach(input => {
+                    input.disabled = true;
+                    input.value = '';
+                    input.placeholder = 'این قابلیت مخصوص اعضای پریمیوم است';
+                    input.title = 'این قابلیت مخصوص اعضای پریمیوم است';
+                });
+            }
             
             editProfileModal.classList.add('active');
         }
@@ -1922,6 +1903,18 @@
                 if (newProfilePicUrl.startsWith('data:image') && newProfilePicUrl !== currentUser.profilePicUrl) {
                     payload.profilePicUrl = newProfilePicUrl;
                 }
+
+                // [MODIFIED] Add premium fields to payload if user is premium
+                if (currentUser.accountType === 'premium') {
+                    const newBeliefs = editBioBeliefsInput.value.trim();
+                    const newEducation = editBioEducationInput.value.trim();
+                    const newLocation = editBioLocationInput.value.trim();
+
+                    if (newBeliefs !== (currentUser.beliefs || '')) payload.beliefs = newBeliefs;
+                    if (newEducation !== (currentUser.education || '')) payload.education = newEducation;
+                    if (newLocation !== (currentUser.location || '')) payload.location = newLocation;
+                }
+
                 if (Object.keys(payload).length === 0) {
                      hideEditProfileModal();
                      return;
@@ -1930,8 +1923,8 @@
                 const path = `users/${currentUser.username}`;
                 await updateUserDataOnServer(path, payload);
 
-                if (payload.displayName) currentUser.displayName = payload.displayName;
-                if (payload.profilePicUrl) currentUser.profilePicUrl = payload.profilePicUrl;
+                // Update local currentUser object with new values
+                Object.assign(currentUser, payload);
                 
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 
@@ -2135,7 +2128,7 @@
                 }
 
                 const userIds = Object.keys(listData);
-                const userPromises = userIds.map(uid => fetchProxyData(`users/${uid}`));
+                const userPromises = userIds.map(uid => allUsers[uid] || fetchProxyData(`users/${uid}`)); // Optimize: use cached user data if available
                 const users = await Promise.all(userPromises);
 
                 let html = '';
@@ -2162,6 +2155,49 @@
             userListOverlay.classList.remove('active');
         }
 
+        // --- [NEW] Profile Viewers Modal Logic ---
+        async function handleShowProfileViewers() {
+            viewersListContent.innerHTML = '<div class="status-container"><div class="spinner"></div><p>در حال دریافت لیست بازدیدکنندگان...</p></div>';
+            viewersListOverlay.classList.add('active');
+
+            try {
+                const path = `profileViews/${currentUser.username}`;
+                const viewersData = await fetchProxyData(path);
+
+                if (!viewersData || Object.keys(viewersData).length === 0) {
+                    viewersListContent.innerHTML = '<div class="status-container"><p>هنوز کسی از پروفایل شما بازدید نکرده است.</p></div>';
+                    return;
+                }
+
+                // The keys of viewersData are the usernames of the viewers
+                const viewerUsernames = Object.keys(viewersData);
+                const userPromises = viewerUsernames.map(username => allUsers[username] || fetchProxyData(`users/${username}`));
+                const users = await Promise.all(userPromises);
+
+                let html = '';
+                users.forEach(user => {
+                    if (user) {
+                        html += createUserListHtml(user);
+                    }
+                });
+
+                if (html === '') {
+                    viewersListContent.innerHTML = '<div class="status-container"><p>اطلاعات بازدیدکنندگان یافت نشد.</p></div>';
+                } else {
+                    viewersListContent.innerHTML = html;
+                    addClickListenersToItems();
+                }
+
+            } catch (error) {
+                console.error("Error loading profile viewers:", error);
+                viewersListContent.innerHTML = '<div class="status-container"><p>خطا در دریافت اطلاعات بازدیدکنندگان.</p></div>';
+            }
+        }
+
+        function hideViewersListModal() {
+            viewersListOverlay.classList.remove('active');
+        }
+
 
         // --- SECTION: Robust Polling with Exponential Backoff ---
         async function checkForUpdates() {
@@ -2185,6 +2221,7 @@
                         if (JSON.stringify(currentUser) !== JSON.stringify(mergedUser)) {
                             currentUser = mergedUser;
                             localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                            updateRewardBanner(); // Update banner if user data changed
                         }
                     }
                     needsUIRefresh = true;
@@ -2236,6 +2273,42 @@
 
 
         // --- SECTION: Utility Functions ---
+
+        // --- [NEW] Reward Banner Logic ---
+        function updateRewardBanner() {
+            if (!currentUser || !rewardBanner) return;
+
+            const reportCount = currentUser.reportCount || 0;
+            const lastReportTimestamp = currentUser.lastReportDate; // Assuming this is a timestamp
+
+            if (reportCount >= 3) {
+                rewardBanner.style.display = 'none'; // Or show a disqualified message
+                return;
+            }
+
+            if (!lastReportTimestamp) {
+                // User has never been reported, show encouraging message
+                rewardBanner.textContent = 'با عدم دریافت گزارش، شانس خود را برای دریافت جایزه پریمیوم افزایش دهید!';
+                rewardBanner.style.display = 'block';
+                return;
+            }
+            
+            const REWARD_PERIOD_DAYS = 7;
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const daysSinceLastReport = Math.floor((Date.now() - lastReportTimestamp) / msPerDay);
+            const daysRemaining = REWARD_PERIOD_DAYS - daysSinceLastReport;
+
+            if (daysRemaining > 0) {
+                rewardBanner.textContent = `شما ${daysSinceLastReport} روز است که گزارشی نداشته‌اید. ${daysRemaining} روز دیگر تا دریافت جایزه پریمیوم!`;
+                rewardBanner.style.display = 'block';
+            } else {
+                // Reward period passed without new reports
+                rewardBanner.textContent = 'تبریک! شما واجد شرایط دریافت جایزه پریمیوم هستید. منتظر بمانید.';
+                rewardBanner.style.background = 'linear-gradient(90deg, #28a745, #20bf55)'; // Success gradient
+                rewardBanner.style.display = 'block';
+            }
+        }
+
         function showCustomConfirm(message, onConfirm) {
             if (document.getElementById('custom-modal')) return;
             const modal = document.createElement('div');
