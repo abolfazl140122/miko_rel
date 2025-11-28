@@ -727,19 +727,42 @@
                     throw new Error('این نام کاربری قبلاً استفاده شده است. لطفاً نام دیگری انتخاب کنید.');
                 }
                 
-                // Step 3: Prepare user data
+                // Step 3: Prepare user data (Updated for Account Types & Coins)
                 const now = new Date().toISOString();
+                
+                // --- NEW: User Data Structure for Account Levels ---
                 const userData = {
                     username: username,
                     displayName: displayName,
                     mobile: allInputs.mobile.value.trim(),
                     age: parseInt(allInputs.age.value),
                     gender: allInputs.gender.value,
-                    password: allInputs.password.value, // Note: In a real app, never store plain text passwords
-                    profilePicUrl: profilePicUrl || '', // Use uploaded URL or empty string
+                    password: allInputs.password.value, 
+                    profilePicUrl: profilePicUrl || '', 
                     createdAt: now,
                     isOnline: false,
-                    lastSeen: now
+                    lastSeen: now,
+                    
+                    // --- فیلدهای جدید مربوط به سطح اکانت و اقتصاد ---
+                    accountType: 'regular', // default: regular, special, premium
+                    coins: 0,
+                    subscriptionExpireAt: 0,
+                    
+                    // --- فیلدهای کنترل محدودیت ---
+                    limits: {
+                        chatsStartedThisWeek: 0,
+                        lastChatReset: Date.now(), // Timestamp for weekly reset logic
+                        likesToday: 0,
+                        lastLikeDate: new Date().toDateString(), // e.g. "Fri Nov 28 2025" for easy daily check
+                        postsThisWeek: 0,
+                        lastPostReset: Date.now()
+                    },
+                    
+                    // --- فیلدهای سیستم اعتبار و گزارش ---
+                    reputationScore: 0,
+                    reportCount: 0,
+                    profilePicStatus: 'pending', // Regular accounts need approval
+                    profilePicUploadedAt: Date.now()
                 };
 
                 // Step 4: Register the user (PUT request)
@@ -761,7 +784,8 @@
                 // Step 5: Success
                 localStorage.setItem('currentUser', JSON.stringify({
                     username: userData.username,
-                    displayName: userData.displayName
+                    displayName: userData.displayName,
+                    accountType: userData.accountType // Keep account type in local storage for quick UI adjustments
                 }));
                 
                 setFormStatus('ثبت‌نام موفق بود! در حال انتقال به صفحه اصلی...', 'success');
