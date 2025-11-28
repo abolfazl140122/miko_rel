@@ -7,7 +7,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
 
-        /* --- Variables (Matching safe_asli.txt) --- */
+        /* --- Variables --- */
         :root {
             --background-color: #0D1117;
             --primary-color: #00A3FF;
@@ -42,7 +42,7 @@
             background: radial-gradient(circle at top right, #1a202c 0%, var(--background-color) 70%);
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Header fixed, main scrolls */
+            overflow: hidden;
             -webkit-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
@@ -125,7 +125,6 @@
             padding-bottom: 40px;
         }
 
-        /* Custom Scrollbar */
         main::-webkit-scrollbar { width: 8px; }
         main::-webkit-scrollbar-track { background: var(--background-color); }
         main::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 10px; border: 2px solid var(--background-color); }
@@ -142,7 +141,6 @@
         }
         .section-title:first-child { margin-top: 0; }
 
-        /* --- Grid Layout for Cards --- */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -156,7 +154,6 @@
             }
         }
 
-        /* --- Generic Card Style --- */
         .store-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -217,10 +214,10 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
-            margin-top: auto; /* Pushes button to bottom */
+            margin-top: auto;
         }
 
-        /* --- Coin Cards Specifics --- */
+        /* --- Coin Cards --- */
         .coin-card .card-icon-container svg {
             color: var(--gold-color);
             filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4));
@@ -237,10 +234,15 @@
             border-color: var(--primary-color);
             box-shadow: 0 4px 10px rgba(0, 163, 255, 0.3);
         }
+        .btn-buy-coin:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            filter: grayscale(100%);
+        }
 
-        /* --- Subscription Cards Specifics --- */
+        /* --- Subscription Cards --- */
         .sub-grid {
-            grid-template-columns: 1fr; /* Default full width for subs on mobile */
+            grid-template-columns: 1fr;
         }
         @media (min-width: 600px) {
             .sub-grid { grid-template-columns: repeat(2, 1fr); }
@@ -263,7 +265,7 @@
             box-shadow: 0 0 15px rgba(0, 163, 255, 0.4);
         }
 
-        /* Premium Plan (Gold) */
+        /* Premium Plan */
         .card-premium {
             background: linear-gradient(160deg, #1B212A 60%, #2a2105 100%);
             border: 1px solid #9E7D08;
@@ -274,7 +276,7 @@
             box-shadow: 0 0 15px var(--premium-shadow);
         }
         .card-premium .card-icon-container svg {
-            color: #1a202c; /* Dark icon on gold bg */
+            color: #1a202c;
             filter: none;
         }
         .card-premium .card-title {
@@ -303,7 +305,7 @@
             box-shadow: 0 5px 20px var(--premium-shadow);
         }
 
-        /* --- Toast Notification (Copied logic) --- */
+        /* --- Toast Notification --- */
         #toast-container {
             position: fixed;
             bottom: 30px;
@@ -330,7 +332,7 @@
         .toast.success { border-color: var(--success-color); color: var(--success-color); }
         .toast.error { border-color: var(--error-color); color: var(--error-color); }
 
-        /* Dialog/Modal for confirmations */
+        /* --- Confirmation Modal --- */
         .confirm-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 100;
@@ -349,7 +351,8 @@
         .confirm-box p { color: var(--text-secondary); margin-bottom: 25px; line-height: 1.6; }
         .confirm-actions { display: flex; gap: 10px; }
         .confirm-actions button { flex: 1; padding: 10px; border-radius: 10px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; }
-        .btn-confirm-yes { background: var(--primary-color); color: white; }
+        .btn-confirm-yes { background: var(--primary-color); color: white; transition: 0.2s;}
+        .btn-confirm-yes:disabled { background: var(--text-secondary); cursor: wait; }
         .btn-confirm-no { background: var(--secondary-hover); color: var(--text-primary); }
 
     </style>
@@ -469,6 +472,10 @@
     <div id="toast-container"></div>
 
     <script>
+        // --- Constants & Connection Config ---
+        const PROXY_URL = 'https://miko.freehost.io/firebase_proxy.php';
+        const SHARED_SECRET = 'miko1234';
+
         // --- Setup & Initialization ---
         let currentUser = null;
         const headerCoinDisplay = document.getElementById('header-coin-display');
@@ -485,13 +492,12 @@
         function loadUser() {
             const storedUser = localStorage.getItem('currentUser');
             if (!storedUser) {
-                // Not logged in
                 window.location.href = 'login.html'; 
                 return;
             }
             currentUser = JSON.parse(storedUser);
             
-            // Initialize defaults if missing
+            // Defaults
             if (typeof currentUser.coins !== 'number') currentUser.coins = 0;
             if (!currentUser.accountType) currentUser.accountType = 'regular';
             
@@ -499,25 +505,84 @@
         }
 
         function updateUI() {
-            // Animate number change
-            animateValue(headerCoinDisplay, parseInt(headerCoinDisplay.innerText), currentUser.coins, 1000);
+            if (headerCoinDisplay && currentUser) {
+                // Animate number change
+                animateValue(headerCoinDisplay, parseInt(headerCoinDisplay.innerText) || 0, currentUser.coins, 1000);
+            }
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
 
-        // --- Logic: Buy Coins (Simulated) ---
-        function buyCoins(amount, price) {
-            // In a real app, this would open a payment gateway.
-            showToast(`در حال انتقال به درگاه پرداخت برای خرید بسته ${amount.toLocaleString()} سکه...`, 'normal');
-            
-            setTimeout(() => {
-                // Simulate successful payment
-                const confirm = window.confirm(`پرداخت ${price.toLocaleString()} تومان با موفقیت انجام شد (شبیه‌سازی).\n\nآیا سکه‌ها به حساب شما افزوده شود؟`);
-                if(confirm) {
-                    currentUser.coins += amount;
-                    updateUI();
-                    showToast(`${amount.toLocaleString()} سکه به کیف پول شما اضافه شد.`, 'success');
+        // --- Server Communication Function ---
+        async function updateUserOnServer(data) {
+            try {
+                // 1. Get Token
+                const tokenData = new FormData();
+                tokenData.append('action', 'get_token');
+                tokenData.append('shared_secret', SHARED_SECRET);
+
+                const tokenRes = await fetch(PROXY_URL, { method: 'POST', body: tokenData });
+                const tokenJson = await tokenRes.json();
+                
+                if (!tokenJson.success) throw new Error("Server Handshake Failed");
+                const serverToken = tokenJson.token;
+
+                // 2. Write Data (PATCH)
+                const path = `users/${currentUser.username}`;
+                const writeData = new FormData();
+                writeData.append('action', 'write');
+                writeData.append('method', 'PATCH');
+                writeData.append('path', path);
+                writeData.append('data', JSON.stringify(data));
+                writeData.append('auth_token', serverToken);
+                writeData.append('username', currentUser.username);
+
+                const writeRes = await fetch(PROXY_URL, { method: 'POST', body: writeData });
+                const writeJson = await writeRes.json();
+
+                if (!writeJson.success) {
+                    throw new Error(writeJson.error || "Update Failed");
                 }
-            }, 1500);
+                return true;
+
+            } catch (error) {
+                console.error("Server Error:", error);
+                throw error;
+            }
+        }
+
+        // --- Logic: Buy Coins (Simulated Payment -> Server Update) ---
+        async function buyCoins(amount, price) {
+            // 1. Simulate Payment Gateway Connection
+            showToast('در حال اتصال به درگاه پرداخت...', 'normal');
+            
+            // Artificial delay for realism
+            await new Promise(r => setTimeout(r, 1500));
+
+            // 2. User confirms payment (Simulation)
+            const confirmed = window.confirm(`شبیه‌سازی پرداخت بانکی:\n\nمبلغ: ${price.toLocaleString()} تومان\nتعداد سکه: ${amount.toLocaleString()}\n\nآیا پرداخت موفق باشد؟`);
+            
+            if (!confirmed) {
+                showToast('پرداخت لغو شد.', 'error');
+                return;
+            }
+
+            // 3. Update Server
+            showToast('در حال ثبت تراکنش در سرور...', 'normal');
+            
+            try {
+                const newTotal = currentUser.coins + amount;
+                
+                // Send request to server
+                await updateUserOnServer({ coins: newTotal });
+
+                // 4. On Success: Update Local & UI
+                currentUser.coins = newTotal;
+                updateUI();
+                showToast(`تراکنش موفق! ${amount.toLocaleString()} سکه اضافه شد.`, 'success');
+
+            } catch (error) {
+                showToast('خطا در ارتباط با سرور. سکه‌ها اضافه نشد.', 'error');
+            }
         }
 
         // --- Logic: Buy Subscription ---
@@ -526,17 +591,19 @@
         function buySubscription(type, cost, durationText) {
             const typeName = type === 'premium' ? 'پریمیوم' : 'ویژه';
             
+            // Check Current Subscription
             if (currentUser.accountType === type) {
                 showToast(`شما در حال حاضر اشتراک ${typeName} را دارید.`, 'error');
                 return;
             }
 
+            // Check Balance (Pre-check)
             if (currentUser.coins < cost) {
                 showToast('موجودی سکه کافی نیست. لطفاً ابتدا سکه بخرید.', 'error');
                 return;
             }
 
-            // Show Custom Confirmation Modal
+            // Show Confirmation Modal
             pendingPurchase = { type, cost, typeName, durationText };
             showConfirm(
                 `خرید اشتراک ${typeName}`,
@@ -544,7 +611,7 @@
             );
         }
 
-        // --- Confirmation Modal Logic ---
+        // --- Confirmation Modal Logic & Server Sync ---
         const confirmOverlay = document.getElementById('confirm-overlay');
         const confirmTitle = document.getElementById('confirm-title');
         const confirmText = document.getElementById('confirm-text');
@@ -555,6 +622,7 @@
             confirmTitle.textContent = title;
             confirmText.textContent = text;
             confirmOverlay.classList.add('active');
+            btnConfirm.disabled = false;
         }
 
         function hideConfirm() {
@@ -564,21 +632,50 @@
 
         btnCancel.addEventListener('click', hideConfirm);
         
-        btnConfirm.addEventListener('click', () => {
-            if (pendingPurchase) {
-                const { type, cost, typeName } = pendingPurchase;
+        btnConfirm.addEventListener('click', async () => {
+            if (!pendingPurchase) return;
+
+            const { type, cost, typeName } = pendingPurchase;
+            
+            // 1. UI Loading State
+            btnConfirm.disabled = true;
+            btnConfirm.textContent = '...';
+            showToast('در حال فعال‌سازی اشتراک...', 'normal');
+
+            try {
+                // 2. Prepare Data
+                const newCoins = currentUser.coins - cost;
                 
-                // Deduct coins
-                currentUser.coins -= cost;
-                // Upgrade account
+                // Double check locally just in case
+                if (newCoins < 0) throw new Error("موجودی ناکافی");
+
+                const updateData = {
+                    coins: newCoins,
+                    accountType: type
+                };
+
+                // 3. Send to Server
+                await updateUserOnServer(updateData);
+
+                // 4. Success: Update Local & UI
+                currentUser.coins = newCoins;
                 currentUser.accountType = type;
-                
                 updateUI();
-                showToast(`تبریک! حساب شما به ${typeName} ارتقا یافت.`, 'success');
-                hideConfirm();
                 
-                // Optional: Redirect back after delay
-                // setTimeout(() => window.location.href = 'safe_asli.html', 2000);
+                hideConfirm();
+                showToast(`تبریک! حساب شما به ${typeName} ارتقا یافت.`, 'success');
+
+            } catch (error) {
+                hideConfirm();
+                if (error.message === "موجودی ناکافی") {
+                    showToast('خطا: موجودی کافی نیست.', 'error');
+                } else {
+                    showToast('خطا در ارتباط با سرور. عملیات انجام نشد.', 'error');
+                }
+            } finally {
+                // Reset Button State
+                btnConfirm.textContent = 'بله، خرید';
+                btnConfirm.disabled = false;
             }
         });
 
