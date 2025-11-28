@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>فروشگاه همیار</title>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+
+        /* --- Variables (Matching safe_asli.txt) --- */
         :root {
-            /* --- Variables (Matching safe_asli.txt) --- */
             --background-color: #0D1117;
             --primary-color: #00A3FF;
             --secondary-color: #161B22;
@@ -18,36 +19,46 @@
             --success-color: #28a745;
             --error-color: #dc3545;
             --gold-color: #FFD700;
+            --gold-gradient: linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #9E7D08 100%);
+            --premium-shadow: rgba(255, 215, 0, 0.3);
+            --shadow-dark: rgba(0, 0, 0, 0.6);
+            --card-bg: #1B212A;
         }
 
         *, *::before, *::after {
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
+        }
+
+        body {
             font-family: 'Vazirmatn', sans-serif;
             background-color: var(--background-color);
             color: var(--text-primary);
+            background: radial-gradient(circle at top right, #1a202c 0%, var(--background-color) 70%);
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            overflow: hidden; /* Header fixed, main scrolls */
+            -webkit-user-select: none;
+            user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
 
         /* --- Header --- */
         .store-header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 15px 20px;
             background-color: var(--secondary-color);
             border-bottom: 1px solid var(--border-color);
-            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             height: 70px;
+            flex-shrink: 0;
+            z-index: 50;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
@@ -59,24 +70,24 @@
 
         .back-btn {
             background: none;
-            border: 1px solid var(--border-color);
+            border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            padding: 8px;
-            border-radius: 12px;
+            padding: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 50%;
             transition: all 0.2s ease;
         }
 
         .back-btn:hover {
+            color: var(--primary-color);
             background-color: var(--secondary-hover);
-            color: var(--text-primary);
         }
 
         .store-title {
-            font-size: 1.2em;
+            font-size: 1.4em;
             font-weight: 700;
             margin: 0;
             color: var(--text-primary);
@@ -89,30 +100,39 @@
             padding: 6px 12px;
             border-radius: 20px;
             border: 1px solid var(--border-color);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .coin-icon-header {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             color: var(--gold-color);
             margin-left: 8px;
+            filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
         }
 
         .coin-amount {
             font-weight: 700;
             color: var(--gold-color);
-            font-size: 1em;
+            font-size: 1.1em;
         }
 
         /* --- Main Content --- */
         main {
             flex-grow: 1;
+            overflow-y: auto;
             padding: 20px;
             padding-bottom: 40px;
         }
 
+        /* Custom Scrollbar */
+        main::-webkit-scrollbar { width: 8px; }
+        main::-webkit-scrollbar-track { background: var(--background-color); }
+        main::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 10px; border: 2px solid var(--background-color); }
+        main::-webkit-scrollbar-thumb:hover { background-color: var(--text-secondary); }
+
         .section-title {
-            font-size: 1.1em;
+            font-size: 1.2em;
             color: var(--text-secondary);
             margin: 25px 0 15px 0;
             padding-right: 10px;
@@ -122,16 +142,23 @@
         }
         .section-title:first-child { margin-top: 0; }
 
-        /* --- Grid --- */
+        /* --- Grid Layout for Cards --- */
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 15px;
         }
+        
+        @media (min-width: 480px) {
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 20px;
+            }
+        }
 
-        /* --- Cards --- */
+        /* --- Generic Card Style --- */
         .store-card {
-            background-color: var(--secondary-color);
+            background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 15px;
             padding: 20px 15px;
@@ -139,54 +166,48 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            transition: transform 0.2s ease, border-color 0.2s;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+            cursor: default;
         }
 
         .store-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--shadow-dark);
             border-color: var(--text-secondary);
         }
 
         .card-icon-container {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             margin-bottom: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: var(--secondary-hover);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 50%;
+            position: relative;
         }
         
         .card-icon-container svg {
-            width: 28px;
-            height: 28px;
+            width: 36px;
+            height: 36px;
         }
 
         .card-title {
-            font-size: 1em;
+            font-size: 1.1em;
             font-weight: 700;
             margin: 0 0 5px 0;
             color: var(--text-primary);
         }
 
         .card-price {
-            font-size: 0.85em;
+            font-size: 0.9em;
             color: var(--text-secondary);
             margin-bottom: 15px;
         }
 
-        /* Coin Specifics */
-        .coin-card .card-icon-container svg { color: var(--gold-color); }
-        
-        /* Subscription Specifics */
-        .card-special { border: 1px solid var(--primary-color); }
-        .card-special .card-icon-container svg { color: var(--primary-color); }
-
-        .card-premium { border: 1px solid var(--gold-color); }
-        .card-premium .card-icon-container svg { color: var(--gold-color); }
-
-        /* --- Buttons --- */
         .store-btn {
             width: 100%;
             padding: 10px;
@@ -194,16 +215,17 @@
             border: none;
             font-family: inherit;
             font-weight: 700;
-            font-size: 0.9em;
             cursor: pointer;
             transition: all 0.2s;
-            margin-top: auto;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin-top: auto; /* Pushes button to bottom */
         }
 
+        /* --- Coin Cards Specifics --- */
+        .coin-card .card-icon-container svg {
+            color: var(--gold-color);
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4));
+        }
+        
         .btn-buy-coin {
             background-color: var(--secondary-hover);
             color: var(--primary-color);
@@ -213,39 +235,82 @@
             background-color: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(0, 163, 255, 0.3);
         }
 
+        /* --- Subscription Cards Specifics --- */
+        .sub-grid {
+            grid-template-columns: 1fr; /* Default full width for subs on mobile */
+        }
+        @media (min-width: 600px) {
+            .sub-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Special Plan */
+        .card-special {
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 0 15px rgba(0, 163, 255, 0.1);
+        }
+        .card-special .card-icon-container svg {
+            color: var(--primary-color);
+        }
         .btn-sub-special {
             background-color: var(--primary-color);
             color: white;
         }
-        .btn-sub-special:hover { background-color: #0091e6; }
+        .btn-sub-special:hover {
+            background-color: #00baff;
+            box-shadow: 0 0 15px rgba(0, 163, 255, 0.4);
+        }
 
-        .btn-sub-premium {
-            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+        /* Premium Plan (Gold) */
+        .card-premium {
+            background: linear-gradient(160deg, #1B212A 60%, #2a2105 100%);
+            border: 1px solid #9E7D08;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+        }
+        .card-premium .card-icon-container {
+            background: var(--gold-gradient);
+            box-shadow: 0 0 15px var(--premium-shadow);
+        }
+        .card-premium .card-icon-container svg {
+            color: #1a202c; /* Dark icon on gold bg */
+            filter: none;
+        }
+        .card-premium .card-title {
+            color: var(--gold-color);
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+        }
+        .premium-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--gold-gradient);
             color: #000;
+            font-size: 0.7em;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
-        .btn-sub-premium:hover { opacity: 0.9; }
-
-        /* Spinner */
-        .spinner {
-            width: 16px; height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 0.8s linear infinite;
-            display: none;
+        .btn-sub-premium {
+            background: var(--gold-gradient);
+            color: #0D1117;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.2);
         }
-        .btn-buy-coin .spinner { border-top-color: var(--primary-color); border-color: rgba(0, 163, 255, 0.3); }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-sub-premium:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px var(--premium-shadow);
+        }
 
-        .store-btn.loading .btn-text { display: none; }
-        .store-btn.loading .spinner { display: block; }
-
-        /* --- Toast --- */
+        /* --- Toast Notification (Copied logic) --- */
         #toast-container {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 2000; pointer-events: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            pointer-events: none;
         }
         .toast {
             background-color: var(--secondary-color);
@@ -254,8 +319,9 @@
             border-radius: 25px;
             margin-top: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            font-size: 0.9em;
-            opacity: 0; transform: translateY(20px);
+            font-size: 0.95em;
+            opacity: 0;
+            transform: translateY(20px);
             transition: all 0.3s ease;
             text-align: center;
             border: 1px solid var(--border-color);
@@ -264,27 +330,26 @@
         .toast.success { border-color: var(--success-color); color: var(--success-color); }
         .toast.error { border-color: var(--error-color); color: var(--error-color); }
 
-        /* --- Modal --- */
+        /* Dialog/Modal for confirmations */
         .confirm-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 150;
+            background: rgba(0,0,0,0.85); z-index: 100;
             display: flex; justify-content: center; align-items: center;
             opacity: 0; visibility: hidden; transition: 0.3s;
-            backdrop-filter: blur(3px);
         }
         .confirm-overlay.active { opacity: 1; visibility: visible; }
         .confirm-box {
-            background: var(--secondary-color); width: 85%; max-width: 320px;
+            background: var(--card-bg); width: 85%; max-width: 320px;
             padding: 25px; border-radius: 20px; text-align: center;
             border: 1px solid var(--border-color);
-            transform: scale(0.9); transition: 0.3s;
+            transform: scale(0.9); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .confirm-overlay.active .confirm-box { transform: scale(1); }
-        .confirm-box h3 { margin-top: 0; color: var(--text-primary); font-size: 1.1em; }
-        .confirm-box p { color: var(--text-secondary); margin-bottom: 25px; line-height: 1.6; font-size: 0.9em; }
+        .confirm-box h3 { margin-top: 0; color: var(--primary-color); }
+        .confirm-box p { color: var(--text-secondary); margin-bottom: 25px; line-height: 1.6; }
         .confirm-actions { display: flex; gap: 10px; }
         .confirm-actions button { flex: 1; padding: 10px; border-radius: 10px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; }
-        .btn-confirm-yes { background: var(--primary-color); color: white; display: flex; justify-content: center; align-items: center;}
+        .btn-confirm-yes { background: var(--primary-color); color: white; }
         .btn-confirm-no { background: var(--secondary-hover); color: var(--text-primary); }
 
     </style>
@@ -294,310 +359,260 @@
     <!-- Header -->
     <header class="store-header">
         <div class="header-start">
-            <button class="back-btn" onclick="window.location.href='safe_asli.html'">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <button class="back-btn" id="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </button>
-            <h1 class="store-title">فروشگاه</h1>
+            <h1 class="store-title">فروشگاه همیار</h1>
         </div>
         <div class="coin-balance">
-            <span class="coin-amount" id="header-coin-display">---</span>
+            <span class="coin-amount" id="header-coin-display">0</span>
             <svg class="coin-icon-header" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1-6v2h2v-2h1a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-1V8h2V6h-2V4h-2v2h-1a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h1v2h-2v2h2v2h2v-2h1z"/></svg>
         </div>
     </header>
 
+    <!-- Main Content -->
     <main>
-        <!-- Buy Coins -->
+        
+        <!-- Section 1: Buy Coins -->
         <div class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-            بسته‌های سکه
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            خرید سکه
         </div>
         
         <div class="cards-grid">
+            <!-- Pack 1 -->
             <div class="store-card coin-card">
                 <div class="card-icon-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/><text x="12" y="16" font-size="10" text-anchor="middle" fill="currentColor" font-weight="bold">$</text></svg>
                 </div>
                 <h3 class="card-title">۵,۰۰۰ سکه</h3>
                 <p class="card-price">۵۰,۰۰۰ تومان</p>
-                <button class="store-btn btn-buy-coin" onclick="handleBuyCoins(5000, 50000, this)">
-                    <span class="btn-text">خرید</span>
-                    <div class="spinner"></div>
-                </button>
+                <button class="store-btn btn-buy-coin" onclick="buyCoins(5000, 50000)">خرید</button>
             </div>
 
+            <!-- Pack 2 -->
             <div class="store-card coin-card">
                 <div class="card-icon-container">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 4H3a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-1 14H4V6h16v12z"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
                 </div>
                 <h3 class="card-title">۱۰,۰۰۰ سکه</h3>
                 <p class="card-price">۹۰,۰۰۰ تومان</p>
-                <button class="store-btn btn-buy-coin" onclick="handleBuyCoins(10000, 90000, this)">
-                    <span class="btn-text">خرید</span>
-                    <div class="spinner"></div>
-                </button>
+                <button class="store-btn btn-buy-coin" onclick="buyCoins(10000, 90000)">خرید</button>
             </div>
 
+            <!-- Pack 3 -->
             <div class="store-card coin-card">
                 <div class="card-icon-container">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2 9h19a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V9zm1-6h15v4H3V3z"/><path d="M12 17a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
                 </div>
                 <h3 class="card-title">۵۰,۰۰۰ سکه</h3>
                 <p class="card-price">۴۰۰,۰۰۰ تومان</p>
-                <button class="store-btn btn-buy-coin" onclick="handleBuyCoins(50000, 400000, this)">
-                    <span class="btn-text">خرید</span>
-                    <div class="spinner"></div>
-                </button>
+                <button class="store-btn btn-buy-coin" onclick="buyCoins(50000, 400000)">خرید</button>
             </div>
         </div>
 
-        <!-- Subscriptions -->
+        <!-- Section 2: Subscriptions -->
         <div class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:8px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-            اشتراک (پرداخت با سکه)
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:8px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            خرید اشتراک (با سکه)
         </div>
 
-        <div class="cards-grid">
-            <!-- Special -->
+        <div class="cards-grid sub-grid">
+            <!-- Special Plan -->
             <div class="store-card card-special">
                 <div class="card-icon-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
                 </div>
                 <h3 class="card-title">حساب ویژه</h3>
                 <p class="card-price">۵,۰۰۰ سکه / ماهانه</p>
-                <button class="store-btn btn-sub-special" onclick="preBuySubscription('special', 5000, 'یک ماهه')">
-                    <span class="btn-text">فعال‌سازی</span>
-                </button>
+                <button class="store-btn btn-sub-special" onclick="buySubscription('special', 5000, 'یک ماهه')">فعال‌سازی</button>
             </div>
 
-            <!-- Premium -->
+            <!-- Premium Plan 3 Months -->
             <div class="store-card card-premium">
+                <div class="premium-badge">PREMIUM</div>
                 <div class="card-icon-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
                 </div>
-                <h3 class="card-title" style="color:var(--gold-color)">پریمیوم طلایی</h3>
-                <p class="card-price">۳۰,۰۰۰ سکه / ۳ ماهه</p>
-                <button class="store-btn btn-sub-premium" onclick="preBuySubscription('premium', 30000, '۳ ماهه')">
-                    <span class="btn-text">خرید طلایی</span>
-                </button>
+                <h3 class="card-title">پریمیوم (۳ ماهه)</h3>
+                <p class="card-price" style="color:#ddd;">۳۰,۰۰۰ سکه</p>
+                <button class="store-btn btn-sub-premium" onclick="buySubscription('premium', 30000, '۳ ماهه')">خرید طلایی</button>
+            </div>
+            
+             <!-- Premium Plan 6 Months -->
+             <div class="store-card card-premium">
+                <div class="premium-badge">GOLD</div>
+                <div class="card-icon-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                </div>
+                <h3 class="card-title">پریمیوم (۶ ماهه)</h3>
+                <p class="card-price" style="color:#ddd;">۶۰,۰۰۰ سکه</p>
+                <button class="store-btn btn-sub-premium" onclick="buySubscription('premium', 60000, '۶ ماهه')">خرید طلایی</button>
             </div>
         </div>
+
     </main>
 
-    <!-- Modal -->
+    <!-- Confirmation Modal -->
     <div class="confirm-overlay" id="confirm-overlay">
         <div class="confirm-box">
             <h3 id="confirm-title">تایید خرید</h3>
-            <p id="confirm-text">...</p>
+            <p id="confirm-text">آیا مطمئن هستید؟</p>
             <div class="confirm-actions">
-                <button class="btn-confirm-no" onclick="hideConfirm()">لغو</button>
-                <button class="btn-confirm-yes" id="btn-confirm-action">
-                    <span class="btn-text">تایید</span>
-                    <div class="spinner"></div>
-                </button>
+                <button class="btn-confirm-no" id="btn-cancel">خیر</button>
+                <button class="btn-confirm-yes" id="btn-confirm">بله، خرید</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast -->
+    <!-- Toast Container -->
     <div id="toast-container"></div>
 
     <script>
-        // --- CONFIG ---
-        const PROXY_BASE = 'https://miko.freehost.io/firebase_proxy.php';
-        const SHARED_SECRET = 'miko1234';
-
-        // --- STATE ---
+        // --- Setup & Initialization ---
         let currentUser = null;
-        let clientToken = null;
-        let pendingPurchase = null;
-
-        // --- INIT ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            loadUserLocal();
-            await refreshClientToken();
-            updateUI();
+        const headerCoinDisplay = document.getElementById('header-coin-display');
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUser();
+            
+            // Back Button Logic
+            document.getElementById('back-btn').addEventListener('click', () => {
+                window.location.href = 'safe_asli.html';
+            });
         });
 
-        function loadUserLocal() {
-            const stored = localStorage.getItem('currentUser');
-            if(stored) {
-                currentUser = JSON.parse(stored);
-                // Ensure defaults
-                if(!currentUser.coins) currentUser.coins = 0;
-            } else {
-                window.location.href = 'login.html';
+        function loadUser() {
+            const storedUser = localStorage.getItem('currentUser');
+            if (!storedUser) {
+                // Not logged in
+                window.location.href = 'login.html'; 
+                return;
             }
-        }
-
-        function toPersianNum(n) {
-            return n.toString().replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
-        }
-
-        // --- AUTH & API ---
-        async function refreshClientToken() {
-            try {
-                // Request a new token from proxy
-                const res = await fetch(`${PROXY_BASE}?auth=token`, {
-                    headers: { 'X-Proxy-Secret': SHARED_SECRET }
-                });
-                const data = await res.json();
-                if(data.token) {
-                    clientToken = data.token;
-                    localStorage.setItem('firebase_token', clientToken);
-                }
-            } catch (e) {
-                console.error("Token Error:", e);
-                showToast("خطا در اتصال به سرور", "error");
-            }
-        }
-
-        async function patchUserData(updates) {
-            if (!currentUser || !currentUser.telegramId || !clientToken) return false;
-
-            const url = `${PROXY_BASE}?path=users/${currentUser.telegramId}`;
+            currentUser = JSON.parse(storedUser);
             
-            try {
-                const response = await fetch(url, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${clientToken}`,
-                        'X-User-Username': currentUser.telegramId
-                    },
-                    body: JSON.stringify(updates)
-                });
-
-                if (response.ok) {
-                    return true;
-                } else {
-                    const err = await response.json();
-                    console.error("API Error:", err);
-                    return false;
-                }
-            } catch (error) {
-                console.error("Network Error:", error);
-                return false;
-            }
+            // Initialize defaults if missing
+            if (typeof currentUser.coins !== 'number') currentUser.coins = 0;
+            if (!currentUser.accountType) currentUser.accountType = 'regular';
+            
+            updateUI();
         }
 
-        // --- COIN PURCHASE ---
-        async function handleBuyCoins(amount, price, btn) {
-            if(!currentUser) return;
+        function updateUI() {
+            // Animate number change
+            animateValue(headerCoinDisplay, parseInt(headerCoinDisplay.innerText), currentUser.coins, 1000);
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+
+        // --- Logic: Buy Coins (Simulated) ---
+        function buyCoins(amount, price) {
+            // In a real app, this would open a payment gateway.
+            showToast(`در حال انتقال به درگاه پرداخت برای خرید بسته ${amount.toLocaleString()} سکه...`, 'normal');
             
-            btn.classList.add('loading');
-            btn.disabled = true;
-
-            // Simulate Gateway
-            setTimeout(async () => {
-                const newCoins = (currentUser.coins || 0) + amount;
-                
-                // Server Update
-                const success = await patchUserData({ coins: newCoins });
-
-                if (success) {
-                    currentUser.coins = newCoins;
+            setTimeout(() => {
+                // Simulate successful payment
+                const confirm = window.confirm(`پرداخت ${price.toLocaleString()} تومان با موفقیت انجام شد (شبیه‌سازی).\n\nآیا سکه‌ها به حساب شما افزوده شود؟`);
+                if(confirm) {
+                    currentUser.coins += amount;
                     updateUI();
-                    showToast(`${toPersianNum(amount)} سکه اضافه شد!`, 'success');
-                } else {
-                    showToast('خطا در ذخیره سازی اطلاعات', 'error');
+                    showToast(`${amount.toLocaleString()} سکه به کیف پول شما اضافه شد.`, 'success');
                 }
-
-                btn.classList.remove('loading');
-                btn.disabled = false;
             }, 1500);
         }
 
-        // --- SUBSCRIPTION PURCHASE ---
-        function preBuySubscription(type, cost, label) {
-            if(!currentUser) return;
+        // --- Logic: Buy Subscription ---
+        let pendingPurchase = null;
 
+        function buySubscription(type, cost, durationText) {
             const typeName = type === 'premium' ? 'پریمیوم' : 'ویژه';
-
-            if(currentUser.accountType === type) {
-                showToast(`شما اشتراک ${typeName} دارید!`, 'error');
+            
+            if (currentUser.accountType === type) {
+                showToast(`شما در حال حاضر اشتراک ${typeName} را دارید.`, 'error');
                 return;
             }
 
-            if(currentUser.coins < cost) {
-                showToast('موجودی سکه کافی نیست', 'error');
+            if (currentUser.coins < cost) {
+                showToast('موجودی سکه کافی نیست. لطفاً ابتدا سکه بخرید.', 'error');
                 return;
             }
 
-            pendingPurchase = { type, cost, typeName, label };
-            showConfirm(`خرید اشتراک ${typeName}`, `آیا مایلید با ${toPersianNum(cost)} سکه اشتراک ${label} را فعال کنید؟`);
+            // Show Custom Confirmation Modal
+            pendingPurchase = { type, cost, typeName, durationText };
+            showConfirm(
+                `خرید اشتراک ${typeName}`,
+                `آیا مایلید اشتراک ${typeName} (${durationText}) را به قیمت ${cost.toLocaleString()} سکه خریداری کنید؟`
+            );
         }
 
-        // --- MODAL LOGIC ---
-        const overlay = document.getElementById('confirm-overlay');
-        const confirmBtn = document.getElementById('btn-confirm-action');
+        // --- Confirmation Modal Logic ---
+        const confirmOverlay = document.getElementById('confirm-overlay');
+        const confirmTitle = document.getElementById('confirm-title');
+        const confirmText = document.getElementById('confirm-text');
+        const btnConfirm = document.getElementById('btn-confirm');
+        const btnCancel = document.getElementById('btn-cancel');
 
         function showConfirm(title, text) {
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-text').innerText = text;
-            overlay.classList.add('active');
+            confirmTitle.textContent = title;
+            confirmText.textContent = text;
+            confirmOverlay.classList.add('active');
         }
 
         function hideConfirm() {
-            overlay.classList.remove('active');
+            confirmOverlay.classList.remove('active');
             pendingPurchase = null;
         }
 
-        confirmBtn.addEventListener('click', async () => {
-            if(!pendingPurchase) return;
-
-            const { type, cost, typeName } = pendingPurchase;
-            const btn = confirmBtn;
-            
-            btn.classList.add('loading');
-
-            // Logic
-            const days = type === 'premium' ? 90 : 30;
-            const expireDate = new Date();
-            expireDate.setDate(expireDate.getDate() + days);
-
-            const newCoins = currentUser.coins - cost;
-            const updates = {
-                coins: newCoins,
-                accountType: type,
-                subscriptionExpireAt: expireDate.toISOString()
-            };
-
-            const success = await patchUserData(updates);
-
-            if(success) {
-                Object.assign(currentUser, updates);
+        btnCancel.addEventListener('click', hideConfirm);
+        
+        btnConfirm.addEventListener('click', () => {
+            if (pendingPurchase) {
+                const { type, cost, typeName } = pendingPurchase;
+                
+                // Deduct coins
+                currentUser.coins -= cost;
+                // Upgrade account
+                currentUser.accountType = type;
+                
                 updateUI();
-                showToast(`اشتراک ${typeName} فعال شد`, 'success');
+                showToast(`تبریک! حساب شما به ${typeName} ارتقا یافت.`, 'success');
                 hideConfirm();
-            } else {
-                showToast('خطا در انجام عملیات', 'error');
+                
+                // Optional: Redirect back after delay
+                // setTimeout(() => window.location.href = 'safe_asli.html', 2000);
             }
-
-            btn.classList.remove('loading');
         });
 
-        // --- UI UPDATES ---
-        function updateUI() {
-            if(currentUser) {
-                const coinEl = document.getElementById('header-coin-display');
-                coinEl.innerText = toPersianNum((currentUser.coins || 0).toLocaleString());
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            }
-        }
+        // --- Utilities ---
+        function showToast(message, type = 'normal') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            // Trigger reflow
+            void toast.offsetWidth; 
+            toast.classList.add('show');
 
-        function showToast(msg, type) {
-            const c = document.getElementById('toast-container');
-            const t = document.createElement('div');
-            t.className = `toast ${type}`;
-            t.innerText = msg;
-            c.appendChild(t);
-            setTimeout(()=> t.classList.add('show'), 10);
-            setTimeout(()=> {
-                t.classList.remove('show');
-                setTimeout(()=> t.remove(), 300);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
     </script>
 </body>
 </html>
