@@ -25,6 +25,7 @@
             --skeleton-highlight: #2A2A2A;
             --shadow-color: rgba(0, 0, 0, 0.2);
             --danger-color: #e53935;
+            --warning-color: #f57c00; /* START: Task 1 Color */
             --modal-backdrop-color: rgba(0, 0, 0, 0.5);
         }
 
@@ -476,7 +477,8 @@
             cursor: pointer; transition: background-color 0.2s; font-size: 1em;
             border-radius: 8px;
         }
-        .menu-option:hover { background-color: rgba(255,255,255,0.1); }
+        .menu-option:hover:not(:disabled) { background-color: rgba(255,255,255,0.1); }
+        .menu-option:disabled { opacity: 0.5; cursor: not-allowed; }
         .menu-option.danger { color: var(--danger-color); }
         .menu-option svg { margin-left: 15px; }
         .menu-divider { height: 1px; background-color: var(--border-color); margin: 8px 0; }
@@ -525,6 +527,18 @@
         #block-user-btn:hover { background-color: var(--danger-color); color: white; }
         #block-user-btn.unblock { border-color: var(--primary-color); color: var(--primary-color); }
         #block-user-btn.unblock:hover { background-color: var(--primary-color); color: white; }
+
+        /* START: Task 1 HTML Button Style */
+        #report-user-btn {
+            background-color: transparent; border: 1px solid var(--warning-color); color: var(--warning-color);
+            padding: 10px 20px; border-radius: 8px; cursor: pointer;
+            font-family: 'Vazirmatn', sans-serif; font-size: 0.95em; margin-top: 10px;
+            width: 100%; transition: background-color 0.2s, color 0.2s, opacity 0.2s;
+        }
+        #report-user-btn:hover:not(:disabled) { background-color: var(--warning-color); color: white; }
+        #report-user-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        /* END: Task 1 HTML Button Style */
+
 
         .dialog-card { text-align: center; }
         .dialog-card h4 { font-size: 1.2em; margin-bottom: 10px; }
@@ -704,6 +718,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 <span>تنظیمات</span>
             </div>
+            <!-- START: Task 2 HTML Modification -->
+            <div class="menu-option" id="rate-user-btn" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <span>امتیاز به کاربر</span>
+            </div>
+            <!-- END: Task 2 HTML Modification -->
         </div>
     </div>
 
@@ -779,6 +799,9 @@
             </ul>
             <button id="profile-follow-btn">دنبال کردن</button>
             <button id="block-user-btn">مسدود کردن کاربر</button>
+            <!-- START: Task 1 HTML Modification -->
+            <button id="report-user-btn">گزارش تخلف</button>
+            <!-- END: Task 1 HTML Modification -->
         </div>
     </div>
 
@@ -1013,6 +1036,12 @@
         const stickerPanelOverlay = document.getElementById('sticker-panel-overlay');
         const stickerGrid = document.getElementById('sticker-grid');
         const closeStickerPanelBtn = document.getElementById('close-sticker-panel-btn');
+        // START: Task 1 JS Variables
+        const reportUserBtn = document.getElementById('report-user-btn');
+        // END: Task 1 JS Variables
+        // START: Task 2 JS Variables
+        const rateUserBtn = document.getElementById('rate-user-btn');
+        // END: Task 2 JS Variables
 
         const cacheManager = new CacheManager();
         const activeControllers = new Map();
@@ -1192,6 +1221,14 @@
             closeStickerPanelBtn.addEventListener('click', closeStickerPanel);
             stickerGrid.addEventListener('click', handleStickerClick);
 
+            // START: Task 1 Event Listener
+            reportUserBtn.addEventListener('click', handleReportUser);
+            // END: Task 1 Event Listener
+
+            // START: Task 2 Event Listener
+            rateUserBtn.addEventListener('click', handleRateUser);
+            // END: Task 2 Event Listener
+
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 overlay.addEventListener('click', (e) => {
                     if (e.target === overlay) {
@@ -1299,6 +1336,89 @@
                 console.error(error);
             }
         }
+
+        // START: Task 1 - Report User Function
+        /**
+         * Handles the user report functionality.
+         */
+        async function handleReportUser() {
+            if (reportUserBtn.disabled) return; // Prevent multiple clicks
+
+            hideModal(profileOverlay); // Close profile modal first
+            const reason = await showCustomPrompt({
+                title: 'گزارش کاربر',
+                message: `لطفاً دلیل گزارش تخلف برای کاربر ${chatPartner.displayName} را به طور خلاصه بنویسید.`
+            });
+
+            if (reason && reason.trim()) {
+                const reportPayload = {
+                    reporter: currentUser.username,
+                    reportedUser: chatPartner.username,
+                    reason: reason.trim()
+                };
+
+                try {
+                    await apiRequest('reports', 'POST', reportPayload);
+                    showCustomAlert({
+                        title: 'گزارش ثبت شد',
+                        message: 'گزارش شما با موفقیت ثبت شد و توسط تیم پشتیبانی بررسی خواهد شد. از همکاری شما متشکریم.'
+                    });
+                    // Disable button to prevent duplicate reports in the same session
+                    reportUserBtn.disabled = true;
+                    reportUserBtn.textContent = 'گزارش ثبت شد';
+                } catch (error) {
+                    console.error('Failed to submit report:', error);
+                    showCustomAlert({
+                        title: 'خطا',
+                        message: 'متاسفانه در ثبت گزارش شما مشکلی پیش آمد. لطفاً دوباره تلاش کنید.'
+                    });
+                }
+            }
+        }
+        // END: Task 1 - Report User Function
+
+        // START: Task 2 - Rate User Function
+        /**
+         * Handles the user rating functionality.
+         */
+        async function handleRateUser(e) {
+            if (e.currentTarget.disabled) return; // Prevent action if already rated
+
+            hideModal(mainOptionsOverlay); // Close main options modal
+            const ratingValue = await showCustomPrompt({
+                title: 'امتیاز به کاربر',
+                message: `لطفاً عملکرد و رفتار ${chatPartner.displayName} را با امتیازی بین ۱ تا ۱۰ ارزیابی کنید.`
+            });
+
+            if (ratingValue === null) return; // User cancelled the prompt
+
+            const rating = parseInt(ratingValue, 10);
+            if (isNaN(rating) || rating < 1 || rating > 10) {
+                showCustomAlert({
+                    title: 'ورودی نامعتبر',
+                    message: 'لطفاً یک عدد صحیح بین ۱ تا ۱۰ وارد کنید.'
+                });
+                return;
+            }
+
+            try {
+                await apiRequest(`pivi_chats/${chatId}/ratings/${currentUser.username}`, 'PUT', String(rating));
+                showCustomAlert({
+                    title: 'ثبت شد',
+                    message: 'امتیاز شما با موفقیت ثبت شد. از شما متشکریم!'
+                });
+                // Update button state immediately
+                rateUserBtn.disabled = true;
+                rateUserBtn.querySelector('span').textContent = 'امتیاز شما ثبت شده';
+            } catch (error) {
+                console.error('Failed to submit rating:', error);
+                showCustomAlert({
+                    title: 'خطا',
+                    message: 'متاسفانه در ثبت امتیاز شما مشکلی پیش آمد. لطفاً دوباره تلاش کنید.'
+                });
+            }
+        }
+        // END: Task 2 - Rate User Function
         
         async function refreshClientToken() {
             try {
@@ -1326,6 +1446,27 @@
                 const chatData = await apiRequest(`pivi_chats/${chatId}`, 'GET');
                 updatePinnedMessageUI(chatData ? chatData.pinnedMessage : null);
                 const messagesData = chatData ? chatData.messages : {};
+
+                // START: Task 2 - Rating System Logic
+                if (chatData && chatData.createdAt) {
+                    const THREE_DAYS_MS = 259200000;
+                    const timeDiff = Date.now() - new Date(chatData.createdAt).getTime();
+                    
+                    if (timeDiff > THREE_DAYS_MS) {
+                        rateUserBtn.style.display = 'flex'; // Show the button
+                        const hasRated = chatData.ratings && chatData.ratings[currentUser.username];
+                        if (hasRated) {
+                            rateUserBtn.disabled = true;
+                            rateUserBtn.querySelector('span').textContent = 'امتیاز شما ثبت شده';
+                        } else {
+                            rateUserBtn.disabled = false;
+                            rateUserBtn.querySelector('span').textContent = 'امتیاز به کاربر';
+                        }
+                    } else {
+                        rateUserBtn.style.display = 'none'; // Keep it hidden if not enough time has passed
+                    }
+                }
+                // END: Task 2 - Rating System Logic
                 
                 if (isInitialLoad && Object.keys(messagesData).length === 0) {
                     messagesArea.innerHTML = `<div style="text-align:center; color: var(--text-secondary);"><p>هنوز پیامی رد و بدل نشده است.</p></div>`;
