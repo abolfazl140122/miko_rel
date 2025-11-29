@@ -108,6 +108,25 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* استایل‌های جدید برای پست طلایی */
+        .post-card.golden-post {
+            border-right: 4px solid var(--gold-color);
+            border-left: 1px solid var(--gold-color);
+            border-top: 1px solid var(--gold-color);
+            border-bottom: 1px solid var(--gold-color);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.15);
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.05), transparent 30%);
+        }
+
+        .golden-post .username::before {
+            content: '👑';
+            margin-left: 8px;
+            font-size: 1rem;
+            filter: drop-shadow(0 0 4px var(--gold-color));
+            vertical-align: middle;
+            padding-bottom: 4px; /* برای تنظیم عمودی بهتر */
+        }
+
         .post-header { padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; }
         .user-info { display: flex; align-items: center; gap: 10px; }
         .user-avatar {
@@ -739,7 +758,16 @@
         function preparePostsArray(data) {
              return Object.entries(data)
                 .map(([key, val]) => ({ id: key, ...val }))
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                .sort((a, b) => {
+                    const aIsGolden = a.isGolden === true;
+                    const bIsGolden = b.isGolden === true;
+
+                    if (aIsGolden && !bIsGolden) return -1;
+                    if (!aIsGolden && bIsGolden) return 1;
+
+                    // اگر هر دو یکسان بودند، بر اساس زمان مرتب کن
+                    return new Date(b.timestamp) - new Date(a.timestamp);
+                });
         }
 
         // --- VIDEO LOGIC ---
@@ -930,6 +958,10 @@
                 comments_disabled: false // Default enabled
             };
 
+            if (currentUser.accountType === 'premium') {
+                postData.isGolden = true;
+            }
+
             try {
                 await fetch(`${PROXY_URL}?path=rubino_posts`, {
                     method: 'POST',
@@ -996,6 +1028,11 @@
 
                     const postEl = document.createElement('div');
                     postEl.className = 'post-card';
+
+                    if (post.isGolden) {
+                        postEl.classList.add('golden-post');
+                    }
+
                     postEl.id = `post-${post.id}`;
                     
                     postEl.innerHTML = `
