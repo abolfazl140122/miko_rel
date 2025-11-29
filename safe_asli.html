@@ -143,6 +143,14 @@
             top: 0;
             z-index: 50;
         }
+        
+        /* [NEW] Header grouping for title and coin */
+        .header-main-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .app-header h1 {
             font-size: 1.8em;
             margin: 0;
@@ -150,6 +158,36 @@
             text-shadow: 0 0 8px rgba(0, 163, 255, 0.4);
             letter-spacing: 0.5px;
         }
+
+        /* [NEW - Task 1] Coin Balance Styles */
+        .coin-balance {
+            display: flex;
+            align-items: center;
+            background-color: var(--secondary-hover);
+            border-radius: 20px;
+            padding: 5px 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .coin-balance:hover {
+            background-color: #3f454f;
+        }
+        .coin-amount {
+            font-weight: 700;
+            color: var(--gold-color);
+            margin-left: 6px;
+            font-size: 1em;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        .coin-icon-header {
+            width: 20px;
+            height: 20px;
+            color: var(--gold-color);
+            filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.6));
+        }
+
         .search-container {
             display: flex;
             align-items: center;
@@ -158,6 +196,8 @@
             padding: 8px 15px;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
             transition: all 0.3s ease;
+            flex-shrink: 1; /* Allow shrinking */
+            min-width: 40px; /* Prevent it from disappearing */
         }
         .search-container:focus-within {
              box-shadow: 0 0 0 2px var(--primary-color), inset 0 2px 4px rgba(0,0,0,0.6);
@@ -168,13 +208,13 @@
             color: var(--text-primary);
             font-family: 'Vazirmatn', sans-serif;
             outline: none;
-            width: 120px;
+            width: 80px; /* Adjusted width */
             transition: width 0.3s ease, padding 0.3s ease;
             text-align: right;
             padding-right: 5px;
         }
         .search-container input:focus {
-            width: 180px;
+            width: 120px; /* Adjusted focus width */
         }
         .search-container svg {
             color: var(--text-secondary);
@@ -561,6 +601,42 @@
             margin-top: 5px;
             font-size: 1em;
             color: var(--text-secondary);
+        }
+
+        /* [NEW - Task 3] Account Level Badge Styles */
+        #profile-account-level {
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .level-regular {
+            color: var(--text-secondary);
+            background-color: var(--secondary-hover);
+        }
+        .level-special {
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            background-color: rgba(0, 163, 255, 0.1);
+            text-shadow: 0 0 5px rgba(0, 163, 255, 0.3);
+        }
+        .level-premium {
+            background: linear-gradient(45deg, #FFD700, #F0C500);
+            color: #161B22; /* Dark text for contrast */
+            border: 1px solid #FFC400;
+            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.4);
+            font-weight: 700;
+        }
+        .level-premium svg {
+            width: 16px;
+            height: 16px;
+            margin-left: 6px;
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
         }
 
         /* --- Profile Stats & Blur Effect --- */
@@ -1066,7 +1142,16 @@
     <div class="app-container" id="app-container">
         <!-- TOP BAR with search -->
         <header class="app-header">
-            <h1>همیار</h1>
+            <div class="header-main-info">
+                <h1>همیار</h1>
+                <!-- Task 1: Coin Balance Display -->
+                <div class="coin-balance">
+                    <span class="coin-amount" id="header-coin-display">0</span>
+                    <svg class="coin-icon-header" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1-6v2h2v-2h1a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-1V8h2V6h-2V4h-2v2h-1a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h1v2h-2v2h2v2h2v-2h1z"/>
+                    </svg>
+                </div>
+            </div>
             <div class="search-container">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input type="text" id="search-input" placeholder="جستجو...">
@@ -1090,19 +1175,23 @@
 
         <!-- BOTTOM NAVIGATION BAR -->
         <footer class="main-footer">
-            <button class="nav-btn" id="nav-profile-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <span>پروفایل</span>
+            <!-- Task 2: Reordered buttons and added Store button -->
+            <button class="nav-btn active" id="nav-chats-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>چت‌ها</span>
             </button>
             <button class="nav-btn" id="nav-people-btn">
                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 <span>افراد</span>
             </button>
-            <button class="nav-btn active" id="nav-chats-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span>چت‌ها</span>
+            <button class="nav-btn" id="nav-store-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                <span>فروشگاه</span>
             </button>
-            <!-- Modified RUBINO Button -->
              <button class="nav-btn" id="nav-rubino-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
@@ -1110,6 +1199,10 @@
                     <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                 </svg>
                 <span>روبینو</span>
+            </button>
+            <button class="nav-btn" id="nav-profile-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>پروفایل</span>
             </button>
         </footer>
 
@@ -1144,6 +1237,9 @@
             <main class="profile-content">
                 <h3 id="profile-display-name"></h3>
                 <p id="profile-username"></p>
+
+                <!-- Task 3: Account Level Badge -->
+                <div id="profile-account-level"></div>
 
                 <!-- Follow Stats -->
                 <div class="profile-stats">
@@ -1402,6 +1498,14 @@
                 });
             }
 
+            // [NEW - Task 2] Store Button Listener
+            const storeBtn = document.getElementById('nav-store-btn');
+            if (storeBtn) {
+                storeBtn.addEventListener('click', () => {
+                    window.location.href = 'فروشگاه.html';
+                });
+            }
+
             searchInput.addEventListener('input', handleSearch);
             searchTabsContainer.addEventListener('click', handleTabSwitch);
             openProfileBtn.addEventListener('click', () => openUserProfile(currentUser.username));
@@ -1510,6 +1614,7 @@
 
                 renderChatList();
                 updateRewardBanner(); // Call the banner update function
+                updateHeaderCoinDisplay(); // [NEW - Task 1] Update coin display on initial load
                 startRealtimeUpdates();
 
             } catch (error) {
@@ -1520,6 +1625,15 @@
                 }
             } finally {
                 hideSkeleton(); // Hide the skeleton when done or failed
+            }
+        }
+        
+        // [NEW - Task 1] Function to update coin display
+        function updateHeaderCoinDisplay() {
+            const coinDisplay = document.getElementById('header-coin-display');
+            if (coinDisplay && currentUser) {
+                const userCoins = currentUser.coins || 0;
+                coinDisplay.textContent = parseInt(userCoins).toLocaleString('fa-IR');
             }
         }
 
@@ -1786,6 +1900,33 @@
             profileDisplayName.innerHTML = `${userData.displayName || userData.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${userData.username}`;
             
+            // [NEW - Task 3] Update Account Level Badge
+            const levelBadge = document.getElementById('profile-account-level');
+            if (levelBadge) {
+                levelBadge.className = 'account-level-badge'; // Reset classes, add base class
+                levelBadge.innerHTML = ''; // Clear previous content
+                levelBadge.style.display = 'inline-flex';
+
+                switch (userData.accountType) {
+                    case 'premium':
+                        levelBadge.classList.add('level-premium');
+                        levelBadge.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1h14v1z"></path></svg>
+                            <span>کاربر پریمیوم</span>
+                        `;
+                        break;
+                    case 'special':
+                        levelBadge.classList.add('level-special');
+                        levelBadge.textContent = 'کاربر ویژه';
+                        break;
+                    default:
+                        levelBadge.classList.add('level-regular');
+                        levelBadge.textContent = 'کاربر عادی';
+                        break;
+                }
+            }
+
+
             profileFollowersCount.classList.add('loading-blur');
             profileFollowingCount.classList.add('loading-blur');
             profileFollowersCount.textContent = '0';
@@ -2222,6 +2363,7 @@
                             currentUser = mergedUser;
                             localStorage.setItem('currentUser', JSON.stringify(currentUser));
                             updateRewardBanner(); // Update banner if user data changed
+                            updateHeaderCoinDisplay(); // [NEW - Task 1] Update coin display on poll
                         }
                     }
                     needsUIRefresh = true;
