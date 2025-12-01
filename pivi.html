@@ -797,10 +797,10 @@
                 <li id="p-location" style="display: none;">منطقه زندگی: <strong id="p-location-value"></strong></li>
                 <!-- END: Task 1 HTML Modification -->
             </ul>
-            <button id="profile-follow-btn">دنبال کردن</button>
-            <button id="block-user-btn">مسدود کردن کاربر</button>
+            <button type="button" id="profile-follow-btn">دنبال کردن</button>
+            <button type="button" id="block-user-btn">مسدود کردن کاربر</button>
             <!-- START: Task 1 HTML Modification -->
-            <button id="report-user-btn">گزارش تخلف</button>
+            <button type="button" id="report-user-btn">گزارش تخلف</button>
             <!-- END: Task 1 HTML Modification -->
         </div>
     </div>
@@ -2161,6 +2161,7 @@
             }
         }
 
+        // START: Follow/Unfollow Implementation
         async function checkFollowStatus(targetUsername) {
             if (!currentUser || !targetUsername) return;
             profileFollowBtn.disabled = true;
@@ -2189,6 +2190,7 @@
             profileFollowBtn.disabled = true;
             const isCurrentlyFollowing = profileFollowBtn.classList.contains('following');
             
+            // 1. Optimistic UI Update
             if (isCurrentlyFollowing) {
                 profileFollowBtn.classList.remove('following');
                 profileFollowBtn.textContent = 'دنبال کردن';
@@ -2198,17 +2200,21 @@
             }
 
             try {
-                const valueToSet = isCurrentlyFollowing ? null : true;
+                // 2. Prepare API Payload
+                const valueToSet = isCurrentlyFollowing ? null : true; // null deletes the key
                 const payload = {
                     [`following/${currentUser.username}/${targetUsername}`]: valueToSet,
                     [`followers/${targetUsername}/${currentUser.username}`]: valueToSet,
                 };
 
+                // 3. Send Request
                 await apiRequest('/', 'PATCH', payload);
                 
             } catch (error) {
                 console.error("Failed to toggle follow:", error);
                 showCustomAlert({ title: 'خطا', message: `خطا در عملیات: ${error.message}` });
+
+                // 4. Revert UI on error
                 if (isCurrentlyFollowing) {
                     profileFollowBtn.classList.add('following');
                     profileFollowBtn.textContent = 'دنبال می‌کنید';
@@ -2217,9 +2223,11 @@
                     profileFollowBtn.textContent = 'دنبال کردن';
                 }
             } finally {
+                // 5. Re-enable button
                 profileFollowBtn.disabled = false;
             }
         }
+        // END: Follow/Unfollow Implementation
 
     </script>
 </body>
