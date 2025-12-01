@@ -108,115 +108,24 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        
-        /*
-        ================================================================
-          ✅ بخش بازنویسی شده: طراحی جدید و پریمیوم برای پست‌های طلایی
-        ================================================================
-        */
-
-        /* انیمیشن برای درخشش و ضربان نرم کارت */
-        @keyframes pulse-glow {
-          0%, 100% {
-            box-shadow: 0 0 15px -5px rgba(255, 215, 0, 0.4), 0 0 40px -15px rgba(255, 215, 0, 0.2);
-          }
-          50% {
-            box-shadow: 0 0 25px -5px rgba(255, 215, 0, 0.6), 0 0 50px -15px rgba(255, 215, 0, 0.4);
-          }
-        }
-
-        /* انیمیشن برای چرخش گرادینت حاشیه */
-        @keyframes animated-border-glow {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-
-        /* استایل اصلی و بازطراحی شده برای کارت پست طلایی */
+        /* استایل‌های جدید برای پست طلایی */
         .post-card.golden-post {
-          position: relative; /* برای قرارگیری صحیح حاشیه متحرک */
-          overflow: hidden;   /* برای پنهان کردن بخش‌های اضافی گرادینت */
-          border: none; /* حذف حاشیه‌های ثابت قبلی */
-          
-          /* پس‌زمینه با یک گرادینت شعاعی زیبا در بالا */
-          background: radial-gradient(circle at 50% 0%, rgba(255, 215, 0, 0.1), transparent 40%), var(--background-color);
-          
-          /* اعمال انیمیشن درخشش ضربان‌دار */
-          animation: pulse-glow 4s ease-in-out infinite;
-          
-          /* آماده‌سازی برای افکت هاور */
-          transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+            border-right: 4px solid var(--gold-color);
+            border-left: 1px solid var(--gold-color);
+            border-top: 1px solid var(--gold-color);
+            border-bottom: 1px solid var(--gold-color);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.15);
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.05), transparent 30%);
         }
 
-        /* ایجاد حاشیه گرادینت متحرک با استفاده از شبه‌المان ::before */
-        .post-card.golden-post::before {
-          content: '';
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          z-index: 0; /* در لایه‌ی زیرین محتوا قرار می‌گیرد */
-          
-          /* گرادینت مخروطی که با چرخش، افکت حاشیه درخشان را ایجاد می‌کند */
-          background: conic-gradient(
-            transparent,
-            rgba(255, 215, 0, 0.6),
-            transparent 30%
-          );
-          
-          /* اعمال انیمیشن چرخش */
-          animation: animated-border-glow 6s linear infinite;
-        }
-
-        /* ایجاد یک لایه داخلی برای پوشاندن گرادینت و نمایش محتوا */
-        .post-card.golden-post::after {
-          content: '';
-          position: absolute;
-          inset: 1.5px; /* ضخامت حاشیه را تعیین می‌کند */
-          background: var(--background-color);
-          z-index: 1; /* روی گرادینت و زیر محتوای اصلی */
-          border-radius: inherit; /* اگر کارت اصلی گوشه‌های گرد داشت */
-        }
-
-        /* اطمینان از اینکه تمام محتوای کارت روی حاشیه متحرک قرار می‌گیرد */
-        .post-card.golden-post > * {
-          position: relative;
-          z-index: 2;
-        }
-
-
-        /* بهبود آیکون تاج در کنار نام کاربری */
         .golden-post .username::before {
-          content: '👑';
-          margin-left: 10px;
-          font-size: 1.3rem; /* کمی بزرگ‌تر برای جلب توجه بیشتر */
-          vertical-align: middle;
-          padding-bottom: 6px; /* تنظیم دقیق‌تر موقعیت عمودی */
-          
-          /* درخشش قوی‌تر و زیباتر با text-shadow */
-          text-shadow: 0 0 6px var(--gold-color), 0 0 12px rgba(255, 215, 0, 0.5);
-          
-          /* انیمیشن ساده برای جذابیت بیشتر */
-          display: inline-block;
-          transition: transform 0.3s ease;
+            content: '👑';
+            margin-left: 8px;
+            font-size: 1rem;
+            filter: drop-shadow(0 0 4px var(--gold-color));
+            vertical-align: middle;
+            padding-bottom: 4px; /* برای تنظیم عمودی بهتر */
         }
-
-        /* افکت هاور زیبا و ظریف برای کارت طلایی */
-        .post-card.golden-post:hover {
-          transform: translateY(-6px) scale(1.01); /* کمی به بالا حرکت کرده و بزرگ می‌شود */
-          box-shadow: 0 10px 35px -5px rgba(255, 215, 0, 0.5); /* درخشش بیشتر هنگام هاور */
-        }
-
-        /* افکت هاور برای آیکون تاج */
-        .post-card.golden-post:hover .username::before {
-            transform: rotate(-15deg) scale(1.1);
-        }
-        /* =================== پایان بخش بازنویسی شده =================== */
-
 
         .post-header { padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; }
         .user-info { display: flex; align-items: center; gap: 10px; }
