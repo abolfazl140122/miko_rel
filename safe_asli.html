@@ -20,6 +20,7 @@
             --notification-badge: #FF4D4D;
             --success-color: #28a745;
             --error-color: #dc3545;
+            --warning-color: #ffc107; /* For pending status */
             --shadow-light: rgba(45, 50, 56, 0.1);
             --shadow-dark: rgba(0, 0, 0, 0.6);
             --profile-card-bg: #1B212A;
@@ -144,7 +145,6 @@
             z-index: 50;
         }
         
-        /* [NEW] Header grouping for title and coin */
         .header-main-info {
             display: flex;
             align-items: center;
@@ -159,7 +159,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* [NEW - Task 1] Coin Balance Styles */
         .coin-balance {
             display: flex;
             align-items: center;
@@ -221,15 +220,38 @@
             margin-right: 5px;
         }
         
-        /* --- [NEW] Reward Banner --- */
+        /* --- [MODIFIED] Reward Banner --- */
         #reward-banner {
+            display: none; /* Hidden by default */
             background: linear-gradient(90deg, #1E90FF, #00A3FF);
             color: white;
-            padding: 10px 15px;
-            text-align: center;
+            padding: 12px 20px;
             font-size: 0.9em;
-            display: none; /* Hidden by default */
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 10px;
             border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 163, 255, 0.2);
+            transition: all 0.3s ease;
+            z-index: 40; /* Ensure it's above content */
+        }
+
+        #reward-banner.clickable {
+            cursor: pointer;
+        }
+
+        #reward-banner.clickable:hover {
+            background: linear-gradient(90deg, #1a7bde, #008bd9);
+            transform: scale(1.01);
+        }
+
+        #reward-banner svg {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0; /* Prevent icon from shrinking */
         }
 
         /* --- Search Tabs --- */
@@ -603,7 +625,6 @@
             color: var(--text-secondary);
         }
 
-        /* [NEW - Task 3] Account Level Badge Styles */
         #profile-account-level {
             margin-top: 12px;
             display: inline-flex;
@@ -639,7 +660,6 @@
             filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
         }
 
-        /* --- Profile Stats & Blur Effect --- */
         .profile-stats {
             display: flex;
             justify-content: center;
@@ -662,7 +682,6 @@
             font-size: 1.3em;
             font-weight: 700;
             color: var(--text-primary);
-            /* Transition for blur effect */
             transition: filter 0.6s ease-out, opacity 0.6s ease-out; 
         }
         .stat-label {
@@ -670,14 +689,12 @@
             color: var(--text-secondary);
         }
 
-        /* --- BLUR CLASS (Dynamic) --- */
         .loading-blur {
             filter: blur(8px);
             opacity: 0.6;
             pointer-events: none; /* Prevent clicks while loading */
         }
 
-        /* --- Follow Button --- */
         .follow-btn {
             width: 80%;
             max-width: 250px;
@@ -758,10 +775,10 @@
         #logout-btn:hover { background-color: rgba(255, 77, 77, 0.1); transform: translateX(3px); }
 
         /* ==============================================
-           --- User List Modal (Followers/Following) --- 
+           --- User/Viewers/Reports List Modal (Combined) --- 
            ==============================================
         */
-        .user-list-overlay, .viewers-list-overlay { /* Combined styles for modals */
+        .user-list-overlay, .viewers-list-overlay, .reports-overlay { 
             position: fixed;
             top: 0;
             left: 0;
@@ -776,11 +793,11 @@
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .user-list-overlay.active, .viewers-list-overlay.active {
+        .user-list-overlay.active, .viewers-list-overlay.active, .reports-overlay.active {
             opacity: 1;
             visibility: visible;
         }
-        .user-list-modal, .viewers-list-modal { /* Combined styles for modals */
+        .user-list-modal, .viewers-list-modal, .reports-modal { 
             width: 100%;
             max-width: 420px;
             height: 80vh; /* 80% of screen height */
@@ -793,10 +810,10 @@
             transform: translateY(100%);
             transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .user-list-overlay.active .user-list-modal, .viewers-list-overlay.active .viewers-list-modal {
+        .user-list-overlay.active .user-list-modal, .viewers-list-overlay.active .viewers-list-modal, .reports-overlay.active .reports-modal {
             transform: translateY(0);
         }
-        .user-list-header, .viewers-list-header { /* Combined styles for modals */
+        .user-list-header, .viewers-list-header, .reports-header { 
             padding: 15px 20px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
@@ -806,12 +823,12 @@
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
         }
-        .user-list-header h3, .viewers-list-header h3 { /* Combined styles for modals */
+        .user-list-header h3, .viewers-list-header h3, .reports-header h3 {
             margin: 0;
             font-size: 1.2em;
             color: var(--text-primary);
         }
-        .user-list-close, .viewers-list-close { /* Combined styles for modals */
+        .user-list-close, .viewers-list-close, .reports-close { 
             background: none;
             border: none;
             color: var(--text-secondary);
@@ -819,14 +836,43 @@
             cursor: pointer;
             line-height: 1;
         }
-        .user-list-content, .viewers-list-content { /* Combined styles for modals */
+        .user-list-content, .viewers-list-content, .reports-list-content { 
             flex-grow: 1;
             overflow-y: auto;
             padding: 0;
         }
         .user-list-item {
-            /* Inherits basic style from chat-item */
             border-bottom: 1px solid var(--border-color);
+        }
+        
+        /* [NEW] Reports List Item Styles */
+        .report-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .report-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .report-reason {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: var(--text-primary);
+        }
+        .report-status {
+            font-size: 0.9em;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: 500;
+        }
+        .report-status.pending { background-color: rgba(255, 193, 7, 0.1); color: var(--warning-color); border: 1px solid var(--warning-color); }
+        .report-status.approved { background-color: rgba(40, 167, 69, 0.1); color: var(--success-color); border: 1px solid var(--success-color); }
+        .report-status.rejected { background-color: rgba(220, 53, 69, 0.1); color: var(--error-color); border: 1px solid var(--error-color); }
+        .report-date {
+            font-size: 0.85em;
+            color: var(--text-secondary);
         }
 
         /* ==============================================
@@ -1144,7 +1190,6 @@
         <header class="app-header">
             <div class="header-main-info">
                 <h1>همیار</h1>
-                <!-- Task 1: Coin Balance Display -->
                 <div class="coin-balance">
                     <span class="coin-amount" id="header-coin-display">0</span>
                     <svg class="coin-icon-header" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -1158,8 +1203,11 @@
             </div>
         </header>
 
-        <!-- [NEW] Reward Banner HTML -->
-        <div id="reward-banner"></div>
+        <!-- [MODIFIED] Reward Banner HTML -->
+        <div id="reward-banner">
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"></path></svg>
+             <span id="reward-banner-text"></span>
+        </div>
 
         <!-- Search Tabs -->
         <div class="search-tabs" id="search-tabs">
@@ -1175,7 +1223,6 @@
 
         <!-- BOTTOM NAVIGATION BAR -->
         <footer class="main-footer">
-            <!-- Task 2: Reordered buttons and added Store button -->
             <button class="nav-btn active" id="nav-chats-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 <span>چت‌ها</span>
@@ -1238,10 +1285,8 @@
                 <h3 id="profile-display-name"></h3>
                 <p id="profile-username"></p>
 
-                <!-- Task 3: Account Level Badge -->
                 <div id="profile-account-level"></div>
 
-                <!-- Follow Stats -->
                 <div class="profile-stats">
                     <div class="stat-item" id="stat-followers-btn">
                         <span class="stat-count" id="profile-followers-count">0</span>
@@ -1253,7 +1298,6 @@
                     </div>
                 </div>
                 
-                <!-- Follow/Unfollow Button -->
                 <button class="follow-btn" id="profile-follow-btn">دنبال کردن</button>
 
                 <ul class="profile-actions">
@@ -1261,11 +1305,10 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         <span>ویرایش پروفایل</span>
                     </li>
-                    <li id="settings-btn"> <!-- Added ID for Settings Button -->
+                    <li id="settings-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                         <span>تنظیمات</span>
                     </li>
-                    <!-- [NEW] Profile Viewers Button -->
                     <li id="viewers-btn" style="display: none;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         <span>بازدیدکنندگان پروفایل</span>
@@ -1302,7 +1345,6 @@
                     <input type="text" id="edit-username" placeholder="آیدی شما" title="آیدی قابل تغییر نیست" readonly disabled>
                 </div>
 
-                <!-- [NEW] Premium-only fields -->
                 <div class="form-group">
                     <label for="edit-bio-beliefs">عقاید</label>
                     <input type="text" id="edit-bio-beliefs" placeholder="عقاید خود را بنویسید">
@@ -1326,7 +1368,7 @@
         </div>
     </div>
 
-    <!-- [NEW] Settings Modal for Password Change -->
+    <!-- Settings Modal for Password Change -->
     <div class="edit-profile-modal" id="settings-modal">
         <div class="modal-content">
             <h2>تغییر رمز عبور</h2>
@@ -1362,12 +1404,11 @@
                 <button class="user-list-close" id="user-list-close">&times;</button>
             </div>
             <div class="user-list-content" id="user-list-content">
-                <!-- User items will be injected here -->
             </div>
         </div>
     </div>
     
-    <!-- [NEW] Profile Viewers Modal -->
+    <!-- Profile Viewers Modal -->
     <div class="viewers-list-overlay" id="viewers-list-overlay">
         <div class="viewers-list-modal">
             <div class="viewers-list-header">
@@ -1375,7 +1416,19 @@
                 <button class="viewers-list-close" id="viewers-list-close">&times;</button>
             </div>
             <div class="viewers-list-content" id="viewers-list-content">
-                <!-- Viewers list will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- [NEW] Reports Modal -->
+    <div class="reports-overlay" id="reports-overlay">
+        <div class="reports-modal" id="reports-modal">
+            <div class="reports-header">
+                <h3>لیست گزارش‌ها</h3>
+                <button class="reports-close" id="reports-close">&times;</button>
+            </div>
+            <div class="reports-list-content" id="reports-list-content">
+                <!-- Report items will be injected here -->
             </div>
         </div>
     </div>
@@ -1392,12 +1445,16 @@
         const mainContent = document.getElementById('main-content');
         const searchInput = document.getElementById('search-input');
         const searchTabsContainer = document.getElementById('search-tabs');
-        const rewardBanner = document.getElementById('reward-banner'); // New Banner
+        
+        // Banner Elements
+        const rewardBanner = document.getElementById('reward-banner');
+        const rewardBannerText = document.getElementById('reward-banner-text');
         
         // Skeleton Loader Elements
         const skeletonLoader = document.getElementById('skeleton-loader');
         const appContainer = document.getElementById('app-container');
         
+        // Profile Elements
         const profileOverlay = document.getElementById('profile-overlay');
         const openProfileBtn = document.getElementById('nav-profile-btn');
         const closeProfileBtn = document.getElementById('close-profile-btn');
@@ -1405,8 +1462,6 @@
         const profileImage = document.getElementById('profile-image');
         const profileDisplayName = document.getElementById('profile-display-name');
         const profileUsername = document.getElementById('profile-username');
-        
-        // Profile Elements
         const profileFollowersCount = document.getElementById('profile-followers-count');
         const profileFollowingCount = document.getElementById('profile-following-count');
         const profileFollowBtn = document.getElementById('profile-follow-btn');
@@ -1426,11 +1481,9 @@
         const pfpUploadInput = document.getElementById('pfp-upload-input');
         const editDisplayNameInput = document.getElementById('edit-display-name');
         const editUsernameInput = document.getElementById('edit-username');
-        // New Premium Fields
         const editBioBeliefsInput = document.getElementById('edit-bio-beliefs');
         const editBioEducationInput = document.getElementById('edit-bio-education');
         const editBioLocationInput = document.getElementById('edit-bio-location');
-
 
         // Settings Modal Elements
         const settingsBtn = document.getElementById('settings-btn');
@@ -1447,13 +1500,18 @@
         const userListContent = document.getElementById('user-list-content');
         const userListClose = document.getElementById('user-list-close');
 
-        // New Profile Viewers Modal Elements
+        // Profile Viewers Modal Elements
         const viewersBtn = document.getElementById('viewers-btn');
         const viewersListOverlay = document.getElementById('viewers-list-overlay');
         const viewersListTitle = document.getElementById('viewers-list-title');
         const viewersListContent = document.getElementById('viewers-list-content');
         const viewersListClose = document.getElementById('viewers-list-close');
 
+        // [NEW] Reports Modal Elements
+        const reportsOverlay = document.getElementById('reports-overlay');
+        const reportsModal = document.getElementById('reports-modal');
+        const reportsListContent = document.getElementById('reports-list-content');
+        const reportsCloseBtn = document.getElementById('reports-close');
 
         // --- SECTION: App State ---
         let currentUser = null;
@@ -1464,11 +1522,10 @@
         let currentSearchMode = 'accounts';
         let currentProfileUsername = null; 
 
-        // --- NEW: Robust Polling State ---
         let pollingTimeoutId = null;
         let pollingErrorCount = 0;
-        const BASE_POLLING_INTERVAL = 20000; // Increased to 20 seconds
-        const MAX_POLLING_INTERVAL = 120000; // Max wait time of 2 minutes
+        const BASE_POLLING_INTERVAL = 20000;
+        const MAX_POLLING_INTERVAL = 120000;
 
         // --- SECTION: Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1482,7 +1539,6 @@
             // EVENT LISTENERS
             const navPeopleBtn = document.getElementById('nav-people-btn');
             
-            // --- Rubino Button Listener ---
             const rubinoBtn = document.getElementById('nav-rubino-btn');
             if (rubinoBtn) {
                 rubinoBtn.addEventListener('click', () => {
@@ -1498,7 +1554,6 @@
                 });
             }
 
-            // [NEW - Task 2] Store Button Listener
             const storeBtn = document.getElementById('nav-store-btn');
             if (storeBtn) {
                 storeBtn.addEventListener('click', () => {
@@ -1519,7 +1574,6 @@
                 window.location.href = 'https://abolfazl140122.github.io/miko_rel/Channel.html';
             });
             
-            // New People/Follow List Navigation
             if(navPeopleBtn) {
                 navPeopleBtn.addEventListener('click', () => {
                     window.location.href = 'Follow list.html';
@@ -1530,9 +1584,7 @@
             editProfileBtn.addEventListener('click', showEditProfileModal);
             cancelEditBtn.addEventListener('click', hideEditProfileModal);
             editProfileModal.addEventListener('click', (e) => {
-                if (e.target === editProfileModal) {
-                    hideEditProfileModal();
-                }
+                if (e.target === editProfileModal) hideEditProfileModal();
             });
             pfpUploadInput.addEventListener('change', handleImagePreview);
             editProfileForm.addEventListener('submit', handleProfileUpdate);
@@ -1541,12 +1593,9 @@
             settingsBtn.addEventListener('click', showSettingsModal);
             cancelSettingsBtn.addEventListener('click', hideSettingsModal);
             settingsModal.addEventListener('click', (e) => {
-                if (e.target === settingsModal) {
-                    hideSettingsModal();
-                }
+                if (e.target === settingsModal) hideSettingsModal();
             });
             changePasswordForm.addEventListener('submit', handlePasswordChange);
-
 
             profileFollowBtn.addEventListener('click', toggleFollow);
 
@@ -1558,17 +1607,28 @@
                 if (e.target === userListOverlay) hideUserListModal();
             });
             
-            // New Profile Viewers Listeners
+            // Profile Viewers Listeners
             viewersBtn.addEventListener('click', handleShowProfileViewers);
             viewersListClose.addEventListener('click', hideViewersListModal);
             viewersListOverlay.addEventListener('click', (e) => {
                 if (e.target === viewersListOverlay) hideViewersListModal();
             });
+            
+            // [NEW] Reports Modal Listeners
+            rewardBanner.addEventListener('click', () => {
+                if (currentUser && currentUser.reportCount > 0) {
+                    openReportsModal();
+                }
+            });
+            reportsCloseBtn.addEventListener('click', hideReportsModal);
+            reportsOverlay.addEventListener('click', (e) => {
+                if (e.target === reportsOverlay) hideReportsModal();
+            });
 
             await loadInitialData();
         });
 
-        // --- NEW: Loading Functions ---
+        // --- Loading Functions ---
         function showSkeleton() {
             skeletonLoader.classList.remove('hidden');
             appContainer.classList.remove('visible');
@@ -1580,7 +1640,7 @@
         }
 
         async function loadInitialData() {
-            showSkeleton(); // Use new Skeleton loader instead of simple spinner
+            showSkeleton();
             try {
                 await refreshClientToken();
 
@@ -1593,6 +1653,7 @@
                 if (usersResponse) {
                     allUsers = usersResponse;
                     if (allUsers[currentUser.username]) {
+                        // Merge server data into local user data on initial load
                         const serverUser = allUsers[currentUser.username];
                         currentUser = {...currentUser, ...serverUser};
                         localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -1603,32 +1664,29 @@
                     }
                 }
                 
-                if (channelsResponse) {
-                    allChannels = channelsResponse;
-                }
-
+                if (channelsResponse) allChannels = channelsResponse;
+                
                 if (chatsResponse) {
                     recentChats = Object.values(chatsResponse)
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 }
 
                 renderChatList();
-                updateRewardBanner(); // Call the banner update function
-                updateHeaderCoinDisplay(); // [NEW - Task 1] Update coin display on initial load
+                updateRewardBanner();
+                updateHeaderCoinDisplay();
                 startRealtimeUpdates();
 
             } catch (error) {
                 console.error("Initialization Error:", error);
                 showErrorMessage(`خطا در بارگذاری اطلاعات اولیه: ${error.message}`);
-                 if (error instanceof TypeError) { // It's a network error
+                 if (error instanceof TypeError) {
                     showErrorMessage('خطای شبکه. لطفاً اتصال اینترنت خود را بررسی کرده و صفحه را رفرش کنید.');
                 }
             } finally {
-                hideSkeleton(); // Hide the skeleton when done or failed
+                hideSkeleton();
             }
         }
         
-        // [NEW - Task 1] Function to update coin display
         function updateHeaderCoinDisplay() {
             const coinDisplay = document.getElementById('header-coin-display');
             if (coinDisplay && currentUser) {
@@ -1705,13 +1763,12 @@
                 return;
             }
 
-            // [MODIFIED] Sort results to show premium users first
             results.sort((a, b) => {
                 const aIsPremium = a.accountType === 'premium';
                 const bIsPremium = b.accountType === 'premium';
-                if (aIsPremium && !bIsPremium) return -1; // a comes first
-                if (!aIsPremium && bIsPremium) return 1;  // b comes first
-                return 0; // maintain original order
+                if (aIsPremium && !bIsPremium) return -1;
+                if (!aIsPremium && bIsPremium) return 1;
+                return 0;
             });
 
             const resultsHtml = results.map(user => createUserResultHtml(user)).join('');
@@ -1763,7 +1820,6 @@
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.username)}&background=161B22&color=fff&size=100`;
 
             const verifiedTickHtml = userData.verified ? `<img class="verified-tick" src="${VERIFIED_TICK_URL}" alt="تایید شده">` : '';
-            // [MODIFIED] Added conditional class for premium users
             const premiumClass = userData.accountType === 'premium' ? 'premium-user-highlight' : '';
 
             return `
@@ -1811,7 +1867,6 @@
                 </div>
             `;
         }
-
 
         // --- SECTION: Event Handlers & Interactions ---
         function performSearch() {
@@ -1864,9 +1919,9 @@
                     const targetChannelId = item.dataset.channelId;
 
                     if(item.classList.contains('user-list-item')) {
-                        // This handles clicks from followers, following, AND viewers lists
                         hideUserListModal();
                         hideViewersListModal();
+                        hideReportsModal();
                         setTimeout(() => openUserProfile(targetUid), 300);
                         return;
                     }
@@ -1900,11 +1955,10 @@
             profileDisplayName.innerHTML = `${userData.displayName || userData.username} ${verifiedTickHtml}`;
             profileUsername.textContent = `@${userData.username}`;
             
-            // [NEW - Task 3] Update Account Level Badge
             const levelBadge = document.getElementById('profile-account-level');
             if (levelBadge) {
-                levelBadge.className = 'account-level-badge'; // Reset classes, add base class
-                levelBadge.innerHTML = ''; // Clear previous content
+                levelBadge.className = 'account-level-badge';
+                levelBadge.innerHTML = '';
                 levelBadge.style.display = 'inline-flex';
 
                 switch (userData.accountType) {
@@ -1926,7 +1980,6 @@
                 }
             }
 
-
             profileFollowersCount.classList.add('loading-blur');
             profileFollowingCount.classList.add('loading-blur');
             profileFollowersCount.textContent = '0';
@@ -1937,10 +1990,8 @@
             const isMyProfile = username === currentUser.username;
             profileFollowBtn.style.display = isMyProfile ? 'none' : 'block';
             editProfileBtn.style.display = isMyProfile ? 'flex' : 'none';
-            settingsBtn.style.display = isMyProfile ? 'flex' : 'none'; // Settings button logic
+            settingsBtn.style.display = isMyProfile ? 'flex' : 'none';
             logoutBtn.style.display = isMyProfile ? 'flex' : 'none';
-
-            // [MODIFIED] Show/Hide viewers button
             viewersBtn.style.display = (isMyProfile && currentUser.accountType === 'premium') ? 'flex' : 'none';
 
             profileOverlay.classList.add('active');
@@ -1978,7 +2029,6 @@
             editDisplayNameInput.value = currentUser.displayName || '';
             editUsernameInput.value = currentUser.username || '';
 
-            // [MODIFIED] Handle premium fields
             const isPremium = currentUser.accountType === 'premium';
             const premiumInputs = [editBioBeliefsInput, editBioEducationInput, editBioLocationInput];
             
@@ -2045,7 +2095,6 @@
                     payload.profilePicUrl = newProfilePicUrl;
                 }
 
-                // [MODIFIED] Add premium fields to payload if user is premium
                 if (currentUser.accountType === 'premium') {
                     const newBeliefs = editBioBeliefsInput.value.trim();
                     const newEducation = editBioEducationInput.value.trim();
@@ -2063,10 +2112,8 @@
 
                 const path = `users/${currentUser.username}`;
                 await updateUserDataOnServer(path, payload);
-
-                // Update local currentUser object with new values
-                Object.assign(currentUser, payload);
                 
+                Object.assign(currentUser, payload);
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 
                 openUserProfile(currentUser.username); 
@@ -2082,7 +2129,7 @@
             }
         }
 
-        // --- NEW: Settings Modal Functions (Password Change) ---
+        // --- Settings Modal Functions (Password Change) ---
         function showSettingsModal() {
             changePasswordForm.reset();
             settingsModal.classList.add('active');
@@ -2095,7 +2142,6 @@
         async function handlePasswordChange(event) {
             event.preventDefault();
 
-            // 1. Basic Form Validation
             if (!changePasswordForm.checkValidity()) {
                 changePasswordForm.reportValidity();
                 return;
@@ -2105,7 +2151,6 @@
             const newPass = newPasswordInput.value;
             const confirmPass = confirmPasswordInput.value;
 
-            // 2. Local Validation Logic
             if (newPass.length < 8) {
                 showToast('رمز عبور جدید باید حداقل ۸ کاراکتر باشد.', 'error');
                 return;
@@ -2116,9 +2161,6 @@
                 return;
             }
 
-            // 3. Verify Current Password
-            // Note: In a production app with hashing, this should be done server-side.
-            // Since we are using a direct proxy with user object on client, we check locally.
             if (currentPass !== currentUser.password) {
                 showToast('رمز عبور فعلی اشتباه است.', 'error');
                 return;
@@ -2129,7 +2171,6 @@
                 return;
             }
 
-            // 4. Update on Server
             const saveBtn = document.getElementById('save-password-btn');
             const originalBtnText = saveBtn.textContent;
             saveBtn.disabled = true;
@@ -2141,7 +2182,6 @@
 
                 await updateUserDataOnServer(path, payload);
 
-                // Update Local User Object
                 currentUser.password = newPass;
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
@@ -2269,14 +2309,12 @@
                 }
 
                 const userIds = Object.keys(listData);
-                const userPromises = userIds.map(uid => allUsers[uid] || fetchProxyData(`users/${uid}`)); // Optimize: use cached user data if available
+                const userPromises = userIds.map(uid => allUsers[uid] || fetchProxyData(`users/${uid}`));
                 const users = await Promise.all(userPromises);
 
                 let html = '';
                 users.forEach(user => {
-                    if(user) {
-                        html += createUserListHtml(user);
-                    }
+                    if(user) html += createUserListHtml(user);
                 });
 
                 if(html === '') {
@@ -2296,7 +2334,7 @@
             userListOverlay.classList.remove('active');
         }
 
-        // --- [NEW] Profile Viewers Modal Logic ---
+        // --- Profile Viewers Modal Logic ---
         async function handleShowProfileViewers() {
             viewersListContent.innerHTML = '<div class="status-container"><div class="spinner"></div><p>در حال دریافت لیست بازدیدکنندگان...</p></div>';
             viewersListOverlay.classList.add('active');
@@ -2310,16 +2348,13 @@
                     return;
                 }
 
-                // The keys of viewersData are the usernames of the viewers
                 const viewerUsernames = Object.keys(viewersData);
                 const userPromises = viewerUsernames.map(username => allUsers[username] || fetchProxyData(`users/${username}`));
                 const users = await Promise.all(userPromises);
 
                 let html = '';
                 users.forEach(user => {
-                    if (user) {
-                        html += createUserListHtml(user);
-                    }
+                    if (user) html += createUserListHtml(user);
                 });
 
                 if (html === '') {
@@ -2338,7 +2373,68 @@
         function hideViewersListModal() {
             viewersListOverlay.classList.remove('active');
         }
+        
+        // --- [NEW] Reports Modal Logic ---
+        async function openReportsModal() {
+            reportsListContent.innerHTML = '<div class="status-container"><div class="spinner"></div><p>در حال دریافت لیست گزارش‌ها...</p></div>';
+            reportsOverlay.classList.add('active');
+            
+            try {
+                const allReports = await fetchProxyData('reports');
+                if (!allReports) {
+                    renderReportsList([]); // Render empty state
+                    return;
+                }
+                
+                const userReports = Object.values(allReports).filter(report => report.reportedUser === currentUser.username);
+                renderReportsList(userReports);
 
+            } catch (error) {
+                console.error("Error loading reports list:", error);
+                reportsListContent.innerHTML = '<div class="status-container"><p>خطا در دریافت اطلاعات گزارش‌ها.</p></div>';
+            }
+        }
+
+        function renderReportsList(reports) {
+            if (reports.length === 0) {
+                reportsListContent.innerHTML = '<div class="status-container"><p>هیچ گزارشی علیه شما ثبت نشده است.</p></div>';
+                return;
+            }
+
+            const getStatusInfo = (status) => {
+                switch (status) {
+                    case 'approved': return { text: 'تایید شده', className: 'approved' };
+                    case 'rejected': return { text: 'رد شده', className: 'rejected' };
+                    case 'pending':
+                    default:
+                        return { text: 'در حال بررسی', className: 'pending' };
+                }
+            };
+
+            const reportsHtml = reports
+                .sort((a, b) => b.timestamp - a.timestamp) // Sort by most recent first
+                .map(report => {
+                    const statusInfo = getStatusInfo(report.status);
+                    const reportDate = new Date(report.timestamp).toLocaleDateString('fa-IR', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+                    return `
+                        <div class="report-item">
+                            <div class="report-item-header">
+                                <span class="report-reason">${report.reason}</span>
+                                <span class="report-status ${statusInfo.className}">${statusInfo.text}</span>
+                            </div>
+                            <div class="report-date">${reportDate}</div>
+                        </div>
+                    `;
+                }).join('');
+            
+            reportsListContent.innerHTML = reportsHtml;
+        }
+
+        function hideReportsModal() {
+            reportsOverlay.classList.remove('active');
+        }
 
         // --- SECTION: Robust Polling with Exponential Backoff ---
         async function checkForUpdates() {
@@ -2358,12 +2454,14 @@
                     allUsers = newUsers;
                     if (currentUser && allUsers[currentUser.username]) {
                         const serverUser = allUsers[currentUser.username];
-                        const mergedUser = { ...serverUser, ...currentUser };
+                        // [BUG FIX] Correctly merge server data over local data
+                        const mergedUser = { ...currentUser, ...serverUser }; 
                         if (JSON.stringify(currentUser) !== JSON.stringify(mergedUser)) {
                             currentUser = mergedUser;
                             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                            updateRewardBanner(); // Update banner if user data changed
-                            updateHeaderCoinDisplay(); // [NEW - Task 1] Update coin display on poll
+                            // [BUG FIX] Rerender banner with fresh data
+                            updateRewardBanner(); 
+                            updateHeaderCoinDisplay();
                         }
                     }
                     needsUIRefresh = true;
@@ -2416,38 +2514,38 @@
 
         // --- SECTION: Utility Functions ---
 
-        // --- [NEW] Reward Banner Logic ---
+        // --- [MODIFIED] Reward Banner Logic ---
         function updateRewardBanner() {
-            if (!currentUser || !rewardBanner) return;
+            if (!currentUser || !rewardBanner || !rewardBannerText) return;
 
             const reportCount = currentUser.reportCount || 0;
-            const lastReportTimestamp = currentUser.lastReportDate; // Assuming this is a timestamp
-
-            if (reportCount >= 3) {
-                rewardBanner.style.display = 'none'; // Or show a disqualified message
-                return;
-            }
-
-            if (!lastReportTimestamp) {
-                // User has never been reported, show encouraging message
-                rewardBanner.textContent = 'با عدم دریافت گزارش، شانس خود را برای دریافت جایزه پریمیوم افزایش دهید!';
-                rewardBanner.style.display = 'block';
-                return;
-            }
             
-            const REWARD_PERIOD_DAYS = 7;
-            const msPerDay = 1000 * 60 * 60 * 24;
-            const daysSinceLastReport = Math.floor((Date.now() - lastReportTimestamp) / msPerDay);
-            const daysRemaining = REWARD_PERIOD_DAYS - daysSinceLastReport;
-
-            if (daysRemaining > 0) {
-                rewardBanner.textContent = `شما ${daysSinceLastReport} روز است که گزارشی نداشته‌اید. ${daysRemaining} روز دیگر تا دریافت جایزه پریمیوم!`;
-                rewardBanner.style.display = 'block';
+            rewardBanner.style.display = 'flex'; // Use flex to show it
+            rewardBanner.classList.remove('clickable');
+            
+            if (reportCount > 0) {
+                rewardBannerText.textContent = `شما ${reportCount} گزارش فعال دارید. برای مشاهده لیست کلیک کنید.`;
+                rewardBanner.classList.add('clickable');
+                rewardBanner.style.background = 'linear-gradient(90deg, #dc3545, #b22222)'; // Error gradient
             } else {
-                // Reward period passed without new reports
-                rewardBanner.textContent = 'تبریک! شما واجد شرایط دریافت جایزه پریمیوم هستید. منتظر بمانید.';
-                rewardBanner.style.background = 'linear-gradient(90deg, #28a745, #20bf55)'; // Success gradient
-                rewardBanner.style.display = 'block';
+                const lastReportTimestamp = currentUser.lastReportDate;
+                if (!lastReportTimestamp) {
+                    rewardBannerText.textContent = 'با عدم دریافت گزارش، شانس دریافت جایزه پریمیوم را افزایش دهید!';
+                    rewardBanner.style.background = 'linear-gradient(90deg, #1E90FF, #00A3FF)'; // Default gradient
+                } else {
+                    const REWARD_PERIOD_DAYS = 7;
+                    const msPerDay = 1000 * 60 * 60 * 24;
+                    const daysSinceLastReport = Math.floor((Date.now() - lastReportTimestamp) / msPerDay);
+                    const daysRemaining = REWARD_PERIOD_DAYS - daysSinceLastReport;
+                    
+                    if (daysRemaining > 0) {
+                        rewardBannerText.textContent = `شما ${daysSinceLastReport} روز است که گزارشی نداشته‌اید. ${daysRemaining} روز دیگر تا جایزه!`;
+                        rewardBanner.style.background = 'linear-gradient(90deg, #1E90FF, #00A3FF)'; // Default gradient
+                    } else {
+                        rewardBannerText.textContent = 'تبریک! شما واجد شرایط دریافت جایزه پریمیوم هستید.';
+                        rewardBanner.style.background = 'linear-gradient(90deg, #28a745, #20bf55)'; // Success gradient
+                    }
+                }
             }
         }
 
