@@ -290,12 +290,45 @@
             flex-grow: 1;
             position: relative;
             overflow-y: auto;
+            /* Will-change for performance boost during transform */
+            will-change: transform;
         }
         main::-webkit-scrollbar { width: 8px; }
         main::-webkit-scrollbar-track { background: var(--secondary-color); }
         main::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 10px; border: 2px solid var(--secondary-color); }
         main::-webkit-scrollbar-thumb:hover { background-color: var(--text-secondary); }
         
+        /* --- [NEW] Pull to Refresh Loader Styles --- */
+        .pull-loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60px;
+            opacity: 0;
+            transform: translateY(-100%);
+            z-index: 1;
+            will-change: transform, opacity;
+        }
+
+        .pull-loader .spinner {
+            width: 30px;
+            height: 30px;
+            border-width: 3px;
+            border-top-color: var(--primary-color);
+            border-right-color: var(--secondary-hover);
+            border-bottom-color: var(--secondary-hover);
+            border-left-color: var(--secondary-hover);
+            transition: transform 0.2s linear;
+        }
+        
+        .pull-loader.loading .spinner {
+            animation: spin 0.8s linear infinite;
+        }
+
         /* --- Chat List --- */
         .chat-list {
             padding: 0;
@@ -1215,6 +1248,10 @@
             <button class="search-tab" data-mode="channels">کانال‌ها</button>
         </div>
 
+        <!-- [NEW] Pull-to-Refresh Loader HTML -->
+        <div id="pull-to-refresh-loader" class="pull-loader">
+            <div class="spinner"></div>
+        </div>
 
         <!-- MAIN CONTENT: Chat list or search results -->
         <main id="main-content">
@@ -1640,7 +1677,10 @@
         }
 
         async function loadInitialData() {
-            showSkeleton();
+            // Do not show skeleton on pull-to-refresh
+            if (!document.body.classList.contains('is-pulling')) {
+                showSkeleton();
+            }
             try {
                 await refreshClientToken();
 
@@ -1683,7 +1723,9 @@
                     showErrorMessage('خطای شبکه. لطفاً اتصال اینترنت خود را بررسی کرده و صفحه را رفرش کنید.');
                 }
             } finally {
-                hideSkeleton();
+                 if (!document.body.classList.contains('is-pulling')) {
+                    hideSkeleton();
+                }
             }
         }
         
@@ -2509,6 +2551,85 @@
         function startRealtimeUpdates() {
             if (pollingTimeoutId) clearTimeout(pollingTimeoutId);
             checkForUpdates();
+        }
+
+        // --- SECTION: Pull-to-Refresh Logic ---
+        const pullLoader = document.getElementById('pull-to-refresh-loader');
+        let startY = 0;
+        let pullDistance = 0;
+        const PULL_THRESHOLD = 70; // فاصله مورد نیاز برای فعال‌سازی رفرش
+
+        mainContent.addEventListener('touchstart', (e) => {
+            // Only initiate if at the top of the scrollable area
+            if (mainContent.scrollTop === 0) {
+                startY = e.touches[0].clientY;
+                // Disable transitions during the pull for a direct response
+                mainContent.style.transition = 'none'; 
+                pullLoader.style.transition = 'none';
+                document.body.classList.add('is-pulling');
+            }
+        }, { passive: true });
+
+        mainContent.addEventListener('touchmove', (e) => {
+            if (startY === 0) return; // Exit if not initiated at the top
+
+            const currentY = e.touches[0].clientY;
+            pullDistance = currentY - startY;
+
+            if (pullDistance > 0) {
+                e.preventDefault(); // Prevent default browser pull-down actions
+
+                // Apply a resistance effect to the pull
+                const moveDistance = pullDistance * 0.4;
+                mainContent.style.transform = `translateY(${moveDistance}px)`;
+                
+                const opacity = Math.min(pullDistance / PULL_THRESHOLD, 1);
+                pullLoader.style.opacity = opacity;
+                // Move the loader into view and rotate it based on pull distance
+                pullLoader.style.transform = `translateY(${moveDistance - 50}px) rotate(${pullDistance * 2}deg)`;
+            }
+        }, { passive: false });
+
+        mainContent.addEventListener('touchend', async () => {
+            if (startY === 0) return; // Exit if touch didn't start at the top
+
+            // Re-enable transitions for a smooth return animation
+            mainContent.style.transition = 'transform 0.3s ease';
+            pullLoader.style.transition = 'all 0.3s ease';
+
+            if (pullDistance > PULL_THRESHOLD) {
+                // --- Trigger Refresh ---
+                pullLoader.classList.add('loading');
+                mainContent.style.transform = `translateY(50px)`; // Keep in loading position
+                pullLoader.style.transform = `translateY(0px) rotate(${pullDistance * 2}deg)`;
+                
+                try {
+                    // Call the main data refresh function
+                    await loadInitialData(); 
+                } catch (error) {
+                    console.error("Pull-to-refresh failed:", error);
+                    showToast('خطا در تازه‌سازی', 'error');
+                } finally {
+                    // Reset UI after refresh is complete or failed
+                    resetPullToRefresh();
+                }
+            } else {
+                // --- Reset without refreshing ---
+                resetPullToRefresh();
+            }
+            
+            // Reset state variables
+            startY = 0;
+            pullDistance = 0;
+            document.body.classList.remove('is-pulling');
+        });
+
+        function resetPullToRefresh() {
+            mainContent.style.transform = 'translateY(0)';
+            pullLoader.style.opacity = '0';
+            pullLoader.classList.remove('loading');
+            // Move the loader back out of view
+            pullLoader.style.transform = 'translateY(-100%)';
         }
 
 
