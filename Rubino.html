@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>روبینو همیار پیشرفته - نسخه بهبود یافته</title>
+    <title>روبینو همیار پیشرفته</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
 
@@ -22,16 +22,9 @@
             --skeleton-highlight: #21262d;
             --danger-color: #FF4D4D;
             --gold-color: #FFD700;
-            --success-color: #00D26A;
-            --warning-color: #FFB800;
         }
 
-        *, *::before, *::after { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            margin: 0; 
-            padding: 0; 
-        }
+        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
             font-family: 'Vazirmatn', sans-serif;
@@ -48,7 +41,6 @@
             display: flex; flex-direction: column; position: relative;
             box-shadow: 0 0 40px rgba(0,0,0,0.5);
             background-color: var(--background-color);
-            overflow: hidden;
         }
 
         /* --- HEADER --- */
@@ -61,7 +53,6 @@
             display: flex; justify-content: space-between; align-items: center;
             z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             position: relative;
-            flex-shrink: 0;
         }
         .header-title {
             font-size: 1.5rem; 
@@ -69,15 +60,13 @@
             color: var(--primary-color);
             text-shadow: 0 0 15px var(--primary-glow);
             letter-spacing: 0.5px;
-            transition: transform 0.3s ease;
         }
         .header-btn {
             background: none; border: none; color: var(--text-primary);
-            cursor: pointer; padding: 8px; transition: transform 0.2s, background-color 0.2s;
+            cursor: pointer; padding: 8px; transition: transform 0.2s;
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
         }
-        .header-btn:hover { background-color: rgba(0, 163, 255, 0.1); }
         .header-btn:active { transform: scale(0.85); background-color: var(--secondary-hover); }
         .header-btn svg { width: 28px; height: 28px; stroke-width: 2.5; }
 
@@ -116,16 +105,8 @@
             border-bottom: 1px solid var(--border-color);
             margin-bottom: 10px; padding-bottom: 10px;
             animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .post-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(20px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* استایل‌های جدید برای پست طلایی */
         .post-card.golden-post {
@@ -135,24 +116,6 @@
             border-bottom: 1px solid var(--gold-color);
             box-shadow: 0 5px 20px rgba(255, 215, 0, 0.15);
             background: linear-gradient(180deg, rgba(255, 215, 0, 0.05), transparent 30%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .post-card.golden-post::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold-color), transparent);
-            animation: shimmer 3s infinite linear;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
         }
 
         .golden-post .username::before {
@@ -161,39 +124,18 @@
             font-size: 1rem;
             filter: drop-shadow(0 0 4px var(--gold-color));
             vertical-align: middle;
-            padding-bottom: 4px;
-            animation: crownGlow 2s infinite alternate;
+            padding-bottom: 4px; /* برای تنظیم عمودی بهتر */
         }
 
-        @keyframes crownGlow {
-            from { filter: drop-shadow(0 0 4px var(--gold-color)); }
-            to { filter: drop-shadow(0 0 8px var(--gold-color)); }
-        }
-
-        .post-header { 
-            padding: 12px 15px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            position: relative;
-        }
-        .user-info { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            transition: transform 0.2s ease;
-        }
-        .user-info:hover { transform: translateX(-5px); }
+        .post-header { padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
         .user-avatar {
             width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
             border: 2px solid var(--border-color);
-            transition: border-color 0.3s, transform 0.3s;
+            transition: border-color 0.3s;
             background-color: var(--secondary-hover);
         }
-        .post-card:hover .user-avatar { 
-            border-color: var(--primary-color); 
-            transform: scale(1.05); 
-        }
+        .post-card:hover .user-avatar { border-color: var(--primary-color); }
 
         .username { 
             font-weight: 700; font-size: 0.95rem; color: var(--text-primary); 
@@ -206,18 +148,11 @@
         }
         
         .post-options { 
-            color: var(--text-secondary); 
-            cursor: pointer; 
-            padding: 8px; 
-            border-radius: 50%; 
-            transition: all 0.2s ease;
+            color: var(--text-secondary); cursor: pointer; padding: 8px; border-radius: 50%; 
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
-        .post-options:hover { 
-            background-color: var(--secondary-hover); 
-            color: var(--text-primary); 
-            transform: rotate(90deg);
-        }
-        .post-options:active { transform: scale(0.9) rotate(90deg); }
+        .post-options:hover { background-color: var(--secondary-hover); color: var(--text-primary); }
+        .post-options:active { transform: scale(0.9); }
         .post-options.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
 
         /* --- MEDIA CONTAINER & LOADING BLUR --- */
@@ -226,7 +161,6 @@
             background-color: #000; min-height: 300px; 
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
-            cursor: pointer;
         }
         
         .media-loader-placeholder {
@@ -257,20 +191,13 @@
             position: absolute; bottom: 15px; right: 15px;
             display: flex; gap: 10px; z-index: 6;
             transition: opacity 0.3s;
-            opacity: 0.7;
         }
-        .video-overlay-controls:hover { opacity: 1; }
         .control-btn {
             background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
             border: 1px solid rgba(255,255,255,0.1);
             color: white; border-radius: 50%; width: 32px; height: 32px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; padding: 6px;
-            transition: all 0.2s ease;
-        }
-        .control-btn:hover {
-            background: rgba(0,0,0,0.8);
-            transform: scale(1.1);
         }
         .control-btn svg { width: 100%; height: 100%; }
         
@@ -282,7 +209,6 @@
             display: flex; align-items: center; justify-content: center;
             z-index: 5; pointer-events: none; opacity: 0;
             transition: opacity 0.2s, transform 0.2s;
-            backdrop-filter: blur(2px);
         }
         .play-pause-overlay.visible { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
         .play-pause-overlay svg { width: 30px; height: 30px; fill: white; }
@@ -294,7 +220,6 @@
             color: #fff; font-size: 90px; pointer-events: none;
             z-index: 7; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
             opacity: 0;
-            text-shadow: 0 0 20px rgba(237, 73, 86, 0.7);
         }
         .heart-overlay.active { animation: heartPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
@@ -307,152 +232,41 @@
             100% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 
         }
 
-        .post-actions { 
-            padding: 12px 15px 8px; 
-            display: flex; 
-            gap: 18px; 
-            align-items: center; 
-        }
-        .action-btn { 
-            background: none; 
-            border: none; 
-            color: var(--text-primary); 
-            cursor: pointer; 
-            padding: 0; 
-            transition: all 0.2s ease; 
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            position: relative;
-            overflow: hidden;
-        }
-        .action-btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(0, 163, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.3s, height 0.3s;
-        }
-        .action-btn:active::after {
-            width: 100px;
-            height: 100px;
-        }
-        .action-btn svg { 
-            width: 28px; 
-            height: 28px; 
-            stroke-width: 1.7; 
-            transition: all 0.2s; 
-        }
+        .post-actions { padding: 12px 15px 8px; display: flex; gap: 18px; align-items: center; }
+        .action-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 0; transition: transform 0.1s; display: flex; align-items: center; gap: 6px; }
+        .action-btn svg { width: 28px; height: 28px; stroke-width: 1.7; transition: all 0.2s; }
         .action-btn:active svg { transform: scale(0.8); }
         .action-btn.liked svg { 
-            fill: var(--like-color); 
-            stroke: var(--like-color); 
+            fill: var(--like-color); stroke: var(--like-color); 
             animation: likePulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
-        .action-btn-text { 
-            font-size: 0.9rem; 
-            font-weight: 500; 
-            color: var(--text-primary); 
-            transition: transform 0.2s;
-        }
-        .action-btn:hover .action-btn-text { transform: translateX(-3px); }
-        @keyframes likePulse { 
-            0% { transform: scale(1); } 
-            50% { transform: scale(1.25); } 
-            100% { transform: scale(1); } 
-        }
+        .action-btn-text { font-size: 0.9rem; font-weight: 500; color: var(--text-primary); }
+        @keyframes likePulse { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
 
         .post-likes { 
-            padding: 0 15px; 
-            font-weight: 700; 
-            font-size: 0.95rem; 
-            margin-bottom: 6px; 
-            width: fit-content; 
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .post-likes:hover {
-            color: var(--primary-color);
-            transform: translateX(-5px);
+            padding: 0 15px; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; 
+            width: fit-content; transition: opacity 0.2s;
         }
         .post-likes.clickable { cursor: pointer; }
         .post-likes.clickable:active { opacity: 0.6; }
-        .post-likes.private { cursor: default; opacity: 0.7; }
+        .post-likes.private { cursor: default; }
 
-        .post-caption { 
-            padding: 0 15px 5px; 
-            font-size: 0.95rem; 
-            line-height: 1.5; 
-            word-wrap: break-word; 
-            transition: opacity 0.2s;
-        }
-        .caption-username { 
-            font-weight: 700; 
-            margin-left: 5px; 
-            color: var(--primary-color);
-        }
-        .post-time { 
-            font-size: 0.75rem; 
-            color: var(--text-secondary); 
-            margin-top: 6px; 
-            display: block; 
-            padding: 0 15px; 
-            letter-spacing: 0.5px; 
-        }
+        .post-caption { padding: 0 15px 5px; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word; }
+        .caption-username { font-weight: 700; margin-left: 5px; }
+        .post-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px; display: block; padding: 0 15px; letter-spacing: 0.5px; }
 
         /* --- SKELETON LOADER --- */
         #skeleton-loader {
-            position: absolute; 
-            top: 60px; 
-            left: 0; 
-            width: 100%; 
-            height: calc(100% - 60px);
-            background: var(--background-color); 
-            z-index: 15; 
-            overflow: hidden;
-            display: block;
+            position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
+            background: var(--background-color); z-index: 15; overflow: hidden;
+            display: block; 
         }
-        .sk-post { 
-            margin-bottom: 20px; 
-            background: var(--background-color); 
-            padding-bottom: 10px; 
-            border-bottom: 1px solid var(--border-color); 
-        }
-        .sk-header { 
-            display: flex; 
-            align-items: center; 
-            padding: 15px; 
-            gap: 10px; 
-        }
-        .sk-avatar { 
-            width: 38px; 
-            height: 38px; 
-            border-radius: 50%; 
-            background: var(--skeleton-base); 
-        }
-        .sk-name { 
-            width: 120px; 
-            height: 16px; 
-            border-radius: 4px; 
-            background: var(--skeleton-base); 
-        }
-        .sk-image { 
-            width: 100%; 
-            height: 380px; 
-            background: var(--skeleton-base); 
-        }
-        .sk-actions { 
-            height: 20px; 
-            margin: 15px; 
-            width: 40%; 
-            background: var(--skeleton-base); 
-            border-radius: 4px; 
-        }
+        .sk-post { margin-bottom: 20px; background: var(--background-color); padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+        .sk-header { display: flex; align-items: center; padding: 15px; gap: 10px; }
+        .sk-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--skeleton-base); }
+        .sk-name { width: 120px; height: 16px; border-radius: 4px; background: var(--skeleton-base); }
+        .sk-image { width: 100%; height: 380px; background: var(--skeleton-base); }
+        .sk-actions { height: 20px; margin: 15px; width: 40%; background: var(--skeleton-base); border-radius: 4px; }
         
         .skeleton-animate { position: relative; overflow: hidden; }
         .skeleton-animate::after {
@@ -460,778 +274,208 @@
             background: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
             animation: shimmer 1.5s infinite;
         }
-        @keyframes shimmer { 
-            0% { transform: translateX(-100%); } 
-            100% { transform: translateX(100%); } 
-        }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
         /* --- MODALS --- */
         .modal-overlay {
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-            background: rgba(0,0,0,0.8); 
-            z-index: 1000; 
-            opacity: 0; 
-            visibility: hidden;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000; opacity: 0; visibility: hidden;
             transition: all 0.3s ease-in-out; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             backdrop-filter: blur(3px);
         }
-        .modal-overlay.active { 
-            opacity: 1; 
-            visibility: visible; 
-        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
         
         .bottom-sheet { align-items: flex-end; }
         .sheet-card {
-            background: var(--modal-bg); 
-            width: 100%; 
-            max-width: 480px; 
-            border-top-left-radius: 24px; 
-            border-top-right-radius: 24px;
+            background: var(--modal-bg); width: 100%; max-width: 480px; 
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
             transform: translateY(100%); 
             transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
             padding: 20px 0 0 0; 
             box-shadow: 0 -5px 40px rgba(0,0,0,0.6);
-            display: flex; 
-            flex-direction: column;
+            display: flex; flex-direction: column;
             max-height: 85vh; 
         }
         .modal-overlay.active .sheet-card { transform: translateY(0); }
 
-        .sheet-drag-handle { 
-            width: 40px; 
-            height: 4px; 
-            background: var(--border-color); 
-            border-radius: 2px; 
-            margin: 0 auto 15px; 
-            flex-shrink: 0; 
-        }
+        .sheet-drag-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 0 auto 15px; flex-shrink: 0; }
 
         .sheet-option {
-            width: 100%; 
-            padding: 16px 25px; 
-            text-align: right; 
-            background: none; 
-            border: none;
-            color: var(--text-primary); 
-            font-size: 1rem; 
-            font-family: 'Vazirmatn';
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            cursor: pointer;
+            width: 100%; padding: 16px 25px; text-align: right; background: none; border: none;
+            color: var(--text-primary); font-size: 1rem; font-family: 'Vazirmatn';
+            display: flex; align-items: center; gap: 15px; cursor: pointer;
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.2s, transform 0.1s;
+            transition: background 0.2s;
         }
         .sheet-option:last-child { border-bottom: none; }
-        .sheet-option:hover { background-color: rgba(255,255,255,0.05); }
-        .sheet-option:active { 
-            background-color: var(--secondary-hover); 
-            transform: translateX(-5px);
-        }
-        .sheet-option svg { 
-            width: 22px; 
-            height: 22px; 
-            color: var(--text-secondary); 
-            transition: transform 0.2s;
-        }
-        .sheet-option:hover svg { transform: scale(1.1); }
+        .sheet-option:active { background-color: var(--secondary-hover); }
+        .sheet-option svg { width: 22px; height: 22px; color: var(--text-secondary); }
         .sheet-option.danger { color: var(--danger-color); font-weight: 700; }
         .sheet-option.danger svg { color: var(--danger-color); }
 
         /* Toggle Switch */
-        .toggle-container { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            width: 100%; 
-        }
-        .switch { 
-            position: relative; 
-            display: inline-block; 
-            width: 46px; 
-            height: 26px; 
-        }
-        .switch input { 
-            opacity: 0; 
-            width: 0; 
-            height: 0; 
-        }
+        .toggle-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
-            position: absolute; 
-            cursor: pointer; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            bottom: 0;
-            background-color: var(--secondary-hover); 
-            transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            border-radius: 26px;
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--secondary-hover); transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 26px;
             border: 1px solid var(--border-color);
         }
         .slider:before {
-            position: absolute; 
-            content: ""; 
-            height: 20px; 
-            width: 20px; 
-            left: 2px; 
-            bottom: 2px;
-            background-color: white; 
-            transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            border-radius: 50%;
+            position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px;
+            background-color: white; transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 50%;
         }
-        input:checked + .slider { 
-            background-color: var(--primary-color); 
-            border-color: var(--primary-color); 
-        }
-        input:checked + .slider:before { 
-            transform: translateX(20px); 
-        }
+        input:checked + .slider { background-color: var(--primary-color); border-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
-        /* Create Modal - بهبود یافته */
+        /* Create Modal */
         .modal-card {
-            background: var(--modal-bg); 
-            width: 90%; 
-            max-width: 450px; 
-            border-radius: 16px;
-            overflow: hidden; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
-            transform: scale(0.9); 
-            opacity: 0;
+            background: var(--modal-bg); width: 85%; max-width: 400px; border-radius: 16px;
+            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
+            transform: scale(0.9); opacity: 0;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
         }
-        .modal-overlay.active .modal-card { 
-            transform: scale(1); 
-            opacity: 1; 
-        }
+        .modal-overlay.active .modal-card { transform: scale(1); opacity: 1; }
         
         .modal-header {
-            padding: 15px; 
-            border-bottom: 1px solid var(--border-color);
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            flex-shrink: 0;
+            padding: 15px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
             background: rgba(255,255,255,0.02);
         }
-        .modal-title { 
-            font-weight: 800; 
-            margin: 0; 
-            font-size: 1rem; 
-            color: var(--text-primary); 
-        }
-        .share-btn { 
-            color: var(--primary-color); 
-            font-weight: 700; 
-            background: none; 
-            border: none; 
-            cursor: pointer; 
-            font-size: 1rem; 
-            transition: all 0.2s; 
-            padding: 8px 16px;
-            border-radius: 8px;
-        }
-        .share-btn:hover:not(:disabled) { 
-            background: rgba(0, 163, 255, 0.1); 
-        }
-        .share-btn:disabled { 
-            opacity: 0.5; 
-            cursor: not-allowed; 
-        }
-        .close-modal { 
-            color: var(--text-primary); 
-            background: none; 
-            border: none; 
-            cursor: pointer; 
-            font-size: 1.5rem; 
-            line-height: 1; 
-            padding: 0 5px; 
-            transition: transform 0.2s;
-        }
-        .close-modal:hover { 
-            transform: rotate(90deg); 
-        }
+        .modal-title { font-weight: 800; margin: 0; font-size: 1rem; color: var(--text-primary); }
+        .share-btn { color: var(--primary-color); font-weight: 700; background: none; border: none; cursor: pointer; font-size: 1rem; transition: opacity 0.2s; }
+        .share-btn:disabled { opacity: 0.5; cursor: default; }
+        .close-modal { color: var(--text-primary); background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 5px; }
         
-        .modal-body { 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            max-height: 70vh; 
-            overflow-y: auto; 
-            flex-grow: 1;
-        }
+        .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; max-height: 70vh; overflow-y: auto; }
         .upload-area {
-            border: 2px dashed var(--border-color); 
-            border-radius: 12px;
-            padding: 40px 20px; 
-            text-align: center; 
-            cursor: pointer; 
-            transition: all 0.3s;
+            border: 2px dashed var(--border-color); border-radius: 12px;
+            padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.3s;
             background: rgba(255,255,255,0.01);
         }
-        .upload-area:hover { 
-            border-color: var(--primary-color); 
-            background: rgba(0, 163, 255, 0.05); 
-            transform: translateY(-2px);
-        }
-        .upload-area:active { 
-            border-color: var(--primary-color); 
-            background: rgba(0, 163, 255, 0.1); 
-            transform: translateY(0);
-        }
-        .upload-area svg { 
-            width: 48px; 
-            height: 48px; 
-            color: var(--text-secondary); 
-            margin-bottom: 10px; 
-        }
+        .upload-area:active { border-color: var(--primary-color); background: rgba(0, 163, 255, 0.05); }
+        .upload-area svg { width: 48px; height: 48px; color: var(--text-secondary); margin-bottom: 10px; }
         
-        .upload-preview { 
-            width: 100%; 
-            max-height: 300px; 
-            object-fit: contain; 
-            border-radius: 8px; 
-            display: none; 
-            background: #000; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        
-        /* پیش‌نمایش بهبود یافته */
-        .preview-container {
-            position: relative;
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .preview-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--secondary-color);
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-        
-        .preview-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        
-        .preview-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-        
-        .preview-btn:hover {
-            background: var(--primary-color);
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
+        .upload-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; display: none; background: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         
         .caption-input {
-            width: 100%; 
-            background: var(--secondary-color); 
-            border: 1px solid var(--border-color); 
-            color: var(--text-primary);
-            padding: 12px; 
-            border-radius: 10px; 
-            font-family: 'Vazirmatn'; 
-            resize: none; 
-            min-height: 90px;
+            width: 100%; background: var(--secondary-color); border: 1px solid var(--border-color); color: var(--text-primary);
+            padding: 12px; border-radius: 10px; font-family: 'Vazirmatn'; resize: none; min-height: 90px;
             transition: border-color 0.2s;
         }
-        .caption-input:focus { 
-            outline: none; 
-            border-color: var(--primary-color); 
-            box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.2);
-        }
+        .caption-input:focus { outline: none; border-color: var(--primary-color); }
         
-        .progress-bar-container { 
-            width: 100%; 
-            height: 6px; 
-            background: var(--secondary-color); 
-            border-radius: 3px; 
-            margin-top: 10px; 
-            display: none; 
-            overflow: hidden; 
-        }
-        .progress-bar { 
-            width: 0%; 
-            height: 100%; 
-            background: linear-gradient(90deg, var(--primary-color), #00C6FF); 
-            border-radius: 3px; 
-            transition: width 0.2s ease-out; 
-        }
+        .progress-bar-container { width: 100%; height: 6px; background: var(--secondary-color); border-radius: 3px; margin-top: 10px; display: none; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary-color), #00C6FF); border-radius: 3px; transition: width 0.2s ease-out; }
 
         /* --- USER LIST MODAL --- */
-        .user-list-content { 
-            max-height: 60vh; 
-            overflow-y: auto; 
-            padding: 0; 
-            flex-grow: 1; 
-        }
+        .user-list-content { max-height: 60vh; overflow-y: auto; padding: 0; flex-grow: 1; }
         .user-list-item { 
-            display: flex; 
-            align-items: center; 
-            padding: 12px 20px; 
-            border-bottom: 1px solid rgba(255,255,255,0.05); 
-            transition: background 0.2s, transform 0.1s;
-            cursor: pointer;
+            display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            transition: background 0.2s;
         }
-        .user-list-item:hover { 
-            background-color: var(--secondary-hover); 
-            transform: translateX(-5px);
-        }
-        .user-list-item:active { 
-            background-color: var(--secondary-hover); 
-            transform: translateX(-5px) scale(0.98);
-        }
-        .user-list-item img { 
-            width: 44px; 
-            height: 44px; 
-            border-radius: 50%; 
-            margin-left: 12px; 
-            object-fit: cover; 
-            border: 1px solid var(--border-color); 
-        }
-        .user-list-info h4 { 
-            margin: 0; 
-            font-size: 0.95rem; 
-            display: flex; 
-            align-items: center; 
-            gap: 4px; 
-            color: var(--text-primary); 
-        }
-        .user-list-info p { 
-            margin: 3px 0 0; 
-            font-size: 0.8rem; 
-            color: var(--text-secondary); 
-        }
-        .user-list-info .verified-tick { 
-            width: 14px; 
-            height: 14px; 
-            vertical-align: middle; 
-        }
+        .user-list-item:active { background-color: var(--secondary-hover); }
+        .user-list-item img { width: 44px; height: 44px; border-radius: 50%; margin-left: 12px; object-fit: cover; border: 1px solid var(--border-color); }
+        .user-list-info h4 { margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 4px; color: var(--text-primary); }
+        .user-list-info p { margin: 3px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
+        .user-list-info .verified-tick { width: 14px; height: 14px; vertical-align: middle; }
 
         /* --- COMMENTS MODAL STYLES --- */
         .comments-list-content {
-            flex-grow: 1; 
-            overflow-y: auto; 
-            padding: 0 0 70px 0;
+            flex-grow: 1; overflow-y: auto; padding: 0 0 70px 0;
             min-height: 200px;
         }
         .comment-item {
-            display: flex; 
-            gap: 12px; 
-            padding: 12px 15px;
+            display: flex; gap: 12px; padding: 12px 15px;
             border-bottom: 1px solid rgba(255,255,255,0.03);
             animation: fadeIn 0.3s ease;
             position: relative;
-            transition: background 0.2s;
-        }
-        .comment-item:hover {
-            background: rgba(255,255,255,0.02);
         }
         .comment-item.pinned {
             background: rgba(255, 215, 0, 0.05);
             border-right: 3px solid var(--gold-color);
         }
         .comment-avatar {
-            width: 32px; 
-            height: 32px; 
-            border-radius: 50%; 
-            object-fit: cover;
-            border: 1px solid var(--border-color); 
-            flex-shrink: 0;
-            transition: transform 0.2s;
+            width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+            border: 1px solid var(--border-color); flex-shrink: 0;
         }
-        .comment-item:hover .comment-avatar {
-            transform: scale(1.1);
-        }
-        .comment-content { 
-            flex: 1; 
-            font-size: 0.9rem; 
-            line-height: 1.4; 
-        }
-        .comment-header { 
-            margin-bottom: 2px; 
-            display: flex; 
-            align-items: center; 
-            gap: 5px; 
-            flex-wrap: wrap; 
-        }
-        .comment-username { 
-            font-weight: 700; 
-            color: var(--text-primary); 
-            font-size: 0.85rem; 
-        }
-        .comment-text { 
-            color: var(--text-primary); 
-            font-weight: 400; 
-            font-size: 0.9rem; 
-            word-break: break-word; 
-        }
-        .comment-time { 
-            font-size: 0.7rem; 
-            color: var(--text-secondary); 
-            margin-top: 4px; 
-            display: block; 
-        }
+        .comment-content { flex: 1; font-size: 0.9rem; line-height: 1.4; }
+        .comment-header { margin-bottom: 2px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+        .comment-username { font-weight: 700; color: var(--text-primary); font-size: 0.85rem; }
+        .comment-text { color: var(--text-primary); font-weight: 400; font-size: 0.9rem; word-break: break-word; }
+        .comment-time { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; display: block; }
         
-        .pin-icon { 
-            width: 14px; 
-            height: 14px; 
-            fill: var(--gold-color); 
-            margin-right: 5px; 
-            transform: rotate(45deg); 
-        }
+        .pin-icon { width: 14px; height: 14px; fill: var(--gold-color); margin-right: 5px; transform: rotate(45deg); }
         
         .comment-actions-btn {
-            position: absolute; 
-            left: 10px; 
-            top: 10px;
-            background: none; 
-            border: none; 
-            color: var(--text-secondary);
-            padding: 5px; 
-            cursor: pointer;
+            position: absolute; left: 10px; top: 10px;
+            background: none; border: none; color: var(--text-secondary);
+            padding: 5px; cursor: pointer;
         }
         
         /* Comment Option Sheet */
         .comment-option-menu {
-            display: flex; 
-            gap: 10px; 
-            margin-top: 5px;
+            display: flex; gap: 10px; margin-top: 5px;
         }
         .mini-btn {
-            background: none; 
-            border: none; 
-            font-size: 0.75rem; 
-            cursor: pointer; 
-            padding: 2px 6px;
-            border-radius: 4px; 
-            display: flex; 
-            align-items: center; 
-            gap: 3px;
-            transition: all 0.2s;
+            background: none; border: none; font-size: 0.75rem; cursor: pointer; padding: 2px 6px;
+            border-radius: 4px; display: flex; align-items: center; gap: 3px;
         }
-        .mini-btn:hover {
-            transform: translateY(-2px);
-        }
-        .btn-delete { 
-            color: var(--danger-color); 
-            background: rgba(255, 77, 77, 0.1); 
-        }
-        .btn-delete:hover { 
-            background: rgba(255, 77, 77, 0.2); 
-        }
-        .btn-pin { 
-            color: var(--gold-color); 
-            background: rgba(255, 215, 0, 0.1); 
-        }
-        .btn-pin:hover { 
-            background: rgba(255, 215, 0, 0.2); 
-        }
+        .btn-delete { color: var(--danger-color); background: rgba(255, 77, 77, 0.1); }
+        .btn-pin { color: var(--gold-color); background: rgba(255, 215, 0, 0.1); }
         
         /* Comment Input Area */
         .comment-input-area {
-            position: absolute; 
-            bottom: 0; 
-            left: 0; 
-            width: 100%;
+            position: absolute; bottom: 0; left: 0; width: 100%;
             background-color: var(--modal-bg);
             border-top: 1px solid var(--border-color);
             padding: 10px 15px;
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
             z-index: 20;
         }
-        .comment-input-area.disabled { 
-            filter: grayscale(1); 
-            opacity: 0.7; 
-            pointer-events: none; 
-        }
+        .comment-input-area.disabled { filter: grayscale(1); opacity: 0.7; pointer-events: none; }
         
         .comment-input-field {
-            flex-grow: 1; 
-            background: var(--secondary-color); 
-            border: 1px solid var(--border-color);
-            color: var(--text-primary); 
-            padding: 10px 15px; 
-            border-radius: 20px;
-            font-family: 'Vazirmatn'; 
-            font-size: 0.9rem; 
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            flex-grow: 1; background: var(--secondary-color); border: 1px solid var(--border-color);
+            color: var(--text-primary); padding: 10px 15px; border-radius: 20px;
+            font-family: 'Vazirmatn'; font-size: 0.9rem; outline: none;
+            transition: border-color 0.2s;
         }
-        .comment-input-field:focus { 
-            border-color: var(--primary-color); 
-            box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.2);
-        }
+        .comment-input-field:focus { border-color: var(--primary-color); }
         .send-comment-btn {
-            background: none; 
-            border: none; 
-            color: var(--primary-color);
-            font-weight: 700; 
-            cursor: pointer; 
-            padding: 5px;
-            opacity: 0.5; 
-            transition: all 0.2s;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: none; border: none; color: var(--primary-color);
+            font-weight: 700; cursor: pointer; padding: 5px;
+            opacity: 0.5; transition: opacity 0.2s;
         }
-        .send-comment-btn:hover {
-            background: rgba(0, 163, 255, 0.1);
-        }
-        .send-comment-btn.active { 
-            opacity: 1; 
-            transform: scale(1.1);
-        }
-        .send-comment-btn svg { 
-            width: 24px; 
-            height: 24px; 
-            fill: none; 
-            stroke: currentColor; 
-            stroke-width: 2; 
-            transform: rotate(180deg); 
-        }
+        .send-comment-btn.active { opacity: 1; }
+        .send-comment-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; transform: rotate(180deg); }
 
         /* Comment Skeleton */
-        .comment-skeleton { 
-            display: flex; 
-            gap: 12px; 
-            padding: 12px 15px; 
-        }
-        .sk-c-avatar { 
-            width: 32px; 
-            height: 32px; 
-            border-radius: 50%; 
-            background: var(--skeleton-base); 
-            flex-shrink: 0; 
-        }
-        .sk-c-content { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 6px; 
-            justify-content: center; 
-        }
-        .sk-c-line1 { 
-            width: 30%; 
-            height: 10px; 
-            background: var(--skeleton-base); 
-            border-radius: 4px; 
-        }
-        .sk-c-line2 { 
-            width: 80%; 
-            height: 10px; 
-            background: var(--skeleton-base); 
-            border-radius: 4px; 
-        }
+        .comment-skeleton { display: flex; gap: 12px; padding: 12px 15px; }
+        .sk-c-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--skeleton-base); flex-shrink: 0; }
+        .sk-c-content { flex: 1; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+        .sk-c-line1 { width: 30%; height: 10px; background: var(--skeleton-base); border-radius: 4px; }
+        .sk-c-line2 { width: 80%; height: 10px; background: var(--skeleton-base); border-radius: 4px; }
 
-        .empty-state { 
-            text-align: center; 
-            padding: 50px 20px; 
-            color: var(--text-secondary); 
-        }
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text-secondary); }
         
         /* Toast Notification */
         .toast {
-            position: fixed; 
-            bottom: 30px; 
-            left: 50%; 
-            transform: translate(-50%, 100px);
-            background: var(--text-primary); 
-            color: var(--background-color); 
-            padding: 12px 24px; 
-            border-radius: 50px;
-            font-size: 0.95rem; 
-            font-weight: 700; 
-            z-index: 2000; 
+            position: fixed; bottom: 30px; left: 50%; transform: translate(-50%, 100px);
+            background: var(--text-primary); color: var(--background-color); padding: 12px 24px; border-radius: 50px;
+            font-size: 0.95rem; font-weight: 700; z-index: 2000; 
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 8px;
             white-space: nowrap;
         }
-        .toast.error { 
-            background: var(--danger-color); 
-            color: white; 
-        }
-        .toast.success { 
-            background: var(--success-color); 
-            color: white; 
-        }
-        .toast.warning { 
-            background: var(--warning-color); 
-            color: white; 
-        }
-        .toast.active { 
-            transform: translate(-50%, 0); 
-        }
+        .toast.error { background: var(--danger-color); color: white; }
+        .toast.active { transform: translate(-50%, 0); }
 
-        /* Loader اضافی */
-        .fullscreen-loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--background-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 1;
-            transition: opacity 0.5s ease;
-        }
-        
-        .fullscreen-loader.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        .loader-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid transparent;
-            border-top: 3px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        .loader-text {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        
-        /* آیکون‌های جدید */
-        .icon-check {
-            width: 20px;
-            height: 20px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 3;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-        
-        /* انیمیشن‌های اضافی */
-        @keyframes slideInUp {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-        
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-        
-        /* اسکرول بار سفارشی */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-color);
-        }
-        
-        /* استایل‌های رسپانسیو */
-        @media (max-width: 480px) {
-            .modal-card {
-                width: 95%;
-                max-height: 90vh;
-            }
-            
-            .sheet-card {
-                max-height: 90vh;
-            }
-            
-            .post-media {
-                max-height: 500px;
-            }
-            
-            video.post-media {
-                max-height: 500px;
-            }
-            
-            .header-title {
-                font-size: 1.3rem;
-            }
-        }
-        
-        @media (max-height: 700px) {
-            .modal-card {
-                max-height: 85vh;
-            }
-            
-            .sheet-card {
-                max-height: 85vh;
-            }
-        }
     </style>
 </head>
 <body>
-
-    <!-- Fullscreen Loader -->
-    <div class="fullscreen-loader" id="fullscreen-loader">
-        <div class="loader-spinner"></div>
-        <div class="loader-text">در حال بارگذاری روبینو...</div>
-    </div>
 
     <div class="app-container">
         <!-- Header -->
@@ -1268,7 +512,7 @@
         </div>
 
         <!-- Feed -->
-        <div class="feed-container custom-scrollbar" id="feed-container"></div>
+        <div class="feed-container" id="feed-container"></div>
 
         <!-- Create Post Modal -->
         <div class="modal-overlay" id="create-modal">
@@ -1278,36 +522,18 @@
                     <h3 class="modal-title">پست جدید</h3>
                     <button class="share-btn" id="share-post-btn">انتشار</button>
                 </div>
-                <div class="modal-body custom-scrollbar">
+                <div class="modal-body">
                     <input type="file" id="file-input" accept="image/*,video/*" style="display: none;">
                     
                     <div class="upload-area" id="upload-trigger">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                         <p style="margin:0; font-weight:500;">انتخاب عکس یا ویدیو</p>
-                        <p style="margin:5px 0 0; font-size:0.8rem; color:var(--text-secondary);">فایل خود را برای پیش‌نمایش انتخاب کنید</p>
                     </div>
                     
-                    <!-- Preview Container -->
-                    <div class="preview-container" id="preview-container">
-                        <div class="preview-info">
-                            <span id="file-type">فایل</span>
-                            <span id="file-size">حجم</span>
-                        </div>
-                        
-                        <img id="image-preview" class="upload-preview" />
-                        <video id="video-preview" class="upload-preview" controls playsinline></video>
-                        
-                        <div class="preview-controls" id="video-controls" style="display: none;">
-                            <button class="preview-btn" id="preview-play-btn">پخش</button>
-                            <button class="preview-btn" id="preview-pause-btn">توقف</button>
-                            <button class="preview-btn" id="preview-mute-btn">بی‌صدا</button>
-                        </div>
-                        
-                        <button class="preview-btn" id="change-file-btn" style="background: var(--secondary-color); color: var(--text-primary);">تغییر فایل</button>
-                    </div>
+                    <img id="image-preview" class="upload-preview" />
+                    <video id="video-preview" class="upload-preview" controls playsinline></video>
 
-                    <textarea class="caption-input" id="caption-input" placeholder="کپشن خود را بنویسید..." maxlength="500"></textarea>
-                    <div style="text-align: left; font-size: 0.8rem; color: var(--text-secondary); margin-top: -10px;" id="char-counter">0/500</div>
+                    <textarea class="caption-input" id="caption-input" placeholder="کپشن خود را بنویسید..."></textarea>
                     
                     <div class="toggle-container" style="padding: 0 5px;">
                         <span style="font-size: 0.9rem; color: var(--text-secondary);">نمایش لایک‌ها</span>
@@ -1316,20 +542,10 @@
                             <span class="slider"></span>
                         </label>
                     </div>
-                    
-                    <div class="toggle-container" style="padding: 0 5px;">
-                        <span style="font-size: 0.9rem; color: var(--text-secondary);">فعال بودن نظرات</span>
-                        <label class="switch">
-                            <input type="checkbox" id="create-comments-toggle" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
 
                     <div class="progress-bar-container" id="upload-progress-container">
                         <div class="progress-bar" id="upload-progress"></div>
                     </div>
-                    
-                    <div id="upload-status" style="font-size: 0.9rem; text-align: center; color: var(--text-secondary); margin-top: 10px;"></div>
                 </div>
             </div>
         </div>
@@ -1381,7 +597,6 @@
                  </div>
                  <div class="modal-body">
                      <textarea class="caption-input" id="edit-caption-input"></textarea>
-                     <div style="text-align: left; font-size: 0.8rem; color: var(--text-secondary); margin-top: -10px;" id="edit-char-counter">0/500</div>
                      <button class="share-btn" id="save-caption-btn" style="background: var(--primary-color); color: white; padding: 12px; border-radius: 10px; width:100%;">ذخیره تغییرات</button>
                      <button class="close-modal" id="cancel-caption-btn" style="margin-top: 5px; font-size: 0.9rem; width:100%; text-align:center;">لغو</button>
                  </div>
@@ -1396,7 +611,7 @@
                     <h3 class="modal-title" style="font-size: 1.1rem;">پسندها</h3>
                     <button class="close-modal" id="close-likes-btn">&times;</button>
                 </div>
-                <div class="user-list-content custom-scrollbar" id="likes-list-container"></div>
+                <div class="user-list-content" id="likes-list-container"></div>
             </div>
         </div>
 
@@ -1409,13 +624,13 @@
                     <button class="close-modal" id="close-comments-btn">&times;</button>
                 </div>
                 
-                <div class="comments-list-content custom-scrollbar" id="comments-list-container">
+                <div class="comments-list-content" id="comments-list-container">
                     <!-- Comments will load here -->
                 </div>
                 
                 <div class="comment-input-area" id="comment-input-area">
                     <img id="current-user-comment-avatar" src="" class="comment-avatar" style="width: 36px; height: 36px; border: none;">
-                    <input type="text" id="comment-input-field" class="comment-input-field" placeholder="نظر خود را بنویسید..." autocomplete="off" maxlength="300">
+                    <input type="text" id="comment-input-field" class="comment-input-field" placeholder="نظر خود را بنویسید..." autocomplete="off">
                     <button id="send-comment-btn" class="send-comment-btn">
                         <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
                     </button>
@@ -1439,7 +654,7 @@
         const SHARED_SECRET = 'miko1234';
         const VERIFIED_ICON_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
         const LIVE_UPDATE_INTERVAL = 4000;
-        const CACHE_KEY_FEED = 'rubino_cached_feed_v2';
+        const CACHE_KEY_FEED = 'rubino_cached_feed';
 
         // --- DOM REFERENCES ---
         const feedContainer = document.getElementById('feed-container');
@@ -1449,7 +664,6 @@
         const likesModal = document.getElementById('likes-modal');
         const commentsModal = document.getElementById('comments-modal');
         const editCaptionModal = document.getElementById('edit-caption-modal');
-        const fullscreenLoader = document.getElementById('fullscreen-loader');
         
         // Buttons & Inputs
         const openCreateBtn = document.getElementById('open-create-modal');
@@ -1473,23 +687,9 @@
         const privacyToggle = document.getElementById('privacy-toggle');
         const commentsToggle = document.getElementById('comments-toggle');
         const createPrivacyToggle = document.getElementById('create-privacy-toggle');
-        const createCommentsToggle = document.getElementById('create-comments-toggle');
         const pullIndicator = document.getElementById('pull-indicator');
         const pullSpinner = document.getElementById('pull-spinner');
         const toast = document.getElementById('toast');
-        const charCounter = document.getElementById('char-counter');
-        const editCharCounter = document.getElementById('edit-char-counter');
-        const uploadStatus = document.getElementById('upload-status');
-        
-        // Preview Elements
-        const previewContainer = document.getElementById('preview-container');
-        const fileType = document.getElementById('file-type');
-        const fileSize = document.getElementById('file-size');
-        const videoControls = document.getElementById('video-controls');
-        const previewPlayBtn = document.getElementById('preview-play-btn');
-        const previewPauseBtn = document.getElementById('preview-pause-btn');
-        const previewMuteBtn = document.getElementById('preview-mute-btn');
-        const changeFileBtn = document.getElementById('change-file-btn');
         
         // Comment Refs
         const commentsListContainer = document.getElementById('comments-list-container');
@@ -1511,36 +711,18 @@
         let videoObserver = null; 
         let startY = 0; let isPulling = false; let currentTranslate = 0;
         let isGlobalMuted = true; 
-        let isCreateModalOpen = false;
-        let isUploading = false;
-        let previewVideoUrl = null;
-        let previewVideoMuted = true;
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
-            // ابتدا لودر را نشان بده
-            fullscreenLoader.classList.remove('hidden');
-            
             const storedUser = localStorage.getItem('currentUser');
-            if (!storedUser) { 
-                window.location.href = 'login.html'; 
-                return; 
-            }
+            if (!storedUser) { window.location.href = 'login.html'; return; }
             currentUser = JSON.parse(storedUser);
 
             currentUserCommentAvatar.src = currentUser.profilePicUrl || `https://ui-avatars.com/api/?name=${currentUser.username}&background=random&color=fff`;
 
             setupEventListeners();
             initVideoObserver();
-            
-            // تاخیر کوچک برای نمایش لودر
-            setTimeout(async () => {
-                await initializeAppUnified();
-                // مخفی کردن لودر با انیمیشن
-                setTimeout(() => {
-                    fullscreenLoader.classList.add('hidden');
-                }, 500);
-            }, 1000);
+            await initializeAppUnified();
         });
 
         async function initializeAppUnified() {
@@ -1563,7 +745,7 @@
                 if (cachedFeed) {
                     postsDataCache = JSON.parse(cachedFeed);
                     renderFeed(preparePostsArray(postsDataCache));
-                    showToast('در حال نمایش نسخه آفلاین', 'warning');
+                    showToast('درحال نمایش نسخه آفلاین', 'error');
                 } else {
                     feedContainer.innerHTML = '<div class="empty-state">خطا در اتصال به سرور.</div>';
                     skeletonLoader.style.display = 'none';
@@ -1588,43 +770,20 @@
                 });
         }
 
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 بایت';
-            const k = 1024;
-            const sizes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-        }
-
         // --- VIDEO LOGIC ---
         function initVideoObserver() {
-            const options = { root: null, rootMargin: '0px', threshold: 0.5 };
+            const options = { root: null, rootMargin: '0px', threshold: 0.65 };
             videoObserver = new IntersectionObserver((entries) => {
-                // اگر مدال آپلود باز است، هیچ ویدیویی را پخش نکن
-                if (isCreateModalOpen) {
-                    entries.forEach(entry => {
-                        const video = entry.target;
-                        if (!video.paused) video.pause();
-                    });
-                    return;
-                }
-                
                 entries.forEach(entry => {
                     const video = entry.target;
                     const muteBtn = document.querySelector(`.mute-btn[data-for="${video.dataset.id}"]`);
                     if (entry.isIntersecting) {
                         video.muted = isGlobalMuted;
                         updateMuteIconUI(muteBtn, isGlobalMuted);
-                        if (video.paused && !video.dataset.manualPause) {
-                            video.play().catch(e => { 
-                                video.muted = true; 
-                                video.play().catch(console.log); 
-                            });
+                        if (video.paused && !video.dataset.manualPause && !createModal.classList.contains('active')) {
+                            video.play().catch(e => { video.muted = true; video.play().catch(console.log); });
                         }
-                        // توقف سایر ویدیوها
-                        document.querySelectorAll('video').forEach(v => { 
-                            if (v !== video && !v.paused && !v.classList.contains('upload-preview')) v.pause(); 
-                        });
+                        document.querySelectorAll('video.post-media').forEach(v => { if (v !== video && !v.paused) v.pause(); });
                     } else {
                         if (!video.paused) video.pause();
                     }
@@ -1635,31 +794,14 @@
         function toggleVideoPlay(vidId) {
             const video = document.getElementById(`video-${vidId}`);
             const overlay = document.getElementById(`play-icon-${vidId}`);
-            if (video.paused) { 
-                video.dataset.manualPause = ""; 
-                video.play().then(() => {
-                    overlay.classList.remove('visible');
-                }).catch(e => {
-                    video.muted = true;
-                    video.play().then(() => overlay.classList.remove('visible'));
-                }); 
-            } else { 
-                video.dataset.manualPause = "true"; 
-                video.pause(); 
-                overlay.classList.add('visible'); 
-            }
+            if (video.paused) { video.dataset.manualPause = ""; video.play(); overlay.classList.remove('visible'); } 
+            else { video.dataset.manualPause = "true"; video.pause(); overlay.classList.add('visible'); }
         }
 
         function toggleMute(vidId, btn) {
             isGlobalMuted = !isGlobalMuted;
-            document.querySelectorAll('video').forEach(vid => { 
-                if (!vid.classList.contains('upload-preview')) {
-                    vid.muted = isGlobalMuted; 
-                }
-            });
-            document.querySelectorAll('.mute-btn').forEach(button => { 
-                updateMuteIconUI(button, isGlobalMuted); 
-            });
+            document.querySelectorAll('video').forEach(vid => { vid.muted = isGlobalMuted; });
+            document.querySelectorAll('.mute-btn').forEach(button => { updateMuteIconUI(button, isGlobalMuted); });
             window.event.stopPropagation();
         }
 
@@ -1670,252 +812,99 @@
                 : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
         }
 
+        function pauseAllFeedVideos() {
+            document.querySelectorAll('video.post-media').forEach(v => {
+                v.pause();
+            });
+        }
+
+        function resumeFeedVideos() {
+            document.querySelectorAll('video.post-media').forEach(v => {
+                videoObserver.observe(v);
+            });
+        }
+
         // --- EVENT LISTENERS ---
         function setupEventListeners() {
             openCreateBtn.addEventListener('click', () => { 
-                pauseAllVideos(); 
                 resetModal(); 
                 createModal.classList.add('active'); 
-                isCreateModalOpen = true;
+                pauseAllFeedVideos(); 
             });
-            
-            closeModalBtn.addEventListener('click', () => {
+            closeModalBtn.addEventListener('click', () => { 
                 createModal.classList.remove('active'); 
-                isCreateModalOpen = false;
-                setTimeout(() => {
-                    playVideosInView();
-                }, 300);
+                resumeFeedVideos(); 
             });
-            
             uploadTrigger.addEventListener('click', () => fileInput.click());
-            
             fileInput.addEventListener('change', (e) => {
-                if (e.target.files && e.target.files[0]) {
-                    handleFileSelect(e.target.files[0]);
-                }
+                if (e.target.files && e.target.files[0]) handleFileSelect(e.target.files[0]);
             });
-            
             sharePostBtn.addEventListener('click', handleUploadAndPost);
 
-            optionsModal.addEventListener('click', (e) => { 
-                if(e.target === optionsModal) closeOptions(); 
-            });
-            
+            optionsModal.addEventListener('click', (e) => { if(e.target === optionsModal) closeOptions(); });
             closeOptionsBtn.addEventListener('click', closeOptions);
             
             likesModal.addEventListener('click', (e) => { 
-                if(e.target === likesModal) { 
-                    likesModal.classList.remove('active'); 
-                    currentViewingLikesPostId = null; 
-                }
+                if(e.target === likesModal) { likesModal.classList.remove('active'); currentViewingLikesPostId = null; }
             });
-            
-            closeLikesBtn.addEventListener('click', () => { 
-                likesModal.classList.remove('active'); 
-                currentViewingLikesPostId = null; 
-            });
+            closeLikesBtn.addEventListener('click', () => { likesModal.classList.remove('active'); currentViewingLikesPostId = null; });
             
             // Comments Listeners
             commentsModal.addEventListener('click', (e) => {
-                if(e.target === commentsModal) { 
-                    commentsModal.classList.remove('active'); 
-                    currentCommentsPostId = null; 
-                }
+                if(e.target === commentsModal) { commentsModal.classList.remove('active'); currentCommentsPostId = null; }
             });
-            
-            closeCommentsBtn.addEventListener('click', () => { 
-                commentsModal.classList.remove('active'); 
-                currentCommentsPostId = null; 
-            });
-            
+            closeCommentsBtn.addEventListener('click', () => { commentsModal.classList.remove('active'); currentCommentsPostId = null; });
             commentInputField.addEventListener('input', (e) => {
                 if(e.target.value.trim().length > 0) sendCommentBtn.classList.add('active');
                 else sendCommentBtn.classList.remove('active');
             });
-            
             sendCommentBtn.addEventListener('click', handleSendComment);
-            
-            commentInputField.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendComment();
-                }
-            });
 
             deletePostBtn.addEventListener('click', handleDeletePost);
-            
             editPostBtn.addEventListener('click', () => {
                 closeOptions();
                 const post = postsDataCache[currentOptionsPostId];
                 editCaptionInput.value = post ? post.caption : '';
-                editCharCounter.textContent = `${editCaptionInput.value.length}/500`;
                 editCaptionModal.classList.add('active');
             });
 
             cancelCaptionBtn.addEventListener('click', () => editCaptionModal.classList.remove('active'));
-            
             saveCaptionBtn.addEventListener('click', handleSaveCaption);
             
             privacyToggle.addEventListener('change', handlePrivacyChange);
-            commentsToggle.addEventListener('change', handleCommentsToggleChange);
-            
-            // Character counters
-            captionInput.addEventListener('input', (e) => {
-                charCounter.textContent = `${e.target.value.length}/500`;
-            });
-            
-            editCaptionInput.addEventListener('input', (e) => {
-                editCharCounter.textContent = `${e.target.value.length}/500`;
-            });
-            
-            // Preview controls
-            previewPlayBtn.addEventListener('click', () => {
-                videoPreview.play();
-            });
-            
-            previewPauseBtn.addEventListener('click', () => {
-                videoPreview.pause();
-            });
-            
-            previewMuteBtn.addEventListener('click', () => {
-                previewVideoMuted = !previewVideoMuted;
-                videoPreview.muted = previewVideoMuted;
-                previewMuteBtn.textContent = previewVideoMuted ? 'صدا دار' : 'بی‌صدا';
-            });
-            
-            changeFileBtn.addEventListener('click', () => {
-                fileInput.click();
-            });
-            
-            // Close modal on Escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    if (createModal.classList.contains('active')) {
-                        closeModalBtn.click();
-                    }
-                    if (optionsModal.classList.contains('active')) {
-                        closeOptions();
-                    }
-                    if (editCaptionModal.classList.contains('active')) {
-                        cancelCaptionBtn.click();
-                    }
-                    if (likesModal.classList.contains('active')) {
-                        closeLikesBtn.click();
-                    }
-                    if (commentsModal.classList.contains('active')) {
-                        closeCommentsBtn.click();
-                    }
-                }
-            });
+            commentsToggle.addEventListener('change', handleCommentsToggleChange); // New listener for comment toggle
 
             // Pull to Refresh
             feedContainer.addEventListener('touchstart', touchStart, {passive: true});
             feedContainer.addEventListener('touchmove', touchMove, {passive: false});
             feedContainer.addEventListener('touchend', touchEnd);
-            
-            // Prevent refresh on pull when scrolled
-            feedContainer.addEventListener('scroll', () => {
-                if (feedContainer.scrollTop > 0) {
-                    isPulling = false;
-                }
-            });
-        }
-
-        // --- VIDEO MANAGEMENT ---
-        function pauseAllVideos() {
-            document.querySelectorAll('video').forEach(video => {
-                if (!video.paused) {
-                    video.dataset.wasPlaying = "true";
-                    video.pause();
-                }
-            });
-        }
-        
-        function playVideosInView() {
-            document.querySelectorAll('video').forEach(video => {
-                if (video.dataset.wasPlaying === "true") {
-                    delete video.dataset.wasPlaying;
-                    const rect = video.getBoundingClientRect();
-                    if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
-                        video.play().catch(e => console.log("Auto-play failed"));
-                    }
-                }
-            });
         }
 
         // --- FILE & MODAL LOGIC ---
         function handleFileSelect(file) {
-            // پاکسازی URL قبلی اگر وجود دارد
-            if (previewVideoUrl) {
-                URL.revokeObjectURL(previewVideoUrl);
-                previewVideoUrl = null;
-            }
-            
             selectedFile = file;
             const reader = new FileReader();
-            
-            // نمایش اطلاعات فایل
-            const fileTypeText = file.type.startsWith('video/') ? 'ویدیو' : 
-                                file.type.startsWith('image/') ? 'تصویر' : 'فایل';
-            fileType.textContent = fileTypeText;
-            fileSize.textContent = formatFileSize(file.size);
-            
             uploadTrigger.style.display = 'none';
-            previewContainer.style.display = 'flex';
-            
             if (file.type.startsWith('video/')) {
-                imagePreview.style.display = 'none'; 
-                videoPreview.style.display = 'block';
-                videoControls.style.display = 'flex';
-                
-                previewVideoUrl = URL.createObjectURL(file);
-                videoPreview.src = previewVideoUrl;
-                videoPreview.muted = previewVideoMuted;
-                previewMuteBtn.textContent = previewVideoMuted ? 'صدا دار' : 'بی‌صدا';
-                
-                // پخش خودکار ویدیو
-                videoPreview.play().catch(e => {
-                    console.log("Auto-play prevented, user interaction required");
-                });
+                imagePreview.style.display = 'none'; videoPreview.style.display = 'block';
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.play(); 
             } else {
-                videoPreview.style.display = 'none'; 
-                videoControls.style.display = 'none';
-                imagePreview.style.display = 'block';
+                videoPreview.style.display = 'none'; imagePreview.style.display = 'block';
                 reader.onload = (e) => imagePreview.src = e.target.result;
                 reader.readAsDataURL(file);
             }
-            
-            sharePostBtn.disabled = false;
-            uploadStatus.textContent = 'فایل انتخاب شد. آماده انتشار.';
-            uploadStatus.style.color = 'var(--success-color)';
         }
 
         function resetModal() {
-            // پاکسازی URL ویدیوی پیش‌نمایش
-            if (previewVideoUrl) {
-                URL.revokeObjectURL(previewVideoUrl);
-                previewVideoUrl = null;
-            }
-            
             selectedFile = null;
-            fileInput.value = ''; 
-            captionInput.value = '';
-            charCounter.textContent = '0/500';
-            imagePreview.src = ''; 
-            videoPreview.src = '';
-            imagePreview.style.display = 'none'; 
-            videoPreview.style.display = 'none';
-            videoControls.style.display = 'none';
-            uploadTrigger.style.display = 'block'; 
-            previewContainer.style.display = 'none';
-            progressBarContainer.style.display = 'none'; 
-            progressBar.style.width = '0%';
-            sharePostBtn.disabled = false; 
-            sharePostBtn.textContent = 'انتشار';
+            fileInput.value = ''; captionInput.value = '';
+            imagePreview.src = ''; videoPreview.src = '';
+            imagePreview.style.display = 'none'; videoPreview.style.display = 'none';
+            uploadTrigger.style.display = 'block';
+            progressBarContainer.style.display = 'none'; progressBar.style.width = '0%';
+            sharePostBtn.disabled = false; sharePostBtn.textContent = 'انتشار';
             createPrivacyToggle.checked = true; 
-            createCommentsToggle.checked = true;
-            uploadStatus.textContent = '';
-            isUploading = false;
         }
 
         function showToast(msg, type = 'success') {
@@ -1927,51 +916,30 @@
         // --- NETWORK CORE ---
         async function refreshClientToken() {
             try {
-                const response = await fetch(`${PROXY_URL}?auth=token`, { 
-                    headers: { 'X-Proxy-Secret': SHARED_SECRET } 
-                });
+                const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
                 if (!response.ok) throw new Error('Auth Failed');
                 const data = await response.json();
                 clientToken = data.token;
-            } catch (e) { 
-                console.error("Token error", e); 
-                throw e; 
-            }
+            } catch (e) { console.error("Token error", e); throw e; }
         }
 
         async function fetchUsersCache() {
             if (!clientToken) await refreshClientToken();
             try {
                 const response = await fetch(`${PROXY_URL}?path=users`, {
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username 
-                    }
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                 });
                 if (response.ok) {
                     allUsersCache = await response.json() || {};
                 }
                 return allUsersCache;
-            } catch (e) { 
-                console.warn("User cache error", e); 
-                return {}; 
-            }
+            } catch (e) { console.warn("User cache error", e); return {}; }
         }
 
         // --- UPLOAD & CREATE POST ---
         async function handleUploadAndPost() {
-            if (isUploading) return;
-            
-            if (!selectedFile) { 
-                showToast('لطفاً یک فایل انتخاب کنید', 'error'); 
-                return; 
-            }
-            
-            isUploading = true;
-            sharePostBtn.disabled = true; 
-            sharePostBtn.textContent = 'در حال آپلود...';
-            uploadStatus.textContent = 'در حال آپلود فایل...';
-            uploadStatus.style.color = 'var(--warning-color)';
+            if (!selectedFile) { showToast('فایلی انتخاب نشده است', 'error'); return; }
+            sharePostBtn.disabled = true; sharePostBtn.textContent = 'در حال آپلود...';
             progressBarContainer.style.display = 'block';
 
             const formData = new FormData();
@@ -1979,16 +947,8 @@
 
             const xhr = new XMLHttpRequest();
             xhr.open('POST', UPLOAD_PHP_ENDPOINT, true);
-            
             xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable) {
-                    const percent = (e.loaded / e.total) * 100;
-                    progressBar.style.width = percent + '%';
-                    
-                    if (percent < 100) {
-                        uploadStatus.textContent = `در حال آپلود: ${Math.round(percent)}%`;
-                    }
-                }
+                if (e.lengthComputable) progressBar.style.width = ((e.loaded / e.total) * 100) + '%';
             };
 
             xhr.onload = async () => {
@@ -1997,39 +957,15 @@
                         const result = JSON.parse(xhr.responseText);
                         if (result.success && result.url) {
                             await createPostRecord(result.url, selectedFile.type.startsWith('video/') ? 'video' : 'image');
-                        } else {
-                            throw new Error(result.error || 'خطا در آپلود');
-                        }
-                    } catch (err) { 
-                        showToast(err.message, 'error'); 
-                        resetUploadState();
-                    }
-                } else { 
-                    showToast('خطای سرور در آپلود', 'error'); 
-                    resetUploadState();
-                }
+                        } else throw new Error(result.error);
+                    } catch (err) { showToast(err.message, 'error'); sharePostBtn.disabled = false; }
+                } else { showToast('خطای سرور', 'error'); sharePostBtn.disabled = false; }
             };
-            
-            xhr.onerror = () => {
-                showToast('خطا در ارتباط با سرور', 'error');
-                resetUploadState();
-            };
-            
             xhr.send(formData);
-        }
-        
-        function resetUploadState() {
-            isUploading = false;
-            sharePostBtn.disabled = false;
-            sharePostBtn.textContent = 'انتشار';
-            uploadStatus.textContent = 'خطا در آپلود. مجدداً تلاش کنید.';
-            uploadStatus.style.color = 'var(--danger-color)';
         }
 
         async function createPostRecord(mediaUrl, type) {
-            sharePostBtn.textContent = 'در حال ذخیره...';
-            uploadStatus.textContent = 'در حال ذخیره پست...';
-            
+            sharePostBtn.textContent = 'ذخیره...';
             const postData = {
                 sender_username: currentUser.username,
                 media_url: mediaUrl,
@@ -2038,7 +974,7 @@
                 timestamp: new Date().toISOString(),
                 likes: {},
                 show_likes: createPrivacyToggle.checked,
-                comments_disabled: !createCommentsToggle.checked
+                comments_disabled: false // Default enabled
             };
 
             if (currentUser.accountType === 'premium') {
@@ -2046,41 +982,21 @@
             }
 
             try {
-                const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
+                await fetch(`${PROXY_URL}?path=rubino_posts`, {
                     method: 'POST',
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username, 
-                        'Content-Type': 'application/json' 
-                    },
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
                     body: JSON.stringify(postData)
                 });
-                
-                if (response.ok) {
-                    createModal.classList.remove('active');
-                    isCreateModalOpen = false;
-                    await fetchPosts(true);
-                    showToast('پست با موفقیت منتشر شد', 'success');
-                    resetModal();
-                    setTimeout(() => {
-                        playVideosInView();
-                    }, 300);
-                } else {
-                    throw new Error('خطا در ذخیره پست');
-                }
-            } catch (err) { 
-                showToast('خطا در انتشار پست', 'error'); 
-                resetUploadState();
-            }
+                createModal.classList.remove('active');
+                await fetchPosts(true); 
+                showToast('پست منتشر شد');
+            } catch (err) { showToast('خطا در انتشار', 'error'); sharePostBtn.disabled = false; }
         }
 
         // --- FEED LOGIC ---
         async function fetchPosts(shouldRender = true) {
             const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
-                headers: { 
-                    'Authorization': `Bearer ${clientToken}`, 
-                    'X-User-Username': currentUser.username 
-                }
+                headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
             });
             if (!response.ok && response.status !== 404) throw new Error("Fetch posts failed");
             const data = await response.json() || {};
@@ -2091,40 +1007,21 @@
         }
 
         function renderFeed(posts) {
-            // توقف و حذف ویدیوهای قبلی
-            document.querySelectorAll('video').forEach(v => { 
-                v.pause(); 
-                v.src = ""; 
-                v.load(); 
-                if (v.parentNode) v.parentNode.removeChild(v); 
-            });
-            
+            // Clean up old videos
+            document.querySelectorAll('video').forEach(v => { v.pause(); v.src = ""; v.load(); v.remove(); });
             feedContainer.innerHTML = '';
             
             if (posts.length === 0) {
-                feedContainer.innerHTML = `
-                    <div class="empty-state">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary); margin-bottom:15px;">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="3" y1="9" x2="21" y2="9"></line>
-                            <line x1="9" y1="21" x2="9" y2="9"></line>
-                        </svg>
-                        <p>هنوز پستی وجود ندارد.</p>
-                        <p style="font-size:0.9rem; margin-top:10px;">اولین پست را ایجاد کنید!</p>
-                    </div>
-                `;
+                feedContainer.innerHTML = '<div class="empty-state">هیچ پستی وجود ندارد.</div>';
             } else {
                 posts.forEach(post => {
                     const isOwner = post.sender_username === currentUser.username;
-                    const user = allUsersCache[post.sender_username] || { 
-                        displayName: post.sender_username, 
-                        username: post.sender_username 
-                    };
+                    const user = allUsersCache[post.sender_username] || { displayName: post.sender_username, username: post.sender_username };
                     const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${post.sender_username}&background=random&color=fff`;
                     const displayName = user.displayName || post.sender_username;
                     const isLiked = post.likes && post.likes[currentUser.username];
                     const likeCount = post.likes ? Object.keys(post.likes).length : 0;
-                    const commentCount = post.comments ? Object.keys(post.comments).length : 0;
+                    const commentCount = post.comments ? Object.keys(post.comments).length : 0; // Count Comments
                     const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
 
                     const canOpenList = isOwner || (post.show_likes !== false); 
@@ -2150,11 +1047,11 @@
 
                     const postEl = document.createElement('div');
                     postEl.className = 'post-card';
-                    
+
                     if (post.isGolden) {
                         postEl.classList.add('golden-post');
                     }
-                    
+
                     postEl.id = `post-${post.id}`;
                     
                     postEl.innerHTML = `
@@ -2191,26 +1088,16 @@
                     `;
                     feedContainer.appendChild(postEl);
                 });
-                
                 skeletonLoader.style.display = 'none';
                 feedContainer.style.opacity = '1';
-                
-                // مشاهده ویدیوها
-                document.querySelectorAll('video').forEach(v => {
-                    if (videoObserver) {
-                        videoObserver.observe(v);
-                    }
-                });
+                document.querySelectorAll('video.post-media').forEach(v => videoObserver.observe(v));
             }
         }
 
         async function startRealtimeUpdates() {
             try {
                 const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username 
-                    }
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                 });
                 if (!response.ok) return;
                 const newData = await response.json() || {};
@@ -2232,12 +1119,10 @@
                     const likeCount = post.likes ? Object.keys(post.likes).length : 0;
                     likeCountEl.textContent = `${likeCount} پسند`;
                     if (canOpenList) {
-                        likeCountEl.classList.add('clickable'); 
-                        likeCountEl.classList.remove('private');
+                        likeCountEl.classList.add('clickable'); likeCountEl.classList.remove('private');
                         likeCountEl.setAttribute('onclick', `showLikesList('${pid}', ${isOwner}, true)`);
                     } else {
-                        likeCountEl.classList.remove('clickable'); 
-                        likeCountEl.classList.add('private');
+                        likeCountEl.classList.remove('clickable'); likeCountEl.classList.add('private');
                         likeCountEl.removeAttribute('onclick');
                     }
                     
@@ -2249,21 +1134,8 @@
                     // Update Caption
                     const capEl = el.querySelector('.caption-text');
                     if (capEl.textContent !== post.caption) capEl.textContent = post.caption;
-                    
-                    // Update Like Button
-                    const likeBtn = el.querySelector('.action-btn');
-                    const isLiked = post.likes && post.likes[currentUser.username];
-                    if (isLiked) {
-                        likeBtn.classList.add('liked');
-                        likeBtn.querySelector('svg').setAttribute('fill', 'currentColor');
-                    } else {
-                        likeBtn.classList.remove('liked');
-                        likeBtn.querySelector('svg').setAttribute('fill', 'none');
-                    }
                 });
-            } catch (e) { 
-                console.warn("Sync error", e); 
-            }
+            } catch (e) { console.warn("Sync error", e); }
         }
 
         // --- COMMENTS LOGIC (ENHANCED) ---
@@ -2291,10 +1163,7 @@
                 }
 
                 const response = await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/comments`, {
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username 
-                    }
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                 });
                 
                 const data = await response.json();
@@ -2308,14 +1177,7 @@
             commentsListContainer.innerHTML = '';
             
             if (!commentsData || Object.keys(commentsData).length === 0) {
-                commentsListContainer.innerHTML = `
-                    <div class="empty-state" style="padding-top:80px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary); margin-bottom:10px;">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        <p>هنوز نظری ثبت نشده است.<br>اولین نفر باشید!</p>
-                    </div>
-                `;
+                commentsListContainer.innerHTML = `<div class="empty-state" style="padding-top:80px;"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary); margin-bottom:10px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><p>هنوز نظری ثبت نشده است.<br>اولین نفر باشید!</p></div>`;
                 return;
             }
 
@@ -2329,10 +1191,7 @@
                 });
 
             commentsArray.forEach(comment => {
-                const user = allUsersCache[comment.sender_username] || { 
-                    displayName: comment.sender_username, 
-                    username: comment.sender_username 
-                };
+                const user = allUsersCache[comment.sender_username] || { displayName: comment.sender_username, username: comment.sender_username };
                 const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${comment.sender_username}&background=random&color=fff`;
                 const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
                 const isMyComment = comment.sender_username === currentUser.username;
@@ -2343,11 +1202,9 @@
                 if (isPostOwner || isMyComment) {
                     actionBtns += `<div class="comment-option-menu">`;
                     if (isPostOwner) {
-                         actionBtns += `<button class="mini-btn btn-pin" onclick="togglePinComment('${currentCommentsPostId}', '${comment.id}', ${!isPinned})">${isPinned ? 'برداشتن سنجاق' : 'سنجاق کردن'}</button>`;
+                         actionBtns += `<button class="mini-btn btn-pin" onclick="togglePinComment('${currentCommentsPostId}', '${comment.id}', ${!isPinned})">${isPinned ? 'برداشتن' : 'سنجاق'}</button>`;
                     }
-                    if (isMyComment || isPostOwner) {
-                        actionBtns += `<button class="mini-btn btn-delete" onclick="deleteComment('${currentCommentsPostId}', '${comment.id}')">حذف</button>`;
-                    }
+                    actionBtns += `<button class="mini-btn btn-delete" onclick="deleteComment('${currentCommentsPostId}', '${comment.id}')">حذف</button>`;
                     actionBtns += `</div>`;
                 }
 
@@ -2368,21 +1225,12 @@
                 `;
                 commentsListContainer.appendChild(div);
             });
-            
-            // اسکرول به پایین
-            setTimeout(() => {
-                commentsListContainer.scrollTop = commentsListContainer.scrollHeight;
-            }, 100);
+            commentsListContainer.scrollTop = commentsListContainer.scrollHeight;
         }
 
         async function handleSendComment() {
             const text = commentInputField.value.trim();
             if (!text || !currentCommentsPostId) return;
-            
-            if (text.length > 300) {
-                showToast('نظر نباید بیشتر از ۳۰۰ کاراکتر باشد', 'error');
-                return;
-            }
 
             const fakeComment = {
                 sender_username: currentUser.username,
@@ -2397,16 +1245,7 @@
             const div = document.createElement('div');
             div.className = 'comment-item';
             div.style.opacity = '0.5'; 
-            div.innerHTML = `
-                <img src="${avatar}" class="comment-avatar">
-                <div class="comment-content">
-                    <div class="comment-header">
-                        <span class="comment-username">${user.displayName || user.username}</span>
-                        <span class="comment-text">${text}</span>
-                    </div>
-                    <span class="comment-time">در حال ارسال...</span>
-                </div>
-            `;
+            div.innerHTML = `<img src="${avatar}" class="comment-avatar"><div class="comment-content"><div class="comment-header"><span class="comment-username">${user.displayName || user.username}</span><span class="comment-text">${text}</span></div><span class="comment-time">درحال ارسال...</span></div>`;
             commentsListContainer.appendChild(div);
             commentsListContainer.scrollTop = commentsListContainer.scrollHeight;
             
@@ -2416,11 +1255,7 @@
             try {
                 await fetch(`${PROXY_URL}?path=rubino_posts/${currentCommentsPostId}/comments`, {
                     method: 'POST',
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username, 
-                        'Content-Type': 'application/json' 
-                    },
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
                     body: JSON.stringify(fakeComment)
                 });
                 div.style.opacity = '1';
@@ -2444,10 +1279,7 @@
             try {
                 await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/comments/${commentId}`, {
                     method: 'DELETE',
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username 
-                    }
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                 });
                 if(commentEl) commentEl.remove();
                 showToast('نظر حذف شد');
@@ -2459,18 +1291,17 @@
 
         async function togglePinComment(postId, commentId, shouldPin) {
              try {
+                // For this demo, we update just the specific comment's is_pinned status
+                // A better approach in a real app might be to unpin all others first if only 1 pin allowed.
+                // Here we allow multiple pins or just handle the state.
+                
                 await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/comments/${commentId}`, {
                     method: 'PATCH',
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username, 
-                        'Content-Type': 'application/json' 
-                    },
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ is_pinned: shouldPin })
                 });
                 // Refresh list to re-sort
                 openComments(postId);
-                showToast(shouldPin ? 'نظر سنجاق شد' : 'سنجاق نظر برداشته شد');
             } catch(e) {
                 showToast('خطا در تغییر وضعیت سنجاق', 'error');
             }
@@ -2490,52 +1321,35 @@
         }
 
         async function handleDeletePost() {
-            if(!confirm('آیا مطمئن هستید که می‌خواهید این پست را حذف کنید؟')) return;
+            if(!confirm('حذف شود؟')) return;
             try {
                 await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
-                    method: 'DELETE', 
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username 
-                    }
+                    method: 'DELETE', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                 });
                 document.getElementById(`post-${currentOptionsPostId}`).remove();
                 closeOptions();
-                showToast('پست با موفقیت حذف شد');
+                showToast('پست حذف شد');
                 await fetchPosts(false);
-            } catch(e) { 
-                showToast('خطا در حذف پست', 'error'); 
-            }
+            } catch(e) { showToast('خطا در حذف', 'error'); }
         }
 
         async function handleSaveCaption() {
-            const newCaption = editCaptionInput.value.trim();
-            if (newCaption.length > 500) {
-                showToast('کپشن نباید بیشتر از ۵۰۰ کاراکتر باشد', 'error');
-                return;
-            }
-            
+            const newCaption = editCaptionInput.value;
             saveCaptionBtn.textContent = '...';
             try {
                 await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
                     method: 'PATCH',
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username, 
-                        'Content-Type': 'application/json' 
-                    },
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ caption: newCaption })
                 });
                 document.querySelector(`#post-${currentOptionsPostId} .caption-text`).textContent = newCaption;
                 editCaptionModal.classList.remove('active');
-                showToast('ویرایش با موفقیت انجام شد');
+                showToast('ویرایش شد');
                 if(postsDataCache[currentOptionsPostId]) {
                     postsDataCache[currentOptionsPostId].caption = newCaption;
                     localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(postsDataCache));
                 }
-            } catch(e) { 
-                showToast('خطا در ویرایش کپشن', 'error'); 
-            }
+            } catch(e) { showToast('خطا', 'error'); }
             saveCaptionBtn.textContent = 'ذخیره تغییرات';
         }
 
@@ -2544,18 +1358,10 @@
             try {
                 await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
                     method: 'PATCH',
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username, 
-                        'Content-Type': 'application/json' 
-                    },
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ show_likes: isChecked })
                 });
-                showToast(isChecked ? 'تعداد لایک‌ها قابل مشاهده است' : 'تعداد لایک‌ها مخفی شد');
-            } catch(e) { 
-                privacyToggle.checked = !isChecked; 
-                showToast('خطا در تغییر تنظیمات', 'error'); 
-            }
+            } catch(e) { privacyToggle.checked = !isChecked; showToast('خطا در تغییر تنظیمات', 'error'); }
         }
 
         async function handleCommentsToggleChange() {
@@ -2566,11 +1372,7 @@
             try {
                 await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
                     method: 'PATCH',
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username, 
-                        'Content-Type': 'application/json' 
-                    },
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ comments_disabled: disableComments })
                 });
                 // Update local cache for immediate feedback on open
@@ -2589,40 +1391,26 @@
             if (!isOwner && !isPublic) return; 
             currentViewingLikesPostId = postId;
             const listContainer = document.getElementById('likes-list-container');
-            listContainer.innerHTML = '<div class="empty-state"><div class="pull-spinner spinning" style="margin:0 auto;"></div><p style="margin-top:10px;">در حال بارگذاری...</p></div>';
+            listContainer.innerHTML = '<div class="empty-state"><div class="pull-spinner spinning" style="margin:0 auto;"></div></div>';
             likesModal.classList.add('active');
 
             try {
                 const response = await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes`, {
-                    headers: { 
-                        'Authorization': `Bearer ${clientToken}`, 
-                        'X-User-Username': currentUser.username 
-                    }
+                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                 });
                 const likesData = await response.json();
                 listContainer.innerHTML = '';
-                if (!likesData || Object.keys(likesData).length === 0) { 
-                    listContainer.innerHTML = '<div class="empty-state">هنوز لایکی ثبت نشده.</div>'; 
-                    return; 
-                }
+                if (!likesData) { listContainer.innerHTML = '<div class="empty-state">هنوز لایکی ثبت نشده.</div>'; return; }
 
                 Object.keys(likesData).forEach(uid => {
                     const user = allUsersCache[uid] || { displayName: uid, username: uid };
                     const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${uid}&background=random&color=fff`;
                     const div = document.createElement('div');
                     div.className = 'user-list-item';
-                    div.innerHTML = `
-                        <img src="${avatar}">
-                        <div class="user-list-info">
-                            <h4>${user.displayName || uid} ${user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : ''}</h4>
-                            <p>@${user.username || uid}</p>
-                        </div>
-                    `;
+                    div.innerHTML = `<img src="${avatar}"><div class="user-list-info"><h4>${user.displayName || uid} ${user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : ''}</h4><p>@${user.username || uid}</p></div>`;
                     listContainer.appendChild(div);
                 });
-            } catch(e) { 
-                listContainer.innerHTML = '<div class="empty-state">خطا در دریافت لیست.</div>'; 
-            }
+            } catch(e) { listContainer.innerHTML = '<div class="empty-state">خطا در دریافت لیست.</div>'; }
         }
 
         // --- LIKE LOGIC ---
@@ -2639,11 +1427,7 @@
                 countEl.textContent = `${Math.max(0, currentCount - 1)} پسند`;
                 try {
                     await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes/${currentUser.username}`, {
-                        method: 'DELETE', 
-                        headers: { 
-                            'Authorization': `Bearer ${clientToken}`, 
-                            'X-User-Username': currentUser.username 
-                        }
+                        method: 'DELETE', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                     });
                 } catch(e) {}
             } else {
@@ -2653,13 +1437,7 @@
                 countEl.textContent = `${currentCount + 1} پسند`;
                 try {
                     await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes/${currentUser.username}`, {
-                        method: 'PUT', 
-                        headers: { 
-                            'Authorization': `Bearer ${clientToken}`, 
-                            'X-User-Username': currentUser.username, 
-                            'Content-Type': 'application/json' 
-                        }, 
-                        body: 'true'
+                        method: 'PUT', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' }, body: 'true'
                     });
                 } catch(e) {}
             }
@@ -2668,20 +1446,12 @@
         window.triggerLike = (postId) => {
             const heart = document.getElementById(`heart-anim-${postId}`);
             const btn = document.getElementById(`like-btn-${postId}`);
-            heart.classList.remove('active'); 
-            void heart.offsetWidth; 
-            heart.classList.add('active');
+            heart.classList.remove('active'); void heart.offsetWidth; heart.classList.add('active');
             if (!btn.classList.contains('liked')) toggleLike(postId);
         };
 
         // --- PULL REFRESH & TIME ---
-        function touchStart(e) { 
-            if (feedContainer.scrollTop === 0) { 
-                startY = e.touches[0].clientY; 
-                isPulling = true; 
-            } 
-        }
-        
+        function touchStart(e) { if (feedContainer.scrollTop === 0) { startY = e.touches[0].clientY; isPulling = true; } }
         function touchMove(e) {
             if (!isPulling) return;
             const diff = e.touches[0].clientY - startY;
@@ -2693,32 +1463,19 @@
                 pullSpinner.style.transform = `rotate(${diff * 2}deg)`; 
             }
         }
-        
         async function touchEnd() {
             if (!isPulling) return;
             isPulling = false;
             if (currentTranslate > 60) {
                 pullSpinner.classList.add('spinning');
                 feedContainer.style.transform = `translateY(60px)`;
-                try { 
-                    await Promise.all([fetchUsersCache(), fetchPosts(false)]); 
-                    renderFeed(preparePostsArray(postsDataCache)); 
-                    showToast('تازه‌سازی انجام شد');
-                } catch(e) { 
-                    console.log(e); 
-                    showToast('خطا در تازه‌سازی', 'error');
-                }
+                try { await Promise.all([fetchUsersCache(), fetchPosts(false)]); renderFeed(preparePostsArray(postsDataCache)); } catch(e) { console.log(e); }
                 setTimeout(resetPull, 500);
-            } else { 
-                resetPull(); 
-            }
+            } else { resetPull(); }
         }
-        
         function resetPull() {
-            feedContainer.style.transform = ''; 
-            pullIndicator.style.opacity = 0;
-            pullSpinner.classList.remove('spinning'); 
-            currentTranslate = 0;
+            feedContainer.style.transform = ''; pullIndicator.style.opacity = 0;
+            pullSpinner.classList.remove('spinning'); currentTranslate = 0;
         }
 
         function updateLiveTimestamps() {
@@ -2738,21 +1495,8 @@
             const hours = Math.floor(minutes / 60);
             if (hours < 24) return `${hours} ساعت پیش`;
             const days = Math.floor(hours / 24);
-            if (days < 7) return `${days} روز پیش`;
-            const weeks = Math.floor(days / 7);
-            if (weeks < 4) return `${weeks} هفته پیش`;
-            const months = Math.floor(days / 30);
-            if (months < 12) return `${months} ماه پیش`;
-            const years = Math.floor(days / 365);
-            return `${years} سال پیش`;
+            return `${days} روز پیش`;
         }
-        
-        // Global functions for inline event handlers
-        window.openPostOptions = openPostOptions;
-        window.showLikesList = showLikesList;
-        window.openComments = openComments;
-        window.toggleVideoPlay = toggleVideoPlay;
-        window.toggleMute = toggleMute;
     </script>
 </body>
 </html>
