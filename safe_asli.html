@@ -160,7 +160,7 @@
         }
 
         .coin-balance {
-            display: flex;
+            display: flex; /* پیش‌فرض فلکس است، اما توسط JS کنترل می‌شود */
             align-items: center;
             background-color: var(--secondary-hover);
             border-radius: 20px;
@@ -225,18 +225,27 @@
             display: none; /* Hidden by default */
             background: linear-gradient(90deg, #1E90FF, #00A3FF);
             color: white;
-            padding: 12px 20px;
-            font-size: 0.9em;
+            /* تغییرات برای کوچک‌تر شدن و جای گرفتن در یک خط */
+            padding: 8px 10px; 
+            font-size: 0.75em; /* کوچک کردن فونت برای موبایل */
             font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            gap: 10px;
+            gap: 6px;
             border-bottom: 1px solid var(--border-color);
             box-shadow: 0 4px 15px rgba(0, 163, 255, 0.2);
             transition: all 0.3s ease;
             z-index: 40; /* Ensure it's above content */
+            white-space: nowrap; /* جلوگیری از شکستن خط */
+            overflow: hidden;
+        }
+
+        #reward-banner-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* سه نقطه اگر متن خیلی طولانی بود */
         }
 
         #reward-banner.clickable {
@@ -249,9 +258,16 @@
         }
 
         #reward-banner svg {
-            width: 22px;
-            height: 22px;
-            flex-shrink: 0; /* Prevent icon from shrinking */
+            width: 18px; /* کمی کوچک‌تر */
+            height: 18px;
+            flex-shrink: 0; 
+        }
+
+        /* مدیا کوئری برای موبایل‌های خیلی کوچک */
+        @media (max-width: 360px) {
+            #reward-banner {
+                font-size: 11px; /* فونت بسیار ریز برای گوشی‌های قدیمی */
+            }
         }
 
         /* --- Search Tabs --- */
@@ -1745,10 +1761,22 @@
         }
         
         function updateHeaderCoinDisplay() {
+            const coinContainer = document.querySelector('.coin-balance');
             const coinDisplay = document.getElementById('header-coin-display');
+            
             if (coinDisplay && currentUser) {
+                // به‌روزرسانی مقدار متنی
                 const userCoins = currentUser.coins || 0;
                 coinDisplay.textContent = parseInt(userCoins).toLocaleString('fa-IR');
+
+                // --- [MODIFIED LOGIC] مدیریت نمایش بر اساس نوع اکانت ---
+                // اگر نوع اکانت پریمیوم یا ویژه باشد، نمایش داده شود
+                // در غیر این صورت (عادی یا نامشخص)، محو شود
+                if (currentUser.accountType === 'premium' || currentUser.accountType === 'special') {
+                    coinContainer.style.display = 'flex'; // نمایش
+                } else {
+                    coinContainer.style.display = 'none'; // محو (حذف از دید)
+                }
             }
         }
 
@@ -2660,13 +2688,13 @@
             rewardBanner.classList.remove('clickable');
             
             if (reportCount > 0) {
-                rewardBannerText.textContent = `شما ${reportCount} گزارش فعال دارید. برای مشاهده لیست کلیک کنید.`;
+                rewardBannerText.textContent = `شما ${reportCount} گزارش فعال دارید.`;
                 rewardBanner.classList.add('clickable');
                 rewardBanner.style.background = 'linear-gradient(90deg, #dc3545, #b22222)'; // Error gradient
             } else {
                 const lastReportTimestamp = currentUser.lastReportDate;
                 if (!lastReportTimestamp) {
-                    rewardBannerText.textContent = 'با عدم دریافت گزارش، شانس دریافت جایزه پریمیوم را افزایش دهید!';
+                    rewardBannerText.textContent = 'عدم دریافت گزارش، شانس جایزه!';
                     rewardBanner.style.background = 'linear-gradient(90deg, #1E90FF, #00A3FF)'; // Default gradient
                 } else {
                     const REWARD_PERIOD_DAYS = 7;
@@ -2675,10 +2703,10 @@
                     const daysRemaining = REWARD_PERIOD_DAYS - daysSinceLastReport;
                     
                     if (daysRemaining > 0) {
-                        rewardBannerText.textContent = `شما ${daysSinceLastReport} روز است که گزارشی نداشته‌اید. ${daysRemaining} روز دیگر تا جایزه!`;
+                        rewardBannerText.textContent = `${daysSinceLastReport} روز پاکی. ${daysRemaining} روز تا جایزه!`;
                         rewardBanner.style.background = 'linear-gradient(90deg, #1E90FF, #00A3FF)'; // Default gradient
                     } else {
-                        rewardBannerText.textContent = 'تبریک! شما واجد شرایط دریافت جایزه پریمیوم هستید.';
+                        rewardBannerText.textContent = 'تبریک! واجد شرایط جایزه پریمیوم هستید.';
                         rewardBanner.style.background = 'linear-gradient(90deg, #28a745, #20bf55)'; // Success gradient
                     }
                 }
