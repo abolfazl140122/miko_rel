@@ -108,7 +108,6 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* استایل‌های جدید برای پست طلایی */
         .post-card.golden-post {
             border-right: 4px solid var(--gold-color);
             border-left: 1px solid var(--gold-color);
@@ -124,7 +123,7 @@
             font-size: 1rem;
             filter: drop-shadow(0 0 4px var(--gold-color));
             vertical-align: middle;
-            padding-bottom: 4px; /* برای تنظیم عمودی بهتر */
+            padding-bottom: 4px; 
         }
 
         .post-header { padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; }
@@ -564,7 +563,6 @@
                     </div>
                 </div>
                 
-                <!-- New Feature: Disable Comments Toggle -->
                 <div class="sheet-option">
                     <div class="toggle-container">
                         <span>باز بودن نظرات</span>
@@ -615,7 +613,7 @@
             </div>
         </div>
 
-        <!-- Comments Modal (Enhanced) -->
+        <!-- Comments Modal -->
         <div class="modal-overlay bottom-sheet" id="comments-modal">
             <div class="sheet-card" style="height: 75vh;">
                 <div class="sheet-drag-handle"></div>
@@ -624,9 +622,7 @@
                     <button class="close-modal" id="close-comments-btn">&times;</button>
                 </div>
                 
-                <div class="comments-list-content" id="comments-list-container">
-                    <!-- Comments will load here -->
-                </div>
+                <div class="comments-list-content" id="comments-list-container"></div>
                 
                 <div class="comment-input-area" id="comment-input-area">
                     <img id="current-user-comment-avatar" src="" class="comment-avatar" style="width: 36px; height: 36px; border: none;">
@@ -761,11 +757,8 @@
                 .sort((a, b) => {
                     const aIsGolden = a.isGolden === true;
                     const bIsGolden = b.isGolden === true;
-
                     if (aIsGolden && !bIsGolden) return -1;
                     if (!aIsGolden && bIsGolden) return 1;
-
-                    // اگر هر دو یکسان بودند، بر اساس زمان مرتب کن
                     return new Date(b.timestamp) - new Date(a.timestamp);
                 });
         }
@@ -815,31 +808,29 @@
         // --- EVENT LISTENERS ---
         function setupEventListeners() {
             openCreateBtn.addEventListener('click', () => { 
-                resetModal(); 
+                resetModal(); // Ensure clean slate without errors
                 createModal.classList.add('active'); 
                 pauseAllFeedVideos();
             });
             
             closeModalBtn.addEventListener('click', () => { 
                 createModal.classList.remove('active'); 
-                resetModal(); // FIX: Reset modal (stop video) when closing
+                resetModal(); 
                 resumeFeedVideos();
             });
             
-            // بستن مدال با کلیک روی overlay
             createModal.addEventListener('click', (e) => {
                 if (e.target === createModal) {
                     createModal.classList.remove('active');
-                    resetModal(); // FIX: Reset modal (stop video) when clicking overlay
+                    resetModal();
                     resumeFeedVideos();
                 }
             });
             
-            // بستن مدال با کلید Escape
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && createModal.classList.contains('active')) {
                     createModal.classList.remove('active');
-                    resetModal(); // FIX: Reset modal (stop video) when pressing Escape
+                    resetModal();
                     resumeFeedVideos();
                 }
             });
@@ -858,7 +849,6 @@
             });
             closeLikesBtn.addEventListener('click', () => { likesModal.classList.remove('active'); currentViewingLikesPostId = null; });
             
-            // Comments Listeners
             commentsModal.addEventListener('click', (e) => {
                 if(e.target === commentsModal) { commentsModal.classList.remove('active'); currentCommentsPostId = null; }
             });
@@ -889,9 +879,7 @@
             feedContainer.addEventListener('touchend', touchEnd);
         }
 
-        // --- VIDEO MANAGEMENT FUNCTIONS ---
         function pauseAllFeedVideos() {
-            console.log("Pausing all feed videos");
             document.querySelectorAll('video.post-media').forEach(v => {
                 if (!v.paused) {
                     v.pause();
@@ -901,66 +889,60 @@
         }
 
         function resumeFeedVideos() {
-            console.log("Resuming feed videos");
             document.querySelectorAll('video.post-media').forEach(v => {
-                // ویدیوها توسط observer به طور خودکار مدیریت می‌شوند
-                // فقط observer را دوباره فعال می‌کنیم
-                if (videoObserver) {
-                    videoObserver.observe(v);
-                }
+                if (videoObserver) videoObserver.observe(v);
             });
         }
 
-        // --- FILE & MODAL LOGIC ---
+        // --- FILE & MODAL LOGIC (FIXED) ---
         function handleFileSelect(file) {
             selectedFile = file;
-            const reader = new FileReader();
             uploadTrigger.style.display = 'none';
             
+            // Clear previous errors first
+            videoPreview.onerror = null;
+
             if (file.type.startsWith('video/')) {
                 imagePreview.style.display = 'none'; 
                 videoPreview.style.display = 'block';
                 
-                // پاک کردن src قبلی
-                videoPreview.src = '';
-                videoPreview.load();
-                
-                // ایجاد URL جدید برای فایل
+                // Revoke old URL if exists
+                if (videoPreview.src && videoPreview.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(videoPreview.src);
+                }
+
                 const videoURL = URL.createObjectURL(file);
                 videoPreview.src = videoURL;
+                videoPreview.muted = true;
+                videoPreview.controls = true;
+                videoPreview.playsInline = true;
                 
-                // تنظیمات اولیه ویدیو
-                videoPreview.muted = true; // قطع صدا
-                videoPreview.controls = true; // نمایش کنترل‌ها
-                videoPreview.playsInline = true; // پخش درون‌خطی
-                
-                // رویداد برای وقتی ویدیو آماده پخش است
                 videoPreview.onloadeddata = () => {
-                    console.log("ویدیو لود شد، تلاش برای پخش...");
-                    videoPreview.play().catch(e => {
-                        console.log("پخش خودکار ویدیو با خطا مواجه شد:", e);
-                        // اگر پخش خودکار با خطا مواجه شد، فقط ویدیو را لود کن
-                        videoPreview.load();
-                    });
+                    videoPreview.play().catch(() => {});
                 };
                 
-                // اگر خطایی در لود ویدیو رخ داد
+                // Only show error if src is set and valid but fails
                 videoPreview.onerror = () => {
-                    console.error("خطا در لود ویدیو");
-                    showToast('خطا در بارگذاری ویدیو', 'error');
-                    videoPreview.style.display = 'none';
-                    uploadTrigger.style.display = 'block';
+                    if (videoPreview.getAttribute('src')) {
+                        console.error("خطا در لود ویدیو");
+                        showToast('فرمت ویدیو پشتیبانی نمی‌شود', 'error');
+                        videoPreview.style.display = 'none';
+                        uploadTrigger.style.display = 'block';
+                    }
                 };
                 
             } else {
-                videoPreview.style.display = 'none'; 
+                videoPreview.style.display = 'none';
+                // Stop video if switching to image
+                if (videoPreview.src) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                }
+
                 imagePreview.style.display = 'block';
-                reader.onload = (e) => {
-                    imagePreview.src = e.target.result;
-                    imagePreview.onload = () => {
-                        console.log("تصویر با موفقیت لود شد");
-                    };
-                };
+                const reader = new FileReader();
+                reader.onload = (e) => { imagePreview.src = e.target.result; };
                 reader.readAsDataURL(file);
             }
         }
@@ -970,17 +952,27 @@
             fileInput.value = ''; 
             captionInput.value = '';
             
-            // پاک کردن و متوقف کردن ویدیو
-            if (videoPreview.src) {
-                videoPreview.pause();
-                videoPreview.currentTime = 0;
-                videoPreview.src = '';
-                videoPreview.load();
+            // --- FIX START: Safe Video Reset ---
+            // 1. Remove listeners to prevent fake errors
+            videoPreview.onerror = null;
+            videoPreview.onloadeddata = null;
+            
+            // 2. Pause and Clean up
+            videoPreview.pause();
+            
+            // 3. Revoke Object URL to free memory
+            if (videoPreview.src && videoPreview.src.startsWith('blob:')) {
+                URL.revokeObjectURL(videoPreview.src);
             }
             
-            // پاک کردن تصویر
-            imagePreview.src = '';
+            // 4. Properly remove src attribute
+            videoPreview.removeAttribute('src');
             
+            // 5. Load (now safe because src attr is gone)
+            videoPreview.load();
+            // --- FIX END ---
+            
+            imagePreview.src = '';
             imagePreview.style.display = 'none'; 
             videoPreview.style.display = 'none';
             uploadTrigger.style.display = 'block';
@@ -1058,7 +1050,7 @@
                 timestamp: new Date().toISOString(),
                 likes: {},
                 show_likes: createPrivacyToggle.checked,
-                comments_disabled: false // Default enabled
+                comments_disabled: false
             };
 
             if (currentUser.accountType === 'premium') {
@@ -1072,8 +1064,8 @@
                     body: JSON.stringify(postData)
                 });
                 createModal.classList.remove('active');
-                resetModal(); // FIX: Stop preview video immediately after post
-                resumeFeedVideos(); // ادامه ویدیوهای فید
+                resetModal(); 
+                resumeFeedVideos(); 
                 await fetchPosts(true); 
                 showToast('پست منتشر شد');
             } catch (err) { showToast('خطا در انتشار', 'error'); sharePostBtn.disabled = false; }
@@ -1093,10 +1085,9 @@
         }
 
         function renderFeed(posts) {
-            // ابتدا تمام ویدیوها را متوقف و منابع را آزاد کن
             document.querySelectorAll('video.post-media').forEach(v => {
                 v.pause();
-                v.src = "";
+                v.removeAttribute('src'); // Better cleanup
                 v.load();
             });
             
@@ -1112,7 +1103,7 @@
                     const displayName = user.displayName || post.sender_username;
                     const isLiked = post.likes && post.likes[currentUser.username];
                     const likeCount = post.likes ? Object.keys(post.likes).length : 0;
-                    const commentCount = post.comments ? Object.keys(post.comments).length : 0; // Count Comments
+                    const commentCount = post.comments ? Object.keys(post.comments).length : 0; 
                     const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
 
                     const canOpenList = isOwner || (post.show_likes !== false); 
@@ -1138,11 +1129,7 @@
 
                     const postEl = document.createElement('div');
                     postEl.className = 'post-card';
-
-                    if (post.isGolden) {
-                        postEl.classList.add('golden-post');
-                    }
-
+                    if (post.isGolden) postEl.classList.add('golden-post');
                     postEl.id = `post-${post.id}`;
                     
                     postEl.innerHTML = `
@@ -1181,7 +1168,6 @@
                 });
                 skeletonLoader.style.display = 'none';
                 feedContainer.style.opacity = '1';
-                // اضافه کردن observer به ویدیوهای جدید
                 setTimeout(() => {
                     document.querySelectorAll('video.post-media').forEach(v => {
                         if (videoObserver) videoObserver.observe(v);
@@ -1234,7 +1220,7 @@
             } catch (e) { console.warn("Sync error", e); }
         }
 
-        // --- COMMENTS LOGIC (ENHANCED) ---
+        // --- COMMENTS LOGIC ---
         async function openComments(postId) {
             currentCommentsPostId = postId;
             commentsModal.classList.add('active');
@@ -1249,7 +1235,6 @@
                 const commentsDisabled = post && post.comments_disabled === true;
                 const isOwner = post && post.sender_username === currentUser.username;
 
-                // Toggle Input Visibility
                 if (commentsDisabled && !isOwner) {
                     commentInputArea.style.display = 'none';
                     commentsDisabledMsg.style.display = 'flex';
@@ -1280,7 +1265,6 @@
             const commentsArray = Object.entries(commentsData)
                 .map(([key, val]) => ({ id: key, ...val }))
                 .sort((a, b) => {
-                    // Sort by pinned first, then chronological
                     if (a.is_pinned && !b.is_pinned) return -1;
                     if (!a.is_pinned && b.is_pinned) return 1;
                     return new Date(a.timestamp) - new Date(b.timestamp);
@@ -1293,7 +1277,6 @@
                 const isMyComment = comment.sender_username === currentUser.username;
                 const isPinned = comment.is_pinned === true;
 
-                // Action Buttons Logic
                 let actionBtns = '';
                 if (isPostOwner || isMyComment) {
                     actionBtns += `<div class="comment-option-menu">`;
@@ -1356,7 +1339,6 @@
                 });
                 div.style.opacity = '1';
                 div.querySelector('.comment-time').textContent = 'همین الان';
-                // Refresh to get ID and correct order/buttons
                 openComments(currentCommentsPostId);
             } catch(e) {
                 div.style.opacity = '1';
@@ -1366,7 +1348,6 @@
             }
         }
 
-        // --- NEW COMMENT FEATURES (PIN & DELETE) ---
         async function deleteComment(postId, commentId) {
             if(!confirm('آیا از حذف این نظر اطمینان دارید؟')) return;
             const commentEl = document.getElementById(`comment-${commentId}`);
@@ -1392,7 +1373,6 @@
                     headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ is_pinned: shouldPin })
                 });
-                // Refresh list to re-sort
                 openComments(postId);
             } catch(e) {
                 showToast('خطا در تغییر وضعیت سنجاق', 'error');
@@ -1403,7 +1383,7 @@
         function openPostOptions(postId, isPublic, isCommentsDisabled) {
             currentOptionsPostId = postId;
             privacyToggle.checked = isPublic;
-            commentsToggle.checked = !isCommentsDisabled; // Switch is "Enable Comments", so checked means enabled (not disabled)
+            commentsToggle.checked = !isCommentsDisabled; 
             optionsModal.classList.add('active');
         }
 
@@ -1458,7 +1438,6 @@
 
         async function handleCommentsToggleChange() {
             const areCommentsEnabled = commentsToggle.checked;
-            // logic: checked(true) -> comments_disabled(false)
             const disableComments = !areCommentsEnabled;
             
             try {
@@ -1467,7 +1446,6 @@
                     headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ comments_disabled: disableComments })
                 });
-                // Update local cache for immediate feedback on open
                 if(postsDataCache[currentOptionsPostId]) {
                     postsDataCache[currentOptionsPostId].comments_disabled = disableComments;
                 }
