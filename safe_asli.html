@@ -1623,8 +1623,8 @@
                         // Allowed
                         window.location.href = 'store.html';
                     } else {
-                        // Not Allowed (Regular User)
-                        showAccessDeniedModal();
+                        // Not Allowed (Regular User) -> Show Coming Soon
+                        showComingSoonModal();
                     }
                 });
             }
@@ -1639,7 +1639,8 @@
             fabMainBtn.addEventListener('click', toggleFabMenu);
             
             newPrivateChatBtn.addEventListener('click', () => {
-                window.location.href = 'https://abolfazl140122.github.io/miko_rel/Channel.html';
+                // Modified: Show Coming Soon modal instead of redirecting
+                showComingSoonModal();
             });
             
             if(navPeopleBtn) {
@@ -2044,10 +2045,11 @@
             if (levelBadge) {
                 levelBadge.className = 'account-level-badge';
                 levelBadge.innerHTML = '';
-                levelBadge.style.display = 'inline-flex';
-
+                
+                // [MODIFIED] Logic to handle visibility of regular user badge
                 switch (userData.accountType) {
                     case 'premium':
+                        levelBadge.style.display = 'inline-flex';
                         levelBadge.classList.add('level-premium');
                         levelBadge.innerHTML = `
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1h14v1z"></path></svg>
@@ -2055,12 +2057,15 @@
                         `;
                         break;
                     case 'special':
+                        levelBadge.style.display = 'inline-flex';
                         levelBadge.classList.add('level-special');
                         levelBadge.textContent = 'کاربر ویژه';
                         break;
                     default:
+                        // Hide badge for regular users instead of showing 'Ordinary User'
                         levelBadge.classList.add('level-regular');
                         levelBadge.textContent = 'کاربر عادی';
+                        levelBadge.style.display = 'none'; // Hidden
                         break;
                 }
             }
@@ -2713,12 +2718,12 @@
             }
         }
         
-        // --- [NEW] Access Denied Modal Function ---
-        function showAccessDeniedModal() {
-            if (document.getElementById('access-denied-modal')) return;
+        // --- [NEW] Coming Soon Modal Function (Replaces Access Denied) ---
+        function showComingSoonModal() {
+            if (document.getElementById('coming-soon-modal')) return;
 
             const modal = document.createElement('div');
-            modal.id = 'access-denied-modal';
+            modal.id = 'coming-soon-modal';
             modal.style.cssText = `
                 position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
                 background: rgba(0,0,0,0.85); z-index: 2000; 
@@ -2741,23 +2746,23 @@
                 animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             `;
 
-            // Icon
+            // Icon (Star/Info instead of alert)
             const iconContainer = document.createElement('div');
-            iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--warning-color); margin-bottom: 15px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+            iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-color); margin-bottom: 15px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
             
             // Title
             const title = document.createElement('h3');
-            title.textContent = 'عدم دسترسی';
+            title.textContent = 'به‌زودی...';
             title.style.cssText = 'margin: 0 0 10px 0; color: var(--text-primary); font-size: 1.4em;';
 
             // Message
             const p = document.createElement('p');
-            p.textContent = 'شما اجازه ورود به این بخش را ندازید. این بخش از دسترس به صورت موقت خارج شده است.';
+            p.textContent = 'این بخش در حال توسعه است و در نسخه‌های آینده در دسترس قرار خواهد گرفت.';
             p.style.cssText = 'margin-bottom: 25px; font-size: 1em; color: var(--text-secondary); line-height: 1.6;';
 
             // Close Button
             const closeBtn = document.createElement('button');
-            closeBtn.textContent = 'متوجه شدم';
+            closeBtn.textContent = 'باشه';
             closeBtn.style.cssText = `
                 background: var(--primary-color); 
                 color: white; 
