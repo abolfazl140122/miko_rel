@@ -531,7 +531,7 @@
                     </div>
                     
                     <img id="image-preview" class="upload-preview" />
-                    <video id="video-preview" class="upload-preview" controls playsinline></video>
+                    <video id="video-preview" class="upload-preview" controls playsinline muted></video>
 
                     <textarea class="caption-input" id="caption-input" placeholder="کپشن خود را بنویسید..."></textarea>
                     
@@ -774,9 +774,6 @@
         function initVideoObserver() {
             const options = { root: null, rootMargin: '0px', threshold: 0.65 };
             videoObserver = new IntersectionObserver((entries) => {
-                // BUG FIX 2: اگر مودال ساخت پست باز است، اجازه پخش ویدیوی پس‌زمینه را نده
-                if(createModal.classList.contains('active')) return;
-
                 entries.forEach(entry => {
                     const video = entry.target;
                     const muteBtn = document.querySelector(`.mute-btn[data-for="${video.dataset.id}"]`);
@@ -815,32 +812,35 @@
                 : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
         }
 
-        function pauseAllFeedVideos() {
-            document.querySelectorAll('video.post-media').forEach(v => {
-                v.pause();
-            });
-        }
-
-        function resumeFeedVideos() {
-            document.querySelectorAll('video.post-media').forEach(v => {
-                videoObserver.observe(v);
-            });
-        }
-
         // --- EVENT LISTENERS ---
         function setupEventListeners() {
             openCreateBtn.addEventListener('click', () => { 
                 resetModal(); 
                 createModal.classList.add('active'); 
-                pauseAllFeedVideos(); 
+                pauseAllFeedVideos();
             });
+            
             closeModalBtn.addEventListener('click', () => { 
                 createModal.classList.remove('active'); 
-                // Stop preview video if playing
-                videoPreview.pause();
-                videoPreview.src = "";
-                resumeFeedVideos(); 
+                resumeFeedVideos();
             });
+            
+            // بستن مدال با کلیک روی overlay
+            createModal.addEventListener('click', (e) => {
+                if (e.target === createModal) {
+                    createModal.classList.remove('active');
+                    resumeFeedVideos();
+                }
+            });
+            
+            // بستن مدال با کلید Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && createModal.classList.contains('active')) {
+                    createModal.classList.remove('active');
+                    resumeFeedVideos();
+                }
+            });
+
             uploadTrigger.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', (e) => {
                 if (e.target.files && e.target.files[0]) handleFileSelect(e.target.files[0]);
@@ -878,7 +878,7 @@
             saveCaptionBtn.addEventListener('click', handleSaveCaption);
             
             privacyToggle.addEventListener('change', handlePrivacyChange);
-            commentsToggle.addEventListener('change', handleCommentsToggleChange); // New listener for comment toggle
+            commentsToggle.addEventListener('change', handleCommentsToggleChange);
 
             // Pull to Refresh
             feedContainer.addEventListener('touchstart', touchStart, {passive: true});
@@ -886,49 +886,105 @@
             feedContainer.addEventListener('touchend', touchEnd);
         }
 
-        // --- FILE & MODAL LOGIC (BUG FIX APPLIED HERE) ---
+        // --- VIDEO MANAGEMENT FUNCTIONS ---
+        function pauseAllFeedVideos() {
+            console.log("Pausing all feed videos");
+            document.querySelectorAll('video.post-media').forEach(v => {
+                if (!v.paused) {
+                    v.pause();
+                    v.dataset.pausedTime = v.currentTime;
+                }
+            });
+        }
+
+        function resumeFeedVideos() {
+            console.log("Resuming feed videos");
+            document.querySelectorAll('video.post-media').forEach(v => {
+                // ویدیوها توسط observer به طور خودکار مدیریت می‌شوند
+                // فقط observer را دوباره فعال می‌کنیم
+                if (videoObserver) {
+                    videoObserver.observe(v);
+                }
+            });
+        }
+
+        // --- FILE & MODAL LOGIC ---
         function handleFileSelect(file) {
             selectedFile = file;
+            const reader = new FileReader();
             uploadTrigger.style.display = 'none';
             
-            // BUG FIX: قطع فوری صدای ویدیوهای پس‌زمینه
-            pauseAllFeedVideos();
-
-            const objectUrl = URL.createObjectURL(file);
-
             if (file.type.startsWith('video/')) {
-                // مخفی کردن عکس، نمایش ویدیو
                 imagePreview.style.display = 'none'; 
-                imagePreview.src = ''; 
-                
                 videoPreview.style.display = 'block';
-                videoPreview.src = objectUrl;
                 
-                // BUG FIX: لود کردن اجباری و پخش
-                videoPreview.load();
-                videoPreview.play().catch(e => console.log("Preview play error:", e));
-
-            } else {
-                // مخفی کردن ویدیو، نمایش عکس
-                videoPreview.style.display = 'none'; 
-                videoPreview.pause();
+                // پاک کردن src قبلی
                 videoPreview.src = '';
-
+                videoPreview.load();
+                
+                // ایجاد URL جدید برای فایل
+                const videoURL = URL.createObjectURL(file);
+                videoPreview.src = videoURL;
+                
+                // تنظیمات اولیه ویدیو
+                videoPreview.muted = true; // قطع صدا
+                videoPreview.controls = true; // نمایش کنترل‌ها
+                videoPreview.playsInline = true; // پخش درون‌خطی
+                
+                // رویداد برای وقتی ویدیو آماده پخش است
+                videoPreview.onloadeddata = () => {
+                    console.log("ویدیو لود شد، تلاش برای پخش...");
+                    videoPreview.play().catch(e => {
+                        console.log("پخش خودکار ویدیو با خطا مواجه شد:", e);
+                        // اگر پخش خودکار با خطا مواجه شد، فقط ویدیو را لود کن
+                        videoPreview.load();
+                    });
+                };
+                
+                // اگر خطایی در لود ویدیو رخ داد
+                videoPreview.onerror = () => {
+                    console.error("خطا در لود ویدیو");
+                    showToast('خطا در بارگذاری ویدیو', 'error');
+                    videoPreview.style.display = 'none';
+                    uploadTrigger.style.display = 'block';
+                };
+                
+            } else {
+                videoPreview.style.display = 'none'; 
                 imagePreview.style.display = 'block';
-                imagePreview.src = objectUrl;
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.onload = () => {
+                        console.log("تصویر با موفقیت لود شد");
+                    };
+                };
+                reader.readAsDataURL(file);
             }
         }
 
         function resetModal() {
             selectedFile = null;
-            fileInput.value = ''; captionInput.value = '';
+            fileInput.value = ''; 
+            captionInput.value = '';
             
-            imagePreview.src = ''; imagePreview.style.display = 'none';
-            videoPreview.src = ''; videoPreview.style.display = 'none';
+            // پاک کردن و متوقف کردن ویدیو
+            if (videoPreview.src) {
+                videoPreview.pause();
+                videoPreview.currentTime = 0;
+                videoPreview.src = '';
+                videoPreview.load();
+            }
             
+            // پاک کردن تصویر
+            imagePreview.src = '';
+            
+            imagePreview.style.display = 'none'; 
+            videoPreview.style.display = 'none';
             uploadTrigger.style.display = 'block';
-            progressBarContainer.style.display = 'none'; progressBar.style.width = '0%';
-            sharePostBtn.disabled = false; sharePostBtn.textContent = 'انتشار';
+            progressBarContainer.style.display = 'none'; 
+            progressBar.style.width = '0%';
+            sharePostBtn.disabled = false; 
+            sharePostBtn.textContent = 'انتشار';
             createPrivacyToggle.checked = true; 
         }
 
@@ -1013,6 +1069,7 @@
                     body: JSON.stringify(postData)
                 });
                 createModal.classList.remove('active');
+                resumeFeedVideos(); // ادامه ویدیوهای فید
                 await fetchPosts(true); 
                 showToast('پست منتشر شد');
             } catch (err) { showToast('خطا در انتشار', 'error'); sharePostBtn.disabled = false; }
@@ -1032,8 +1089,13 @@
         }
 
         function renderFeed(posts) {
-            // Clean up old videos
-            document.querySelectorAll('video').forEach(v => { v.pause(); v.src = ""; v.load(); v.remove(); });
+            // ابتدا تمام ویدیوها را متوقف و منابع را آزاد کن
+            document.querySelectorAll('video.post-media').forEach(v => {
+                v.pause();
+                v.src = "";
+                v.load();
+            });
+            
             feedContainer.innerHTML = '';
             
             if (posts.length === 0) {
@@ -1115,7 +1177,12 @@
                 });
                 skeletonLoader.style.display = 'none';
                 feedContainer.style.opacity = '1';
-                document.querySelectorAll('video.post-media').forEach(v => videoObserver.observe(v));
+                // اضافه کردن observer به ویدیوهای جدید
+                setTimeout(() => {
+                    document.querySelectorAll('video.post-media').forEach(v => {
+                        if (videoObserver) videoObserver.observe(v);
+                    });
+                }, 100);
             }
         }
 
@@ -1316,10 +1383,6 @@
 
         async function togglePinComment(postId, commentId, shouldPin) {
              try {
-                // For this demo, we update just the specific comment's is_pinned status
-                // A better approach in a real app might be to unpin all others first if only 1 pin allowed.
-                // Here we allow multiple pins or just handle the state.
-                
                 await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/comments/${commentId}`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
@@ -1522,6 +1585,14 @@
             const days = Math.floor(hours / 24);
             return `${days} روز پیش`;
         }
+
+        // --- GLOBAL FUNCTIONS ---
+        window.openPostOptions = openPostOptions;
+        window.showLikesList = showLikesList;
+        window.openComments = openComments;
+        window.toggleVideoPlay = toggleVideoPlay;
+        window.toggleMute = toggleMute;
+        window.triggerLike = triggerLike;
     </script>
 </body>
 </html>
