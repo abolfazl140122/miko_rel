@@ -774,6 +774,9 @@
         function initVideoObserver() {
             const options = { root: null, rootMargin: '0px', threshold: 0.65 };
             videoObserver = new IntersectionObserver((entries) => {
+                // BUG FIX 2: اگر مودال ساخت پست باز است، اجازه پخش ویدیوی پس‌زمینه را نده
+                if(createModal.classList.contains('active')) return;
+
                 entries.forEach(entry => {
                     const video = entry.target;
                     const muteBtn = document.querySelector(`.mute-btn[data-for="${video.dataset.id}"]`);
@@ -833,6 +836,9 @@
             });
             closeModalBtn.addEventListener('click', () => { 
                 createModal.classList.remove('active'); 
+                // Stop preview video if playing
+                videoPreview.pause();
+                videoPreview.src = "";
                 resumeFeedVideos(); 
             });
             uploadTrigger.addEventListener('click', () => fileInput.click());
@@ -880,27 +886,46 @@
             feedContainer.addEventListener('touchend', touchEnd);
         }
 
-        // --- FILE & MODAL LOGIC ---
+        // --- FILE & MODAL LOGIC (BUG FIX APPLIED HERE) ---
         function handleFileSelect(file) {
             selectedFile = file;
-            const reader = new FileReader();
             uploadTrigger.style.display = 'none';
+            
+            // BUG FIX: قطع فوری صدای ویدیوهای پس‌زمینه
+            pauseAllFeedVideos();
+
+            const objectUrl = URL.createObjectURL(file);
+
             if (file.type.startsWith('video/')) {
-                imagePreview.style.display = 'none'; videoPreview.style.display = 'block';
-                videoPreview.src = URL.createObjectURL(file);
-                videoPreview.play(); 
+                // مخفی کردن عکس، نمایش ویدیو
+                imagePreview.style.display = 'none'; 
+                imagePreview.src = ''; 
+                
+                videoPreview.style.display = 'block';
+                videoPreview.src = objectUrl;
+                
+                // BUG FIX: لود کردن اجباری و پخش
+                videoPreview.load();
+                videoPreview.play().catch(e => console.log("Preview play error:", e));
+
             } else {
-                videoPreview.style.display = 'none'; imagePreview.style.display = 'block';
-                reader.onload = (e) => imagePreview.src = e.target.result;
-                reader.readAsDataURL(file);
+                // مخفی کردن ویدیو، نمایش عکس
+                videoPreview.style.display = 'none'; 
+                videoPreview.pause();
+                videoPreview.src = '';
+
+                imagePreview.style.display = 'block';
+                imagePreview.src = objectUrl;
             }
         }
 
         function resetModal() {
             selectedFile = null;
             fileInput.value = ''; captionInput.value = '';
-            imagePreview.src = ''; videoPreview.src = '';
-            imagePreview.style.display = 'none'; videoPreview.style.display = 'none';
+            
+            imagePreview.src = ''; imagePreview.style.display = 'none';
+            videoPreview.src = ''; videoPreview.style.display = 'none';
+            
             uploadTrigger.style.display = 'block';
             progressBarContainer.style.display = 'none'; progressBar.style.width = '0%';
             sharePostBtn.disabled = false; sharePostBtn.textContent = 'انتشار';
