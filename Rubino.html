@@ -822,6 +822,7 @@
             
             closeModalBtn.addEventListener('click', () => { 
                 createModal.classList.remove('active'); 
+                resetModal(); // FIX: Reset modal (stop video) when closing
                 resumeFeedVideos();
             });
             
@@ -829,6 +830,7 @@
             createModal.addEventListener('click', (e) => {
                 if (e.target === createModal) {
                     createModal.classList.remove('active');
+                    resetModal(); // FIX: Reset modal (stop video) when clicking overlay
                     resumeFeedVideos();
                 }
             });
@@ -837,6 +839,7 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && createModal.classList.contains('active')) {
                     createModal.classList.remove('active');
+                    resetModal(); // FIX: Reset modal (stop video) when pressing Escape
                     resumeFeedVideos();
                 }
             });
@@ -1069,6 +1072,7 @@
                     body: JSON.stringify(postData)
                 });
                 createModal.classList.remove('active');
+                resetModal(); // FIX: Stop preview video immediately after post
                 resumeFeedVideos(); // ادامه ویدیوهای فید
                 await fetchPosts(true); 
                 showToast('پست منتشر شد');
