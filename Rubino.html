@@ -1250,7 +1250,7 @@
                 const data = await response.json();
                 renderComments(data, isOwner);
             } catch(e) {
-                commentsListContainer.innerHTML = '<div class="empty-state">خطا در دریافت نظرات.</div>';
+                commentsListContainer.innerHTML = '<div class="empty-state">نظری گذاشته نشده!</div>';
             }
         }
 
