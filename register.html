@@ -19,6 +19,9 @@
             --error-color: #ff4d4d;
             --success-color: #28a745;
             --input-bg: #0d1117;
+            --scrollbar-track: #0D1117;
+            --scrollbar-thumb: #30363d;
+            --scrollbar-thumb-hover: #00A3FF;
         }
 
         *, *::before, *::after {
@@ -45,6 +48,7 @@
             width: 100%;
             max-width: 480px;
             perspective: 1000px;
+            z-index: 1;
         }
 
         .register-card {
@@ -191,7 +195,7 @@
             width: 100%;
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
-            padding: 12px 45px 12px 15px; /* فضای خالی برای آیکون راست */
+            padding: 12px 45px 12px 15px;
             border-radius: 12px;
             color: var(--text-primary);
             font-family: 'Vazirmatn', sans-serif;
@@ -362,71 +366,71 @@
             text-shadow: 0 0 8px var(--primary-glow);
         }
 
-        /* --- پنل قوانین (Modal) --- */
+        /* --- استایل‌های مودال قوانین --- */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(5px);
-            z-index: 2000;
-            display: none; /* مخفی به صورت پیش‌فرض */
+            z-index: 9999;
+            display: flex;
             justify-content: center;
             align-items: center;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
 
         .modal-overlay.active {
-            display: flex;
             opacity: 1;
+            visibility: visible;
         }
 
-        .modal-box {
+        .modal-container {
             background-color: var(--secondary-color);
-            border: 1px solid var(--border-color);
             width: 90%;
-            max-width: 550px;
+            max-width: 500px;
             max-height: 85vh;
             border-radius: 20px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             transform: scale(0.9);
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .modal-overlay.active .modal-box {
+        .modal-overlay.active .modal-container {
             transform: scale(1);
         }
 
         .modal-header {
-            padding: 15px 20px;
+            padding: 20px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: rgba(255, 255, 255, 0.03);
         }
 
         .modal-title {
-            margin: 0;
             font-size: 1.1rem;
-            color: var(--text-primary);
             font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
         }
 
         .modal-close {
-            background: none;
+            background: transparent;
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
             font-size: 1.5rem;
-            padding: 0;
-            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: color 0.2s;
         }
 
@@ -437,51 +441,63 @@
         .modal-body {
             padding: 20px;
             overflow-y: auto;
-            color: var(--text-secondary);
             font-size: 0.9rem;
             line-height: 1.8;
-            text-align: justify;
+            color: var(--text-primary);
+            text-align: right;
         }
 
         .modal-body h3 {
-            color: var(--primary-color);
-            margin: 15px 0 5px;
+            color: var(--text-primary);
+            margin-bottom: 15px;
             font-size: 1rem;
+            text-align: center;
         }
 
-        .modal-body p, .modal-body ul {
-            margin-bottom: 10px;
+        /* --- اسکرول بار اختصاصی مودال (هم رنگ تم) --- */
+        .modal-body::-webkit-scrollbar {
+            width: 8px; /* عرض اسکرول */
         }
 
-        .modal-body ul {
-            padding-right: 20px;
+        .modal-body::-webkit-scrollbar-track {
+            background: var(--scrollbar-track); 
+            border-radius: 0 0 0 0;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb);
+            border-radius: 4px;
+            border: 2px solid var(--scrollbar-track); /* فاصله جزیی از لبه */
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background-color: var(--scrollbar-thumb-hover);
         }
 
         .modal-footer {
-            padding: 15px 20px;
+            padding: 20px;
             border-top: 1px solid var(--border-color);
-            background-color: rgba(255, 255, 255, 0.03);
             display: flex;
             justify-content: center;
         }
 
         .accept-btn {
-            background-color: var(--primary-color);
+            background: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 25px;
-            border-radius: 8px;
+            padding: 10px 30px;
+            border-radius: 10px;
             font-family: 'Vazirmatn', sans-serif;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
             width: 100%;
-            font-size: 1rem;
         }
 
         .accept-btn:hover {
-            background-color: #0091e6;
+            background: #0091e6;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 163, 255, 0.3);
         }
 
     </style>
@@ -603,60 +619,48 @@
         </div>
     </div>
 
-    <!-- Modal for Terms and Conditions -->
-    <div id="terms-modal" class="modal-overlay">
-        <div class="modal-box">
+    <!-- مودال قوانین و مقررات -->
+    <div class="modal-overlay" id="terms-modal">
+        <div class="modal-container">
             <div class="modal-header">
                 <h2 class="modal-title">قوانین و مقررات همیار</h2>
-                <button class="modal-close" id="close-modal-x">&times;</button>
+                <button class="modal-close" id="close-terms-btn">×</button>
             </div>
             <div class="modal-body">
-                <h3>۱. پذیرش قوانین</h3>
-                <ul>
-                    <li>با ثبت‌نام و استفاده از اپلیکیشن، کاربر تأیید می‌کند که این قوانین را مطالعه کرده پذیرفته است.</li>
-                    <li>در صورت عدم پذیرش، امکان استفاده از خدمات وجود ندارد.</li>
-                </ul>
+                <h3>📜 قوانین و شرایط استفاده اپلیکیشن همیار</h3>
+                
+                <p><strong>۱. پذیرش قوانین</strong><br>
+                - با ثبت‌نام و استفاده از اپلیکیشن، کاربر تأیید می‌کند که این قوانین را مطالعه کرده پذیرفته است.<br>
+                - در صورت عدم پذیرش، امکان استفاده از خدمات وجود ندارد.</p>
 
-                <h3>۲. حساب کاربری</h3>
-                <ul>
-                    <li>کاربر موظف است اطلاعات صحیح و واقعی هنگام ثبت‌نام وارد کند.</li>
-                    <li>هرگونه فعالیت مشکوک باید فوراً به تیم پشتیبانی گزارش شود.</li>
-                </ul>
+                <p><strong>۲. حساب کاربری</strong><br>
+                - کاربر موظف است اطلاعات صحیح و واقعی هنگام ثبت‌نام وارد کند.<br>
+                - هرگونه فعالیت مشکوک باید فوراً به تیم پشتیبانی گزارش شود.</p>
 
-                <h3>۳. رفتار و محتوای مجاز</h3>
-                <ul>
-                    <li>ارسال هرگونه محتوای غیرقانونی، توهین‌آمیز، خشونت‌آمیز یا ناقض حقوق دیگران ممنوع است.</li>
-                    <li>استفاده از اپلیکیشن برای تبلیغات ناخواسته (اسپم) یا فعالیت‌های تجاری بدون مجوز رسمی ممنوع است.</li>
-                    <li>کاربر موظف است به قوانین کشور و حقوق سایر کاربران احترام بگذارد.</li>
-                </ul>
+                <p><strong>۳. رفتار و محتوای مجاز</strong><br>
+                - ارسال هرگونه محتوای غیرقانونی، توهین‌آمیز، خشونت‌آمیز یا ناقض حقوق دیگران ممنوع است.<br>
+                - استفاده از اپلیکیشن برای تبلیغات ناخواسته (اسپم) یا فعالیت‌های تجاری بدون مجوز رسمی ممنوع است.<br>
+                - کاربر موظف است به قوانین کشور و حقوق سایر کاربران احترام بگذارد.</p>
 
-                <h3>۴. حریم خصوصی</h3>
-                <ul>
-                    <li>اطلاعات شخصی کاربران مطابق با سیاست‌های حریم خصوصی محافظت می‌شود.</li>
-                    <li>اپلیکیشن بدون رضایت کاربر، داده‌های شخصی را در اختیار اشخاص ثالث قرار نمی‌دهد مگر در موارد الزامی قانونی.</li>
-                </ul>
+                <p><strong>۴. حریم خصوصی</strong><br>
+                - اطلاعات شخصی کاربران مطابق با سیاست‌های حریم خصوصی محافظت می‌شود.<br>
+                - اپلیکیشن بدون رضایت کاربر، داده‌های شخصی را در اختیار اشخاص ثالث قرار نمی‌دهد مگر در موارد الزامی قانونی.</p>
 
-                <h3>۵. محدودیت‌ها و مسئولیت‌ها</h3>
-                <ul>
-                    <li>اپلیکیشن مسئولیتی در قبال محتوای تولیدشده توسط کاربران ندارد.</li>
-                    <li>در صورت نقض قوانین، حساب کاربری ممکن است مسدود یا حذف شود.</li>
-                    <li>کاربر مسئول پیام‌ها و فایل‌هایی است که ارسال یا دریافت می‌کند.</li>
-                </ul>
+                <p><strong>۵. محدودیت‌ها و مسئولیت‌ها</strong><br>
+                - اپلیکیشن مسئولیتی در قبال محتوای تولیدشده توسط کاربران ندارد.<br>
+                - در صورت نقض قوانین، حساب کاربری ممکن است مسدود یا حذف شود.<br>
+                - کاربر مسئول پیام‌ها و فایل‌هایی است که ارسال یا دریافت می‌کند.</p>
 
-                <h3>۶. تغییرات قوانین</h3>
-                <ul>
-                    <li>اپلیکیشن حق دارد در هر زمان قوانین را تغییر دهد.</li>
-                    <li>نسخه به‌روز قوانین در بخش تنظیمات یا وب‌سایت رسمی منتشر خواهد شد.</li>
-                    <li>ادامه استفاده از اپلیکیشن به‌منزله پذیرش تغییرات است.</li>
-                </ul>
+                <p><strong>۶. تغییرات قوانین</strong><br>
+                - اپلیکیشن حق دارد در هر زمان قوانین را تغییر دهد.<br>
+                - نسخه به‌روز قوانین در بخش تنظیمات یا وب‌سایت رسمی منتشر خواهد شد.<br>
+                - ادامه استفاده از اپلیکیشن به‌منزله پذیرش تغییرات است.</p>
 
-                <h3>۷. پشتیبانی و ارتباط</h3>
-                <ul>
-                    <li>کاربران می‌توانند برای گزارش مشکلات یا پرسش‌ها از طریق بخش پشتیبانی درون‌برنامه یا ایمیل رسمی اقدام کنند.</li>
-                </ul>
+                <p><strong>۷. پشتیبانی و ارتباط</strong><br>
+                - کاربران می‌توانند برای گزارش مشکلات یا پرسش‌ها از طریق بخش پشتیبانی درون‌برنامه یا ایمیل رسمی اقدام کنند.</p>
             </div>
             <div class="modal-footer">
-                <button id="accept-terms-btn" class="accept-btn">مطالعه کردم و قوانین را می‌پذیرم</button>
+                <button class="accept-btn" id="accept-terms-btn">پذیرش قوانین و بستن</button>
             </div>
         </div>
     </div>
@@ -680,9 +684,9 @@
         // Modal Elements
         const termsLink = document.getElementById('terms-link');
         const termsModal = document.getElementById('terms-modal');
-        const closeModalX = document.getElementById('close-modal-x');
+        const closeTermsBtn = document.getElementById('close-terms-btn');
         const acceptTermsBtn = document.getElementById('accept-terms-btn');
-
+        
         const allInputs = {
             displayName: document.getElementById('displayName'),
             username: document.getElementById('username'),
@@ -697,7 +701,39 @@
         // --- 3. State ---
         let profilePicUrl = ''; // Will hold the URL of the uploaded image
 
-        // --- 4. Helper Functions ---
+        // --- 4. Modal Logic (Terms & Conditions) ---
+        
+        // باز کردن مودال
+        termsLink.addEventListener('click', (e) => {
+            e.preventDefault(); // جلوگیری از رفتار پیشفرض لینک
+            termsModal.classList.add('active');
+        });
+
+        // بستن مودال با دکمه ضربدر
+        closeTermsBtn.addEventListener('click', () => {
+            termsModal.classList.remove('active');
+        });
+
+        // بستن مودال با کلیک بیرون کادر
+        termsModal.addEventListener('click', (e) => {
+            if (e.target === termsModal) {
+                termsModal.classList.remove('active');
+            }
+        });
+
+        // دکمه پذیرش قوانین
+        acceptTermsBtn.addEventListener('click', () => {
+            // 1. تیک زدن چک باکس
+            allInputs.terms.checked = true;
+            // 2. بستن مودال
+            termsModal.classList.remove('active');
+            // 3. اعتبارسنجی مجدد فرم برای فعال شدن دکمه ثبت نام
+            validateField('terms');
+            checkFormValidity();
+        });
+
+
+        // --- 5. Helper Functions ---
         function showError(fieldId, message) {
             const errorEl = document.getElementById(`${fieldId}-error`);
             if (errorEl) {
@@ -726,45 +762,6 @@
             formStatus.className = `status-message ${type}`; // 'success' or 'error'
             formStatus.style.display = 'block';
         }
-
-        // --- 5. Modal Logic ---
-        function openModal() {
-            termsModal.style.display = 'flex';
-            // Slight delay for animation
-            setTimeout(() => {
-                termsModal.classList.add('active');
-            }, 10);
-        }
-
-        function closeModal() {
-            termsModal.classList.remove('active');
-            setTimeout(() => {
-                termsModal.style.display = 'none';
-            }, 300);
-        }
-
-        termsLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            openModal();
-        });
-
-        closeModalX.addEventListener('click', closeModal);
-
-        // Clicking outside the modal box to close it
-        termsModal.addEventListener('click', (e) => {
-            if (e.target === termsModal) {
-                closeModal();
-            }
-        });
-
-        // Accept Button Logic
-        acceptTermsBtn.addEventListener('click', () => {
-            allInputs.terms.checked = true; // Check the checkbox
-            validateField('terms'); // Remove error if present
-            checkFormValidity(); // Update submit button
-            closeModal();
-        });
-
 
         // --- 6. Image Upload Logic ---
         profileUploader.addEventListener('click', () => profilePicInput.click());
