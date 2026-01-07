@@ -267,6 +267,7 @@
             color: var(--primary-color);
             text-decoration: none;
             transition: color 0.2s;
+            cursor: pointer;
         }
         .terms-group a:hover {
             color: #4dc3ff;
@@ -359,6 +360,128 @@
 
         .form-footer a:hover {
             text-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        /* --- پنل قوانین (Modal) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none; /* مخفی به صورت پیش‌فرض */
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-box {
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            width: 90%;
+            max-width: 550px;
+            max-height: 85vh;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--error-color);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .modal-body h3 {
+            color: var(--primary-color);
+            margin: 15px 0 5px;
+            font-size: 1rem;
+        }
+
+        .modal-body p, .modal-body ul {
+            margin-bottom: 10px;
+        }
+
+        .modal-body ul {
+            padding-right: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(255, 255, 255, 0.03);
+            display: flex;
+            justify-content: center;
+        }
+
+        .accept-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .accept-btn:hover {
+            background-color: #0091e6;
+            transform: translateY(-2px);
         }
 
     </style>
@@ -459,7 +582,7 @@
                 <!-- قوانین -->
                 <div class="terms-group">
                     <input type="checkbox" id="terms" required>
-                    <label for="terms">با <a href="#" target="_blank">قوانین و مقررات</a> موافقم.</label>
+                    <label for="terms">با <a id="terms-link">قوانین و مقررات</a> موافقم.</label>
                 </div>
                 <div class="field-error-text" id="terms-error"></div>
                 
@@ -480,6 +603,64 @@
         </div>
     </div>
 
+    <!-- Modal for Terms and Conditions -->
+    <div id="terms-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 class="modal-title">قوانین و مقررات همیار</h2>
+                <button class="modal-close" id="close-modal-x">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>۱. پذیرش قوانین</h3>
+                <ul>
+                    <li>با ثبت‌نام و استفاده از اپلیکیشن، کاربر تأیید می‌کند که این قوانین را مطالعه کرده پذیرفته است.</li>
+                    <li>در صورت عدم پذیرش، امکان استفاده از خدمات وجود ندارد.</li>
+                </ul>
+
+                <h3>۲. حساب کاربری</h3>
+                <ul>
+                    <li>کاربر موظف است اطلاعات صحیح و واقعی هنگام ثبت‌نام وارد کند.</li>
+                    <li>هرگونه فعالیت مشکوک باید فوراً به تیم پشتیبانی گزارش شود.</li>
+                </ul>
+
+                <h3>۳. رفتار و محتوای مجاز</h3>
+                <ul>
+                    <li>ارسال هرگونه محتوای غیرقانونی، توهین‌آمیز، خشونت‌آمیز یا ناقض حقوق دیگران ممنوع است.</li>
+                    <li>استفاده از اپلیکیشن برای تبلیغات ناخواسته (اسپم) یا فعالیت‌های تجاری بدون مجوز رسمی ممنوع است.</li>
+                    <li>کاربر موظف است به قوانین کشور و حقوق سایر کاربران احترام بگذارد.</li>
+                </ul>
+
+                <h3>۴. حریم خصوصی</h3>
+                <ul>
+                    <li>اطلاعات شخصی کاربران مطابق با سیاست‌های حریم خصوصی محافظت می‌شود.</li>
+                    <li>اپلیکیشن بدون رضایت کاربر، داده‌های شخصی را در اختیار اشخاص ثالث قرار نمی‌دهد مگر در موارد الزامی قانونی.</li>
+                </ul>
+
+                <h3>۵. محدودیت‌ها و مسئولیت‌ها</h3>
+                <ul>
+                    <li>اپلیکیشن مسئولیتی در قبال محتوای تولیدشده توسط کاربران ندارد.</li>
+                    <li>در صورت نقض قوانین، حساب کاربری ممکن است مسدود یا حذف شود.</li>
+                    <li>کاربر مسئول پیام‌ها و فایل‌هایی است که ارسال یا دریافت می‌کند.</li>
+                </ul>
+
+                <h3>۶. تغییرات قوانین</h3>
+                <ul>
+                    <li>اپلیکیشن حق دارد در هر زمان قوانین را تغییر دهد.</li>
+                    <li>نسخه به‌روز قوانین در بخش تنظیمات یا وب‌سایت رسمی منتشر خواهد شد.</li>
+                    <li>ادامه استفاده از اپلیکیشن به‌منزله پذیرش تغییرات است.</li>
+                </ul>
+
+                <h3>۷. پشتیبانی و ارتباط</h3>
+                <ul>
+                    <li>کاربران می‌توانند برای گزارش مشکلات یا پرسش‌ها از طریق بخش پشتیبانی درون‌برنامه یا ایمیل رسمی اقدام کنند.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button id="accept-terms-btn" class="accept-btn">مطالعه کردم و قوانین را می‌پذیرم</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- 1. Configuration ---
         const UPLOAD_ENDPOINT = 'https://miko.freehost.io/upload_to_parspack.php';
@@ -496,6 +677,12 @@
         const uploadProgressContainer = document.querySelector('.upload-progress');
         const uploadProgressBar = document.querySelector('.upload-progress-bar');
         
+        // Modal Elements
+        const termsLink = document.getElementById('terms-link');
+        const termsModal = document.getElementById('terms-modal');
+        const closeModalX = document.getElementById('close-modal-x');
+        const acceptTermsBtn = document.getElementById('accept-terms-btn');
+
         const allInputs = {
             displayName: document.getElementById('displayName'),
             username: document.getElementById('username'),
@@ -540,7 +727,46 @@
             formStatus.style.display = 'block';
         }
 
-        // --- 5. Image Upload Logic ---
+        // --- 5. Modal Logic ---
+        function openModal() {
+            termsModal.style.display = 'flex';
+            // Slight delay for animation
+            setTimeout(() => {
+                termsModal.classList.add('active');
+            }, 10);
+        }
+
+        function closeModal() {
+            termsModal.classList.remove('active');
+            setTimeout(() => {
+                termsModal.style.display = 'none';
+            }, 300);
+        }
+
+        termsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal();
+        });
+
+        closeModalX.addEventListener('click', closeModal);
+
+        // Clicking outside the modal box to close it
+        termsModal.addEventListener('click', (e) => {
+            if (e.target === termsModal) {
+                closeModal();
+            }
+        });
+
+        // Accept Button Logic
+        acceptTermsBtn.addEventListener('click', () => {
+            allInputs.terms.checked = true; // Check the checkbox
+            validateField('terms'); // Remove error if present
+            checkFormValidity(); // Update submit button
+            closeModal();
+        });
+
+
+        // --- 6. Image Upload Logic ---
         profileUploader.addEventListener('click', () => profilePicInput.click());
 
         profilePicInput.addEventListener('change', (e) => {
@@ -613,7 +839,7 @@
         }
 
 
-        // --- 6. Validation Logic ---
+        // --- 7. Validation Logic ---
         function validateField(fieldId) {
             const input = allInputs[fieldId];
             if (!input) return true; 
@@ -674,7 +900,7 @@
             return isFormValid;
         }
 
-        // --- 7. Event Listeners ---
+        // --- 8. Event Listeners ---
         Object.values(allInputs).forEach(input => {
             if(!input) return;
             const eventType = ['checkbox', 'select-one'].includes(input.type) ? 'change' : 'input';
@@ -693,7 +919,7 @@
         });
 
 
-        // --- 8. Form Submission Flow ---
+        // --- 9. Form Submission Flow ---
         async function submitRegistration() {
             submitBtn.disabled = true;
             // Add loading class to show spinner and hide text
