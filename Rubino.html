@@ -3,566 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>روبینو همیار پیشرفته - نسخه موشن</title>
+    <title>روبینو همیار پرو</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap');
 
         :root {
-            /* Colors */
-            --background-color: #0D1117;
-            --secondary-color: #161B22;
-            --secondary-hover: #2C2F33;
+            --bg-dark: #090c10;
+            --bg-card: #161b22;
+            --bg-hover: #21262d;
             --border-color: #30363d;
-            --text-primary: #E4E6EB;
-            --text-secondary: #8b949e;
-            --primary-color: #00A3FF;
-            --primary-glow: rgba(0, 163, 255, 0.4);
-            --like-color: #ED4956;
-            --modal-bg: rgba(28, 33, 40, 0.95); /* More transparent for blur */
-            --skeleton-base: #161B22;
-            --skeleton-highlight: #21262d;
-            --danger-color: #FF4D4D;
-            --gold-color: #FFD700;
-
-            /* Physics & Motion */
-            --spring-easing: cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy */
-            --smooth-easing: cubic-bezier(0.4, 0.0, 0.2, 1);    /* Silky */
-            --card-border-radius: 16px;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+            --accent-color: #58a6ff;
+            --accent-glow: rgba(88, 166, 255, 0.4);
+            --danger-color: #f85149;
+            --success-color: #2ea043;
+            --gold-color: #e3b341;
+            --modal-bg: rgba(22, 27, 34, 0.95);
+            
+            /* Animation Variables */
+            --spring-easing: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --smooth-easing: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        *, *::before, *::after { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            outline: none;
-        }
+        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-primary);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             margin: 0; padding: 0;
             height: 100vh; overflow: hidden;
             user-select: none;
-            background: radial-gradient(circle at top left, #1a202c 0%, var(--background-color) 70%);
-        }
-
-        /* --- RIPPLE EFFECT --- */
-        .ripple-effect {
-            position: absolute; border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-            pointer-events: none;
-        }
-        @keyframes ripple {
-            to { transform: scale(4); opacity: 0; }
         }
 
         .app-container {
             width: 100%; max-width: 480px; height: 100%; margin: 0 auto;
             display: flex; flex-direction: column; position: relative;
             box-shadow: 0 0 50px rgba(0,0,0,0.7);
-            background-color: var(--background-color);
+            background-color: var(--bg-dark);
         }
 
         /* --- HEADER --- */
         .header-area {
-            background-color: rgba(22, 27, 34, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding: 12px 20px;
-            height: 65px;
+            background: rgba(9, 12, 16, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 16px;
+            height: 60px;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 50; 
-            position: relative;
-            transition: all 0.3s ease;
+            z-index: 50;
+            position: absolute; top: 0; left: 0; right: 0;
         }
         .header-title {
-            font-size: 1.6rem; 
-            font-weight: 900; margin: 0;
-            background: linear-gradient(45deg, var(--primary-color), #00d2ff);
+            font-size: 1.2rem; font-weight: 800; margin: 0;
+            background: linear-gradient(45deg, var(--accent-color), #a5d6ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 20px rgba(0, 163, 255, 0.3);
             letter-spacing: -0.5px;
         }
         .header-btn {
-            background: rgba(255,255,255,0.05); 
-            border: 1px solid rgba(255,255,255,0.05);
-            color: var(--text-primary);
-            cursor: pointer; padding: 10px; 
-            border-radius: 14px;
+            background: transparent; border: none; color: var(--text-main);
+            width: 40px; height: 40px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s var(--spring-easing);
-            position: relative; overflow: hidden;
+            transition: background 0.2s; cursor: pointer;
         }
-        .header-btn:active { transform: scale(0.9); background-color: var(--secondary-hover); }
-        .header-btn svg { width: 24px; height: 24px; stroke-width: 2.5; }
+        .header-btn:active { background-color: var(--bg-hover); transform: scale(0.95); }
+        .header-btn svg { width: 24px; height: 24px; stroke-width: 2; }
 
-        /* --- PULL TO REFRESH --- */
-        .pull-indicator {
-            position: absolute; top: 70px; left: 0; right: 0; height: 50px;
-            display: flex; justify-content: center; align-items: center;
-            pointer-events: none; transition: transform 0.3s var(--smooth-easing), opacity 0.3s; z-index: 10; opacity: 0;
-        }
-        .pull-spinner {
-            width: 35px; height: 35px;
-            border: 3px solid rgba(255,255,255,0.1); 
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            box-shadow: 0 0 15px var(--primary-glow);
-        }
-        .pull-spinner.spinning { animation: spin 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* --- MAIN FEED --- */
+        /* --- FEED & POSTS --- */
         .feed-container {
             flex-grow: 1; overflow-y: auto; 
-            padding-bottom: 80px;
+            padding-top: 60px; padding-bottom: 20px;
             scrollbar-width: none;
-            position: relative;
-            /* Smooth scrolling handled by browser, but we animate elements inside */
+            overscroll-behavior-y: contain;
         }
         .feed-container::-webkit-scrollbar { display: none; }
 
-        /* --- POST CARD --- */
         .post-card {
-            background-color: var(--background-color);
+            background-color: var(--bg-dark);
             border-bottom: 1px solid var(--border-color);
-            margin-bottom: 15px; padding-bottom: 15px;
-            opacity: 0; /* For Staggered Animation */
-            transform: translateY(30px) scale(0.95);
-            animation: postEntrance 0.7s var(--spring-easing) forwards;
+            margin-bottom: 10px; padding-bottom: 10px;
+            opacity: 0; transform: translateY(20px);
+            animation: postEnter 0.6s var(--smooth-easing) forwards;
         }
+        @keyframes postEnter { to { opacity: 1; transform: translateY(0); } }
 
-        /* Staggered Animation Logic handled in JS, but base keyframe here */
-        @keyframes postEntrance {
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* Golden Post with "Sheen" Effect */
         .post-card.golden-post {
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            background: linear-gradient(180deg, rgba(255, 215, 0, 0.03), transparent 40%);
-            position: relative;
-            overflow: hidden;
+            background: radial-gradient(circle at top right, rgba(227, 179, 65, 0.08), transparent 40%);
+            border: 1px solid rgba(227, 179, 65, 0.3);
+            border-radius: 12px; margin: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
-        .post-card.golden-post::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
-            transform: skewX(-20deg);
-            animation: goldenSheen 6s infinite ease-in-out;
-            pointer-events: none;
-        }
-        @keyframes goldenSheen {
-            0% { left: -100%; }
-            20% { left: 200%; }
-            100% { left: 200%; }
+        .golden-post .username { color: var(--gold-color); }
+        .golden-post .username::after {
+            content: '👑'; margin-right: 4px; font-size: 0.9em;
         }
 
-        .golden-post .username::before {
-            content: '👑'; margin-left: 8px; font-size: 1.1rem;
-            filter: drop-shadow(0 0 6px var(--gold-color));
-            animation: crownFloat 3s ease-in-out infinite;
-            display: inline-block;
-        }
-        @keyframes crownFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-
-        .post-header { padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; }
-        .user-info { display: flex; align-items: center; gap: 12px; }
-        
-        .user-avatar-container { position: relative; }
+        .post-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
         .user-avatar {
-            width: 42px; height: 42px; border-radius: 50%; object-fit: cover;
-            border: 2px solid var(--border-color);
-            transition: all 0.3s ease;
-            background-color: var(--secondary-hover);
+            width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--bg-card);
+            background: var(--bg-hover);
         }
-        .post-card:hover .user-avatar { border-color: var(--primary-color); transform: scale(1.05); }
+        .username { font-weight: 700; font-size: 0.95rem; color: var(--text-main); }
+        .verified-tick { width: 14px; height: 14px; margin-right: 4px; vertical-align: middle; }
 
-        .username { 
-            font-weight: 700; font-size: 0.95rem; color: var(--text-primary); 
-            display: flex; align-items: center; gap: 4px;
-        }
-        .verified-tick {
-            width: 18px; height: 18px;
-            filter: drop-shadow(0 0 8px var(--primary-glow));
-            vertical-align: sub;
-        }
-        
-        .post-options { 
-            color: var(--text-secondary); cursor: pointer; padding: 10px; border-radius: 50%; 
-            transition: all 0.3s ease;
-            position: relative; overflow: hidden;
-        }
-        .post-options:active { transform: scale(0.85) rotate(10deg); }
-
-        /* --- MEDIA --- */
+        /* Media */
         .post-media-container {
             width: 100%; position: relative;
-            background-color: #050505; min-height: 350px; 
+            background-color: #000; min-height: 250px;
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
-            border-radius: 4px; /* Slight radius */
         }
-        
-        .media-loader-placeholder {
-            position: absolute; inset: 0;
-            background-color: var(--secondary-color);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 2; transition: opacity 0.6s ease;
-        }
-        .media-loader-placeholder.loaded { opacity: 0; pointer-events: none; }
-        
-        /* Modern Loader */
-        .loading-spinner {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(255,255,255,0.05);
-            border-top-color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
-        }
-
         .post-media { 
-            width: 100%; height: auto; max-height: 580px; object-fit: contain; display: block;
-            opacity: 0; transition: opacity 0.8s ease; 
+            width: 100%; height: auto; max-height: 600px; object-fit: contain; 
+            display: block; opacity: 0; transition: opacity 0.4s ease;
         }
         .post-media.loaded { opacity: 1; }
         
-        /* Video Controls */
-        .video-overlay-controls {
-            position: absolute; bottom: 20px; right: 20px;
-            display: flex; gap: 10px; z-index: 6;
+        /* Loading Spinner */
+        .media-loader {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: var(--bg-hover); z-index: 1; transition: opacity 0.3s;
         }
-        .control-btn {
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white; border-radius: 50%; width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; padding: 7px;
-            transition: all 0.2s var(--spring-easing);
+        .spinner {
+            width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent-color); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
-        .control-btn:active { transform: scale(0.8); background: rgba(255,255,255,0.2); }
-        
-        .play-pause-overlay {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.5);
-            background: rgba(0,0,0,0.3); backdrop-filter: blur(4px);
-            border-radius: 50%;
-            width: 70px; height: 70px;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 5; pointer-events: none; opacity: 0;
-            transition: all 0.4s var(--spring-easing);
-        }
-        .play-pause-overlay.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* --- HEART ANIMATION (Explosion) --- */
+        /* Heart Animation */
         .heart-overlay {
             position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%) scale(0);
-            color: #fff; font-size: 100px; pointer-events: none;
-            z-index: 7; filter: drop-shadow(0 10px 20px rgba(237, 73, 86, 0.4));
+            color: #fff; font-size: 80px; pointer-events: none;
+            z-index: 10; filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
             opacity: 0;
         }
-        .heart-overlay.active { animation: heartPopBig 1s var(--spring-easing) forwards; }
-        
-        @keyframes heartPopBig { 
-            0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0; } 
-            20% { transform: translate(-50%, -50%) scale(1.3) rotate(0deg); opacity: 1; } 
+        .heart-overlay.active { animation: heartPop 0.8s var(--spring-easing) forwards; }
+        @keyframes heartPop { 
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 
+            20% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; } 
             40% { transform: translate(-50%, -50%) scale(0.9); opacity: 1; } 
-            60% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 
             100% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 
         }
 
-        .post-actions { padding: 12px 15px 8px; display: flex; gap: 20px; align-items: center; }
+        /* Actions */
+        .post-actions { padding: 12px 16px 8px; display: flex; gap: 20px; }
+        .action-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--text-main); transition: transform 0.1s; display: flex; align-items: center; gap: 6px; }
+        .action-btn:active { transform: scale(0.85); }
+        .action-btn svg { width: 26px; height: 26px; stroke-width: 1.8; transition: all 0.2s; }
+        .action-btn.liked svg { fill: var(--danger-color); stroke: var(--danger-color); }
         
-        .action-btn { 
-            background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 0; 
-            display: flex; align-items: center; gap: 6px; position: relative;
-            transition: transform 0.2s var(--spring-easing);
-        }
-        .action-btn:active { transform: scale(0.8); }
-        .action-btn svg { width: 30px; height: 30px; stroke-width: 1.8; transition: all 0.3s; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
-        
-        .action-btn.liked svg { 
-            fill: var(--like-color); stroke: var(--like-color); 
-            filter: drop-shadow(0 0 10px rgba(237, 73, 86, 0.5));
-            animation: likePulse 0.5s var(--spring-easing); 
-        }
-        @keyframes likePulse { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
+        .post-likes { padding: 0 16px; font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; cursor: pointer; }
+        .post-caption { padding: 0 16px 8px; font-size: 0.9rem; line-height: 1.5; color: var(--text-main); }
+        .caption-username { font-weight: 700; margin-left: 6px; }
+        .post-time { font-size: 0.75rem; color: var(--text-muted); padding: 0 16px; }
 
-        .post-likes { 
-            padding: 0 15px; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; 
-            width: fit-content; transition: opacity 0.2s; position: relative;
-            overflow: hidden; border-radius: 4px;
-        }
-        .post-likes.clickable:active { background: rgba(255,255,255,0.05); }
-
-        .post-caption { padding: 0 15px 5px; font-size: 0.95rem; line-height: 1.6; }
-        .caption-username { font-weight: 700; margin-left: 5px; }
-        .post-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px; display: block; padding: 0 15px; letter-spacing: 0.5px; opacity: 0.7; }
-
-        /* --- SKELETON LOADER (Modern) --- */
-        #skeleton-loader {
-            position: absolute; top: 65px; left: 0; width: 100%; height: calc(100% - 65px);
-            background: var(--background-color); z-index: 15; overflow: hidden;
-            display: block; 
-        }
-        .sk-post { margin-bottom: 20px; background: var(--background-color); padding-bottom: 10px; }
-        .sk-header { display: flex; align-items: center; padding: 15px; gap: 10px; }
-        .sk-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--skeleton-base); }
-        .sk-name { width: 120px; height: 16px; border-radius: 4px; background: var(--skeleton-base); }
-        .sk-image { width: 100%; height: 380px; background: var(--skeleton-base); }
-        .sk-actions { height: 20px; margin: 15px; width: 40%; background: var(--skeleton-base); border-radius: 4px; }
-        
-        .skeleton-animate { position: relative; overflow: hidden; }
-        .skeleton-animate::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            transform: skewX(-20deg);
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer { 0% { transform: translateX(-150%) skewX(-20deg); } 100% { transform: translateX(150%) skewX(-20deg); } }
-
-        /* --- MODALS (Glassmorphism & Physics) --- */
+        /* --- MODALS (Enhanced) --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 1000; opacity: 0; visibility: hidden;
-            transition: all 0.4s var(--smooth-easing);
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            z-index: 1000; opacity: 0; visibility: hidden;
+            transition: all 0.3s var(--smooth-easing);
             display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(8px);
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         
-        .bottom-sheet { align-items: flex-end; }
-        .sheet-card {
-            background: var(--modal-bg); width: 100%; max-width: 480px; 
-            border-top-left-radius: 24px; border-top-right-radius: 24px;
-            transform: translateY(110%); 
-            transition: transform 0.5s var(--spring-easing);
-            padding: 10px 0 0 0; 
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column;
-            max-height: 85vh; 
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .modal-overlay.active .sheet-card { transform: translateY(0); }
-
-        .sheet-drag-handle { width: 50px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 3px; margin: 10px auto 20px; flex-shrink: 0; }
-
-        .sheet-option {
-            width: 100%; padding: 18px 25px; text-align: right; background: none; border: none;
-            color: var(--text-primary); font-size: 1rem; font-family: 'Vazirmatn';
-            display: flex; align-items: center; gap: 15px; cursor: pointer;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            transition: background 0.2s; position: relative; overflow: hidden;
-        }
-        .sheet-option:active { background-color: rgba(255,255,255,0.05); }
-        .sheet-option svg { width: 24px; height: 24px; color: var(--text-secondary); transition: transform 0.3s; }
-        .sheet-option:active svg { transform: scale(0.9); }
-        .sheet-option.danger { color: var(--danger-color); font-weight: 700; }
-        .sheet-option.danger svg { color: var(--danger-color); }
-
-        /* Modern Toggle Switch */
-        .toggle-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--secondary-hover); transition: .4s var(--spring-easing); border-radius: 28px;
-            border: 1px solid var(--border-color);
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 2px;
-            background-color: white; transition: .4s var(--spring-easing); border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        input:checked + .slider { background-color: var(--primary-color); border-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(22px); }
-
-        /* Create Modal - Pop Effect */
         .modal-card {
-            background: #1C2128; width: 88%; max-width: 420px; border-radius: 24px;
-            overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); 
-            transform: scale(0.8) translateY(20px); opacity: 0;
-            transition: all 0.5s var(--spring-easing);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: var(--bg-card); width: 90%; max-width: 420px;
+            border-radius: 20px; border: 1px solid var(--border-color);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.4s var(--spring-easing), opacity 0.3s ease;
+            opacity: 0; overflow: hidden; position: relative;
         }
         .modal-overlay.active .modal-card { transform: scale(1) translateY(0); opacity: 1; }
-        
+
         .modal-header {
-            padding: 18px 20px; border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+            padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-title { margin: 0; font-size: 1rem; font-weight: 700; }
+        .close-modal {
+            background: none; border: none; color: var(--text-muted);
+            font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 0 5px;
+        }
+
+        /* Create Post Modal Specifics */
+        .upload-area {
+            margin: 20px; height: 200px;
+            border: 2px dashed var(--border-color); border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-muted); cursor: pointer; transition: all 0.3s;
             background: rgba(255,255,255,0.02);
         }
-        .modal-title { font-weight: 800; margin: 0; font-size: 1.1rem; color: var(--text-primary); }
-        .share-btn { 
-            color: var(--primary-color); font-weight: 700; background: none; border: none; 
-            cursor: pointer; font-size: 1rem; transition: all 0.2s; padding: 5px 10px; border-radius: 8px; 
-        }
-        .share-btn:active { background: rgba(0, 163, 255, 0.1); transform: scale(0.95); }
-        .share-btn:disabled { opacity: 0.5; cursor: default; }
-        .close-modal { 
-            color: var(--text-primary); background: rgba(255,255,255,0.05); border-radius: 50%;
-            border: none; cursor: pointer; width: 32px; height: 32px;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s; font-size: 1.5rem;
-        }
-        .close-modal:active { transform: rotate(90deg); background: rgba(255,255,255,0.1); }
-        
-        .modal-body { padding: 25px; display: flex; flex-direction: column; gap: 20px; max-height: 70vh; overflow-y: auto; }
-        .upload-area {
-            border: 2px dashed var(--border-color); border-radius: 16px;
-            padding: 50px 20px; text-align: center; cursor: pointer; transition: all 0.3s;
-            background: rgba(255,255,255,0.01);
-            position: relative; overflow: hidden;
-        }
-        .upload-area:active { transform: scale(0.98); border-color: var(--primary-color); background: rgba(0, 163, 255, 0.05); }
-        .upload-area svg { width: 50px; height: 50px; color: var(--text-secondary); margin-bottom: 12px; transition: transform 0.3s var(--spring-easing); }
-        .upload-area:hover svg { transform: translateY(-5px); color: var(--primary-color); }
-        
-        .upload-preview { 
-            width: 100%; max-height: 300px; object-fit: contain; border-radius: 12px; 
-            display: none; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            animation: fadeIn 0.5s ease;
-        }
-        
+        .upload-area:active { background: rgba(88, 166, 255, 0.05); border-color: var(--accent-color); }
+        .upload-preview { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; display: none; background: #000; }
+
         .caption-input {
-            width: 100%; background: var(--secondary-color); border: 1px solid var(--border-color); color: var(--text-primary);
-            padding: 15px; border-radius: 14px; font-family: 'Vazirmatn'; resize: none; min-height: 100px;
-            transition: all 0.3s; font-size: 0.95rem;
+            width: calc(100% - 40px); margin: 0 20px 20px;
+            background: var(--bg-dark); border: 1px solid var(--border-color);
+            color: var(--text-main); padding: 12px; border-radius: 12px;
+            font-family: inherit; resize: none; min-height: 100px;
         }
-        .caption-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 163, 255, 0.1); }
-        
-        .progress-bar-container { width: 100%; height: 8px; background: var(--secondary-color); border-radius: 4px; margin-top: 10px; display: none; overflow: hidden; }
-        .progress-bar { 
-            width: 0%; height: 100%; 
-            background: linear-gradient(90deg, var(--primary-color), #00C6FF); 
-            border-radius: 4px; transition: width 0.3s var(--smooth-easing);
-            box-shadow: 0 0 10px var(--primary-glow);
-        }
+        .caption-input:focus { border-color: var(--accent-color); }
 
-        /* --- USER LIST MODAL --- */
-        .user-list-content { max-height: 60vh; overflow-y: auto; padding: 0; flex-grow: 1; }
-        .user-list-item { 
-            display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.03); 
-            transition: background 0.2s; position: relative; overflow: hidden;
-            animation: slideInRight 0.4s var(--spring-easing);
-            animation-fill-mode: both;
-        }
-        .user-list-item:nth-child(1) { animation-delay: 0.05s; }
-        .user-list-item:nth-child(2) { animation-delay: 0.1s; }
-        .user-list-item:nth-child(3) { animation-delay: 0.15s; }
-
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .user-list-item:active { background-color: var(--secondary-hover); }
-        .user-list-item img { width: 48px; height: 48px; border-radius: 50%; margin-left: 14px; object-fit: cover; border: 1px solid var(--border-color); }
-        .user-list-info h4 { margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 5px; color: var(--text-primary); }
-        .user-list-info p { margin: 4px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
-
-        /* --- COMMENTS MODAL STYLES --- */
-        .comments-list-content {
-            flex-grow: 1; overflow-y: auto; padding: 0 0 80px 0;
-            min-height: 200px;
-        }
-        .comment-item {
-            display: flex; gap: 12px; padding: 14px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.02);
-            position: relative;
-            transform-origin: left center;
-            animation: commentPop 0.4s var(--spring-easing);
-            animation-fill-mode: both;
-        }
-        @keyframes commentPop {
-            from { opacity: 0; transform: scale(0.9) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .comment-item.pinned {
-            background: rgba(255, 215, 0, 0.08);
-            border-right: 3px solid var(--gold-color);
-        }
-        .comment-avatar {
-            width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
-            border: 1px solid var(--border-color); flex-shrink: 0;
+        .share-btn {
+            width: calc(100% - 40px); margin: 0 20px 20px;
+            background: var(--accent-color); color: #fff;
+            border: none; padding: 14px; border-radius: 12px;
+            font-weight: 700; font-size: 1rem; cursor: pointer;
+            box-shadow: 0 4px 15px var(--accent-glow);
             transition: transform 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .comment-avatar:active { transform: scale(0.9); }
-        
-        .comment-content { flex: 1; font-size: 0.9rem; line-height: 1.5; }
-        .comment-header { margin-bottom: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        .comment-username { font-weight: 700; color: var(--text-primary); font-size: 0.9rem; }
-        .comment-text { color: #d0d7de; font-weight: 400; font-size: 0.92rem; word-break: break-word; }
-        .comment-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; display: block; }
-        
-        .pin-icon { width: 14px; height: 14px; fill: var(--gold-color); margin-right: 5px; transform: rotate(45deg); }
-        
-        /* Comment Option Buttons */
-        .comment-option-menu { display: flex; gap: 8px; margin-top: 8px; opacity: 0.8; }
-        .mini-btn {
-            background: rgba(255,255,255,0.05); border: none; font-size: 0.7rem; cursor: pointer; padding: 4px 10px;
-            border-radius: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600;
-            transition: all 0.2s;
-        }
-        .mini-btn:active { transform: scale(0.9); }
-        .btn-delete { color: var(--danger-color); background: rgba(255, 77, 77, 0.1); }
-        .btn-pin { color: var(--gold-color); background: rgba(255, 215, 0, 0.1); }
-        
-        /* Comment Input Area */
-        .comment-input-area {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            background-color: var(--modal-bg);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 12px 15px;
-            display: flex; align-items: center; gap: 12px;
-            z-index: 20;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
-        }
-        .comment-input-area.disabled { filter: grayscale(1); opacity: 0.7; pointer-events: none; }
-        
-        .comment-input-field {
-            flex-grow: 1; background: var(--secondary-color); border: 1px solid var(--border-color);
-            color: var(--text-primary); padding: 12px 18px; border-radius: 24px;
-            font-family: 'Vazirmatn'; font-size: 0.9rem; outline: none;
-            transition: all 0.2s;
-        }
-        .comment-input-field:focus { border-color: var(--primary-color); background: #0d1117; }
-        .send-comment-btn {
-            background: var(--primary-color); border: none; color: white;
-            border-radius: 50%; width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; padding: 0;
-            opacity: 0.5; transition: all 0.3s var(--spring-easing);
-            transform: scale(0.9);
-        }
-        .send-comment-btn.active { opacity: 1; transform: scale(1); box-shadow: 0 0 15px var(--primary-glow); }
-        .send-comment-btn:active { transform: scale(0.85); }
-        .send-comment-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.5; transform: rotate(180deg) translateX(1px); }
+        .share-btn:active { transform: scale(0.98); }
+        .share-btn:disabled { background: var(--border-color); opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        .empty-state { 
-            text-align: center; padding: 60px 20px; color: var(--text-secondary); 
-            animation: fadeIn 0.5s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* --- UPLOAD LOCK STATE STYLES --- */
+        .modal-overlay.locked { pointer-events: none; } /* Disable clicks on overlay */
+        .modal-overlay.locked .close-modal { opacity: 0; pointer-events: none; }
+        .modal-overlay.locked .upload-area { opacity: 0.5; pointer-events: none; }
+        .modal-overlay.locked .caption-input { opacity: 0.5; pointer-events: none; }
         
-        /* Toast Notification - Floating Pill */
-        .toast {
-            position: fixed; bottom: 40px; left: 50%; transform: translate(-50%, 150px) scale(0.8);
-            background: rgba(255, 255, 255, 0.95); color: #000; 
-            padding: 14px 28px; border-radius: 50px;
-            font-size: 0.9rem; font-weight: 700; z-index: 2000; 
-            transition: all 0.5s var(--spring-easing);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 10px;
-            white-space: nowrap; backdrop-filter: blur(5px);
+        .progress-container {
+            margin: 0 20px 20px; height: 6px; background: var(--bg-hover);
+            border-radius: 3px; overflow: hidden; display: none; position: relative;
         }
-        .toast.error { background: #FF4D4D; color: white; }
-        .toast.active { transform: translate(-50%, 0) scale(1); }
+        .progress-bar {
+            width: 0%; height: 100%; background: var(--accent-color);
+            border-radius: 3px; transition: width 0.2s linear;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* Success Animation (Checkmark) */
+        .success-animation {
+            position: absolute; inset: 0; background: var(--bg-card);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10; opacity: 0; visibility: hidden; transition: opacity 0.3s;
+        }
+        .success-animation.active { opacity: 1; visibility: visible; }
+        
+        .checkmark-circle {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: var(--success-color);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(46, 160, 67, 0.4);
+            animation: popIn 0.5s var(--spring-easing) forwards;
+        }
+        .checkmark {
+            width: 40px; height: 40px; border-radius: 3px;
+            border-bottom: 4px solid #fff; border-right: 4px solid #fff;
+            transform: rotate(45deg) translate(-2px, -2px);
+            opacity: 0; animation: checkDraw 0.4s 0.3s ease forwards;
+        }
+        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes checkDraw { 0% { opacity: 0; width: 0; height: 0; } 100% { opacity: 1; width: 14px; height: 26px; } }
+
+        /* --- BOTTOM SHEETS --- */
+        .bottom-sheet .sheet-card {
+            background: var(--bg-card); width: 100%; max-width: 480px;
+            border-radius: 24px 24px 0 0;
+            position: fixed; bottom: 0; left: 0; right: 0; margin: 0 auto;
+            transform: translateY(100%); transition: transform 0.4s var(--spring-easing);
+            padding-bottom: 30px; border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .modal-overlay.active .sheet-card { transform: translateY(0); }
+        .sheet-handle { width: 40px; height: 5px; background: var(--border-color); border-radius: 3px; margin: 12px auto; }
+        
+        .sheet-btn {
+            width: 100%; padding: 16px 24px; text-align: right; background: none; border: none;
+            color: var(--text-main); font-size: 1rem; font-family: inherit;
+            display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .sheet-btn:active { background: var(--bg-hover); }
+        .sheet-btn.danger { color: var(--danger-color); }
+
+        /* --- TOAST --- */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translate(-50%, 50px);
+            background: #fff; color: #000; padding: 12px 24px; border-radius: 50px;
+            font-weight: 700; z-index: 2000; opacity: 0;
+            transition: all 0.4s var(--spring-easing);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .toast.active { transform: translate(-50%, 0); opacity: 1; }
+        .toast.error { background: var(--danger-color); color: #fff; }
+
+        /* --- SKELETON --- */
+        .skeleton { background: var(--bg-hover); position: relative; overflow: hidden; }
+        .skeleton::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        /* Pull Indicator */
+        .pull-indicator {
+            position: absolute; top: 70px; left: 0; right: 0; height: 40px;
+            display: flex; justify-content: center; align-items: center;
+            pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 40;
+        }
+        .pull-spinner {
+            width: 24px; height: 24px; border: 2px solid var(--accent-color); border-top-color: transparent; border-radius: 50%;
+        }
 
     </style>
 </head>
@@ -571,1114 +322,573 @@
     <div class="app-container">
         <!-- Header -->
         <header class="header-area">
-            <button class="header-btn back-btn ripple-trigger" onclick="window.location.href='safe_asli.html'">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+            <button class="header-btn" onclick="window.location.href='safe_asli.html'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
             </button>
-            <h1 class="header-title">روبینو پلاس</h1>
-            <button class="header-btn ripple-trigger" id="open-create-modal">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
+            <h1 class="header-title">روبینو پرو</h1>
+            <button class="header-btn" id="open-create-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
         </header>
-        
-        <!-- Pull to Refresh -->
-        <div class="pull-indicator" id="pull-indicator">
-            <div class="pull-spinner" id="pull-spinner"></div>
-        </div>
 
-        <!-- Skeleton Loader (Main Feed) -->
-        <div id="skeleton-loader">
-            <div class="sk-post">
-                <div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div>
-                <div class="sk-image skeleton-animate"></div>
-                <div class="sk-actions skeleton-animate"></div>
-            </div>
-            <div class="sk-post">
-                <div class="sk-header"><div class="sk-avatar skeleton-animate"></div><div class="sk-name skeleton-animate"></div></div>
-                <div class="sk-image skeleton-animate"></div>
-                <div class="sk-actions skeleton-animate"></div>
-            </div>
-        </div>
+        <!-- Pull Refresh -->
+        <div class="pull-indicator" id="pull-indicator"><div class="pull-spinner" id="pull-spinner"></div></div>
 
         <!-- Feed -->
-        <div class="feed-container" id="feed-container"></div>
+        <div class="feed-container" id="feed-container">
+            <!-- Skeletons will be injected here by JS initially -->
+        </div>
 
-        <!-- Create Post Modal -->
+        <!-- Create Modal (The Critical Part) -->
         <div class="modal-overlay" id="create-modal">
             <div class="modal-card">
-                <div class="modal-header">
-                    <button class="close-modal ripple-trigger" id="close-modal-btn">&times;</button>
-                    <h3 class="modal-title">پست جدید</h3>
-                    <button class="share-btn ripple-trigger" id="share-post-btn">انتشار</button>
+                <!-- Success Animation Layer -->
+                <div class="success-animation" id="upload-success-anim">
+                    <div class="checkmark-circle"><div class="checkmark"></div></div>
+                    <p style="margin-top:20px; font-weight:700; font-size:1.1rem;">پست منتشر شد!</p>
                 </div>
+
+                <div class="modal-header">
+                    <h3 class="modal-title">پست جدید</h3>
+                    <button class="close-modal" id="close-create-btn">&times;</button>
+                </div>
+                
                 <div class="modal-body">
                     <input type="file" id="file-input" accept="image/*,video/*" style="display: none;">
                     
-                    <div class="upload-area ripple-trigger" id="upload-trigger">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                        <p style="margin:0; font-weight:500;">لمس برای انتخاب مدیا</p>
-                    </div>
-                    
-                    <img id="image-preview" class="upload-preview" />
-                    <video id="video-preview" class="upload-preview" controls playsinline muted></video>
-
-                    <textarea class="caption-input" id="caption-input" placeholder="کپشن خود را بنویسید..."></textarea>
-                    
-                    <div class="toggle-container" style="padding: 0 5px;">
-                        <span style="font-size: 0.95rem; font-weight: 500;">نمایش لایک‌ها</span>
-                        <label class="switch">
-                            <input type="checkbox" id="create-privacy-toggle" checked>
-                            <span class="slider"></span>
-                        </label>
+                    <div class="upload-area" id="upload-area">
+                        <svg id="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <p style="margin:0; font-size:0.9rem;">انتخاب عکس یا ویدیو</p>
+                        
+                        <img id="image-preview" class="upload-preview">
+                        <video id="video-preview" class="upload-preview" controls playsinline></video>
                     </div>
 
-                    <div class="progress-bar-container" id="upload-progress-container">
-                        <div class="progress-bar" id="upload-progress"></div>
+                    <textarea class="caption-input" id="caption-input" placeholder="کپشن را بنویسید..."></textarea>
+                    
+                    <div class="progress-container" id="progress-container">
+                        <div class="progress-bar" id="progress-bar"></div>
                     </div>
+
+                    <button class="share-btn" id="share-btn">انتشار پست</button>
                 </div>
             </div>
         </div>
 
-        <!-- Post Options Modal -->
+        <!-- Options Modal -->
         <div class="modal-overlay bottom-sheet" id="options-modal">
             <div class="sheet-card">
-                <div class="sheet-drag-handle"></div>
-                <div class="sheet-option">
-                    <div class="toggle-container">
-                        <span>نمایش تعداد لایک</span>
-                        <label class="switch">
-                            <input type="checkbox" id="privacy-toggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="sheet-option">
-                    <div class="toggle-container">
-                        <span>باز بودن نظرات</span>
-                        <label class="switch">
-                            <input type="checkbox" id="comments-toggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <button class="sheet-option ripple-trigger" id="edit-post-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    ویرایش کپشن
-                </button>
-                <button class="sheet-option danger ripple-trigger" id="delete-post-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <div class="sheet-handle"></div>
+                <button class="sheet-btn danger" id="delete-post-btn">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     حذف پست
                 </button>
-                <button class="sheet-option ripple-trigger" id="close-options-btn" style="justify-content: center; color: var(--text-secondary);">
-                    انصراف
-                </button>
-            </div>
-        </div>
-        
-        <!-- Edit Caption Modal -->
-        <div class="modal-overlay" id="edit-caption-modal">
-             <div class="modal-card">
-                 <div class="modal-header">
-                     <h3 class="modal-title">ویرایش متن</h3>
-                 </div>
-                 <div class="modal-body">
-                     <textarea class="caption-input" id="edit-caption-input"></textarea>
-                     <button class="share-btn ripple-trigger" id="save-caption-btn" style="background: var(--primary-color); color: white; padding: 12px; border-radius: 10px; width:100%;">ذخیره تغییرات</button>
-                     <button class="close-modal ripple-trigger" id="cancel-caption-btn" style="margin-top: 5px; font-size: 0.9rem; width:100%; text-align:center; border-radius: 10px;">لغو</button>
-                 </div>
-             </div>
-        </div>
-
-        <!-- Likes List Modal -->
-        <div class="modal-overlay bottom-sheet" id="likes-modal">
-            <div class="sheet-card" style="max-height: 80vh;">
-                <div class="sheet-drag-handle"></div>
-                <div class="modal-header" style="border:none; padding: 0 20px 15px;">
-                    <h3 class="modal-title" style="font-size: 1.1rem;">لیست پسندها</h3>
-                    <button class="close-modal ripple-trigger" id="close-likes-btn">&times;</button>
-                </div>
-                <div class="user-list-content" id="likes-list-container"></div>
+                <button class="sheet-btn" id="close-options-btn" style="justify-content: center; color: var(--text-muted);">لغو</button>
             </div>
         </div>
 
-        <!-- Comments Modal -->
-        <div class="modal-overlay bottom-sheet" id="comments-modal">
-            <div class="sheet-card" style="height: 80vh;">
-                <div class="sheet-drag-handle"></div>
-                <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding: 5px 20px 15px;">
-                    <h3 class="modal-title" style="font-size: 1.1rem;">نظرات</h3>
-                    <button class="close-modal ripple-trigger" id="close-comments-btn">&times;</button>
-                </div>
-                
-                <div class="comments-list-content" id="comments-list-container"></div>
-                
-                <div class="comment-input-area" id="comment-input-area">
-                    <img id="current-user-comment-avatar" src="" class="comment-avatar" style="width: 38px; height: 38px; border: none;">
-                    <input type="text" id="comment-input-field" class="comment-input-field" placeholder="نظری بنویسید..." autocomplete="off">
-                    <button id="send-comment-btn" class="send-comment-btn ripple-trigger">
-                        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-                    </button>
-                </div>
-                
-                <div class="comment-input-area" id="comments-disabled-msg" style="display:none; justify-content:center; color:var(--text-secondary);">
-                    <span>نظرات برای این پست بسته شده است.</span>
-                </div>
-            </div>
-        </div>
-        
         <!-- Toast -->
-        <div class="toast" id="toast">پیام سیستم</div>
-
+        <div class="toast" id="toast">پیام</div>
     </div>
 
     <script>
-        // --- CONFIGURATION ---
+        // --- CONFIG ---
         const PROXY_URL = 'https://escortgame.ir/firebase_proxy.php';
-        const UPLOAD_PHP_ENDPOINT = 'https://escortgame.ir/upload_to_parspack.php';
-        const SHARED_SECRET = 'miko1234';
-        const VERIFIED_ICON_URL = 'https://up.20script.ir/file/edfa-tickpng-parspng-com-4.png';
-        const LIVE_UPDATE_INTERVAL = 4000;
-        const CACHE_KEY_FEED = 'rubino_cached_feed';
-
-        // --- DOM REFERENCES ---
-        const feedContainer = document.getElementById('feed-container');
-        const skeletonLoader = document.getElementById('skeleton-loader');
-        const createModal = document.getElementById('create-modal');
-        const optionsModal = document.getElementById('options-modal');
-        const likesModal = document.getElementById('likes-modal');
-        const commentsModal = document.getElementById('comments-modal');
-        const editCaptionModal = document.getElementById('edit-caption-modal');
+        const UPLOAD_URL = 'https://escortgame.ir/upload_to_parspack.php';
+        const SHARED_SECRET = 'miko1234'; // Must match server
         
-        // Buttons & Inputs
-        const openCreateBtn = document.getElementById('open-create-modal');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const sharePostBtn = document.getElementById('share-post-btn');
-        const closeOptionsBtn = document.getElementById('close-options-btn');
-        const closeLikesBtn = document.getElementById('close-likes-btn');
-        const closeCommentsBtn = document.getElementById('close-comments-btn');
-        const deletePostBtn = document.getElementById('delete-post-btn');
-        const editPostBtn = document.getElementById('edit-post-btn');
-        const saveCaptionBtn = document.getElementById('save-caption-btn');
-        const cancelCaptionBtn = document.getElementById('cancel-caption-btn');
-        const fileInput = document.getElementById('file-input');
-        const uploadTrigger = document.getElementById('upload-trigger');
-        const imagePreview = document.getElementById('image-preview');
-        const videoPreview = document.getElementById('video-preview');
-        const captionInput = document.getElementById('caption-input');
-        const editCaptionInput = document.getElementById('edit-caption-input');
-        const progressBarContainer = document.getElementById('upload-progress-container');
-        const progressBar = document.getElementById('upload-progress');
-        const privacyToggle = document.getElementById('privacy-toggle');
-        const commentsToggle = document.getElementById('comments-toggle');
-        const createPrivacyToggle = document.getElementById('create-privacy-toggle');
-        const pullIndicator = document.getElementById('pull-indicator');
-        const pullSpinner = document.getElementById('pull-spinner');
-        const toast = document.getElementById('toast');
-        
-        // Comment Refs
-        const commentsListContainer = document.getElementById('comments-list-container');
-        const commentInputArea = document.getElementById('comment-input-area');
-        const commentsDisabledMsg = document.getElementById('comments-disabled-msg');
-        const commentInputField = document.getElementById('comment-input-field');
-        const sendCommentBtn = document.getElementById('send-comment-btn');
-        const currentUserCommentAvatar = document.getElementById('current-user-comment-avatar');
+        // --- STATE ---
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        if(!currentUser) window.location.href = 'login.html'; // Basic Auth Check
 
-        // --- APP STATE ---
-        let currentUser = null;
         let clientToken = null;
         let selectedFile = null;
-        let allUsersCache = {};
-        let currentOptionsPostId = null; 
-        let currentViewingLikesPostId = null; 
-        let currentCommentsPostId = null; 
-        let postsDataCache = {}; 
-        let videoObserver = null; 
-        let startY = 0; let isPulling = false; let currentTranslate = 0;
-        let isGlobalMuted = true; 
+        let isUploading = false; // CRITICAL: Lock state
+        let postsData = {};
+        let activeVideo = null;
+        let currentOptionsPostId = null;
 
-        // --- RIPPLE EFFECT LOGIC (Motion Graphics) ---
-        function addRippleEffect(e) {
-            const button = e.currentTarget;
-            const ripple = document.createElement('span');
-            const rect = button.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
+        // --- DOM ---
+        const els = {
+            feed: document.getElementById('feed-container'),
+            createModal: document.getElementById('create-modal'),
+            createBtn: document.getElementById('open-create-btn'),
+            closeCreateBtn: document.getElementById('close-create-btn'),
+            shareBtn: document.getElementById('share-btn'),
+            fileInput: document.getElementById('file-input'),
+            uploadArea: document.getElementById('upload-area'),
+            imgPrev: document.getElementById('image-preview'),
+            vidPrev: document.getElementById('video-preview'),
+            caption: document.getElementById('caption-input'),
+            progressBox: document.getElementById('progress-container'),
+            progressBar: document.getElementById('progress-bar'),
+            toast: document.getElementById('toast'),
+            uploadIcon: document.getElementById('upload-icon'),
+            successAnim: document.getElementById('upload-success-anim'),
+            optionsModal: document.getElementById('options-modal'),
+            deleteBtn: document.getElementById('delete-post-btn')
+        };
+
+        // --- INIT ---
+        (async function init() {
+            renderSkeletons();
+            setupEvents();
+            setupIntersectionObserver();
             
-            ripple.style.width = ripple.style.height = `${size}px`;
-            ripple.style.left = `${x}px`;
-            ripple.style.top = `${y}px`;
-            ripple.classList.add('ripple-effect');
-            
-            button.appendChild(ripple);
-            
-            setTimeout(() => ripple.remove(), 600);
+            try {
+                await refreshToken();
+                await loadPosts();
+            } catch(e) {
+                showToast('خطا در اتصال به سرور', 'error');
+            }
+        })();
+
+        // --- AUTH & NETWORK ---
+        async function refreshToken() {
+            try {
+                const res = await fetch(`${PROXY_URL}?auth=token`, { 
+                    headers: { 'X-Proxy-Secret': SHARED_SECRET } 
+                });
+                const data = await res.json();
+                clientToken = data.token;
+            } catch (e) { console.error('Auth Error', e); }
         }
 
-        function initRipples() {
-            document.querySelectorAll('.ripple-trigger').forEach(btn => {
-                btn.removeEventListener('click', addRippleEffect); // Prevent duplicates
-                btn.style.position = 'relative';
-                btn.style.overflow = 'hidden';
-                btn.addEventListener('click', addRippleEffect);
-            });
+        // --- EVENTS ---
+        function setupEvents() {
+            // Modal Open
+            els.createBtn.onclick = () => {
+                resetCreateModal();
+                els.createModal.classList.add('active');
+            };
+
+            // Modal Close (Locked during upload)
+            const tryCloseModal = () => {
+                if(isUploading) return; // BLOCKED
+                els.createModal.classList.remove('active');
+                resetCreateModal();
+            };
+
+            els.closeCreateBtn.onclick = tryCloseModal;
+            els.createModal.onclick = (e) => {
+                if(e.target === els.createModal) tryCloseModal();
+            };
+            document.onkeydown = (e) => {
+                if(e.key === 'Escape' && els.createModal.classList.contains('active')) tryCloseModal();
+            };
+
+            // File Selection
+            els.uploadArea.onclick = () => !isUploading && els.fileInput.click();
+            els.fileInput.onchange = (e) => {
+                if(e.target.files[0]) handleFilePreview(e.target.files[0]);
+            };
+
+            // Post Action
+            els.shareBtn.onclick = handleUploadProcess;
+
+            // Options
+            els.optionsModal.onclick = (e) => { if(e.target === els.optionsModal) els.optionsModal.classList.remove('active'); };
+            document.getElementById('close-options-btn').onclick = () => els.optionsModal.classList.remove('active');
+            els.deleteBtn.onclick = deletePost;
+
+            // Pull Refresh
+            setupPullRefresh();
         }
 
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            const storedUser = localStorage.getItem('currentUser');
-            if (!storedUser) { window.location.href = 'login.html'; return; }
-            currentUser = JSON.parse(storedUser);
+        // --- FILE HANDLING ---
+        function handleFilePreview(file) {
+            selectedFile = file;
+            els.uploadIcon.style.display = 'none';
+            els.uploadArea.querySelector('p').style.display = 'none';
+            
+            // Cleanup
+            els.imgPrev.style.display = 'none';
+            els.vidPrev.style.display = 'none';
+            els.vidPrev.pause();
+            if(els.vidPrev.src) URL.revokeObjectURL(els.vidPrev.src);
 
-            currentUserCommentAvatar.src = currentUser.profilePicUrl || `https://ui-avatars.com/api/?name=${currentUser.username}&background=random&color=fff`;
+            const url = URL.createObjectURL(file);
+            
+            if(file.type.startsWith('video/')) {
+                els.vidPrev.src = url;
+                els.vidPrev.style.display = 'block';
+                els.vidPrev.load();
+            } else {
+                els.imgPrev.src = url;
+                els.imgPrev.style.display = 'block';
+            }
+        }
 
-            setupEventListeners();
-            initVideoObserver();
-            initRipples(); // Initialize ripples on static elements
-            await initializeAppUnified();
-        });
-
-        async function initializeAppUnified() {
-            skeletonLoader.style.display = 'block';
-            feedContainer.style.opacity = '0';
+        // --- THE FIX: ROBUST UPLOAD LOGIC ---
+        async function handleUploadProcess() {
+            if(!selectedFile) return showToast('لطفا فایل انتخاب کنید', 'error');
+            
+            // 1. LOCK UI
+            isUploading = true;
+            els.createModal.classList.add('locked'); // CSS locks interactions
+            els.shareBtn.disabled = true;
+            els.shareBtn.innerHTML = '<div class="pull-spinner" style="width:20px; height:20px; border-width:2px; border-color:white; border-top-color:transparent;"></div> در حال آپلود...';
+            els.progressBox.style.display = 'block';
+            els.progressBar.style.width = '0%';
 
             try {
-                await refreshClientToken();
-                await Promise.all([
-                    fetchUsersCache(),
-                    fetchPosts(false) 
-                ]);
-                renderFeed(preparePostsArray(postsDataCache));
-                setInterval(updateLiveTimestamps, 60000);
-                setInterval(startRealtimeUpdates, LIVE_UPDATE_INTERVAL);
+                // Refresh token before upload to ensure session is valid
+                await refreshToken();
+
+                // 2. UPLOAD FILE
+                const mediaUrl = await uploadFileXHR(selectedFile);
+                
+                // 3. CREATE RECORD (Wait for it!)
+                await createPostRecordInDB(mediaUrl, selectedFile.type.startsWith('video') ? 'video' : 'image');
+
+                // 4. SUCCESS STATE (Show animation before closing)
+                els.successAnim.classList.add('active');
+                
+                // Wait for animation
+                setTimeout(async () => {
+                    // 5. UNLOCK & RESET
+                    isUploading = false;
+                    els.createModal.classList.remove('locked', 'active');
+                    resetCreateModal();
+                    
+                    // 6. REFRESH FEED
+                    showToast('پست با موفقیت منتشر شد');
+                    await loadPosts(); // Fetch new data immediately
+                }, 1500);
 
             } catch (error) {
-                console.error("Initialization failed:", error);
-                const cachedFeed = localStorage.getItem(CACHE_KEY_FEED);
-                if (cachedFeed) {
-                    postsDataCache = JSON.parse(cachedFeed);
-                    renderFeed(preparePostsArray(postsDataCache));
-                    showToast('درحال نمایش نسخه آفلاین', 'error');
-                } else {
-                    feedContainer.innerHTML = '<div class="empty-state">خطا در اتصال به سرور.</div>';
-                    skeletonLoader.style.display = 'none';
-                    feedContainer.style.opacity = '1';
-                }
+                console.error(error);
+                showToast(error.message || 'خطا در آپلود', 'error');
+                
+                // Unlock on error
+                isUploading = false;
+                els.createModal.classList.remove('locked');
+                els.shareBtn.disabled = false;
+                els.shareBtn.textContent = 'انتشار پست';
+                els.progressBar.style.width = '0%';
             }
         }
 
-        // --- HELPERS ---
-        function preparePostsArray(data) {
-             return Object.entries(data)
-                .map(([key, val]) => ({ id: key, ...val }))
-                .sort((a, b) => {
-                    const aIsGolden = a.isGolden === true;
-                    const bIsGolden = b.isGolden === true;
-                    if (aIsGolden && !bIsGolden) return -1;
-                    if (!aIsGolden && bIsGolden) return 1;
-                    return new Date(b.timestamp) - new Date(a.timestamp);
-                });
-        }
+        function uploadFileXHR(file) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('file', file);
 
-        // --- VIDEO LOGIC ---
-        function initVideoObserver() {
-            const options = { root: null, rootMargin: '0px', threshold: 0.65 };
-            videoObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    const video = entry.target;
-                    const muteBtn = document.querySelector(`.mute-btn[data-for="${video.dataset.id}"]`);
-                    if (entry.isIntersecting) {
-                        video.muted = isGlobalMuted;
-                        updateMuteIconUI(muteBtn, isGlobalMuted);
-                        if (video.paused && !video.dataset.manualPause && !createModal.classList.contains('active')) {
-                            video.play().catch(e => { video.muted = true; video.play().catch(console.log); });
-                        }
-                        document.querySelectorAll('video.post-media').forEach(v => { if (v !== video && !v.paused) v.pause(); });
-                    } else {
-                        if (!video.paused) video.pause();
-                    }
-                });
-            }, options);
-        }
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', UPLOAD_URL, true);
 
-        function toggleVideoPlay(vidId) {
-            const video = document.getElementById(`video-${vidId}`);
-            const overlay = document.getElementById(`play-icon-${vidId}`);
-            if (video.paused) { video.dataset.manualPause = ""; video.play(); overlay.classList.remove('visible'); } 
-            else { video.dataset.manualPause = "true"; video.pause(); overlay.classList.add('visible'); }
-        }
-
-        function toggleMute(vidId, btn) {
-            isGlobalMuted = !isGlobalMuted;
-            document.querySelectorAll('video').forEach(vid => { vid.muted = isGlobalMuted; });
-            document.querySelectorAll('.mute-btn').forEach(button => { updateMuteIconUI(button, isGlobalMuted); });
-            window.event.stopPropagation();
-        }
-
-        function updateMuteIconUI(btn, isMuted) {
-            if(!btn) return;
-            btn.innerHTML = isMuted 
-                ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`
-                : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
-        }
-
-        // --- EVENT LISTENERS ---
-        function setupEventListeners() {
-            openCreateBtn.addEventListener('click', () => { 
-                resetModal(); 
-                createModal.classList.add('active'); 
-                pauseAllFeedVideos();
-            });
-            
-            closeModalBtn.addEventListener('click', () => { 
-                createModal.classList.remove('active'); 
-                resetModal(); 
-                resumeFeedVideos();
-            });
-            
-            createModal.addEventListener('click', (e) => {
-                if (e.target === createModal) {
-                    createModal.classList.remove('active');
-                    resetModal();
-                    resumeFeedVideos();
-                }
-            });
-            
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && createModal.classList.contains('active')) {
-                    createModal.classList.remove('active');
-                    resetModal();
-                    resumeFeedVideos();
-                }
-            });
-
-            uploadTrigger.addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files && e.target.files[0]) handleFileSelect(e.target.files[0]);
-            });
-            sharePostBtn.addEventListener('click', handleUploadAndPost);
-
-            optionsModal.addEventListener('click', (e) => { if(e.target === optionsModal) closeOptions(); });
-            closeOptionsBtn.addEventListener('click', closeOptions);
-            
-            likesModal.addEventListener('click', (e) => { 
-                if(e.target === likesModal) { likesModal.classList.remove('active'); currentViewingLikesPostId = null; }
-            });
-            closeLikesBtn.addEventListener('click', () => { likesModal.classList.remove('active'); currentViewingLikesPostId = null; });
-            
-            commentsModal.addEventListener('click', (e) => {
-                if(e.target === commentsModal) { commentsModal.classList.remove('active'); currentCommentsPostId = null; }
-            });
-            closeCommentsBtn.addEventListener('click', () => { commentsModal.classList.remove('active'); currentCommentsPostId = null; });
-            commentInputField.addEventListener('input', (e) => {
-                if(e.target.value.trim().length > 0) sendCommentBtn.classList.add('active');
-                else sendCommentBtn.classList.remove('active');
-            });
-            sendCommentBtn.addEventListener('click', handleSendComment);
-
-            deletePostBtn.addEventListener('click', handleDeletePost);
-            editPostBtn.addEventListener('click', () => {
-                closeOptions();
-                const post = postsDataCache[currentOptionsPostId];
-                editCaptionInput.value = post ? post.caption : '';
-                editCaptionModal.classList.add('active');
-            });
-
-            cancelCaptionBtn.addEventListener('click', () => editCaptionModal.classList.remove('active'));
-            saveCaptionBtn.addEventListener('click', handleSaveCaption);
-            
-            privacyToggle.addEventListener('change', handlePrivacyChange);
-            commentsToggle.addEventListener('change', handleCommentsToggleChange);
-
-            // Pull to Refresh
-            feedContainer.addEventListener('touchstart', touchStart, {passive: true});
-            feedContainer.addEventListener('touchmove', touchMove, {passive: false});
-            feedContainer.addEventListener('touchend', touchEnd);
-        }
-
-        function pauseAllFeedVideos() {
-            document.querySelectorAll('video.post-media').forEach(v => {
-                if (!v.paused) {
-                    v.pause();
-                    v.dataset.pausedTime = v.currentTime;
-                }
-            });
-        }
-
-        function resumeFeedVideos() {
-            document.querySelectorAll('video.post-media').forEach(v => {
-                if (videoObserver) videoObserver.observe(v);
-            });
-        }
-
-        // --- FILE & MODAL LOGIC ---
-        function handleFileSelect(file) {
-            selectedFile = file;
-            uploadTrigger.style.display = 'none';
-            videoPreview.onerror = null;
-
-            if (file.type.startsWith('video/')) {
-                imagePreview.style.display = 'none'; 
-                videoPreview.style.display = 'block';
-                if (videoPreview.src && videoPreview.src.startsWith('blob:')) URL.revokeObjectURL(videoPreview.src);
-                const videoURL = URL.createObjectURL(file);
-                videoPreview.src = videoURL;
-                videoPreview.muted = true;
-                videoPreview.controls = true;
-                videoPreview.playsInline = true;
-                videoPreview.onloadeddata = () => { videoPreview.play().catch(() => {}); };
-                videoPreview.onerror = () => {
-                    if (videoPreview.getAttribute('src')) {
-                        showToast('فرمت ویدیو پشتیبانی نمی‌شود', 'error');
-                        videoPreview.style.display = 'none';
-                        uploadTrigger.style.display = 'block';
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percent = (e.loaded / e.total) * 100;
+                        els.progressBar.style.width = percent + '%';
+                        if(percent >= 100) els.shareBtn.textContent = 'در حال ذخیره...';
                     }
                 };
-            } else {
-                videoPreview.style.display = 'none';
-                if (videoPreview.src) { videoPreview.pause(); videoPreview.removeAttribute('src'); videoPreview.load(); }
-                imagePreview.style.display = 'block';
-                const reader = new FileReader();
-                reader.onload = (e) => { imagePreview.src = e.target.result; };
-                reader.readAsDataURL(file);
-            }
+
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        try {
+                            const res = JSON.parse(xhr.responseText);
+                            if (res.success && res.url) resolve(res.url);
+                            else reject(new Error(res.error || 'خطای سرور آپلود'));
+                        } catch (e) { reject(new Error('پاسخ نامعتبر سرور')); }
+                    } else {
+                        reject(new Error('خطای شبکه: ' + xhr.status));
+                    }
+                };
+
+                xhr.onerror = () => reject(new Error('خطای اتصال اینترنت'));
+                xhr.send(formData);
+            });
         }
 
-        function resetModal() {
-            selectedFile = null;
-            fileInput.value = ''; 
-            captionInput.value = '';
-            videoPreview.onerror = null; videoPreview.onloadeddata = null;
-            videoPreview.pause();
-            if (videoPreview.src && videoPreview.src.startsWith('blob:')) URL.revokeObjectURL(videoPreview.src);
-            videoPreview.removeAttribute('src'); videoPreview.load();
-            imagePreview.src = '';
-            imagePreview.style.display = 'none'; 
-            videoPreview.style.display = 'none';
-            uploadTrigger.style.display = 'block';
-            progressBarContainer.style.display = 'none'; 
-            progressBar.style.width = '0%';
-            sharePostBtn.disabled = false; 
-            sharePostBtn.textContent = 'انتشار';
-            createPrivacyToggle.checked = true; 
-        }
-
-        function showToast(msg, type = 'success') {
-            toast.textContent = msg;
-            toast.className = `toast ${type} active`;
-            setTimeout(() => toast.classList.remove('active'), 3500);
-        }
-
-        // --- NETWORK CORE ---
-        async function refreshClientToken() {
-            try {
-                const response = await fetch(`${PROXY_URL}?auth=token`, { headers: { 'X-Proxy-Secret': SHARED_SECRET } });
-                if (!response.ok) throw new Error('Auth Failed');
-                const data = await response.json();
-                clientToken = data.token;
-            } catch (e) { console.error("Token error", e); throw e; }
-        }
-
-        async function fetchUsersCache() {
-            if (!clientToken) await refreshClientToken();
-            try {
-                const response = await fetch(`${PROXY_URL}?path=users`, {
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
-                });
-                if (response.ok) {
-                    allUsersCache = await response.json() || {};
-                }
-                return allUsersCache;
-            } catch (e) { console.warn("User cache error", e); return {}; }
-        }
-
-        // --- UPLOAD & CREATE POST ---
-        async function handleUploadAndPost() {
-            if (!selectedFile) { showToast('فایلی انتخاب نشده است', 'error'); return; }
-            sharePostBtn.disabled = true; sharePostBtn.textContent = 'در حال آپلود...';
-            progressBarContainer.style.display = 'block';
-
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', UPLOAD_PHP_ENDPOINT, true);
-            xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable) progressBar.style.width = ((e.loaded / e.total) * 100) + '%';
-            };
-
-            xhr.onload = async () => {
-                if (xhr.status === 200) {
-                    try {
-                        const result = JSON.parse(xhr.responseText);
-                        if (result.success && result.url) {
-                            await createPostRecord(result.url, selectedFile.type.startsWith('video/') ? 'video' : 'image');
-                        } else throw new Error(result.error);
-                    } catch (err) { showToast(err.message, 'error'); sharePostBtn.disabled = false; }
-                } else { showToast('خطای سرور', 'error'); sharePostBtn.disabled = false; }
-            };
-            xhr.send(formData);
-        }
-
-        async function createPostRecord(mediaUrl, type) {
-            sharePostBtn.textContent = 'ذخیره...';
-            const postData = {
+        async function createPostRecordInDB(url, type) {
+            const postBody = {
                 sender_username: currentUser.username,
-                media_url: mediaUrl,
+                media_url: url,
                 type: type,
-                caption: captionInput.value.trim(),
+                caption: els.caption.value.trim(),
                 timestamp: new Date().toISOString(),
                 likes: {},
-                show_likes: createPrivacyToggle.checked,
-                comments_disabled: false
+                isGolden: currentUser.accountType === 'premium'
             };
 
-            if (currentUser.accountType === 'premium') {
-                postData.isGolden = true;
-            }
-
-            try {
-                await fetch(`${PROXY_URL}?path=rubino_posts`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(postData)
-                });
-                createModal.classList.remove('active');
-                resetModal(); 
-                resumeFeedVideos(); 
-                await fetchPosts(true); 
-                showToast('پست منتشر شد');
-            } catch (err) { showToast('خطا در انتشار', 'error'); sharePostBtn.disabled = false; }
-        }
-
-        // --- FEED LOGIC (ANIMATED) ---
-        async function fetchPosts(shouldRender = true) {
-            const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
-                headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+            const res = await fetch(`${PROXY_URL}?path=rubino_posts`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${clientToken}`,
+                    'Content-Type': 'application/json',
+                    'X-User-Username': currentUser.username
+                },
+                body: JSON.stringify(postBody)
             });
-            if (!response.ok && response.status !== 404) throw new Error("Fetch posts failed");
-            const data = await response.json() || {};
-            postsDataCache = data;
-            localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(data));
-            if (shouldRender) renderFeed(preparePostsArray(data));
-            return data;
+
+            if (!res.ok) throw new Error('خطا در ذخیره پست');
+            return await res.json();
         }
 
-        function renderFeed(posts) {
-            document.querySelectorAll('video.post-media').forEach(v => {
-                v.pause(); v.removeAttribute('src'); v.load();
-            });
-            
-            feedContainer.innerHTML = '';
-            
-            if (posts.length === 0) {
-                feedContainer.innerHTML = '<div class="empty-state">هیچ پستی وجود ندارد.</div>';
-            } else {
-                posts.forEach((post, index) => {
-                    const isOwner = post.sender_username === currentUser.username;
-                    const user = allUsersCache[post.sender_username] || { displayName: post.sender_username, username: post.sender_username };
-                    const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${post.sender_username}&background=random&color=fff`;
-                    const displayName = user.displayName || post.sender_username;
-                    const isLiked = post.likes && post.likes[currentUser.username];
-                    const likeCount = post.likes ? Object.keys(post.likes).length : 0;
-                    const commentCount = post.comments ? Object.keys(post.comments).length : 0; 
-                    const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
-
-                    const canOpenList = isOwner || (post.show_likes !== false); 
-                    const likesText = `${likeCount} پسند`;
-                    const likesClass = canOpenList ? 'clickable ripple-trigger' : 'private';
-                    const likesClickAction = canOpenList ? `onclick="showLikesList('${post.id}', ${isOwner}, ${post.show_likes !== false})"` : '';
-
-                    let mediaHtml = '';
-                    const loadingOverlay = `<div class="media-loader-placeholder" id="loader-${post.id}"><div class="loading-spinner"></div></div>`;
-
-                    if (post.type === 'video') {
-                        mediaHtml = `
-                            ${loadingOverlay}
-                            <video class="post-media" id="video-${post.id}" data-id="${post.id}" src="${post.media_url}" loop playsinline muted onloadeddata="document.getElementById('loader-${post.id}').classList.add('loaded'); this.classList.add('loaded')"></video>
-                            <div class="play-pause-overlay" id="play-icon-${post.id}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
-                            <div class="video-overlay-controls">
-                                <button class="control-btn mute-btn" data-for="${post.id}" onclick="toggleMute('${post.id}', this)">${isGlobalMuted ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>'}</button>
-                            </div>
-                        `;
-                    } else {
-                        mediaHtml = `${loadingOverlay}<img class="post-media" src="${post.media_url}" loading="lazy" onload="document.getElementById('loader-${post.id}').classList.add('loaded'); this.classList.add('loaded')" ondblclick="triggerLike('${post.id}')">`;
-                    }
-
-                    const postEl = document.createElement('div');
-                    postEl.className = 'post-card';
-                    postEl.style.animationDelay = `${index * 0.1}s`; // Staggered Animation
-                    
-                    if (post.isGolden) postEl.classList.add('golden-post');
-                    postEl.id = `post-${post.id}`;
-                    
-                    postEl.innerHTML = `
-                        <div class="post-header">
-                            <div class="user-info">
-                                <div class="user-avatar-container">
-                                    <img src="${avatar}" class="user-avatar" alt="Avatar">
-                                </div>
-                                <span class="username">${displayName} ${verifiedHtml}</span>
-                            </div>
-                            <div class="post-options ripple-trigger ${isOwner ? '' : 'disabled'}" ${isOwner ? `onclick="openPostOptions('${post.id}', ${post.show_likes !== false}, ${post.comments_disabled === true})"` : ''}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-                            </div>
-                        </div>
-                        <div class="post-media-container" id="media-container-${post.id}" onclick="${post.type === 'video' ? `toggleVideoPlay('${post.id}')` : ''}" ondblclick="triggerLike('${post.id}')">
-                            ${mediaHtml}
-                            <div class="heart-overlay" id="heart-anim-${post.id}">❤</div>
-                        </div>
-                        <div class="post-actions">
-                            <button class="action-btn ${isLiked ? 'liked' : ''} ripple-trigger" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                            </button>
-                            <button class="action-btn ripple-trigger" onclick="openComments('${post.id}')">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                                <span class="action-btn-text" style="margin-right:5px; font-weight:700;">${commentCount > 0 ? commentCount : ''}</span>
-                            </button>
-                        </div>
-                        <div class="post-likes ${likesClass}" id="likes-count-${post.id}" ${likesClickAction}>
-                            ${likesText}
-                        </div>
-                        <div class="post-caption">
-                            <span class="caption-username">${displayName}</span>
-                            <span class="caption-text">${post.caption}</span>
-                        </div>
-                        <span class="post-time" data-timestamp="${post.timestamp}">${timeAgo(post.timestamp)}</span>
-                    `;
-                    feedContainer.appendChild(postEl);
-                });
-                skeletonLoader.style.display = 'none';
-                feedContainer.style.opacity = '1';
-                initRipples(); // Re-bind ripples to new elements
-                setTimeout(() => {
-                    document.querySelectorAll('video.post-media').forEach(v => {
-                        if (videoObserver) videoObserver.observe(v);
-                    });
-                }, 100);
-            }
+        function resetCreateModal() {
+            selectedFile = null;
+            els.fileInput.value = '';
+            els.caption.value = '';
+            els.imgPrev.src = ''; els.imgPrev.style.display = 'none';
+            els.vidPrev.src = ''; els.vidPrev.style.display = 'none';
+            els.uploadIcon.style.display = 'block';
+            els.uploadArea.querySelector('p').style.display = 'block';
+            els.progressBox.style.display = 'none';
+            els.progressBar.style.width = '0';
+            els.shareBtn.disabled = false;
+            els.shareBtn.textContent = 'انتشار پست';
+            els.successAnim.classList.remove('active');
         }
 
-        async function startRealtimeUpdates() {
+        // --- FEED LOGIC ---
+        async function loadPosts() {
             try {
-                const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
+                const res = await fetch(`${PROXY_URL}?path=rubino_posts`, {
                     headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                 });
-                if (!response.ok) return;
-                const newData = await response.json() || {};
-                if (JSON.stringify(newData) === JSON.stringify(postsDataCache)) return;
-
-                postsDataCache = newData;
-                localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(newData));
-
-                const domPosts = document.querySelectorAll('.post-card');
-                domPosts.forEach(el => {
-                    const pid = el.id.replace('post-', '');
-                    if (!newData[pid]) { el.style.opacity = '0'; setTimeout(()=>el.remove(),300); return; } // Fade out remove
-                    const post = newData[pid];
-                    
-                    // Update Likes
-                    const likeCountEl = el.querySelector('.post-likes');
-                    const isOwner = post.sender_username === currentUser.username;
-                    const canOpenList = isOwner || (post.show_likes !== false);
-                    const likeCount = post.likes ? Object.keys(post.likes).length : 0;
-                    likeCountEl.textContent = `${likeCount} پسند`;
-                    if (canOpenList) {
-                        likeCountEl.classList.add('clickable'); likeCountEl.classList.remove('private');
-                        likeCountEl.setAttribute('onclick', `showLikesList('${pid}', ${isOwner}, true)`);
-                    } else {
-                        likeCountEl.classList.remove('clickable'); likeCountEl.classList.add('private');
-                        likeCountEl.removeAttribute('onclick');
-                    }
-                    
-                    // Update Comment Count
-                    const commentCount = post.comments ? Object.keys(post.comments).length : 0;
-                    const commentCountEl = el.querySelector('.action-btn-text');
-                    if(commentCountEl) commentCountEl.textContent = commentCount > 0 ? commentCount : '';
-
-                    // Update Caption
-                    const capEl = el.querySelector('.caption-text');
-                    if (capEl.textContent !== post.caption) capEl.textContent = post.caption;
-                });
-            } catch (e) { console.warn("Sync error", e); }
-        }
-
-        // --- COMMENTS LOGIC ---
-        async function openComments(postId) {
-            currentCommentsPostId = postId;
-            commentsModal.classList.add('active');
-            
-            commentsListContainer.innerHTML = '';
-            for(let i=0; i<4; i++) {
-                commentsListContainer.innerHTML += `<div class="comment-skeleton skeleton-animate" style="padding:15px; display:flex; gap:10px;"><div style="width:36px; height:36px; background:var(--skeleton-base); border-radius:50%;"></div><div style="flex:1;"><div style="width:30%; height:10px; background:var(--skeleton-base); margin-bottom:5px;"></div><div style="width:80%; height:10px; background:var(--skeleton-base);"></div></div></div>`;
-            }
-
-            try {
-                const post = postsDataCache[postId];
-                const commentsDisabled = post && post.comments_disabled === true;
-                const isOwner = post && post.sender_username === currentUser.username;
-
-                if (commentsDisabled && !isOwner) {
-                    commentInputArea.style.display = 'none';
-                    commentsDisabledMsg.style.display = 'flex';
-                } else {
-                    commentInputArea.style.display = 'flex';
-                    commentsDisabledMsg.style.display = 'none';
+                const data = await res.json();
+                if(data) {
+                    postsData = data;
+                    renderFeed(data);
                 }
-
-                const response = await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/comments`, {
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
-                });
-                
-                const data = await response.json();
-                renderComments(data, isOwner);
-            } catch(e) {
-                commentsListContainer.innerHTML = '<div class="empty-state">نظری گذاشته نشده!</div>';
-            }
+            } catch(e) { console.log(e); }
         }
 
-        function renderComments(commentsData, isPostOwner) {
-            commentsListContainer.innerHTML = '';
-            
-            if (!commentsData || Object.keys(commentsData).length === 0) {
-                commentsListContainer.innerHTML = `<div class="empty-state" style="padding-top:80px;"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary); margin-bottom:10px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><p>هنوز نظری ثبت نشده است.<br>اولین نفر باشید!</p></div>`;
+        function renderFeed(data) {
+            els.feed.innerHTML = '';
+            const posts = Object.entries(data)
+                .map(([id, post]) => ({...post, id}))
+                .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            if(posts.length === 0) {
+                els.feed.innerHTML = '<div style="text-align:center; padding:50px; color:var(--text-muted)">هیچ پستی وجود ندارد</div>';
                 return;
             }
 
-            const commentsArray = Object.entries(commentsData)
-                .map(([key, val]) => ({ id: key, ...val }))
-                .sort((a, b) => {
-                    if (a.is_pinned && !b.is_pinned) return -1;
-                    if (!a.is_pinned && b.is_pinned) return 1;
-                    return new Date(a.timestamp) - new Date(b.timestamp);
-                });
-
-            commentsArray.forEach((comment, index) => {
-                const user = allUsersCache[comment.sender_username] || { displayName: comment.sender_username, username: comment.sender_username };
-                const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${comment.sender_username}&background=random&color=fff`;
-                const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
-                const isMyComment = comment.sender_username === currentUser.username;
-                const isPinned = comment.is_pinned === true;
-
-                let actionBtns = '';
-                if (isPostOwner || isMyComment) {
-                    actionBtns += `<div class="comment-option-menu">`;
-                    if (isPostOwner) {
-                         actionBtns += `<button class="mini-btn btn-pin" onclick="togglePinComment('${currentCommentsPostId}', '${comment.id}', ${!isPinned})">${isPinned ? 'برداشتن' : 'سنجاق'}</button>`;
-                    }
-                    actionBtns += `<button class="mini-btn btn-delete" onclick="deleteComment('${currentCommentsPostId}', '${comment.id}')">حذف</button>`;
-                    actionBtns += `</div>`;
+            posts.forEach(post => {
+                const isOwner = post.sender_username === currentUser.username;
+                const avatar = `https://ui-avatars.com/api/?name=${post.sender_username}&background=random&color=fff&size=128`;
+                
+                const card = document.createElement('div');
+                card.className = `post-card ${post.isGolden ? 'golden-post' : ''}`;
+                card.id = `post-${post.id}`;
+                
+                let mediaHtml = '';
+                if(post.type === 'video') {
+                    mediaHtml = `
+                        <video class="post-media" src="${post.media_url}" loop playsinline muted></video>
+                        <div class="media-loader"><div class="spinner"></div></div>
+                    `;
+                } else {
+                    mediaHtml = `
+                        <img class="post-media" src="${post.media_url}" loading="lazy">
+                        <div class="media-loader"><div class="spinner"></div></div>
+                    `;
                 }
 
-                const div = document.createElement('div');
-                div.className = `comment-item ${isPinned ? 'pinned' : ''}`;
-                div.style.animationDelay = `${index * 0.05}s`; // Staggered entry
-                div.id = `comment-${comment.id}`;
-                div.innerHTML = `
-                    <img src="${avatar}" class="comment-avatar">
-                    <div class="comment-content">
-                        <div class="comment-header">
-                            ${isPinned ? '<svg class="pin-icon" viewBox="0 0 24 24"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>' : ''}
-                            <span class="comment-username">${user.displayName || comment.sender_username} ${verifiedHtml}</span>
-                            <span class="comment-text">${comment.text}</span>
+                card.innerHTML = `
+                    <div class="post-header">
+                        <div class="user-info">
+                            <img src="${avatar}" class="user-avatar">
+                            <span class="username">${post.sender_username}</span>
                         </div>
-                        ${actionBtns}
-                        <span class="comment-time">${timeAgo(comment.timestamp)}</span>
+                        ${isOwner ? `<button class="header-btn" onclick="openOptions('${post.id}')" style="width:30px;height:30px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="20"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>` : ''}
                     </div>
+                    <div class="post-media-container" ondblclick="triggerLike('${post.id}')">
+                        ${mediaHtml}
+                        <div class="heart-overlay" id="heart-${post.id}">❤</div>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn ${post.likes && post.likes[currentUser.username] ? 'liked' : ''}" id="btn-like-${post.id}" onclick="toggleLike('${post.id}')">
+                            <svg viewBox="0 0 24 24" fill="${post.likes && post.likes[currentUser.username] ? 'currentColor' : 'none'}" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </button>
+                        <button class="action-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        </button>
+                    </div>
+                    <div class="post-likes" id="likes-count-${post.id}">
+                        ${post.likes ? Object.keys(post.likes).length : 0} پسند
+                    </div>
+                    <div class="post-caption">
+                        <span class="caption-username">${post.sender_username}</span>
+                        ${post.caption}
+                    </div>
+                    <div class="post-time">${timeAgo(post.timestamp)}</div>
                 `;
-                commentsListContainer.appendChild(div);
+                els.feed.appendChild(card);
             });
-            commentsListContainer.scrollTop = commentsListContainer.scrollHeight;
+
+            setupMediaLoading();
+            setupIntersectionObserver();
         }
 
-        async function handleSendComment() {
-            const text = commentInputField.value.trim();
-            if (!text || !currentCommentsPostId) return;
-
-            const fakeComment = {
-                sender_username: currentUser.username,
-                text: text,
-                timestamp: new Date().toISOString()
-            };
-            
-            if(commentsListContainer.querySelector('.empty-state')) commentsListContainer.innerHTML = '';
-            const user = currentUser;
-            const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${user.username}&background=random&color=fff`;
-            
-            const div = document.createElement('div');
-            div.className = 'comment-item';
-            div.style.opacity = '0.5'; 
-            div.innerHTML = `<img src="${avatar}" class="comment-avatar"><div class="comment-content"><div class="comment-header"><span class="comment-username">${user.displayName || user.username}</span><span class="comment-text">${text}</span></div><span class="comment-time">درحال ارسال...</span></div>`;
-            commentsListContainer.appendChild(div);
-            commentsListContainer.scrollTop = commentsListContainer.scrollHeight;
-            
-            commentInputField.value = '';
-            sendCommentBtn.classList.remove('active');
-
-            try {
-                await fetch(`${PROXY_URL}?path=rubino_posts/${currentCommentsPostId}/comments`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(fakeComment)
-                });
-                div.style.opacity = '1';
-                div.querySelector('.comment-time').textContent = 'همین الان';
-                openComments(currentCommentsPostId);
-            } catch(e) {
-                div.style.opacity = '1';
-                div.querySelector('.comment-time').textContent = 'خطا در ارسال';
-                div.querySelector('.comment-time').style.color = 'var(--danger-color)';
-                showToast('خطا در ارسال نظر', 'error');
-            }
-        }
-
-        async function deleteComment(postId, commentId) {
-            if(!confirm('آیا از حذف این نظر اطمینان دارید؟')) return;
-            const commentEl = document.getElementById(`comment-${commentId}`);
-            if(commentEl) {
-                commentEl.style.transition = 'all 0.3s';
-                commentEl.style.transform = 'translateX(50px)';
-                commentEl.style.opacity = '0';
-            }
-            
-            try {
-                await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/comments/${commentId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
-                });
-                if(commentEl) setTimeout(()=>commentEl.remove(), 300);
-                showToast('نظر حذف شد');
-            } catch(e) {
-                if(commentEl) {
-                    commentEl.style.transform = 'translateX(0)';
-                    commentEl.style.opacity = '1';
+        // --- MEDIA UTILS ---
+        function setupMediaLoading() {
+            document.querySelectorAll('.post-media').forEach(media => {
+                if(media.tagName === 'IMG') {
+                    media.onload = function() {
+                        this.classList.add('loaded');
+                        this.nextElementSibling.style.opacity = '0';
+                    }
+                } else {
+                    media.onloadeddata = function() {
+                        this.classList.add('loaded');
+                        this.nextElementSibling.style.opacity = '0';
+                    }
                 }
-                showToast('خطا در حذف نظر', 'error');
-            }
+            });
         }
 
-        async function togglePinComment(postId, commentId, shouldPin) {
-             try {
-                await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/comments/${commentId}`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ is_pinned: shouldPin })
+        function setupIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target;
+                    if(entry.isIntersecting) {
+                        video.play().catch(()=>{});
+                    } else {
+                        video.pause();
+                    }
                 });
-                openComments(postId);
-            } catch(e) {
-                showToast('خطا در تغییر وضعیت سنجاق', 'error');
+            }, { threshold: 0.6 });
+
+            document.querySelectorAll('video.post-media').forEach(v => observer.observe(v));
+        }
+
+        // --- ACTIONS ---
+        window.triggerLike = (id) => {
+            const heart = document.getElementById(`heart-${id}`);
+            heart.classList.remove('active');
+            void heart.offsetWidth; // Trigger reflow
+            heart.classList.add('active');
+            
+            const btn = document.getElementById(`btn-like-${id}`);
+            if(!btn.classList.contains('liked')) toggleLike(id);
+        };
+
+        window.toggleLike = async (id) => {
+            const btn = document.getElementById(`btn-like-${id}`);
+            const countEl = document.getElementById(`likes-count-${id}`);
+            const isLiked = btn.classList.contains('liked');
+            let count = parseInt(countEl.innerText);
+
+            // Optimistic UI Update
+            btn.classList.toggle('liked');
+            const svg = btn.querySelector('svg');
+            
+            if(isLiked) {
+                // Unlike
+                svg.setAttribute('fill', 'none');
+                countEl.innerText = `${Math.max(0, count - 1)} پسند`;
+                try {
+                    await fetch(`${PROXY_URL}?path=rubino_posts/${id}/likes/${currentUser.username}`, {
+                        method: 'DELETE', headers: {'Authorization':`Bearer ${clientToken}`, 'X-User-Username':currentUser.username}
+                    });
+                } catch(e) { /* Revert if failed */ }
+            } else {
+                // Like
+                svg.setAttribute('fill', 'currentColor');
+                countEl.innerText = `${count + 1} پسند`;
+                try {
+                    await fetch(`${PROXY_URL}?path=rubino_posts/${id}/likes/${currentUser.username}`, {
+                        method: 'PUT',
+                        headers: {'Authorization':`Bearer ${clientToken}`, 'X-User-Username':currentUser.username, 'Content-Type': 'application/json'},
+                        body: 'true'
+                    });
+                } catch(e) {}
             }
-        }
+        };
 
-        // --- POST ACTIONS ---
-        function openPostOptions(postId, isPublic, isCommentsDisabled) {
-            currentOptionsPostId = postId;
-            privacyToggle.checked = isPublic;
-            commentsToggle.checked = !isCommentsDisabled; 
-            optionsModal.classList.add('active');
-        }
+        window.openOptions = (id) => {
+            currentOptionsPostId = id;
+            els.optionsModal.classList.add('active');
+        };
 
-        function closeOptions() {
-            optionsModal.classList.remove('active');
-            currentOptionsPostId = null;
-        }
-
-        async function handleDeletePost() {
-            if(!confirm('حذف شود؟')) return;
+        async function deletePost() {
+            if(!currentOptionsPostId) return;
+            if(!confirm('آیا مطمئن هستید؟')) return;
+            
             try {
                 await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
-                    method: 'DELETE', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
+                    method: 'DELETE',
+                    headers: {'Authorization':`Bearer ${clientToken}`, 'X-User-Username':currentUser.username}
                 });
-                const el = document.getElementById(`post-${currentOptionsPostId}`);
-                if(el) {
-                    el.style.transition = 'all 0.5s';
-                    el.style.transform = 'scale(0.8)';
-                    el.style.opacity = '0';
-                    setTimeout(() => el.remove(), 500);
-                }
-                closeOptions();
+                document.getElementById(`post-${currentOptionsPostId}`).remove();
+                els.optionsModal.classList.remove('active');
                 showToast('پست حذف شد');
-                await fetchPosts(false);
             } catch(e) { showToast('خطا در حذف', 'error'); }
         }
 
-        async function handleSaveCaption() {
-            const newCaption = editCaptionInput.value;
-            saveCaptionBtn.textContent = '...';
-            try {
-                await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ caption: newCaption })
-                });
-                document.querySelector(`#post-${currentOptionsPostId} .caption-text`).textContent = newCaption;
-                editCaptionModal.classList.remove('active');
-                showToast('ویرایش شد');
-                if(postsDataCache[currentOptionsPostId]) {
-                    postsDataCache[currentOptionsPostId].caption = newCaption;
-                    localStorage.setItem(CACHE_KEY_FEED, JSON.stringify(postsDataCache));
-                }
-            } catch(e) { showToast('خطا', 'error'); }
-            saveCaptionBtn.textContent = 'ذخیره تغییرات';
-        }
-
-        async function handlePrivacyChange() {
-            const isChecked = privacyToggle.checked;
-            try {
-                await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ show_likes: isChecked })
-                });
-            } catch(e) { privacyToggle.checked = !isChecked; showToast('خطا در تغییر تنظیمات', 'error'); }
-        }
-
-        async function handleCommentsToggleChange() {
-            const areCommentsEnabled = commentsToggle.checked;
-            const disableComments = !areCommentsEnabled;
-            
-            try {
-                await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ comments_disabled: disableComments })
-                });
-                if(postsDataCache[currentOptionsPostId]) {
-                    postsDataCache[currentOptionsPostId].comments_disabled = disableComments;
-                }
-                showToast(disableComments ? 'نظرات بسته شد' : 'نظرات باز شد');
-            } catch(e) { 
-                commentsToggle.checked = !areCommentsEnabled; 
-                showToast('خطا در تغییر وضعیت', 'error'); 
+        // --- UTILS ---
+        function renderSkeletons() {
+            let html = '';
+            for(let i=0; i<2; i++) {
+                html += `
+                    <div class="post-card" style="opacity:1; transform:none;">
+                        <div class="post-header">
+                            <div class="skeleton" style="width:40px;height:40px;border-radius:50%"></div>
+                            <div class="skeleton" style="width:100px;height:16px;margin-right:10px;border-radius:4px"></div>
+                        </div>
+                        <div class="skeleton" style="width:100%;height:300px;"></div>
+                        <div class="post-actions">
+                            <div class="skeleton" style="width:24px;height:24px;border-radius:4px"></div>
+                            <div class="skeleton" style="width:24px;height:24px;border-radius:4px"></div>
+                        </div>
+                    </div>
+                `;
             }
+            els.feed.innerHTML = html;
         }
 
-        // --- LIKES LIST ---
-        async function showLikesList(postId, isOwner, isPublic) {
-            if (!isOwner && !isPublic) return; 
-            currentViewingLikesPostId = postId;
-            const listContainer = document.getElementById('likes-list-container');
-            listContainer.innerHTML = '<div class="empty-state"><div class="pull-spinner spinning" style="margin:0 auto;"></div></div>';
-            likesModal.classList.add('active');
-
-            try {
-                const response = await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes`, {
-                    headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
-                });
-                const likesData = await response.json();
-                listContainer.innerHTML = '';
-                if (!likesData) { listContainer.innerHTML = '<div class="empty-state">هنوز لایکی ثبت نشده.</div>'; return; }
-
-                Object.keys(likesData).forEach((uid, idx) => {
-                    const user = allUsersCache[uid] || { displayName: uid, username: uid };
-                    const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${uid}&background=random&color=fff`;
-                    const div = document.createElement('div');
-                    div.className = 'user-list-item';
-                    div.style.animationDelay = `${idx * 0.05}s`;
-                    div.innerHTML = `<img src="${avatar}"><div class="user-list-info"><h4>${user.displayName || uid} ${user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : ''}</h4><p>@${user.username || uid}</p></div>`;
-                    listContainer.appendChild(div);
-                });
-            } catch(e) { listContainer.innerHTML = '<div class="empty-state">خطا در دریافت لیست.</div>'; }
-        }
-
-        // --- LIKE LOGIC ---
-        window.toggleLike = async (postId) => {
-            const btn = document.getElementById(`like-btn-${postId}`);
-            const countEl = document.getElementById(`likes-count-${postId}`);
-            const isLiked = btn.classList.contains('liked');
-            let currentCount = parseInt(countEl.textContent) || 0;
-            
-            if (isLiked) {
-                btn.classList.remove('liked');
-                btn.querySelector('svg').setAttribute('fill', 'none');
-                btn.querySelector('svg').setAttribute('stroke', 'currentColor');
-                countEl.textContent = `${Math.max(0, currentCount - 1)} پسند`;
-                try {
-                    await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes/${currentUser.username}`, {
-                        method: 'DELETE', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
-                    });
-                } catch(e) {}
-            } else {
-                btn.classList.add('liked');
-                btn.querySelector('svg').setAttribute('fill', '#ED4956');
-                btn.querySelector('svg').setAttribute('stroke', '#ED4956');
-                countEl.textContent = `${currentCount + 1} پسند`;
-                try {
-                    await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/likes/${currentUser.username}`, {
-                        method: 'PUT', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username, 'Content-Type': 'application/json' }, body: 'true'
-                    });
-                } catch(e) {}
-            }
-        };
-
-        window.triggerLike = (postId) => {
-            const heart = document.getElementById(`heart-anim-${postId}`);
-            const btn = document.getElementById(`like-btn-${postId}`);
-            heart.classList.remove('active'); void heart.offsetWidth; heart.classList.add('active');
-            if (!btn.classList.contains('liked')) toggleLike(postId);
-        };
-
-        // --- PULL REFRESH & TIME ---
-        function touchStart(e) { if (feedContainer.scrollTop === 0) { startY = e.touches[0].clientY; isPulling = true; } }
-        function touchMove(e) {
-            if (!isPulling) return;
-            const diff = e.touches[0].clientY - startY;
-            if (diff > 0 && feedContainer.scrollTop === 0) {
-                e.preventDefault();
-                currentTranslate = Math.min(diff * 0.4, 90); // Smoother dampening
-                feedContainer.style.transform = `translateY(${currentTranslate}px)`;
-                feedContainer.style.transition = 'none'; // Direct tracking
-                pullIndicator.style.opacity = Math.min(diff / 60, 1);
-                pullSpinner.style.transform = `rotate(${diff * 2.5}deg)`; 
-            }
-        }
-        async function touchEnd() {
-            if (!isPulling) return;
-            isPulling = false;
-            feedContainer.style.transition = 'transform 0.4s var(--spring-easing)'; // Snap back physics
-            if (currentTranslate > 65) {
-                pullSpinner.classList.add('spinning');
-                feedContainer.style.transform = `translateY(65px)`;
-                try { await Promise.all([fetchUsersCache(), fetchPosts(false)]); renderFeed(preparePostsArray(postsDataCache)); } catch(e) { console.log(e); }
-                setTimeout(resetPull, 500);
-            } else { resetPull(); }
-        }
-        function resetPull() {
-            feedContainer.style.transform = ''; pullIndicator.style.opacity = 0;
-            pullSpinner.classList.remove('spinning'); currentTranslate = 0;
-        }
-
-        function updateLiveTimestamps() {
-            document.querySelectorAll('.post-time').forEach(el => {
-                const ts = el.getAttribute('data-timestamp');
-                if (ts) el.textContent = timeAgo(ts);
-            });
+        function showToast(msg, type='success') {
+            els.toast.textContent = msg;
+            els.toast.className = `toast ${type} active`;
+            setTimeout(() => els.toast.classList.remove('active'), 3000);
         }
 
         function timeAgo(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const seconds = Math.floor((now - date) / 1000);
+            const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
             if (seconds < 60) return 'همین الان';
             const minutes = Math.floor(seconds / 60);
             if (minutes < 60) return `${minutes} دقیقه پیش`;
             const hours = Math.floor(minutes / 60);
             if (hours < 24) return `${hours} ساعت پیش`;
-            const days = Math.floor(hours / 24);
-            return `${days} روز پیش`;
+            return `${Math.floor(hours / 24)} روز پیش`;
         }
 
-        // --- GLOBAL FUNCTIONS ---
-        window.openPostOptions = openPostOptions;
-        window.showLikesList = showLikesList;
-        window.openComments = openComments;
-        window.toggleVideoPlay = toggleVideoPlay;
-        window.toggleMute = toggleMute;
-        window.triggerLike = triggerLike;
+        // Pull to refresh logic
+        function setupPullRefresh() {
+            let startY = 0;
+            let isPulling = false;
+            const spinner = document.getElementById('pull-spinner');
+            const indicator = document.getElementById('pull-indicator');
+
+            els.feed.addEventListener('touchstart', e => {
+                if(els.feed.scrollTop === 0) { startY = e.touches[0].clientY; isPulling = true; }
+            }, {passive: true});
+
+            els.feed.addEventListener('touchmove', e => {
+                if(!isPulling) return;
+                const diff = e.touches[0].clientY - startY;
+                if(diff > 0 && els.feed.scrollTop === 0) {
+                    e.preventDefault();
+                    indicator.style.opacity = Math.min(diff/100, 1);
+                    spinner.style.transform = `rotate(${diff*2}deg)`;
+                }
+            }, {passive: false});
+
+            els.feed.addEventListener('touchend', async e => {
+                if(!isPulling) return;
+                isPulling = false;
+                const diff = e.changedTouches[0].clientY - startY;
+                if(diff > 60) {
+                    indicator.style.opacity = 1;
+                    await loadPosts();
+                }
+                indicator.style.opacity = 0;
+            });
+        }
     </script>
 </body>
 </html>
