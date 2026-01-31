@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>روبینو همیار پیشرفته</title>
+    <title>روبینو همیار پیشرفته - نسخه موشن</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
 
         :root {
+            /* Colors */
             --background-color: #0D1117;
             --secondary-color: #161B22;
             --secondary-hover: #2C2F33;
@@ -17,14 +18,23 @@
             --primary-color: #00A3FF;
             --primary-glow: rgba(0, 163, 255, 0.4);
             --like-color: #ED4956;
-            --modal-bg: #1C2128;
+            --modal-bg: rgba(28, 33, 40, 0.95); /* More transparent for blur */
             --skeleton-base: #161B22;
             --skeleton-highlight: #21262d;
             --danger-color: #FF4D4D;
             --gold-color: #FFD700;
+
+            /* Physics & Motion */
+            --spring-easing: cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy */
+            --smooth-easing: cubic-bezier(0.4, 0.0, 0.2, 1);    /* Silky */
+            --card-border-radius: 16px;
         }
 
-        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        *, *::before, *::after { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            outline: none;
+        }
         
         body {
             font-family: 'Vazirmatn', sans-serif;
@@ -36,233 +46,272 @@
             background: radial-gradient(circle at top left, #1a202c 0%, var(--background-color) 70%);
         }
 
+        /* --- RIPPLE EFFECT --- */
+        .ripple-effect {
+            position: absolute; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple {
+            to { transform: scale(4); opacity: 0; }
+        }
+
         .app-container {
             width: 100%; max-width: 480px; height: 100%; margin: 0 auto;
             display: flex; flex-direction: column; position: relative;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            box-shadow: 0 0 50px rgba(0,0,0,0.7);
             background-color: var(--background-color);
         }
 
         /* --- HEADER --- */
         .header-area {
-            background-color: rgba(22, 27, 34, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(22, 27, 34, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             padding: 12px 20px;
-            height: 60px;
+            height: 65px;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 50; 
             position: relative;
+            transition: all 0.3s ease;
         }
         .header-title {
-            font-size: 1.5rem; 
+            font-size: 1.6rem; 
             font-weight: 900; margin: 0;
-            color: var(--primary-color);
-            text-shadow: 0 0 15px var(--primary-glow);
-            letter-spacing: 0.5px;
+            background: linear-gradient(45deg, var(--primary-color), #00d2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 20px rgba(0, 163, 255, 0.3);
+            letter-spacing: -0.5px;
         }
         .header-btn {
-            background: none; border: none; color: var(--text-primary);
-            cursor: pointer; padding: 8px; transition: transform 0.2s;
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-primary);
+            cursor: pointer; padding: 10px; 
+            border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 50%;
+            transition: all 0.3s var(--spring-easing);
+            position: relative; overflow: hidden;
         }
-        .header-btn:active { transform: scale(0.85); background-color: var(--secondary-hover); }
-        .header-btn svg { width: 28px; height: 28px; stroke-width: 2.5; }
+        .header-btn:active { transform: scale(0.9); background-color: var(--secondary-hover); }
+        .header-btn svg { width: 24px; height: 24px; stroke-width: 2.5; }
 
         /* --- PULL TO REFRESH --- */
         .pull-indicator {
             position: absolute; top: 70px; left: 0; right: 0; height: 50px;
             display: flex; justify-content: center; align-items: center;
-            pointer-events: none; transition: transform 0.2s, opacity 0.2s; z-index: 10; opacity: 0;
+            pointer-events: none; transition: transform 0.3s var(--smooth-easing), opacity 0.3s; z-index: 10; opacity: 0;
         }
         .pull-spinner {
-            width: 30px; height: 30px;
-            border: 3px solid var(--secondary-hover); 
+            width: 35px; height: 35px;
+            border: 3px solid rgba(255,255,255,0.1); 
             border-top-color: var(--primary-color);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary-glow);
+            box-shadow: 0 0 15px var(--primary-glow);
         }
-        .pull-spinner.spinning { animation: spin 0.8s linear infinite; }
+        .pull-spinner.spinning { animation: spin 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* --- MAIN FEED --- */
         .feed-container {
             flex-grow: 1; overflow-y: auto; 
-            padding-bottom: 20px;
+            padding-bottom: 80px;
             scrollbar-width: none;
             position: relative;
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            opacity: 0; 
-            animation: feedFadeIn 0.5s ease forwards;
+            /* Smooth scrolling handled by browser, but we animate elements inside */
         }
-        @keyframes feedFadeIn { to { opacity: 1; } }
         .feed-container::-webkit-scrollbar { display: none; }
 
         /* --- POST CARD --- */
         .post-card {
             background-color: var(--background-color);
             border-bottom: 1px solid var(--border-color);
-            margin-bottom: 10px; padding-bottom: 10px;
-            animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            margin-bottom: 15px; padding-bottom: 15px;
+            opacity: 0; /* For Staggered Animation */
+            transform: translateY(30px) scale(0.95);
+            animation: postEntrance 0.7s var(--spring-easing) forwards;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Staggered Animation Logic handled in JS, but base keyframe here */
+        @keyframes postEntrance {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Golden Post with "Sheen" Effect */
         .post-card.golden-post {
-            border-right: 4px solid var(--gold-color);
-            border-left: 1px solid var(--gold-color);
-            border-top: 1px solid var(--gold-color);
-            border-bottom: 1px solid var(--gold-color);
-            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.15);
-            background: linear-gradient(180deg, rgba(255, 215, 0, 0.05), transparent 30%);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.03), transparent 40%);
+            position: relative;
+            overflow: hidden;
+        }
+        .post-card.golden-post::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transform: skewX(-20deg);
+            animation: goldenSheen 6s infinite ease-in-out;
+            pointer-events: none;
+        }
+        @keyframes goldenSheen {
+            0% { left: -100%; }
+            20% { left: 200%; }
+            100% { left: 200%; }
         }
 
         .golden-post .username::before {
-            content: '👑';
-            margin-left: 8px;
-            font-size: 1rem;
-            filter: drop-shadow(0 0 4px var(--gold-color));
-            vertical-align: middle;
-            padding-bottom: 4px; 
+            content: '👑'; margin-left: 8px; font-size: 1.1rem;
+            filter: drop-shadow(0 0 6px var(--gold-color));
+            animation: crownFloat 3s ease-in-out infinite;
+            display: inline-block;
         }
+        @keyframes crownFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 
         .post-header { padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        
+        .user-avatar-container { position: relative; }
         .user-avatar {
-            width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+            width: 42px; height: 42px; border-radius: 50%; object-fit: cover;
             border: 2px solid var(--border-color);
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
             background-color: var(--secondary-hover);
         }
-        .post-card:hover .user-avatar { border-color: var(--primary-color); }
+        .post-card:hover .user-avatar { border-color: var(--primary-color); transform: scale(1.05); }
 
         .username { 
             font-weight: 700; font-size: 0.95rem; color: var(--text-primary); 
             display: flex; align-items: center; gap: 4px;
         }
         .verified-tick {
-            width: 16px; height: 16px;
-            filter: drop-shadow(0 0 4px var(--primary-glow));
+            width: 18px; height: 18px;
+            filter: drop-shadow(0 0 8px var(--primary-glow));
             vertical-align: sub;
         }
         
         .post-options { 
-            color: var(--text-secondary); cursor: pointer; padding: 8px; border-radius: 50%; 
-            transition: background-color 0.2s ease, transform 0.1s ease;
+            color: var(--text-secondary); cursor: pointer; padding: 10px; border-radius: 50%; 
+            transition: all 0.3s ease;
+            position: relative; overflow: hidden;
         }
-        .post-options:hover { background-color: var(--secondary-hover); color: var(--text-primary); }
-        .post-options:active { transform: scale(0.9); }
-        .post-options.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+        .post-options:active { transform: scale(0.85) rotate(10deg); }
 
-        /* --- MEDIA CONTAINER & LOADING BLUR --- */
+        /* --- MEDIA --- */
         .post-media-container {
             width: 100%; position: relative;
-            background-color: #000; min-height: 300px; 
+            background-color: #050505; min-height: 350px; 
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
+            border-radius: 4px; /* Slight radius */
         }
         
         .media-loader-placeholder {
             position: absolute; inset: 0;
             background-color: var(--secondary-color);
             display: flex; align-items: center; justify-content: center;
-            z-index: 2; transition: opacity 0.5s ease;
+            z-index: 2; transition: opacity 0.6s ease;
         }
         .media-loader-placeholder.loaded { opacity: 0; pointer-events: none; }
+        
+        /* Modern Loader */
         .loading-spinner {
-            width: 30px; height: 30px;
-            border: 3px solid rgba(255,255,255,0.1);
+            width: 40px; height: 40px;
+            border: 3px solid rgba(255,255,255,0.05);
             border-top-color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
         }
 
         .post-media { 
             width: 100%; height: auto; max-height: 580px; object-fit: contain; display: block;
-            opacity: 0; transition: opacity 0.5s ease-in; 
+            opacity: 0; transition: opacity 0.8s ease; 
         }
         .post-media.loaded { opacity: 1; }
         
-        video.post-media { object-fit: contain; max-height: 600px; }
-
-        /* --- VIDEO CONTROLS --- */
+        /* Video Controls */
         .video-overlay-controls {
-            position: absolute; bottom: 15px; right: 15px;
+            position: absolute; bottom: 20px; right: 20px;
             display: flex; gap: 10px; z-index: 6;
-            transition: opacity 0.3s;
         }
         .control-btn {
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
             border: 1px solid rgba(255,255,255,0.1);
-            color: white; border-radius: 50%; width: 32px; height: 32px;
+            color: white; border-radius: 50%; width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; padding: 6px;
+            cursor: pointer; padding: 7px;
+            transition: all 0.2s var(--spring-easing);
         }
-        .control-btn svg { width: 100%; height: 100%; }
+        .control-btn:active { transform: scale(0.8); background: rgba(255,255,255,0.2); }
         
         .play-pause-overlay {
             position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.4); border-radius: 50%;
-            width: 60px; height: 60px;
+            transform: translate(-50%, -50%) scale(0.5);
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(4px);
+            border-radius: 50%;
+            width: 70px; height: 70px;
             display: flex; align-items: center; justify-content: center;
             z-index: 5; pointer-events: none; opacity: 0;
-            transition: opacity 0.2s, transform 0.2s;
+            transition: all 0.4s var(--spring-easing);
         }
-        .play-pause-overlay.visible { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-        .play-pause-overlay svg { width: 30px; height: 30px; fill: white; }
+        .play-pause-overlay.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        /* --- HEART ANIMATION --- */
+        /* --- HEART ANIMATION (Explosion) --- */
         .heart-overlay {
             position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%) scale(0);
-            color: #fff; font-size: 90px; pointer-events: none;
-            z-index: 7; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+            color: #fff; font-size: 100px; pointer-events: none;
+            z-index: 7; filter: drop-shadow(0 10px 20px rgba(237, 73, 86, 0.4));
             opacity: 0;
         }
-        .heart-overlay.active { animation: heartPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .heart-overlay.active { animation: heartPopBig 1s var(--spring-easing) forwards; }
         
-        @keyframes heartPop { 
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 
-            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 
-            30% { transform: translate(-50%, -50%) scale(0.95); opacity: 1; } 
-            45% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 
-            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 
+        @keyframes heartPopBig { 
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0; } 
+            20% { transform: translate(-50%, -50%) scale(1.3) rotate(0deg); opacity: 1; } 
+            40% { transform: translate(-50%, -50%) scale(0.9); opacity: 1; } 
+            60% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 
             100% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 
         }
 
-        .post-actions { padding: 12px 15px 8px; display: flex; gap: 18px; align-items: center; }
-        .action-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 0; transition: transform 0.1s; display: flex; align-items: center; gap: 6px; }
-        .action-btn svg { width: 28px; height: 28px; stroke-width: 1.7; transition: all 0.2s; }
-        .action-btn:active svg { transform: scale(0.8); }
+        .post-actions { padding: 12px 15px 8px; display: flex; gap: 20px; align-items: center; }
+        
+        .action-btn { 
+            background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 0; 
+            display: flex; align-items: center; gap: 6px; position: relative;
+            transition: transform 0.2s var(--spring-easing);
+        }
+        .action-btn:active { transform: scale(0.8); }
+        .action-btn svg { width: 30px; height: 30px; stroke-width: 1.8; transition: all 0.3s; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        
         .action-btn.liked svg { 
             fill: var(--like-color); stroke: var(--like-color); 
-            animation: likePulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            filter: drop-shadow(0 0 10px rgba(237, 73, 86, 0.5));
+            animation: likePulse 0.5s var(--spring-easing); 
         }
-        .action-btn-text { font-size: 0.9rem; font-weight: 500; color: var(--text-primary); }
-        @keyframes likePulse { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
+        @keyframes likePulse { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
 
         .post-likes { 
             padding: 0 15px; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; 
-            width: fit-content; transition: opacity 0.2s;
+            width: fit-content; transition: opacity 0.2s; position: relative;
+            overflow: hidden; border-radius: 4px;
         }
-        .post-likes.clickable { cursor: pointer; }
-        .post-likes.clickable:active { opacity: 0.6; }
-        .post-likes.private { cursor: default; }
+        .post-likes.clickable:active { background: rgba(255,255,255,0.05); }
 
-        .post-caption { padding: 0 15px 5px; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word; }
+        .post-caption { padding: 0 15px 5px; font-size: 0.95rem; line-height: 1.6; }
         .caption-username { font-weight: 700; margin-left: 5px; }
-        .post-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px; display: block; padding: 0 15px; letter-spacing: 0.5px; }
+        .post-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px; display: block; padding: 0 15px; letter-spacing: 0.5px; opacity: 0.7; }
 
-        /* --- SKELETON LOADER --- */
+        /* --- SKELETON LOADER (Modern) --- */
         #skeleton-loader {
-            position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
+            position: absolute; top: 65px; left: 0; width: 100%; height: calc(100% - 65px);
             background: var(--background-color); z-index: 15; overflow: hidden;
             display: block; 
         }
-        .sk-post { margin-bottom: 20px; background: var(--background-color); padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+        .sk-post { margin-bottom: 20px; background: var(--background-color); padding-bottom: 10px; }
         .sk-header { display: flex; align-items: center; padding: 15px; gap: 10px; }
-        .sk-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--skeleton-base); }
+        .sk-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--skeleton-base); }
         .sk-name { width: 120px; height: 16px; border-radius: 4px; background: var(--skeleton-base); }
         .sk-image { width: 100%; height: 380px; background: var(--skeleton-base); }
         .sk-actions { height: 20px; margin: 15px; width: 40%; background: var(--skeleton-base); border-radius: 4px; }
@@ -270,18 +319,19 @@
         .skeleton-animate { position: relative; overflow: hidden; }
         .skeleton-animate::after {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: skewX(-20deg);
             animation: shimmer 1.5s infinite;
         }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        @keyframes shimmer { 0% { transform: translateX(-150%) skewX(-20deg); } 100% { transform: translateX(150%) skewX(-20deg); } }
 
-        /* --- MODALS --- */
+        /* --- MODALS (Glassmorphism & Physics) --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 1000; opacity: 0; visibility: hidden;
-            transition: all 0.3s ease-in-out; 
+            background: rgba(0,0,0,0.6); z-index: 1000; opacity: 0; visibility: hidden;
+            transition: all 0.4s var(--smooth-easing);
             display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(8px);
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         
@@ -289,139 +339,177 @@
         .sheet-card {
             background: var(--modal-bg); width: 100%; max-width: 480px; 
             border-top-left-radius: 24px; border-top-right-radius: 24px;
-            transform: translateY(100%); 
-            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            padding: 20px 0 0 0; 
-            box-shadow: 0 -5px 40px rgba(0,0,0,0.6);
+            transform: translateY(110%); 
+            transition: transform 0.5s var(--spring-easing);
+            padding: 10px 0 0 0; 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
             display: flex; flex-direction: column;
             max-height: 85vh; 
+            border-top: 1px solid rgba(255,255,255,0.1);
         }
         .modal-overlay.active .sheet-card { transform: translateY(0); }
 
-        .sheet-drag-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 0 auto 15px; flex-shrink: 0; }
+        .sheet-drag-handle { width: 50px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 3px; margin: 10px auto 20px; flex-shrink: 0; }
 
         .sheet-option {
-            width: 100%; padding: 16px 25px; text-align: right; background: none; border: none;
+            width: 100%; padding: 18px 25px; text-align: right; background: none; border: none;
             color: var(--text-primary); font-size: 1rem; font-family: 'Vazirmatn';
             display: flex; align-items: center; gap: 15px; cursor: pointer;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.2s;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: background 0.2s; position: relative; overflow: hidden;
         }
-        .sheet-option:last-child { border-bottom: none; }
-        .sheet-option:active { background-color: var(--secondary-hover); }
-        .sheet-option svg { width: 22px; height: 22px; color: var(--text-secondary); }
+        .sheet-option:active { background-color: rgba(255,255,255,0.05); }
+        .sheet-option svg { width: 24px; height: 24px; color: var(--text-secondary); transition: transform 0.3s; }
+        .sheet-option:active svg { transform: scale(0.9); }
         .sheet-option.danger { color: var(--danger-color); font-weight: 700; }
         .sheet-option.danger svg { color: var(--danger-color); }
 
-        /* Toggle Switch */
+        /* Modern Toggle Switch */
         .toggle-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--secondary-hover); transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 26px;
+            background-color: var(--secondary-hover); transition: .4s var(--spring-easing); border-radius: 28px;
             border: 1px solid var(--border-color);
         }
         .slider:before {
-            position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px;
-            background-color: white; transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 50%;
+            position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 2px;
+            background-color: white; transition: .4s var(--spring-easing); border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         input:checked + .slider { background-color: var(--primary-color); border-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(20px); }
+        input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Create Modal */
+        /* Create Modal - Pop Effect */
         .modal-card {
-            background: var(--modal-bg); width: 85%; max-width: 400px; border-radius: 16px;
-            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
-            transform: scale(0.9); opacity: 0;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: #1C2128; width: 88%; max-width: 420px; border-radius: 24px;
+            overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); 
+            transform: scale(0.8) translateY(20px); opacity: 0;
+            transition: all 0.5s var(--spring-easing);
+            border: 1px solid rgba(255,255,255,0.08);
         }
-        .modal-overlay.active .modal-card { transform: scale(1); opacity: 1; }
+        .modal-overlay.active .modal-card { transform: scale(1) translateY(0); opacity: 1; }
         
         .modal-header {
-            padding: 15px; border-bottom: 1px solid var(--border-color);
+            padding: 18px 20px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
             background: rgba(255,255,255,0.02);
         }
-        .modal-title { font-weight: 800; margin: 0; font-size: 1rem; color: var(--text-primary); }
-        .share-btn { color: var(--primary-color); font-weight: 700; background: none; border: none; cursor: pointer; font-size: 1rem; transition: opacity 0.2s; }
-        .share-btn:disabled { opacity: 0.5; cursor: default; }
-        .close-modal { color: var(--text-primary); background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 5px; }
-        
-        .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; max-height: 70vh; overflow-y: auto; }
-        .upload-area {
-            border: 2px dashed var(--border-color); border-radius: 12px;
-            padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.3s;
-            background: rgba(255,255,255,0.01);
+        .modal-title { font-weight: 800; margin: 0; font-size: 1.1rem; color: var(--text-primary); }
+        .share-btn { 
+            color: var(--primary-color); font-weight: 700; background: none; border: none; 
+            cursor: pointer; font-size: 1rem; transition: all 0.2s; padding: 5px 10px; border-radius: 8px; 
         }
-        .upload-area:active { border-color: var(--primary-color); background: rgba(0, 163, 255, 0.05); }
-        .upload-area svg { width: 48px; height: 48px; color: var(--text-secondary); margin-bottom: 10px; }
+        .share-btn:active { background: rgba(0, 163, 255, 0.1); transform: scale(0.95); }
+        .share-btn:disabled { opacity: 0.5; cursor: default; }
+        .close-modal { 
+            color: var(--text-primary); background: rgba(255,255,255,0.05); border-radius: 50%;
+            border: none; cursor: pointer; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; font-size: 1.5rem;
+        }
+        .close-modal:active { transform: rotate(90deg); background: rgba(255,255,255,0.1); }
         
-        .upload-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; display: none; background: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .modal-body { padding: 25px; display: flex; flex-direction: column; gap: 20px; max-height: 70vh; overflow-y: auto; }
+        .upload-area {
+            border: 2px dashed var(--border-color); border-radius: 16px;
+            padding: 50px 20px; text-align: center; cursor: pointer; transition: all 0.3s;
+            background: rgba(255,255,255,0.01);
+            position: relative; overflow: hidden;
+        }
+        .upload-area:active { transform: scale(0.98); border-color: var(--primary-color); background: rgba(0, 163, 255, 0.05); }
+        .upload-area svg { width: 50px; height: 50px; color: var(--text-secondary); margin-bottom: 12px; transition: transform 0.3s var(--spring-easing); }
+        .upload-area:hover svg { transform: translateY(-5px); color: var(--primary-color); }
+        
+        .upload-preview { 
+            width: 100%; max-height: 300px; object-fit: contain; border-radius: 12px; 
+            display: none; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            animation: fadeIn 0.5s ease;
+        }
         
         .caption-input {
             width: 100%; background: var(--secondary-color); border: 1px solid var(--border-color); color: var(--text-primary);
-            padding: 12px; border-radius: 10px; font-family: 'Vazirmatn'; resize: none; min-height: 90px;
-            transition: border-color 0.2s;
+            padding: 15px; border-radius: 14px; font-family: 'Vazirmatn'; resize: none; min-height: 100px;
+            transition: all 0.3s; font-size: 0.95rem;
         }
-        .caption-input:focus { outline: none; border-color: var(--primary-color); }
+        .caption-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 163, 255, 0.1); }
         
-        .progress-bar-container { width: 100%; height: 6px; background: var(--secondary-color); border-radius: 3px; margin-top: 10px; display: none; overflow: hidden; }
-        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary-color), #00C6FF); border-radius: 3px; transition: width 0.2s ease-out; }
+        .progress-bar-container { width: 100%; height: 8px; background: var(--secondary-color); border-radius: 4px; margin-top: 10px; display: none; overflow: hidden; }
+        .progress-bar { 
+            width: 0%; height: 100%; 
+            background: linear-gradient(90deg, var(--primary-color), #00C6FF); 
+            border-radius: 4px; transition: width 0.3s var(--smooth-easing);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
 
         /* --- USER LIST MODAL --- */
         .user-list-content { max-height: 60vh; overflow-y: auto; padding: 0; flex-grow: 1; }
         .user-list-item { 
-            display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
-            transition: background 0.2s;
+            display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.03); 
+            transition: background 0.2s; position: relative; overflow: hidden;
+            animation: slideInRight 0.4s var(--spring-easing);
+            animation-fill-mode: both;
         }
+        .user-list-item:nth-child(1) { animation-delay: 0.05s; }
+        .user-list-item:nth-child(2) { animation-delay: 0.1s; }
+        .user-list-item:nth-child(3) { animation-delay: 0.15s; }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
         .user-list-item:active { background-color: var(--secondary-hover); }
-        .user-list-item img { width: 44px; height: 44px; border-radius: 50%; margin-left: 12px; object-fit: cover; border: 1px solid var(--border-color); }
-        .user-list-info h4 { margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 4px; color: var(--text-primary); }
-        .user-list-info p { margin: 3px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
-        .user-list-info .verified-tick { width: 14px; height: 14px; vertical-align: middle; }
+        .user-list-item img { width: 48px; height: 48px; border-radius: 50%; margin-left: 14px; object-fit: cover; border: 1px solid var(--border-color); }
+        .user-list-info h4 { margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 5px; color: var(--text-primary); }
+        .user-list-info p { margin: 4px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
 
         /* --- COMMENTS MODAL STYLES --- */
         .comments-list-content {
-            flex-grow: 1; overflow-y: auto; padding: 0 0 70px 0;
+            flex-grow: 1; overflow-y: auto; padding: 0 0 80px 0;
             min-height: 200px;
         }
         .comment-item {
-            display: flex; gap: 12px; padding: 12px 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            animation: fadeIn 0.3s ease;
+            display: flex; gap: 12px; padding: 14px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
             position: relative;
+            transform-origin: left center;
+            animation: commentPop 0.4s var(--spring-easing);
+            animation-fill-mode: both;
         }
+        @keyframes commentPop {
+            from { opacity: 0; transform: scale(0.9) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
         .comment-item.pinned {
-            background: rgba(255, 215, 0, 0.05);
+            background: rgba(255, 215, 0, 0.08);
             border-right: 3px solid var(--gold-color);
         }
         .comment-avatar {
-            width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+            width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
             border: 1px solid var(--border-color); flex-shrink: 0;
+            transition: transform 0.2s;
         }
-        .comment-content { flex: 1; font-size: 0.9rem; line-height: 1.4; }
-        .comment-header { margin-bottom: 2px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-        .comment-username { font-weight: 700; color: var(--text-primary); font-size: 0.85rem; }
-        .comment-text { color: var(--text-primary); font-weight: 400; font-size: 0.9rem; word-break: break-word; }
-        .comment-time { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; display: block; }
+        .comment-avatar:active { transform: scale(0.9); }
+        
+        .comment-content { flex: 1; font-size: 0.9rem; line-height: 1.5; }
+        .comment-header { margin-bottom: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .comment-username { font-weight: 700; color: var(--text-primary); font-size: 0.9rem; }
+        .comment-text { color: #d0d7de; font-weight: 400; font-size: 0.92rem; word-break: break-word; }
+        .comment-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; display: block; }
         
         .pin-icon { width: 14px; height: 14px; fill: var(--gold-color); margin-right: 5px; transform: rotate(45deg); }
         
-        .comment-actions-btn {
-            position: absolute; left: 10px; top: 10px;
-            background: none; border: none; color: var(--text-secondary);
-            padding: 5px; cursor: pointer;
-        }
-        
-        /* Comment Option Sheet */
-        .comment-option-menu {
-            display: flex; gap: 10px; margin-top: 5px;
-        }
+        /* Comment Option Buttons */
+        .comment-option-menu { display: flex; gap: 8px; margin-top: 8px; opacity: 0.8; }
         .mini-btn {
-            background: none; border: none; font-size: 0.75rem; cursor: pointer; padding: 2px 6px;
-            border-radius: 4px; display: flex; align-items: center; gap: 3px;
+            background: rgba(255,255,255,0.05); border: none; font-size: 0.7rem; cursor: pointer; padding: 4px 10px;
+            border-radius: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600;
+            transition: all 0.2s;
         }
+        .mini-btn:active { transform: scale(0.9); }
         .btn-delete { color: var(--danger-color); background: rgba(255, 77, 77, 0.1); }
         .btn-pin { color: var(--gold-color); background: rgba(255, 215, 0, 0.1); }
         
@@ -429,48 +517,52 @@
         .comment-input-area {
             position: absolute; bottom: 0; left: 0; width: 100%;
             background-color: var(--modal-bg);
-            border-top: 1px solid var(--border-color);
-            padding: 10px 15px;
-            display: flex; align-items: center; gap: 10px;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 15px;
+            display: flex; align-items: center; gap: 12px;
             z-index: 20;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
         }
         .comment-input-area.disabled { filter: grayscale(1); opacity: 0.7; pointer-events: none; }
         
         .comment-input-field {
             flex-grow: 1; background: var(--secondary-color); border: 1px solid var(--border-color);
-            color: var(--text-primary); padding: 10px 15px; border-radius: 20px;
+            color: var(--text-primary); padding: 12px 18px; border-radius: 24px;
             font-family: 'Vazirmatn'; font-size: 0.9rem; outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
-        .comment-input-field:focus { border-color: var(--primary-color); }
+        .comment-input-field:focus { border-color: var(--primary-color); background: #0d1117; }
         .send-comment-btn {
-            background: none; border: none; color: var(--primary-color);
-            font-weight: 700; cursor: pointer; padding: 5px;
-            opacity: 0.5; transition: opacity 0.2s;
+            background: var(--primary-color); border: none; color: white;
+            border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; padding: 0;
+            opacity: 0.5; transition: all 0.3s var(--spring-easing);
+            transform: scale(0.9);
         }
-        .send-comment-btn.active { opacity: 1; }
-        .send-comment-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; transform: rotate(180deg); }
+        .send-comment-btn.active { opacity: 1; transform: scale(1); box-shadow: 0 0 15px var(--primary-glow); }
+        .send-comment-btn:active { transform: scale(0.85); }
+        .send-comment-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.5; transform: rotate(180deg) translateX(1px); }
 
-        /* Comment Skeleton */
-        .comment-skeleton { display: flex; gap: 12px; padding: 12px 15px; }
-        .sk-c-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--skeleton-base); flex-shrink: 0; }
-        .sk-c-content { flex: 1; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
-        .sk-c-line1 { width: 30%; height: 10px; background: var(--skeleton-base); border-radius: 4px; }
-        .sk-c-line2 { width: 80%; height: 10px; background: var(--skeleton-base); border-radius: 4px; }
-
-        .empty-state { text-align: center; padding: 50px 20px; color: var(--text-secondary); }
+        .empty-state { 
+            text-align: center; padding: 60px 20px; color: var(--text-secondary); 
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Toast Notification */
+        /* Toast Notification - Floating Pill */
         .toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translate(-50%, 100px);
-            background: var(--text-primary); color: var(--background-color); padding: 12px 24px; border-radius: 50px;
-            font-size: 0.95rem; font-weight: 700; z-index: 2000; 
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 8px;
-            white-space: nowrap;
+            position: fixed; bottom: 40px; left: 50%; transform: translate(-50%, 150px) scale(0.8);
+            background: rgba(255, 255, 255, 0.95); color: #000; 
+            padding: 14px 28px; border-radius: 50px;
+            font-size: 0.9rem; font-weight: 700; z-index: 2000; 
+            transition: all 0.5s var(--spring-easing);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 10px;
+            white-space: nowrap; backdrop-filter: blur(5px);
         }
-        .toast.error { background: var(--danger-color); color: white; }
-        .toast.active { transform: translate(-50%, 0); }
+        .toast.error { background: #FF4D4D; color: white; }
+        .toast.active { transform: translate(-50%, 0) scale(1); }
 
     </style>
 </head>
@@ -479,11 +571,11 @@
     <div class="app-container">
         <!-- Header -->
         <header class="header-area">
-            <button class="header-btn back-btn" onclick="window.location.href='safe_asli.html'">
+            <button class="header-btn back-btn ripple-trigger" onclick="window.location.href='safe_asli.html'">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
             </button>
-            <h1 class="header-title">روبینو همیار</h1>
-            <button class="header-btn" id="open-create-modal">
+            <h1 class="header-title">روبینو پلاس</h1>
+            <button class="header-btn ripple-trigger" id="open-create-modal">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -517,16 +609,16 @@
         <div class="modal-overlay" id="create-modal">
             <div class="modal-card">
                 <div class="modal-header">
-                    <button class="close-modal" id="close-modal-btn">&times;</button>
+                    <button class="close-modal ripple-trigger" id="close-modal-btn">&times;</button>
                     <h3 class="modal-title">پست جدید</h3>
-                    <button class="share-btn" id="share-post-btn">انتشار</button>
+                    <button class="share-btn ripple-trigger" id="share-post-btn">انتشار</button>
                 </div>
                 <div class="modal-body">
                     <input type="file" id="file-input" accept="image/*,video/*" style="display: none;">
                     
-                    <div class="upload-area" id="upload-trigger">
+                    <div class="upload-area ripple-trigger" id="upload-trigger">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                        <p style="margin:0; font-weight:500;">انتخاب عکس یا ویدیو</p>
+                        <p style="margin:0; font-weight:500;">لمس برای انتخاب مدیا</p>
                     </div>
                     
                     <img id="image-preview" class="upload-preview" />
@@ -535,7 +627,7 @@
                     <textarea class="caption-input" id="caption-input" placeholder="کپشن خود را بنویسید..."></textarea>
                     
                     <div class="toggle-container" style="padding: 0 5px;">
-                        <span style="font-size: 0.9rem; color: var(--text-secondary);">نمایش لایک‌ها</span>
+                        <span style="font-size: 0.95rem; font-weight: 500;">نمایش لایک‌ها</span>
                         <label class="switch">
                             <input type="checkbox" id="create-privacy-toggle" checked>
                             <span class="slider"></span>
@@ -573,15 +665,15 @@
                     </div>
                 </div>
 
-                <button class="sheet-option" id="edit-post-btn">
+                <button class="sheet-option ripple-trigger" id="edit-post-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     ویرایش کپشن
                 </button>
-                <button class="sheet-option danger" id="delete-post-btn">
+                <button class="sheet-option danger ripple-trigger" id="delete-post-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     حذف پست
                 </button>
-                <button class="sheet-option" id="close-options-btn" style="justify-content: center; color: var(--text-secondary);">
+                <button class="sheet-option ripple-trigger" id="close-options-btn" style="justify-content: center; color: var(--text-secondary);">
                     انصراف
                 </button>
             </div>
@@ -595,8 +687,8 @@
                  </div>
                  <div class="modal-body">
                      <textarea class="caption-input" id="edit-caption-input"></textarea>
-                     <button class="share-btn" id="save-caption-btn" style="background: var(--primary-color); color: white; padding: 12px; border-radius: 10px; width:100%;">ذخیره تغییرات</button>
-                     <button class="close-modal" id="cancel-caption-btn" style="margin-top: 5px; font-size: 0.9rem; width:100%; text-align:center;">لغو</button>
+                     <button class="share-btn ripple-trigger" id="save-caption-btn" style="background: var(--primary-color); color: white; padding: 12px; border-radius: 10px; width:100%;">ذخیره تغییرات</button>
+                     <button class="close-modal ripple-trigger" id="cancel-caption-btn" style="margin-top: 5px; font-size: 0.9rem; width:100%; text-align:center; border-radius: 10px;">لغو</button>
                  </div>
              </div>
         </div>
@@ -606,8 +698,8 @@
             <div class="sheet-card" style="max-height: 80vh;">
                 <div class="sheet-drag-handle"></div>
                 <div class="modal-header" style="border:none; padding: 0 20px 15px;">
-                    <h3 class="modal-title" style="font-size: 1.1rem;">پسندها</h3>
-                    <button class="close-modal" id="close-likes-btn">&times;</button>
+                    <h3 class="modal-title" style="font-size: 1.1rem;">لیست پسندها</h3>
+                    <button class="close-modal ripple-trigger" id="close-likes-btn">&times;</button>
                 </div>
                 <div class="user-list-content" id="likes-list-container"></div>
             </div>
@@ -615,19 +707,19 @@
 
         <!-- Comments Modal -->
         <div class="modal-overlay bottom-sheet" id="comments-modal">
-            <div class="sheet-card" style="height: 75vh;">
+            <div class="sheet-card" style="height: 80vh;">
                 <div class="sheet-drag-handle"></div>
                 <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding: 5px 20px 15px;">
                     <h3 class="modal-title" style="font-size: 1.1rem;">نظرات</h3>
-                    <button class="close-modal" id="close-comments-btn">&times;</button>
+                    <button class="close-modal ripple-trigger" id="close-comments-btn">&times;</button>
                 </div>
                 
                 <div class="comments-list-content" id="comments-list-container"></div>
                 
                 <div class="comment-input-area" id="comment-input-area">
-                    <img id="current-user-comment-avatar" src="" class="comment-avatar" style="width: 36px; height: 36px; border: none;">
-                    <input type="text" id="comment-input-field" class="comment-input-field" placeholder="نظر خود را بنویسید..." autocomplete="off">
-                    <button id="send-comment-btn" class="send-comment-btn">
+                    <img id="current-user-comment-avatar" src="" class="comment-avatar" style="width: 38px; height: 38px; border: none;">
+                    <input type="text" id="comment-input-field" class="comment-input-field" placeholder="نظری بنویسید..." autocomplete="off">
+                    <button id="send-comment-btn" class="send-comment-btn ripple-trigger">
                         <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
                     </button>
                 </div>
@@ -708,6 +800,34 @@
         let startY = 0; let isPulling = false; let currentTranslate = 0;
         let isGlobalMuted = true; 
 
+        // --- RIPPLE EFFECT LOGIC (Motion Graphics) ---
+        function addRippleEffect(e) {
+            const button = e.currentTarget;
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            ripple.classList.add('ripple-effect');
+            
+            button.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        function initRipples() {
+            document.querySelectorAll('.ripple-trigger').forEach(btn => {
+                btn.removeEventListener('click', addRippleEffect); // Prevent duplicates
+                btn.style.position = 'relative';
+                btn.style.overflow = 'hidden';
+                btn.addEventListener('click', addRippleEffect);
+            });
+        }
+
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
             const storedUser = localStorage.getItem('currentUser');
@@ -718,6 +838,7 @@
 
             setupEventListeners();
             initVideoObserver();
+            initRipples(); // Initialize ripples on static elements
             await initializeAppUnified();
         });
 
@@ -808,7 +929,7 @@
         // --- EVENT LISTENERS ---
         function setupEventListeners() {
             openCreateBtn.addEventListener('click', () => { 
-                resetModal(); // Ensure clean slate without errors
+                resetModal(); 
                 createModal.classList.add('active'); 
                 pauseAllFeedVideos();
             });
@@ -894,52 +1015,32 @@
             });
         }
 
-        // --- FILE & MODAL LOGIC (FIXED) ---
+        // --- FILE & MODAL LOGIC ---
         function handleFileSelect(file) {
             selectedFile = file;
             uploadTrigger.style.display = 'none';
-            
-            // Clear previous errors first
             videoPreview.onerror = null;
 
             if (file.type.startsWith('video/')) {
                 imagePreview.style.display = 'none'; 
                 videoPreview.style.display = 'block';
-                
-                // Revoke old URL if exists
-                if (videoPreview.src && videoPreview.src.startsWith('blob:')) {
-                    URL.revokeObjectURL(videoPreview.src);
-                }
-
+                if (videoPreview.src && videoPreview.src.startsWith('blob:')) URL.revokeObjectURL(videoPreview.src);
                 const videoURL = URL.createObjectURL(file);
                 videoPreview.src = videoURL;
                 videoPreview.muted = true;
                 videoPreview.controls = true;
                 videoPreview.playsInline = true;
-                
-                videoPreview.onloadeddata = () => {
-                    videoPreview.play().catch(() => {});
-                };
-                
-                // Only show error if src is set and valid but fails
+                videoPreview.onloadeddata = () => { videoPreview.play().catch(() => {}); };
                 videoPreview.onerror = () => {
                     if (videoPreview.getAttribute('src')) {
-                        console.error("خطا در لود ویدیو");
                         showToast('فرمت ویدیو پشتیبانی نمی‌شود', 'error');
                         videoPreview.style.display = 'none';
                         uploadTrigger.style.display = 'block';
                     }
                 };
-                
             } else {
                 videoPreview.style.display = 'none';
-                // Stop video if switching to image
-                if (videoPreview.src) {
-                    videoPreview.pause();
-                    videoPreview.removeAttribute('src');
-                    videoPreview.load();
-                }
-
+                if (videoPreview.src) { videoPreview.pause(); videoPreview.removeAttribute('src'); videoPreview.load(); }
                 imagePreview.style.display = 'block';
                 const reader = new FileReader();
                 reader.onload = (e) => { imagePreview.src = e.target.result; };
@@ -951,27 +1052,10 @@
             selectedFile = null;
             fileInput.value = ''; 
             captionInput.value = '';
-            
-            // --- FIX START: Safe Video Reset ---
-            // 1. Remove listeners to prevent fake errors
-            videoPreview.onerror = null;
-            videoPreview.onloadeddata = null;
-            
-            // 2. Pause and Clean up
+            videoPreview.onerror = null; videoPreview.onloadeddata = null;
             videoPreview.pause();
-            
-            // 3. Revoke Object URL to free memory
-            if (videoPreview.src && videoPreview.src.startsWith('blob:')) {
-                URL.revokeObjectURL(videoPreview.src);
-            }
-            
-            // 4. Properly remove src attribute
-            videoPreview.removeAttribute('src');
-            
-            // 5. Load (now safe because src attr is gone)
-            videoPreview.load();
-            // --- FIX END ---
-            
+            if (videoPreview.src && videoPreview.src.startsWith('blob:')) URL.revokeObjectURL(videoPreview.src);
+            videoPreview.removeAttribute('src'); videoPreview.load();
             imagePreview.src = '';
             imagePreview.style.display = 'none'; 
             videoPreview.style.display = 'none';
@@ -1071,7 +1155,7 @@
             } catch (err) { showToast('خطا در انتشار', 'error'); sharePostBtn.disabled = false; }
         }
 
-        // --- FEED LOGIC ---
+        // --- FEED LOGIC (ANIMATED) ---
         async function fetchPosts(shouldRender = true) {
             const response = await fetch(`${PROXY_URL}?path=rubino_posts`, {
                 headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
@@ -1086,9 +1170,7 @@
 
         function renderFeed(posts) {
             document.querySelectorAll('video.post-media').forEach(v => {
-                v.pause();
-                v.removeAttribute('src'); // Better cleanup
-                v.load();
+                v.pause(); v.removeAttribute('src'); v.load();
             });
             
             feedContainer.innerHTML = '';
@@ -1096,7 +1178,7 @@
             if (posts.length === 0) {
                 feedContainer.innerHTML = '<div class="empty-state">هیچ پستی وجود ندارد.</div>';
             } else {
-                posts.forEach(post => {
+                posts.forEach((post, index) => {
                     const isOwner = post.sender_username === currentUser.username;
                     const user = allUsersCache[post.sender_username] || { displayName: post.sender_username, username: post.sender_username };
                     const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${post.sender_username}&background=random&color=fff`;
@@ -1108,7 +1190,7 @@
 
                     const canOpenList = isOwner || (post.show_likes !== false); 
                     const likesText = `${likeCount} پسند`;
-                    const likesClass = canOpenList ? 'clickable' : 'private';
+                    const likesClass = canOpenList ? 'clickable ripple-trigger' : 'private';
                     const likesClickAction = canOpenList ? `onclick="showLikesList('${post.id}', ${isOwner}, ${post.show_likes !== false})"` : '';
 
                     let mediaHtml = '';
@@ -1129,16 +1211,20 @@
 
                     const postEl = document.createElement('div');
                     postEl.className = 'post-card';
+                    postEl.style.animationDelay = `${index * 0.1}s`; // Staggered Animation
+                    
                     if (post.isGolden) postEl.classList.add('golden-post');
                     postEl.id = `post-${post.id}`;
                     
                     postEl.innerHTML = `
                         <div class="post-header">
                             <div class="user-info">
-                                <img src="${avatar}" class="user-avatar" alt="Avatar">
+                                <div class="user-avatar-container">
+                                    <img src="${avatar}" class="user-avatar" alt="Avatar">
+                                </div>
                                 <span class="username">${displayName} ${verifiedHtml}</span>
                             </div>
-                            <div class="post-options ${isOwner ? '' : 'disabled'}" ${isOwner ? `onclick="openPostOptions('${post.id}', ${post.show_likes !== false}, ${post.comments_disabled === true})"` : ''}>
+                            <div class="post-options ripple-trigger ${isOwner ? '' : 'disabled'}" ${isOwner ? `onclick="openPostOptions('${post.id}', ${post.show_likes !== false}, ${post.comments_disabled === true})"` : ''}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
                             </div>
                         </div>
@@ -1147,12 +1233,12 @@
                             <div class="heart-overlay" id="heart-anim-${post.id}">❤</div>
                         </div>
                         <div class="post-actions">
-                            <button class="action-btn ${isLiked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
+                            <button class="action-btn ${isLiked ? 'liked' : ''} ripple-trigger" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                             </button>
-                            <button class="action-btn" onclick="openComments('${post.id}')">
+                            <button class="action-btn ripple-trigger" onclick="openComments('${post.id}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                                <span class="action-btn-text">${commentCount > 0 ? commentCount : ''}</span>
+                                <span class="action-btn-text" style="margin-right:5px; font-weight:700;">${commentCount > 0 ? commentCount : ''}</span>
                             </button>
                         </div>
                         <div class="post-likes ${likesClass}" id="likes-count-${post.id}" ${likesClickAction}>
@@ -1168,6 +1254,7 @@
                 });
                 skeletonLoader.style.display = 'none';
                 feedContainer.style.opacity = '1';
+                initRipples(); // Re-bind ripples to new elements
                 setTimeout(() => {
                     document.querySelectorAll('video.post-media').forEach(v => {
                         if (videoObserver) videoObserver.observe(v);
@@ -1191,7 +1278,7 @@
                 const domPosts = document.querySelectorAll('.post-card');
                 domPosts.forEach(el => {
                     const pid = el.id.replace('post-', '');
-                    if (!newData[pid]) { el.remove(); return; }
+                    if (!newData[pid]) { el.style.opacity = '0'; setTimeout(()=>el.remove(),300); return; } // Fade out remove
                     const post = newData[pid];
                     
                     // Update Likes
@@ -1227,7 +1314,7 @@
             
             commentsListContainer.innerHTML = '';
             for(let i=0; i<4; i++) {
-                commentsListContainer.innerHTML += `<div class="comment-skeleton skeleton-animate"><div class="sk-c-avatar"></div><div class="sk-c-content"><div class="sk-c-line1"></div><div class="sk-c-line2"></div></div></div>`;
+                commentsListContainer.innerHTML += `<div class="comment-skeleton skeleton-animate" style="padding:15px; display:flex; gap:10px;"><div style="width:36px; height:36px; background:var(--skeleton-base); border-radius:50%;"></div><div style="flex:1;"><div style="width:30%; height:10px; background:var(--skeleton-base); margin-bottom:5px;"></div><div style="width:80%; height:10px; background:var(--skeleton-base);"></div></div></div>`;
             }
 
             try {
@@ -1270,7 +1357,7 @@
                     return new Date(a.timestamp) - new Date(b.timestamp);
                 });
 
-            commentsArray.forEach(comment => {
+            commentsArray.forEach((comment, index) => {
                 const user = allUsersCache[comment.sender_username] || { displayName: comment.sender_username, username: comment.sender_username };
                 const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${comment.sender_username}&background=random&color=fff`;
                 const verifiedHtml = user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : '';
@@ -1289,6 +1376,7 @@
 
                 const div = document.createElement('div');
                 div.className = `comment-item ${isPinned ? 'pinned' : ''}`;
+                div.style.animationDelay = `${index * 0.05}s`; // Staggered entry
                 div.id = `comment-${comment.id}`;
                 div.innerHTML = `
                     <img src="${avatar}" class="comment-avatar">
@@ -1351,17 +1439,24 @@
         async function deleteComment(postId, commentId) {
             if(!confirm('آیا از حذف این نظر اطمینان دارید؟')) return;
             const commentEl = document.getElementById(`comment-${commentId}`);
-            if(commentEl) commentEl.style.opacity = '0.3';
+            if(commentEl) {
+                commentEl.style.transition = 'all 0.3s';
+                commentEl.style.transform = 'translateX(50px)';
+                commentEl.style.opacity = '0';
+            }
             
             try {
                 await fetch(`${PROXY_URL}?path=rubino_posts/${postId}/comments/${commentId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                 });
-                if(commentEl) commentEl.remove();
+                if(commentEl) setTimeout(()=>commentEl.remove(), 300);
                 showToast('نظر حذف شد');
             } catch(e) {
-                if(commentEl) commentEl.style.opacity = '1';
+                if(commentEl) {
+                    commentEl.style.transform = 'translateX(0)';
+                    commentEl.style.opacity = '1';
+                }
                 showToast('خطا در حذف نظر', 'error');
             }
         }
@@ -1398,7 +1493,13 @@
                 await fetch(`${PROXY_URL}?path=rubino_posts/${currentOptionsPostId}`, {
                     method: 'DELETE', headers: { 'Authorization': `Bearer ${clientToken}`, 'X-User-Username': currentUser.username }
                 });
-                document.getElementById(`post-${currentOptionsPostId}`).remove();
+                const el = document.getElementById(`post-${currentOptionsPostId}`);
+                if(el) {
+                    el.style.transition = 'all 0.5s';
+                    el.style.transform = 'scale(0.8)';
+                    el.style.opacity = '0';
+                    setTimeout(() => el.remove(), 500);
+                }
                 closeOptions();
                 showToast('پست حذف شد');
                 await fetchPosts(false);
@@ -1472,11 +1573,12 @@
                 listContainer.innerHTML = '';
                 if (!likesData) { listContainer.innerHTML = '<div class="empty-state">هنوز لایکی ثبت نشده.</div>'; return; }
 
-                Object.keys(likesData).forEach(uid => {
+                Object.keys(likesData).forEach((uid, idx) => {
                     const user = allUsersCache[uid] || { displayName: uid, username: uid };
                     const avatar = user.profilePicUrl || `https://ui-avatars.com/api/?name=${uid}&background=random&color=fff`;
                     const div = document.createElement('div');
                     div.className = 'user-list-item';
+                    div.style.animationDelay = `${idx * 0.05}s`;
                     div.innerHTML = `<img src="${avatar}"><div class="user-list-info"><h4>${user.displayName || uid} ${user.verified ? `<img src="${VERIFIED_ICON_URL}" class="verified-tick">` : ''}</h4><p>@${user.username || uid}</p></div>`;
                     listContainer.appendChild(div);
                 });
@@ -1527,18 +1629,20 @@
             const diff = e.touches[0].clientY - startY;
             if (diff > 0 && feedContainer.scrollTop === 0) {
                 e.preventDefault();
-                currentTranslate = Math.min(diff * 0.5, 80);
+                currentTranslate = Math.min(diff * 0.4, 90); // Smoother dampening
                 feedContainer.style.transform = `translateY(${currentTranslate}px)`;
-                pullIndicator.style.opacity = Math.min(diff / 50, 1);
-                pullSpinner.style.transform = `rotate(${diff * 2}deg)`; 
+                feedContainer.style.transition = 'none'; // Direct tracking
+                pullIndicator.style.opacity = Math.min(diff / 60, 1);
+                pullSpinner.style.transform = `rotate(${diff * 2.5}deg)`; 
             }
         }
         async function touchEnd() {
             if (!isPulling) return;
             isPulling = false;
-            if (currentTranslate > 60) {
+            feedContainer.style.transition = 'transform 0.4s var(--spring-easing)'; // Snap back physics
+            if (currentTranslate > 65) {
                 pullSpinner.classList.add('spinning');
-                feedContainer.style.transform = `translateY(60px)`;
+                feedContainer.style.transform = `translateY(65px)`;
                 try { await Promise.all([fetchUsersCache(), fetchPosts(false)]); renderFeed(preparePostsArray(postsDataCache)); } catch(e) { console.log(e); }
                 setTimeout(resetPull, 500);
             } else { resetPull(); }
